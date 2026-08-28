@@ -22,10 +22,15 @@ LAND_USES = ["cropland", "grassland", "degraded_forest"]
 
 SCENARIOS = ["ssp126", "ssp245", "ssp370"]
 
+COMPLEXITY_LEVELS = [0, 1, 2, 3, 4, 5, 6]
+
 T_START = 2025
 T_END = 2150
 
 S0 = 1361.0  # Solar constant [W/m²]
+
+A_EARTH_M2 = 5.1006e14  # Earth surface area [m²]
+HA_TO_M2 = 1.0e4  # 1 ha = 10^4 m²
 
 DEFORESTATION_RATE = 0.005  # 0.5%/yr
 C_FOREST_TROPICAL = 200.0  # tC/ha
@@ -116,6 +121,27 @@ def get_disturbance_probability(
     # Linear ramp: factor goes from 1.0 at T_START to 1.5 at T_END
     factor = 1.0 + 0.5 * (years - T_START) / (T_END - T_START)
     return base * factor
+
+
+# ---------------------------------------------------------------------------
+# Evapotranspiration forcing  ΔF_ET [W/m²]  (always negative = cooling)
+# Values represent steady-state latent heat flux cooling relative to baseline
+# land cover. Literature basis: Bonan (2008) Science, Duveiller et al. (2018).
+# ---------------------------------------------------------------------------
+
+_ET_VALUES: dict[str, dict[int, float]] = {
+    "tropical_reforestation": {0: -1.5, 15: -1.2, 30: -0.8},
+    "boreal_afforestation": {45: -0.3, 60: -0.1},
+    "avoided_deforestation": {0: 0.0, 15: 0.0, 30: 0.0, 45: 0.0, 60: 0.0},
+    "beccs": {0: -0.8, 15: -0.7, 30: -0.5, 45: -0.2, 60: -0.05},
+}
+
+
+def get_et_values(intervention: str, lat: int) -> float:
+    """Return ΔF_ET [W/m²] for *intervention* at *lat*. Negative = cooling."""
+    lat_map = _ET_VALUES[intervention]
+    key = lat if lat in lat_map else _nearest_key(list(lat_map.keys()), lat)
+    return lat_map[key]
 
 
 # ---------------------------------------------------------------------------
