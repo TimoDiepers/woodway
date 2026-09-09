@@ -18,7 +18,14 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.constants import A_CO2_W_M2_PER_KG, A_EARTH_M2, M_CO2_PER_C, TAU_ATM
+from nbs.constants import (
+    A_CO2_LOG_W_M2_PER_PPM,
+    A_CO2_W_M2_PER_KG,
+    A_EARTH_M2,
+    KG_CO2_PER_PPM,
+    M_CO2_PER_C,
+    TAU_ATM,
+)
 from nbs.response import convolve_response
 from nbs.species import Species
 
@@ -39,6 +46,40 @@ def phi_co2(co2_flux_kg_per_yr: NDArray, g_c: NDArray) -> NDArray:
     """
     delta_m = convolve_response(g_c, np.asarray(co2_flux_kg_per_yr, dtype=float))
     return A_CO2_W_M2_PER_KG * delta_m
+
+
+def phi_co2_background(
+    co2_flux_kg_per_yr: NDArray, g_c: NDArray, c_background_ppm: NDArray
+) -> NDArray:
+    """Marginal CO2 radiative forcing [W/m^2] against a rising background.
+
+    This is the logarithmic variant of ``phi_co2``: the flux is convolved
+    with the airborne fraction exactly as in ``phi_co2`` to get the airborne
+    mass anomaly Delta_m_CO2 [kg], which is converted to a concentration
+    anomaly Delta_C [ppm] and then run through the actual (logarithmic) CO2
+    forcing law FaIR uses, evaluated against the scenario's background
+    concentration C_bg(t) rather than assumed constant:
+
+        phi(t) = a * ln( (C_bg(t) + Delta_C(t)) / C_bg(t) )
+
+    with a = A_CO2_LOG_W_M2_PER_PPM (Myhre et al. 1998) and
+    KG_CO2_PER_PPM converting kg CO2 to ppm.
+
+    Leave ``phi_co2`` (the linear, constant-efficiency variant) untouched --
+    existing tests pin it, and it is what slide 21 derives. This function is
+    the scenario-consistent alternative selected by
+    ``ModelConfig(co2_forcing="logarithmic")``.
+
+    For a small Delta_C this linearises to phi ~= a * Delta_C / C_bg, i.e. an
+    effective radiative efficiency of a / (C_bg * KG_CO2_PER_PPM) per kg --
+    1.61e-15 W/m^2/kg at 424 ppm, 1.10e-15 at 624 ppm, both below the linear
+    constant A_CO2_W_M2_PER_KG = 1.76e-15. That gap is exactly the 26-40%
+    integrated CO2-channel deviation the review measured against FaIR.
+    """
+    delta_m = convolve_response(g_c, np.asarray(co2_flux_kg_per_yr, dtype=float))
+    delta_c_ppm = delta_m / KG_CO2_PER_PPM
+    c_bg = np.asarray(c_background_ppm, dtype=float)
+    return A_CO2_LOG_W_M2_PER_PPM * np.log((c_bg + delta_c_ppm) / c_bg)
 
 
 def phi_albedo(

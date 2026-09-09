@@ -9,6 +9,7 @@ from nbs.forcing import (
     light_bulb_watts,
     phi_albedo,
     phi_co2,
+    phi_co2_background,
 )
 from nbs.species import get_species
 
@@ -94,3 +95,73 @@ def test_fallback_functions_interpolate_between_table_rows():
     assert min(fallback_q_sw(45.0), fallback_q_sw(60.0)) < mid < max(
         fallback_q_sw(45.0), fallback_q_sw(60.0)
     )
+
+
+# --- phi_co2_background: logarithmic CO2 forcing against a background ------
+#
+# Sanity anchor from the task spec: linearising phi = a*ln((C0+dC)/C0) around
+# a small dC gives an effective radiative efficiency of a/(C0*KG_CO2_PER_PPM)
+# per kg. At 424 ppm that works out to 1.61e-15 W/m^2/kg; at 624 ppm to
+# 1.10e-15. Both are below the linear constant A_CO2_W_M2_PER_KG = 1.76e-15,
+# which is exactly the source of the 26-40% CO2-channel deviation the review
+# measured (9% high at 424 ppm, 38% high at 624 ppm).
+
+
+def _effective_efficiency(c_background_ppm: float) -> float:
+    """phi_co2_background's forcing per kg for a tiny pulse, at t=0."""
+    flux = np.zeros(len(YEARS))
+    flux[0] = -1.0e10  # 10 Mt CO2: tiny relative to a ppm of the atmosphere,
+    # far from double-precision cancellation (dC/C ~ 3e-6, x^2/2 ~ 4.5e-12)
+    g_c = np.zeros(len(YEARS))
+    g_c[0] = 1.0  # all still airborne at t=0
+    c_bg = np.full(len(YEARS), c_background_ppm)
+    phi = phi_co2_background(flux, g_c, c_bg)
+    return phi[0] / flux[0]
+
+
+def test_logarithmic_effective_efficiency_at_424ppm():
+    assert _effective_efficiency(424.0) == pytest.approx(1.61e-15, rel=0.01)
+
+
+def test_logarithmic_effective_efficiency_at_624ppm():
+    assert _effective_efficiency(624.0) == pytest.approx(1.10e-15, rel=0.01)
+
+
+def test_logarithmic_effective_efficiency_below_linear_constant():
+    """This ordering is the whole point of the sensitivity switch: the
+    constant A_CO2_W_M2_PER_KG overstates the true (logarithmic) efficiency
+    at both ends of the ssp245 study period, more so as CO2 rises."""
+    eff_424 = _effective_efficiency(424.0)
+    eff_624 = _effective_efficiency(624.0)
+    assert eff_424 < A_CO2_W_M2_PER_KG
+    assert eff_624 < eff_424, "efficiency keeps falling as the background rises"
+
+
+def test_phi_co2_background_removal_cools():
+    """A steady removal flux (negative, as co2_flux_kg_per_yr convention has
+    it) must give a negative (cooling) forcing, same sign as phi_co2."""
+    flux = np.full(len(YEARS), -1.0e11)
+    g_c = np.ones(len(YEARS))
+    c_bg = np.full(len(YEARS), 424.0)
+    phi = phi_co2_background(flux, g_c, c_bg)
+    assert phi[10] < 0.0
+    assert phi[-1] < phi[10], "the gap keeps widening while removal continues"
+
+
+def test_phi_co2_background_zero_flux_gives_zero_forcing():
+    flux = np.zeros(len(YEARS))
+    g_c = np.ones(len(YEARS))
+    c_bg = np.full(len(YEARS), 424.0)
+    phi = phi_co2_background(flux, g_c, c_bg)
+    assert np.allclose(phi, 0.0, atol=1e-25)
+
+
+def test_phi_co2_background_tracks_rising_background_at_fixed_mass():
+    """The same airborne mass anomaly forces less against a higher
+    background -- that is the entire mechanism behind the deviation."""
+    flux = np.zeros(len(YEARS))
+    flux[0] = -1.0e11
+    g_c = np.ones(len(YEARS))
+    phi_low = phi_co2_background(flux, g_c, np.full(len(YEARS), 424.0))
+    phi_high = phi_co2_background(flux, g_c, np.full(len(YEARS), 624.0))
+    assert abs(phi_high[-1]) < abs(phi_low[-1])
