@@ -15,7 +15,7 @@ from fair import FAIR
 from fair.interface import fill, initialise
 from fair.io import read_properties
 
-from nbs.parameters import T_START, T_END
+from nbs.legacy.parameters import T_START, T_END
 
 # Index offsets: FaIR time axis starts at 1750
 _START_IDX = T_START - 1750  # 275

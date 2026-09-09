@@ -9,9 +9,9 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.albedo_module import compute_albedo_forcing_timeseries
-from nbs.carbon_module import compute_nee, compute_nee_at_level, nominal_credit_gtco2
-from nbs.et_module import compute_et_forcing_timeseries
+from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.carbon_module import compute_nee, compute_nee_at_level, nominal_credit_gtco2
+from nbs.legacy.et_module import compute_et_forcing_timeseries
 from nbs.fair_module import (
     compute_delta_t,
     compute_pulse_warming,
@@ -19,7 +19,7 @@ from nbs.fair_module import (
     run_fair_baseline,
     run_fair_perturbed,
 )
-from nbs.parameters import (
+from nbs.legacy.parameters import (
     A_EARTH_M2,
     COMPLEXITY_LEVELS,
     HA_TO_M2,
@@ -162,7 +162,7 @@ def run_at_level(
     area_mha: float = 1.0,
 ) -> dict:
     """Run one of the study's complexity levels 0-6."""
-    from nbs.carbon_module import _LEVEL_FLAGS
+    from nbs.legacy.carbon_module import _LEVEL_FLAGS
 
     flags = dict(_LEVEL_FLAGS[level])
     flags["albedo"] = level >= 3

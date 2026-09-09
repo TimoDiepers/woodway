@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nbs.scenario_runner import (
+from nbs.legacy.scenario_runner import (
     is_valid_combination,
     run_single_scenario,
     run_all_scenarios,

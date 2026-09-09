@@ -12,7 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from nbs.parameters import INTERVENTIONS, LATITUDES, SCENARIOS, T_END, T_START
+from nbs.legacy.parameters import INTERVENTIONS, LATITUDES, SCENARIOS, T_END, T_START
 
 # ---------------------------------------------------------------------------
 # Style constants

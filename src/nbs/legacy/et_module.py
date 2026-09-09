@@ -17,7 +17,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.parameters import T_END, T_START, get_et_values
+from nbs.legacy.parameters import T_END, T_START, get_et_values
 
 
 def compute_et_forcing_timeseries(

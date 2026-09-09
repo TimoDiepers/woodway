@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from nbs.fair_module import run_fair_baseline
-from nbs.scenario_runner import run_single_scenario
+from nbs.legacy.scenario_runner import run_single_scenario
 
 
 @pytest.fixture(scope="module")

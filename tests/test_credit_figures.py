@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from pathlib import Path
-from nbs.credit_figures import (
+from nbs.legacy.credit_figures import (
     plot_progressive_delta_t, plot_equivalence_by_latitude,
     plot_breakeven_by_level, plot_warming_debt,
     plot_credit_depreciation, plot_credit_sobol,

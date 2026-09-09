@@ -9,8 +9,8 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.albedo_module import compute_albedo_forcing_timeseries
-from nbs.carbon_module import (
+from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.carbon_module import (
     BASE_TEMP,
     C_TO_CO2,
     compute_biomass_growth,
@@ -24,7 +24,7 @@ from nbs.fair_module import (
     run_fair_baseline,
     run_fair_perturbed,
 )
-from nbs.parameters import (
+from nbs.legacy.parameters import (
     BECCS_CCS_EFFICIENCY,
     BECCS_HARVEST_PERIOD,
     BECCS_PROCESS_EMISSION_FRAC,

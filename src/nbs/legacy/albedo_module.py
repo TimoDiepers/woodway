@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.parameters import T_END, T_START, get_albedo_values
+from nbs.legacy.parameters import T_END, T_START, get_albedo_values
 
 
 def compute_albedo_forcing_timeseries(

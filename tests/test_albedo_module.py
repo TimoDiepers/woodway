@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from nbs.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
 
 
 class TestAlbedoForcingTimeseries:

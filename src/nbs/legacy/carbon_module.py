@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.parameters import (
+from nbs.legacy.parameters import (
     BECCS_CCS_EFFICIENCY,
     BECCS_HARVEST_PERIOD,
     BECCS_PROCESS_EMISSION_FRAC,

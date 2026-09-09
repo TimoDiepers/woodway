@@ -12,7 +12,7 @@ from nbs.fair_module import (
     run_fair_baseline,
     run_fair_perturbed,
 )
-from nbs.parameters import T_START, T_END
+from nbs.legacy.parameters import T_START, T_END
 
 N_YEARS = T_END - T_START  # 125
 

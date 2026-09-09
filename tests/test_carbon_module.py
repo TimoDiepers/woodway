@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nbs.carbon_module import (
+from nbs.legacy.carbon_module import (
     compute_biomass_growth,
     compute_disturbance_loss,
     compute_nee_at_level,

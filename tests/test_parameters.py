@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from nbs.parameters import (
+from nbs.legacy.parameters import (
     BECCS_CCS_EFFICIENCY,
     BECCS_HARVEST_PERIOD,
     BECCS_PROCESS_EMISSION_FRAC,

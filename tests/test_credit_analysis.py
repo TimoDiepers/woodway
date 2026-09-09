@@ -5,13 +5,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nbs.credit_analysis import (
+from nbs.legacy.credit_analysis import (
     compute_warming_debt,
     compute_equivalence_ratio,
     run_at_level,
     run_progressive_analysis,
 )
-from nbs.parameters import T_START, T_END
+from nbs.legacy.parameters import T_START, T_END
 
 N_YEARS = T_END - T_START
 

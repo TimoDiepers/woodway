@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from nbs.parameters import INTERVENTIONS, LATITUDES, SCENARIOS, T_START, T_END
+from nbs.legacy.parameters import INTERVENTIONS, LATITUDES, SCENARIOS, T_START, T_END
 
 
 @pytest.fixture
@@ -47,13 +47,13 @@ def mock_sobol_results():
 
 class TestPlotDeltaTCurves:
     def test_returns_existing_path(self, mock_results, tmp_path):
-        from nbs.figures import plot_delta_t_curves
+        from nbs.legacy.figures import plot_delta_t_curves
 
         path = plot_delta_t_curves(mock_results, str(tmp_path))
         assert Path(path).exists()
 
     def test_default_filename(self, mock_results, tmp_path):
-        from nbs.figures import plot_delta_t_curves
+        from nbs.legacy.figures import plot_delta_t_curves
 
         path = plot_delta_t_curves(mock_results, str(tmp_path))
         assert Path(path).name == "fig1_delta_t_curves.png"
@@ -61,13 +61,13 @@ class TestPlotDeltaTCurves:
 
 class TestPlotBreakevenMap:
     def test_returns_existing_path(self, mock_results, tmp_path):
-        from nbs.figures import plot_breakeven_map
+        from nbs.legacy.figures import plot_breakeven_map
 
         path = plot_breakeven_map(mock_results, str(tmp_path))
         assert Path(path).exists()
 
     def test_default_filename(self, mock_results, tmp_path):
-        from nbs.figures import plot_breakeven_map
+        from nbs.legacy.figures import plot_breakeven_map
 
         path = plot_breakeven_map(mock_results, str(tmp_path))
         assert Path(path).name == "fig2_breakeven_map.png"
@@ -75,13 +75,13 @@ class TestPlotBreakevenMap:
 
 class TestPlotRankingHeatmap:
     def test_returns_existing_path(self, mock_results, tmp_path):
-        from nbs.figures import plot_ranking_heatmap
+        from nbs.legacy.figures import plot_ranking_heatmap
 
         path = plot_ranking_heatmap(mock_results, str(tmp_path))
         assert Path(path).exists()
 
     def test_default_filename(self, mock_results, tmp_path):
-        from nbs.figures import plot_ranking_heatmap
+        from nbs.legacy.figures import plot_ranking_heatmap
 
         path = plot_ranking_heatmap(mock_results, str(tmp_path))
         assert Path(path).name == "fig3_ranking_heatmap.png"
@@ -89,13 +89,13 @@ class TestPlotRankingHeatmap:
 
 class TestPlotSspSensitivity:
     def test_returns_existing_path(self, mock_results, tmp_path):
-        from nbs.figures import plot_ssp_sensitivity
+        from nbs.legacy.figures import plot_ssp_sensitivity
 
         path = plot_ssp_sensitivity(mock_results, str(tmp_path))
         assert Path(path).exists()
 
     def test_default_filename(self, mock_results, tmp_path):
-        from nbs.figures import plot_ssp_sensitivity
+        from nbs.legacy.figures import plot_ssp_sensitivity
 
         path = plot_ssp_sensitivity(mock_results, str(tmp_path))
         assert Path(path).name == "fig4_ssp_sensitivity.png"
@@ -103,13 +103,13 @@ class TestPlotSspSensitivity:
 
 class TestPlotSobolIndices:
     def test_returns_existing_path(self, mock_sobol_results, tmp_path):
-        from nbs.figures import plot_sobol_indices
+        from nbs.legacy.figures import plot_sobol_indices
 
         path = plot_sobol_indices(mock_sobol_results, str(tmp_path))
         assert Path(path).exists()
 
     def test_default_filename(self, mock_sobol_results, tmp_path):
-        from nbs.figures import plot_sobol_indices
+        from nbs.legacy.figures import plot_sobol_indices
 
         path = plot_sobol_indices(mock_sobol_results, str(tmp_path))
         assert Path(path).name == "fig5_sobol_indices.png"

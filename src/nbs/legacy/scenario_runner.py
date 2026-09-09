@@ -9,15 +9,15 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.albedo_module import compute_albedo_forcing_timeseries
-from nbs.carbon_module import compute_nee_timeseries
+from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.carbon_module import compute_nee_timeseries
 from nbs.fair_module import (
     compute_delta_t,
     find_breakeven_year,
     run_fair_baseline,
     run_fair_perturbed,
 )
-from nbs.parameters import INTERVENTIONS, LATITUDES, SCENARIOS
+from nbs.legacy.parameters import INTERVENTIONS, LATITUDES, SCENARIOS
 
 # Valid latitude ranges per intervention (inclusive bounds)
 _VALID_LAT_RANGES: dict[str, tuple[int, int]] = {

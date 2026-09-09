@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nbs.sensitivity import PARAM_BOUNDS, run_oat_sensitivity, run_sobol_sensitivity
+from nbs.legacy.sensitivity import PARAM_BOUNDS, run_oat_sensitivity, run_sobol_sensitivity
 
 
 # ---------------------------------------------------------------------------
