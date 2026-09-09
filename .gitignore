@@ -9,3 +9,6 @@ docs/slides/andere_vortraege/
 # Zeitgestempelte Sicherungen vor Schreibzugriffen, je ~3 MB
 docs/slides/workspace/dissvortrag_pre_*.pptx
 docs/slides/dissvortrag_backup.pptx
+
+# Rohdaten der Rasterschicht
+data/raw/

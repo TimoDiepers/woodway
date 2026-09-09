@@ -43,6 +43,29 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 ```
 
+## Die Kette
+
+Ein Baum, zwei Kanäle, eine Faltung:
+
+    m(t)  →  ṁ_CO₂ = −(44/12)·ṁ  →  Δm_CO₂ = g_C ∗ ṁ_CO₂  →  φ_CO₂ = A_CO₂·Δm_CO₂
+          →  f(t)                                          →  φ_α = −Δα·q̇_kurz·τ·f·A_Baum/A_Erde
+                                                           →  ΔT = g_T ∗ (φ_CO₂ + φ_α)
+
+FaIR liefert g_C und g_T einmalig; alles danach ist Faltung. Evapotranspiration
+ist kein Term in φ — sie überquert die Bilanzgrenze am Oberrand der Atmosphäre
+nicht und steckt im Rückkopplungsparameter Λ.
+
+```python
+from nbs.pipeline import run_single_tree
+from nbs.metrics import t_star
+
+r = run_single_tree("picea_abies", lat_deg=60.0, scenario="ssp245")
+print(t_star(r.delta_t, r.years))
+```
+
+Der vorherige Stand — Komplexitätslevel 0–6, Äquivalenzverhältnis, Sobol —
+liegt unverändert unter `nbs.legacy`.
+
 ## Quick Start
 
 ### Progressive complexity analysis
@@ -147,18 +170,20 @@ results = run_all_scenarios(area_mha=1.0)
 
 ```
 src/nbs/
-  parameters.py       # Physical constants, growth/SOC/albedo parameters
-  carbon_module.py    # Biomass growth, SOC, soil respiration, disturbance, NEE
-  albedo_module.py    # Albedo radiative forcing with transition phase
-  fair_module.py      # FaIR v2 baseline/perturbed runs, pulse warming, ΔT
-  scenario_runner.py  # Orchestration for 4-intervention comparison
-  sensitivity.py      # OAT and Sobol global sensitivity analysis
-  figures.py          # Publication figures
-  credit_analysis.py  # Progressive complexity analysis, equivalence ratio, warming debt
-  credit_figures.py   # Analysis figures (6 figure types)
-tests/                # ~130 tests (fast + slow/integration)
+  species.py    fünf Arten, je Biom eine
+  tree.py       Vorrat, Kronenschluss, Störungspfade — je Baum
+  forcing.py    φ_CO₂ und φ_α
+  response.py   Impulsantworten g_C, g_T; Faltung
+  pipeline.py   die vollständige Kette für einen Baum an einem Ort
+  metrics.py    t*, Risikoprämie, Quantilbänder
+  plots.py      Abbildungen für die Ergebnisfolien
+  constants.py  gemeinsame physikalische Konstanten
+  fair_module.py
+  legacy/       vorheriger Stand, Tests laufen weiter
+tests/
 notebooks/
-  01_single_intervention_demo.ipynb
+  01_einzelbaum.ipynb
+  archiv/
 ```
 
 ## Running Tests
