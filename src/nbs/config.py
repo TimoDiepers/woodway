@@ -42,6 +42,19 @@ class ModelConfig:
 
     Every field isolates one physical claim so its contribution to Delta-T
     can be shown as a sensitivity on its own slide (see ``nbs.variants``).
+
+    ``disturbance`` means two different things depending on the entry point
+    (see the field's own docstring for the detail): in
+    ``nbs.pipeline.run_single_tree`` all three values are distinct, but in
+    ``nbs.pipeline.run_single_tree_ensemble`` the ensemble members are
+    always drawn stochastically -- the ensemble *is* the stochastic
+    realisation -- so ``"deterministic"`` and ``"stochastic"`` there produce
+    byte-identical ensembles and only ``"off"`` (zero disturbance
+    probability) changes anything. That is not a bug; putting
+    ``"deterministic"`` and ``"stochastic"`` side by side on an *ensemble*
+    sensitivity slide will show two identical rows, which is the correct
+    (if easy to misread as "disturbance stochasticity does not matter")
+    result of that comparison.
     """
 
     co2_forcing: Co2Forcing = "logarithmic"
@@ -74,8 +87,20 @@ class ModelConfig:
     ``"off"``: no disturbance at all (a species with its disturbance
     probability zeroed). ``"deterministic"``: today's committed behaviour, an
     expected-value drain applied continuously. ``"stochastic"``: discrete
-    Monte-Carlo disturbance events; in the single-tree path this is one
-    seeded realisation rather than the full 1000-member ensemble.
+    Monte-Carlo disturbance events; in the single-tree path
+    (``run_single_tree``) this is one seeded realisation rather than the
+    full 1000-member ensemble.
+
+    In ``run_single_tree_ensemble`` this switch is effectively binary, not
+    three-valued: every ensemble member is always drawn from the discrete
+    stochastic integrator regardless of this field, because the ensemble
+    *is* the Monte-Carlo realisation. ``"deterministic"`` and
+    ``"stochastic"`` therefore produce byte-identical ensembles there; only
+    ``"off"`` (which zeroes the species' disturbance probability for every
+    member) changes anything. This is intentional, not an oversight -- see
+    ``ModelConfig``'s class docstring -- but it means a sensitivity figure
+    comparing those two values on an *ensemble* result will show two
+    identical rows.
     """
 
     carbon_sink: CarbonSink = "scenario"

@@ -23,10 +23,11 @@ def test_config_is_frozen():
 
 
 def test_config_fields_document_their_slide():
-    for field in dataclasses.fields(ModelConfig):
-        assert field.__doc__ or True  # dataclass fields don't carry __doc__;
-    # docstrings live as attribute-docstrings in the source; smoke-check the
-    # module docstring at least mentions both CO2 variants and slide 21.
+    # dataclass fields don't carry a __doc__ attribute of their own --
+    # docstrings live as attribute-docstrings in the source, which aren't
+    # introspectable at runtime -- so this is a smoke check that the module
+    # docstring at least mentions both CO2 variants and slide 21, not a
+    # per-field check.
     import nbs.config as config_module
 
     assert "logarithmic" in config_module.__doc__
