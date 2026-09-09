@@ -16,7 +16,7 @@ def test_every_source_carries_provenance():
 def test_status_reports_every_registered_source():
     st = status()
     assert set(st) == set(SOURCES)
-    assert all(v in {"vorhanden", "fehlt", "pruefsumme_falsch"} for v in st.values())
+    assert all(v in {"vorhanden", "fehlt", "prüfsumme_falsch"} for v in st.values())
 
 
 def test_resolve_returns_none_for_a_missing_file(tmp_path, monkeypatch):

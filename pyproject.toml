@@ -27,6 +27,7 @@ build-backend = "hatchling.build"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
+pythonpath = ["scripts"]
 
 [dependency-groups]
 dev = [

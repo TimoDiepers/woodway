@@ -75,14 +75,14 @@ def resolve(key: str) -> Path | None:
 
 
 def status() -> dict[str, str]:
-    """Per source: 'vorhanden', 'fehlt' or 'pruefsumme_falsch'."""
+    """Per source: 'vorhanden', 'fehlt' or 'prüfsumme_falsch'."""
     out: dict[str, str] = {}
     for key, src in SOURCES.items():
         path = RAW_DIR / src.filename
         if not path.exists():
             out[key] = "fehlt"
         elif src.sha256 and _sha256(path) != src.sha256:
-            out[key] = "pruefsumme_falsch"
+            out[key] = "prüfsumme_falsch"
         else:
             out[key] = "vorhanden"
     return out
