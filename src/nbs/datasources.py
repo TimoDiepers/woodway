@@ -42,6 +42,31 @@ SOURCES: dict[str, Source] = {
         citation="Duveiller, G., Hooker, J., Cescatti, A. (2018), Sci. Data 5, 180014",
         filename="LULCC-bph_LSM-vs-RS.nc",
     ),
+    "duveiller_albedo": Source(
+        key="duveiller_albedo",
+        title="Land cover change albedo effect, IGBPdet transitions (Delta_albedo)",
+        doi="10.2905/F97E4216-E81C-4DFB-B42D-D0C19070D029",
+        url="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/ECOCLIM/Biophysical-effects-vgt-change/v2.0/",
+        sha256="119e16490fad04e361bfd6a0e38c53c7a1f5aa758446f3be7274efc7e239b872",
+        license="CC-BY-4.0, (c) European Union",
+        size_mb=14.4,
+        citation="Duveiller, G., Hooker, J., Cescatti, A. (2018), Sci. Data 5, 180014, "
+        "v2.0 (JRC open data repository)",
+        filename="alb_det.nc",
+    ),
+    "duveiller_swr": Source(
+        key="duveiller_swr",
+        title="Land cover change albedo effect, IGBPdet transitions "
+        "(Delta_SWreflected)",
+        doi="10.2905/F97E4216-E81C-4DFB-B42D-D0C19070D029",
+        url="https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/ECOCLIM/Biophysical-effects-vgt-change/v2.0/",
+        sha256="6049b6b0ac1b433ec5743c78ed2060325179982d2a81c84452fb9241fa2beb8a",
+        license="CC-BY-4.0, (c) European Union",
+        size_mb=14.8,
+        citation="Duveiller, G., Hooker, J., Cescatti, A. (2018), Sci. Data 5, 180014, "
+        "v2.0 (JRC open data repository)",
+        filename="swr_det.nc",
+    ),
 }
 
 

@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib>=3.7",
     "SALib>=1.4",
     "pandas>=2.0",
+    "netcdf4>=1.7.4",
 ]
 
 [project.optional-dependencies]

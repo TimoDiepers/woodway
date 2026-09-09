@@ -125,6 +125,23 @@ def light_bulb_watts(delta_alpha: float, q_sw_w_m2: float, sp: Species) -> float
     return float(-delta_alpha * q_sw_w_m2 * sp.stand_area_m2)
 
 
+def phi_albedo_from_product(
+    closure: NDArray, alpha_q_product_w_m2: float, sp: Species
+) -> NDArray:
+    """Albedo forcing [W/m^2] from a pre-formed delta_alpha * q_sw product.
+
+    Identical physics to phi_albedo; the difference is that the product arrives
+    already formed. The grid needs this because delta_alpha and the insolation
+    must be multiplied month by month before being averaged -- spring snow
+    masking depends on the two peaking together, and multiplying annual means
+    loses that covariance. See nbs.albedo_grid and the Plan 1 findings
+    document (docs/superpowers/specs/2026-09-09-befunde-fuer-plan-2-und-3.md),
+    section 4.
+    """
+    f = np.asarray(closure, dtype=float)
+    return -alpha_q_product_w_m2 * TAU_ATM * f * sp.stand_area_m2 / A_EARTH_M2
+
+
 _LAT_TABLE = np.array([0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0])
 _DELTA_ALPHA_TABLE = np.array([-0.033, -0.033, -0.040, -0.070, -0.130, -0.160, -0.160])
 _Q_SW_TABLE = np.array([210.0, 230.0, 225.0, 160.0, 110.0, 75.0, 60.0])
