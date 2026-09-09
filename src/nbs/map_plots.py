@@ -1,0 +1,402 @@
+"""Grid maps for the results section of the talk (Plan 2, Task 6).
+
+Three figures, all built from ``nbs.aggregate.unit_curves`` and
+``nbs.albedo_grid.alpha_q_product`` -- never by re-running the single-tree
+pipeline per cell, which would mean ~5700 plantable cells times a FaIR call
+each:
+
+- ``plot_breakeven_map``: per-cell break-even year t* (the primary figure --
+  it alone carries the whole "warming fraction by year" table the task-6
+  brief measured: 64.4% of plantable cells still warming in 2030, dropping to
+  0.8% by 2125).
+- ``plot_sign_map``: the discrete warming/cooling split at one year, default
+  2050 -- the year the measured table puts the split closest to 50/50
+  (48.2% warming), which is when the talk's "opposite signs" claim is most
+  visibly true on a single map. A single-year map at, say, 2125 would show
+  almost no warming and understate the point: not because the albedo channel
+  is missing, but because by then it is long over.
+- ``plot_horizon_field``: the continuous version of the same fact for one
+  species -- net Delta_T(time, latitude), with the zero contour tracing
+  t*(latitude) directly, the same quantity a discrete breakeven table lists
+  year by year.
+
+Every figure carries ``footer_text()`` in its own footer, not just a
+docstring: it names both data provenances (the Duveiller albedo-transition
+raster via ``nbs.albedo_grid.product_provenance`` and the latitude-band
+species assignment via ``nbs.landscape.provenance``) and states the
+three-tier retrieval fractions -- local retrieval, zonal extrapolation,
+latitude-table fallback -- for the species the talk foregrounds (Picea
+abies, 60-70N). A map that is nine-tenths not-directly-measured is still a
+legitimate product, provided it says so where the number is shown, not only
+in a source comment.
+
+German labels (these are slide material); code and docstrings in English.
+"""
+
+from __future__ import annotations
+
+import os
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.colors as mcolors  # noqa: E402
+import matplotlib.patheffects as pe  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.ticker as mticker  # noqa: E402
+import numpy as np  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.patches import Patch  # noqa: E402
+from numpy.typing import NDArray  # noqa: E402
+
+from nbs.aggregate import delta_t_at_year, unit_curves  # noqa: E402
+from nbs.albedo_grid import (  # noqa: E402
+    alpha_q_product,
+    product_provenance,
+    provenance_fractions,
+)
+from nbs.config import ModelConfig  # noqa: E402
+from nbs.constants import T_END, T_START, YEARS  # noqa: E402
+from nbs.grid import grid_lats, grid_lons  # noqa: E402
+from nbs.landscape import assign_species  # noqa: E402
+from nbs.landscape import provenance as landscape_provenance  # noqa: E402
+from nbs.species import SPECIES, get_species  # noqa: E402
+
+DPI = 300
+_FOOTER_SPECIES = "picea_abies"
+"""Species whose three-tier fractions footer_text() quotes.
+
+Picea abies is the boreal conifer the talk's slides (14, the ladder, the
+light-bulb image) all foreground, so it is the fraction figure a reader
+would otherwise assume applies everywhere -- naming it explicitly instead of
+an average across species avoids implying a number that was never computed.
+"""
+
+_COLOR_WARM = "#b2182b"
+_COLOR_COOL = "#2166ac"
+_COLOR_NEVER = "#7a0421"
+_COLOR_UNPLANTABLE = "#e5e5e5"
+
+
+def _save(fig, out_path: str) -> str:
+    directory = os.path.dirname(out_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    fig.savefig(out_path, dpi=DPI, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
+def _de1(value: float) -> str:
+    """One-decimal German number formatting, e.g. 48.2 -> '48,2'."""
+    return f"{value:.1f}".replace(".", ",")
+
+
+def _de_pct(fraction: float) -> str:
+    """Format a 0-1 fraction as a German-style percentage, e.g. 0.089 -> '8,9 %'."""
+    return _de1(fraction * 100.0) + " %"
+
+
+def _warming_cooling_pct(year: int, scenario: str) -> tuple[float, float]:
+    """(warm_pct, cool_pct) over plantable cells only, 0-100, summing to 100.
+
+    Plantability is read from nbs.landscape.assign_species(), not from
+    "field != 0" -- an exact zero Delta_T is possible in principle and would
+    otherwise be indistinguishable from an unplantable cell.
+    """
+    field = delta_t_at_year(year, scenario)
+    plantable = assign_species() != None  # noqa: E711
+    n_total = int(plantable.sum())
+    if n_total == 0:
+        return float("nan"), float("nan")
+    warm_pct = 100.0 * int((plantable & (field > 0.0)).sum()) / n_total
+    return warm_pct, 100.0 - warm_pct
+
+
+def footer_text(species_key: str = _FOOTER_SPECIES) -> str:
+    """Both data provenances, plus the named species' three-tier fractions.
+
+    Composed as plain text so it can be asserted on directly (the plotting
+    functions close their figure on save, leaving no live artist to
+    interrogate afterwards) and so every figure in this module places the
+    identical string, keeping the wording consistent across P1 and E6.
+    """
+    prod = product_provenance()
+    land = landscape_provenance()
+    frac = provenance_fractions(species_key)
+    sp = get_species(species_key)
+    return (
+        f"Albedo-Rasterquelle (Duveiller et al. 2018, JRC v2.0): {prod}  |  "
+        f"Art-/Flächenzuordnung (Breitenbänder, keine GEZ-Rasterquelle): {land}  |  "
+        f"{sp.name_de}: {_de_pct(frac['lokal'])} lokal erhoben, "
+        f"{_de_pct(frac['zonal'])} zonal extrapoliert, "
+        f"{_de_pct(frac['tabelle'])} Breitentabelle"
+    )
+
+
+def _add_footer(fig, species_key: str = _FOOTER_SPECIES) -> None:
+    """Place footer_text() as an unmissable, boxed strip under the axes.
+
+    A hairline caption is easy to skip; a coloured box spanning the figure
+    width is not. fig.text (not ax.text) so it survives independent of
+    whichever axes the caller built, and bbox_inches="tight" in _save()
+    still picks it up because it is a figure-level artist.
+    """
+    fig.text(
+        0.5,
+        -0.02,
+        footer_text(species_key),
+        ha="center",
+        va="top",
+        fontsize=9.5,
+        wrap=True,
+        transform=fig.transFigure,
+        bbox=dict(boxstyle="round,pad=0.5", facecolor="#fff3cd", edgecolor="#8a6d3b", linewidth=1.0),
+    )
+
+
+def _lat_formatter(deg: float, _pos=None) -> str:
+    if deg == 0:
+        return "0°"
+    hemi = "N" if deg > 0 else "S"
+    return f"{abs(deg):.0f}°{hemi}"
+
+
+def _lon_formatter(deg: float, _pos=None) -> str:
+    if deg == 0:
+        return "0°"
+    hemi = "O" if deg > 0 else "W"
+    return f"{abs(deg):.0f}°{hemi}"
+
+
+def _add_lat_lon_grid(ax) -> None:
+    """Plain-equirectangular gridlines and degree labels -- no cartopy.
+
+    The maps' message is the sign/break-even pattern by latitude, not
+    coastlines, so a labelled graticule is enough context (per the task-6
+    brief: "Küstenlinien sind verzichtbar").
+    """
+    ax.set_xlim(-180, 180)
+    ax.set_ylim(-90, 90)
+    ax.set_xticks(np.arange(-180, 181, 60))
+    ax.set_yticks(np.arange(-90, 91, 30))
+    ax.xaxis.set_major_formatter(mticker.FuncFormatter(_lon_formatter))
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(_lat_formatter))
+    ax.set_aspect("equal")
+    ax.grid(True, color="0.5", alpha=0.35, linewidth=0.6)
+    ax.set_xlabel("Länge")
+    ax.set_ylabel("Breite")
+
+
+def _t_star_batch(traj: NDArray, years: NDArray) -> NDArray:
+    """Vectorised nbs.metrics.t_star over the leading axis of *traj*.
+
+    traj: (n_cells, n_years). Returns (n_cells,) break-even years, with the
+    identical semantics as the scalar t_star: years[0] if never warming,
+    np.inf if the last warming year is the final one in the horizon, else the
+    year right after the last sign change.
+    """
+    warming = traj > 0.0
+    n_years = traj.shape[1]
+    any_warm = warming.any(axis=1)
+    idx_from_end = np.argmax(warming[:, ::-1], axis=1)
+    last_idx = n_years - 1 - idx_from_end
+
+    out = np.full(traj.shape[0], float(years[0]))
+    still_warming_at_end = any_warm & (last_idx == n_years - 1)
+    recovers = any_warm & (last_idx < n_years - 1)
+    out[still_warming_at_end] = np.inf
+    out[recovers] = years[last_idx[recovers] + 1]
+    return out
+
+
+def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None = None) -> NDArray:
+    """(360, 720) break-even year t* per cell, NaN where unplantable.
+
+    Built from unit_curves (two curves per species, five species total) and
+    each cell's own alpha_q_product -- ten convolutions' worth of trajectory
+    shape, reused across every plantable cell of that species, exactly the
+    same shortcut nbs.aggregate uses for Delta_T itself. A cell's tree count
+    N_c is strictly positive wherever a species is assigned, so it never
+    changes the sign of (co2(t) + P_c * albedo_unit(t)) and is left out of
+    this per-cell trajectory on purpose -- t* only depends on sign.
+    """
+    species_grid = assign_species()
+    field = np.full(species_grid.shape, np.nan, dtype=float)
+    for key in SPECIES:
+        mask = species_grid == key
+        if not mask.any():
+            continue
+        co2, albedo_unit = unit_curves(key, scenario, config)
+        p = alpha_q_product(key)[mask]
+        traj = co2[None, :] + p[:, None] * albedo_unit[None, :]
+        field[mask] = _t_star_batch(traj, YEARS)
+    return field
+
+
+def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
+    """Folie P1 (primary): per-cell break-even year t*, one still that
+    carries the whole warming-fraction-by-year table (task-6 brief): 64.4%
+    of plantable cells still warming in 2030, 49.2% in 2040, 48.2% in 2050,
+    24.7% in 2060, 1.7% in 2080, 0.8% in 2125. Early break-even years read
+    bright, late ones dark, and cells that never break even within the
+    2025-2150 horizon get their own distinct colour rather than being folded
+    into the "late" end of the scale, which would silently equate "took 120
+    years" with "never".
+    """
+    field = _breakeven_year_field(scenario)
+    lats, lons = grid_lats(), grid_lons()
+
+    # Anchor years for the title's summary line: the same two years the
+    # task-6 brief's warming-fraction table uses to bracket the transient
+    # decades (64.4% -> 0.8% under the default ssp245), recomputed here (not
+    # hardcoded) so the number stays correct if a caller passes a different
+    # scenario.
+    _start_year, _end_year = 2030, 2125
+    _warm_start, _ = _warming_cooling_pct(_start_year, scenario)
+    _warm_end, _ = _warming_cooling_pct(_end_year, scenario)
+
+    cmap = plt.get_cmap("viridis_r").copy()
+    cmap.set_bad(_COLOR_UNPLANTABLE)
+    cmap.set_over(_COLOR_NEVER)
+    norm = mcolors.Normalize(vmin=T_START, vmax=T_END)
+
+    fig, ax = plt.subplots(figsize=(12, 6.8))
+    im = ax.pcolormesh(
+        lons, lats, np.ma.masked_invalid(field), cmap=cmap, norm=norm, shading="auto"
+    )
+    cbar = fig.colorbar(im, ax=ax, extend="max", pad=0.02, shrink=0.85)
+    cbar.set_label("Ausgleichsjahr t* [Jahr]")
+
+    legend_handles = [
+        Patch(facecolor=_COLOR_NEVER, label=f"kein Ausgleich bis {T_END}"),
+        Patch(facecolor=_COLOR_UNPLANTABLE, label="nicht bepflanzbar"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower left", frameon=True, fontsize=9)
+
+    _add_lat_lon_grid(ax)
+    ax.set_title(
+        f"Ausgleichsjahr t* je Rasterzelle, {scenario.upper()}\n"
+        f"wärmend {_start_year} : {_de1(_warm_start)} %  →  "
+        f"wärmend {_end_year} : {_de1(_warm_end)} %"
+    )
+    _add_footer(fig)
+    return _save(fig, out_path)
+
+
+def plot_sign_map(
+    year: int = 2050, out_path: str = "sign_map.png", *, scenario: str = "ssp245"
+) -> str:
+    """Folie P1b: discrete warming/cooling split at one year.
+
+    Defaults to 2050 (not the horizon end): the measured warming-cell
+    fraction is 64.4% in 2030, 49.2% in 2040, 48.2% in 2050, 24.7% in 2060,
+    1.7% in 2080 and 0.8% in 2125 (task-6 brief) -- by 2125 the map would be
+    almost entirely one colour, which is correct but makes a single still
+    understate the "opposite signs" claim the talk makes about the transient
+    decades. 2050 is closest to an even split (48/52) and keeps the argument
+    legible in a single frame; plot_breakeven_map carries the full
+    across-year picture this figure necessarily reduces to one year.
+
+    Plantability is read from nbs.landscape.assign_species(), not from
+    "field != 0" -- an exact zero Delta_T is possible in principle and would
+    otherwise be indistinguishable from an unplantable cell.
+    """
+    field = delta_t_at_year(year, scenario)
+    plantable = assign_species() != None  # noqa: E711
+    warm = plantable & (field > 0.0)
+    cool = plantable & ~(field > 0.0)
+
+    warm_pct, cool_pct = _warming_cooling_pct(year, scenario)
+
+    sign = np.full(field.shape, np.nan)
+    sign[cool] = -1.0
+    sign[warm] = 1.0
+
+    lats, lons = grid_lats(), grid_lons()
+    cmap = mcolors.ListedColormap([_COLOR_COOL, _COLOR_WARM])
+    cmap.set_bad(_COLOR_UNPLANTABLE)
+    norm = mcolors.BoundaryNorm([-1.5, 0.0, 1.5], cmap.N)
+
+    fig, ax = plt.subplots(figsize=(12, 6.8))
+    ax.pcolormesh(lons, lats, np.ma.masked_invalid(sign), cmap=cmap, norm=norm, shading="auto")
+
+    legend_handles = [
+        Patch(facecolor=_COLOR_COOL, label="kühlend (ΔT ≤ 0)"),
+        Patch(facecolor=_COLOR_WARM, label="wärmend (ΔT > 0)"),
+        Patch(facecolor=_COLOR_UNPLANTABLE, label="nicht bepflanzbar"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower left", frameon=True, fontsize=9)
+
+    _add_lat_lon_grid(ax)
+    ax.set_title(
+        f"Vorzeichen von ΔT({year}) je Rasterzelle, {scenario.upper()}\n"
+        f"wärmend: {_de1(warm_pct)} %  ·  kühlend: {_de1(cool_pct)} %"
+    )
+    _add_footer(fig)
+    return _save(fig, out_path)
+
+
+def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp245") -> str:
+    """Folie E6: continuous horizon x latitude field of net Delta_T per tree.
+
+    x: study year (2025-2150, the model's own annual resolution -- the
+    "continuous" axis the brief asks for, as opposed to the handful of
+    support years plot_breakeven_map and plot_sign_map single out).
+    y: latitude, zonal-mean alpha_q_product per row for *species_key*.
+    colour: net Delta_T per tree [K] (co2 + albedo channel), diverging
+    around zero.
+
+    The white zero contour is not a decoration: it *is* t*(latitude) for
+    this species, drawn as a continuous curve instead of read off a table of
+    discrete years -- the same sign change nbs.metrics.t_star locates on a
+    single trajectory, here traced across every latitude row at once. A
+    thin black stroke is added beneath the white line (matplotlib
+    path_effects) so it stays legible in both the pale centre of the RdBu_r
+    colourmap and its saturated ends.
+    """
+    co2, albedo_unit = unit_curves(species_key, scenario)
+    lats = grid_lats()
+    zonal_product = alpha_q_product(species_key).mean(axis=1)  # (360,)
+
+    field_k = co2[None, :] + zonal_product[:, None] * albedo_unit[None, :]  # (360, 126) K
+    field = field_k * 1e15  # 1e-15 K per tree, matches nbs.plots' convention
+
+    vmax = float(np.max(np.abs(field)))
+    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+
+    fig, ax = plt.subplots(figsize=(11, 6.8))
+    im = ax.pcolormesh(YEARS, lats, field, cmap="RdBu_r", norm=norm, shading="auto")
+    cbar = fig.colorbar(im, ax=ax, pad=0.02)
+    cbar.set_label("Netto ΔT je Baum [10$^{-15}$ K]")
+
+    cs = ax.contour(YEARS, lats, field, levels=[0.0], colors="white", linewidths=2.4, zorder=5)
+    cs.set_path_effects([pe.Stroke(linewidth=4.0, foreground="black"), pe.Normal()])
+
+    zero_line_proxy = Line2D(
+        [0], [0], color="white", lw=2.4,
+        path_effects=[pe.Stroke(linewidth=4.0, foreground="black"), pe.Normal()],
+        label="t*(Breite) — Nullkontur",
+    )
+    ax.legend(handles=[zero_line_proxy], loc="upper right", frameon=True, fontsize=9)
+
+    sp = get_species(species_key)
+    ax.set_title(
+        f"Horizontfeld: Netto ΔT je Baum, {sp.name_de} ({sp.name_lat}), {scenario.upper()}"
+    )
+    ax.set_xlabel("Jahr")
+    ax.set_ylabel("Breite")
+    ax.set_ylim(-90, 90)
+    ax.set_yticks(np.arange(-90, 91, 30))
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(_lat_formatter))
+    ax.grid(alpha=0.2, color="0.4", linewidth=0.6)
+    _add_footer(fig, species_key)
+    return _save(fig, out_path)
+
+
+__all__ = [
+    "footer_text",
+    "plot_breakeven_map",
+    "plot_horizon_field",
+    "plot_sign_map",
+]
