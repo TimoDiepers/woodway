@@ -93,11 +93,11 @@ class ModelConfig:
         co2 = "log" if self.co2_forcing == "logarithmic" else "lin"
         albedo = "+Albedo" if self.albedo else "-Albedo"
         dist = {
-            "off": "-Stoerung",
-            "deterministic": "Stoerung(E)",
-            "stochastic": "Stoerung(MC)",
+            "off": "-Störung",
+            "deterministic": "Störung(E)",
+            "stochastic": "Störung(MC)",
         }[self.disturbance]
-        sink = "Saettigung" if self.carbon_sink == "scenario" else "vorind."
+        sink = "Sättigung" if self.carbon_sink == "scenario" else "vorind."
         return f"{co2}, {albedo}, {dist}, {sink}"
 
     def describe_de(self) -> str:
@@ -109,12 +109,12 @@ class ModelConfig:
         )
         albedo = "mit Albedo-Kanal" if self.albedo else "ohne Albedo-Kanal"
         dist = {
-            "off": "ohne Stoerung",
-            "deterministic": "mit Stoerung (Erwartungswert)",
-            "stochastic": "mit Stoerung (stochastisch)",
+            "off": "ohne Störung",
+            "deterministic": "mit Störung (Erwartungswert)",
+            "stochastic": "mit Störung (stochastisch)",
         }[self.disturbance]
         sink = (
-            "szenario-konditionierte Senke (mit Saettigung)"
+            "szenario-konditionierte Senke (mit Sättigung)"
             if self.carbon_sink == "scenario"
             else "vorindustrielle Senke (Lehrbuchkurve)"
         )
