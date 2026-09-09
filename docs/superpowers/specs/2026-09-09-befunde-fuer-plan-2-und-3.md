@@ -93,10 +93,19 @@ Gemessen am JRC-Datensatz (Duveiller et al. 2018, v2.0), Übergang 38
 
 | Breite | mean(Δα·q̇) / [mean(Δα)·mean(q̇)] | Spitzenmonat | Spitze / Jahresmittel |
 |---|---|---|---|
-| 45°N | 0,87 | Juli | 1,3× |
+| 45°N | 0,87 | Februar | 1,4× |
 | 55°N | 0,80 | März | 2,7× |
-| 60°N | 0,80 | April | 3,7× |
+| 60°N | 0,80 | April | 3,0× |
 | 65°N | 0,70 | April | 4,3× |
+
+Die Spitze **wandert mit der Breite von Februar nach April**, und ihre Dominanz
+wächst dabei. Im Süden liegt zwar Schnee, aber die Sonne ist noch schwach;
+weiter nördlich fällt der späte Schnee mit der bereits kräftigen
+Frühjahrssonne zusammen. Das ist die Schneemaskierung, als Wanderung sichtbar.
+
+*(Werte für eine Gitterzeile; ein Band von ±2,5° verschiebt die Verhältnisse
+um wenige Zehntel, nicht die Aussage. Wer eine Wattzahl für einen einzelnen
+Monat zitiert, muss die Bandbreite dazusagen.)*
 
 Das Multiplizieren von Jahresmitteln **überschätzt** den borealen Antrieb um
 20 bis 30 Prozent, und der Fehler wächst polwärts. Der Grund: der
@@ -117,9 +126,9 @@ Der Monatsgang bei 60°N zeigt ihn unmittelbar:
 | Juli | 0,06 | 214 | 13,3 |
 
 Im April liegt noch Schnee **und** die Sonne steht schon hoch. Dieser eine
-Monat trägt mehr als das Dreifache des Jahresmittels. Bei 45°N verschwindet
-das Muster: dort liegt die Spitze im Juli und ist kaum ausgeprägt — keine
-Schneegeschichte, nur Sommersonne.
+Monat trägt rund das Dreifache des Jahresmittels. Bei 45°N ist das Muster viel
+schwächer und liegt im Februar: dort schmilzt der Schnee, bevor die Sonne
+Kraft hat.
 
 ### Folge für die Rechnung
 
