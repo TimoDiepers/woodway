@@ -26,7 +26,11 @@ def test_channel_decomposition_sums_to_the_total(result):
     g = green_temperature(result.scenario)
     dt_c = convolve_response(g, result.phi_co2)
     dt_a = convolve_response(g, result.phi_albedo)
-    assert np.allclose(dt_c + dt_a, result.delta_t)
+    # delta_t here is of order 1e-13 K; np.allclose's default atol=1e-8 would
+    # swamp that entirely and let a wrong decomposition (e.g. a dropped or
+    # sign-flipped channel) pass. Scale the tolerance to the signal instead.
+    scale = np.abs(result.delta_t).max()
+    assert np.allclose(dt_c + dt_a, result.delta_t, rtol=0.0, atol=1e-9 * scale)
 
 
 @pytest.mark.slow

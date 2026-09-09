@@ -38,7 +38,10 @@ def test_phi_co2_scales_with_radiative_efficiency():
     flux[0] = -1000.0
     g_c = np.ones(len(YEARS))
     phi = phi_co2(flux, g_c)
-    assert phi[0] == pytest.approx(-1000.0 * A_CO2_W_M2_PER_KG)
+    # Expected magnitude is 1.76e-12: pytest.approx's default abs=1e-12 is the
+    # same order as the value under test, so a wrong result could pass. Drop
+    # the absolute floor and rely on a tight relative tolerance instead.
+    assert phi[0] == pytest.approx(-1000.0 * A_CO2_W_M2_PER_KG, rel=1e-9, abs=0)
 
 
 def test_darker_forest_warms():
@@ -55,7 +58,11 @@ def test_brighter_surface_cools():
 def test_albedo_forcing_follows_canopy_closure():
     f = np.linspace(0.0, 1.0, len(YEARS))
     phi = phi_albedo(f, -0.13, 110.0, BOREAL)
-    assert phi[0] == pytest.approx(0.0)
+    # Real phi values elsewhere in this run are ~1e-13; pytest.approx's
+    # default abs=1e-12 would let a wrongly nonzero phi[0] of that order pass
+    # as "zero". f[0] is exactly 0.0 so phi[0] must be exactly 0.0 (a product
+    # against 0.0 carries no floating-point rounding), hence the near-zero abs.
+    assert phi[0] == pytest.approx(0.0, abs=1e-20)
     assert np.all(np.diff(phi) >= 0.0)
 
 

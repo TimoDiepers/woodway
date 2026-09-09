@@ -12,7 +12,11 @@ def test_single_tree_result_is_well_formed():
     assert isinstance(r, SiteResult)
     for arr in (r.phi_co2, r.phi_albedo, r.phi_total, r.delta_t):
         assert arr.shape == YEARS.shape
-    assert np.allclose(r.phi_total, r.phi_co2 + r.phi_albedo)
+    # phi_total is of order 1e-13 W/m^2; np.allclose's default atol=1e-8
+    # would swamp that entirely and let a wrong sum pass. Scale the
+    # tolerance to the signal instead (see also tests/test_plots.py).
+    scale = np.abs(r.phi_total).max()
+    assert np.allclose(r.phi_total, r.phi_co2 + r.phi_albedo, rtol=0.0, atol=1e-9 * scale)
 
 
 @pytest.mark.slow
