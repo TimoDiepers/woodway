@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from numpy.typing import NDArray  # noqa: E402
 
+from nbs.forcing import co2_flux_kg_per_yr  # noqa: E402
 from nbs.metrics import quantile_band, t_star  # noqa: E402
 from nbs.pipeline import SiteResult  # noqa: E402
 from nbs.response import convolve_response, green_temperature  # noqa: E402
@@ -36,7 +37,11 @@ def _save(fig, out_path: str) -> str:
 
 def _title(result: SiteResult) -> str:
     sp = get_species(result.species_key)
-    return f"{sp.name_de} ({sp.name_lat}), {result.lat_deg:.0f}°N, {result.scenario.upper()}"
+    hemisphere = "S" if result.lat_deg < 0 else "N"
+    return (
+        f"{sp.name_de} ({sp.name_lat}), {abs(result.lat_deg):.0f}°{hemisphere}, "
+        f"{result.scenario.upper()}"
+    )
 
 
 def plot_tree_inputs(result: SiteResult, out_path: str) -> str:
@@ -48,7 +53,7 @@ def plot_tree_inputs(result: SiteResult, out_path: str) -> str:
     axes[0].plot(y, traj.stock_kgC, color=C_CARBON)
     axes[0].set_ylabel("Vorrat m\n[kgC je Baum]")
 
-    axes[1].plot(y, -44.0 / 12.0 * traj.net_uptake_kgC_yr, color=C_CARBON)
+    axes[1].plot(y, co2_flux_kg_per_yr(traj.net_uptake_kgC_yr), color=C_CARBON)
     axes[1].axhline(0.0, color="0.6", lw=0.8)
     axes[1].set_ylabel("$\\dot m_{CO_2}$\n[kg CO$_2$/a]")
 
@@ -67,9 +72,12 @@ def plot_tree_inputs(result: SiteResult, out_path: str) -> str:
 def plot_decomposition(result: SiteResult, out_path: str) -> str:
     """Slide E3: forcing above, temperature below, both split by channel.
 
-    Two panels rather than one, because the albedo forcing arrives at once
-    while the carbon cooling takes decades — sharper in the forcing than in
-    the temperature it produces.
+    Two panels rather than one, not because the contrast between channels is
+    sharper in the forcing than in the temperature — the two panels are in
+    fact nearly identical, because the temperature Green's function's memory
+    is short relative to the timescale on which the forcing varies. The real
+    difference the second panel shows is timing: the net forcing crosses
+    zero about four years before the net temperature does.
     """
     g = green_temperature(result.scenario)
     dt_carbon = convolve_response(g, result.phi_co2)

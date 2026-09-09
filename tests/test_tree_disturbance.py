@@ -28,8 +28,13 @@ def test_disturbance_probability_rises_with_background_warming():
 
 
 def test_disturbance_probability_stays_a_probability():
-    p = disturbance_probability(SP, np.full(len(YEARS), 20.0))
+    # SP.p_disturb * exp(SP.gamma_warming * T) only exceeds 1 above about
+    # 22.1 K for picea_abies; 30 K is comfortably past that so the clip(...,
+    # 0.0, 1.0) in disturbance_probability is actually exercised here.
+    p = disturbance_probability(SP, np.full(len(YEARS), 30.0))
+    assert SP.p_disturb * np.exp(SP.gamma_warming * 30.0) > 1.0, "clamp must be binding at this temperature"
     assert np.all(p <= 1.0)
+    assert np.all(p == pytest.approx(1.0))
 
 
 def test_deterministic_run_without_disturbance_matches_closed_form():

@@ -58,13 +58,6 @@ def test_growth_rate_is_positive_below_saturation():
     assert growth_rate_from_stock(0.5 * SP.m_max_kgC, SP) > 0.0
 
 
-def test_growth_rate_depends_only_on_stock_not_on_age():
-    """A tree knocked back to half its stock grows like a tree that has just
-    reached half its stock. That is what lets disturbed trees recover."""
-    half = 0.5 * SP.m_max_kgC
-    assert growth_rate_from_stock(half, SP) == growth_rate_from_stock(half, SP)
-
-
 def test_canopy_closure_bounds():
     assert canopy_closure(0.0, SP) == pytest.approx(0.0)
     assert canopy_closure(SP.m_max_kgC, SP) == pytest.approx(1.0)
