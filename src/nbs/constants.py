@@ -29,9 +29,13 @@ study period (see ``nbs.forcing.phi_co2_background``).
 A_CO2_LOG_W_M2_PER_PPM = 5.35
 """Logarithmic CO2 forcing coefficient a in phi = a * ln(C/C0) [W/m^2].
 
-Myhre, Highwood, Shine & Stordal (1998), GRL 25(14), 2715-2718 -- the standard
-simplified expression for CO2 radiative forcing, and what FaIR itself uses
-internally. Paired with KG_CO2_PER_PPM in
+Myhre, Highwood, Shine & Stordal (1998), GRL 25(14), 2715-2718 -- the
+standard, fixed-coefficient simplified expression for CO2 radiative forcing.
+This is a close approximation of, but not identical to, what FaIR itself
+computes: ``fair_module._create_fair`` never sets ``ghg_method``, so FaIR
+uses its default ``meinshausen2020``, a state- and N2O-dependent formula.
+See ``nbs.forcing.phi_co2_background`` for the size of that approximation
+along the ssp245 background. Paired with KG_CO2_PER_PPM in
 ``nbs.forcing.phi_co2_background`` to convert an airborne mass anomaly into
 the marginal forcing against a rising background concentration.
 """

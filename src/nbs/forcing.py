@@ -56,14 +56,31 @@ def phi_co2_background(
     This is the logarithmic variant of ``phi_co2``: the flux is convolved
     with the airborne fraction exactly as in ``phi_co2`` to get the airborne
     mass anomaly Delta_m_CO2 [kg], which is converted to a concentration
-    anomaly Delta_C [ppm] and then run through the actual (logarithmic) CO2
-    forcing law FaIR uses, evaluated against the scenario's background
+    anomaly Delta_C [ppm] and then run through a fixed-coefficient
+    logarithmic CO2 forcing law, evaluated against the scenario's background
     concentration C_bg(t) rather than assumed constant:
 
         phi(t) = a * ln( (C_bg(t) + Delta_C(t)) / C_bg(t) )
 
-    with a = A_CO2_LOG_W_M2_PER_PPM (Myhre et al. 1998) and
+    with a = A_CO2_LOG_W_M2_PER_PPM (Myhre et al. 1998, GRL 25(14)) and
     KG_CO2_PER_PPM converting kg CO2 to ppm.
+
+    This a=5.35 form is a close *standard approximation* of FaIR's forcing
+    law, not identical to it: ``fair_module._create_fair`` never sets
+    ``ghg_method``, so FaIR actually uses its default ``meinshausen2020``, a
+    more elaborate, state- and N2O-dependent formula. Measured directly
+    against FaIR along the ssp245 background, the effective coefficient
+    ``meinshausen2020`` implies is 5.354 at 424 ppm (0.08% above the fixed
+    5.35 used here) and 5.482 at 624 ppm (2.46% above). The fixed Myhre
+    coefficient is kept deliberately -- a model whose equations are meant to
+    fit on a slide should not carry a state-dependent forcing expression for
+    a ~2.5% effect, especially one dwarfed by the ~15% pulse-superposition
+    error already documented in the mirror test
+    (``tests/test_response.py::test_co2_chain_reproduces_a_full_fair_run_for_both_variants``).
+    The *shape* of the approximation -- logarithmic, evaluated against the
+    real rising background -- is what actually fixes the 26-40% CO2-channel
+    deviation from using a constant linear efficiency; the ~2.5% residual
+    from the fixed coefficient is a separate, much smaller effect.
 
     Leave ``phi_co2`` (the linear, constant-efficiency variant) untouched --
     existing tests pin it, and it is what slide 21 derives. This function is

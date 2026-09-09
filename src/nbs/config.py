@@ -16,8 +16,10 @@ airborne-fraction curve represents the carbon sink -- get the same
 treatment.
 
 ``"linear"`` is what the talk's slide 21 derives (a constant radiative
-efficiency). ``"logarithmic"`` is what FaIR actually computes internally
-(marginal forcing against the rising background concentration). The default
+efficiency). ``"logarithmic"`` closely approximates what FaIR actually
+computes internally (marginal forcing against the rising background
+concentration) -- see ``nbs.forcing.phi_co2_background`` for the size of
+that approximation. The default
 below is ``"logarithmic"`` because it is the scenario-consistent choice; every
 other switch defaults to what was already committed before this module
 existed, so that ``ModelConfig()`` reproduces today's behaviour except for
@@ -49,7 +51,10 @@ class ModelConfig:
     form slide 21 derives from a first-order Taylor expansion of the
     logarithmic law around today's concentration. ``"logarithmic"``: the
     marginal forcing evaluated against the actual rising ssp245 background
-    (``nbs.forcing.phi_co2_background``), which is what FaIR itself computes.
+    (``nbs.forcing.phi_co2_background``), a close standard approximation of
+    what FaIR itself computes (FaIR's default ``meinshausen2020`` forcing
+    law, not the fixed Myhre et al. coefficient this uses -- see
+    ``nbs.forcing.phi_co2_background`` for the size of the gap between them).
     This is the switch the 26-40% CO2-channel deviation traces back to.
     """
 
