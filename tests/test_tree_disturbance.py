@@ -54,11 +54,20 @@ def test_deterministic_disturbance_lowers_stock_below_undisturbed():
            simulate_deterministic(quiet, NO_WARMING).stock_kgC[-1]
 
 
-def test_carbon_is_conserved():
-    """Cumulative net uptake must equal the ecosystem stock that is standing.
+def test_uptake_array_is_internally_consistent_with_recorded_state():
+    """Bookkeeping alignment check only -- NOT a proof of conservation.
 
-    Carbon may sit in the tree or in debris; anything else has gone back to the
-    atmosphere and must show up as reduced cumulative uptake.
+    net_uptake_kgC_yr[i] is *defined* inside _integrate as
+    (stock+debris)_after minus (stock+debris)_before for year i, and
+    stock/debris[i] are read from that same running state. So
+    cumsum(uptake)[:-1] == ecosystem[1:] - ecosystem[0] is an algebraic
+    identity: it holds even if eps_immediate were 1.0, if to_debris were
+    always zero, or if a disturbance silently discarded carbon outright, as
+    long as the (m+d) before/after values used to fill both arrays agree.
+    What it *does* catch is an off-by-one or misaligned write between the
+    two arrays (e.g. uptake recorded against the wrong year's stock), which
+    is a real and different bug class from broken conservation -- hence the
+    rename and the separate test below for the split itself.
     """
     traj = simulate_deterministic(SP, STRONG_WARMING)
     ecosystem = traj.stock_kgC + traj.debris_kgC
@@ -68,6 +77,43 @@ def test_carbon_is_conserved():
         ecosystem[1:] - ecosystem[0],
         atol=0.5,
     )
+
+
+def test_disturbance_moves_carbon_to_debris_not_out_of_the_ecosystem():
+    """The thing test_carbon_is_conserved was supposed to protect against:
+    that a disturbance is an internal transfer, and only the eps_immediate
+    fraction actually leaves the ecosystem (as combustion), the rest landing
+    in debris rather than vanishing. This computes the ecosystem carbon
+    change independently of net_uptake_kgC_yr, from stock/debris alone, and
+    checks it against the disturbance parameters directly -- so it would
+    fail if e.g. immediate carbon were also routed to debris, if
+    eps_immediate were ignored, or if lost carbon were discarded outright
+    instead of split.
+
+    Growth is suppressed by using a fast-saturating species and reading the
+    transition in the next-to-last year, where stock is essentially pinned
+    at m_max (growth well below 1e-5 kgC/yr there); decay is suppressed
+    because, with disturbance probability held at ~0 everywhere except one
+    spiked year, no debris has had a chance to accumulate yet when the event
+    fires. dt=1.0 makes that spiked year exactly one disturbance step, so the
+    recorded transition *is* the single event.
+    """
+    sp = dataclasses.replace(get_species("eucalyptus_grandis"), p_disturb=1e-9)
+    spike_idx = len(YEARS) - 2
+    t_background = np.zeros(len(YEARS))
+    t_background[spike_idx] = 200.0  # forces p_annual to clip to 1.0 there
+
+    traj = simulate_deterministic(sp, t_background, dt=1.0)
+    m_before = traj.stock_kgC[spike_idx]
+    assert m_before == pytest.approx(sp.m_max_kgC, rel=1e-3)  # growth suppressed
+    assert traj.debris_kgC[spike_idx] < 1e-4  # decay suppressed: nothing to decay yet
+
+    severity = sp.severity_beta[0] / sum(sp.severity_beta)
+    lost = severity * m_before  # p_step == 1.0 at the spike
+
+    e_before = m_before + traj.debris_kgC[spike_idx]
+    e_after = traj.stock_kgC[spike_idx + 1] + traj.debris_kgC[spike_idx + 1]
+    assert (e_after - e_before) == pytest.approx(-sp.eps_immediate * lost, abs=1e-3)
 
 
 def test_stochastic_run_is_reproducible_from_its_seed():
@@ -104,7 +150,11 @@ def test_ensemble_size_and_spread():
 
 def test_ensemble_mean_stock_is_below_deterministic_run():
     """Disturbance is multiplicative in the stock, so averaging trajectories is
-    not the same as running the average. The gap is the risk premium."""
-    ens = simulate_ensemble(SP, STRONG_WARMING, n_members=200, seed=3)
+    not the same as running the average. The gap is the risk premium
+    (Jensen's inequality), and its sign is guaranteed asymptotically -- so
+    once the ensemble is large enough to shrink sampling noise well below the
+    gap, the comparison should be strict rather than padded with slack that
+    would also pass a zero or reversed effect."""
+    ens = simulate_ensemble(SP, STRONG_WARMING, n_members=1000, seed=3)
     mean_final = np.mean([t.stock_kgC[-1] for t in ens])
-    assert mean_final < simulate_deterministic(SP, STRONG_WARMING).stock_kgC[-1] * 1.05
+    assert mean_final < simulate_deterministic(SP, STRONG_WARMING).stock_kgC[-1]

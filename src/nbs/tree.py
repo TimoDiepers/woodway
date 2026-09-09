@@ -42,6 +42,34 @@ def growth_rate_from_stock(m, sp: Species):
     return rate if np.ndim(m) else float(rate)
 
 
+def advance_stock(m: float, dt: float, sp: Species) -> float:
+    """Exact time-dt flow of dm/dt = growth_rate_from_stock(m, sp).
+
+    growth_rate_from_stock exists so a disturbed tree can resume growing at
+    the rate belonging to what stock is left, without tracking age. The same
+    stock<->age correspondence lets a step advance exactly rather than
+    approximately: invert the current stock to its equivalent age under the
+    closed form, step that age forward by dt, and read the resulting stock
+    back off the closed form.
+
+        u = (m / m_max)^(1/p) = 1 - exp(-k t)  =>  t = -ln(1 - u) / k
+        m(t + dt) = biomass_closed(t + dt, sp)
+
+    This has zero truncation error for growth alone: growth, debris decay
+    and disturbance are combined by first-order operator splitting in the
+    caller, so the coupled integrator is still O(dt) once disturbance is
+    active.
+
+    u is clipped to 1 - 1e-12 before inversion so that t stays finite as m
+    approaches m_max. That makes m_max a very slightly repelling fixed point
+    rather than an attracting one -- about -1.6e-10 kgC lost per step, on
+    the order of 2.5e-7 kgC over a full run -- which is expected, not a bug.
+    """
+    u = min(np.clip(m / sp.m_max_kgC, 0.0, 1.0) ** (1.0 / sp.p), 1.0 - 1e-12)
+    t_eff = -np.log(1.0 - u) / sp.k
+    return float(biomass_closed(t_eff + dt, sp))
+
+
 def canopy_closure(m, sp: Species):
     """Fraction of the tree's footprint covered by canopy, f in [0, 1].
 
@@ -93,13 +121,13 @@ def _integrate(
     debris = np.zeros(n_years)
     uptake = np.zeros(n_years)
 
-    m = 1e-9  # dm/dt vanishes at exactly zero, so start from a seedling
+    m = 0.0  # advance_stock's exact step advances a zero seed off the origin cleanly
     d = 0.0
     n_dist = 0
 
     for iy in range(n_years):
         # record the state *at* YEARS[iy], before integrating that year, so
-        # stock[0] is the seedling and lines up with biomass_closed(0)
+        # stock[0] is 0 and lines up with biomass_closed(0)
         stock[iy] = m
         debris[iy] = d
         e_before = m + d
@@ -107,24 +135,8 @@ def _integrate(
         p_step = 1.0 - (1.0 - p_annual[iy]) ** dt
 
         for _ in range(steps_per_year):
-            # growth: exact closed-form step, not an ODE approximation.
-            #
-            # The Chapman-Richards curve's third time-derivative diverges as
-            # t -> 0 (from the p-th power near the origin), so a fixed-step
-            # midpoint rule under-resolves the first few years for any
-            # dt as coarse as 1/12 -- it takes until roughly year 40 to
-            # recover the closed form to 2e-3 relative accuracy, which fails
-            # test_deterministic_run_without_disturbance_matches_closed_form.
-            # growth_rate_from_stock exists so a disturbed tree can resume
-            # growing at the rate belonging to what stock is left, without
-            # tracking age; the same stock<->age correspondence lets a step
-            # advance exactly, by inverting stock to an equivalent age,
-            # stepping that age by dt in the closed form, and reading the
-            # resulting stock back off — zero truncation error, and cheaper
-            # than the two growth_rate_from_stock calls it replaces.
-            u = min(np.clip(m / sp.m_max_kgC, 0.0, 1.0) ** (1.0 / sp.p), 1.0 - 1e-12)
-            t_eff = -np.log(1.0 - u) / sp.k
-            grown = float(biomass_closed(t_eff + dt, sp)) - m
+            # growth: exact closed-form step, see advance_stock
+            grown = advance_stock(m, dt, sp) - m
 
             # debris decay
             decayed = d * (1.0 - np.exp(-dt / sp.tau_decay_yr))

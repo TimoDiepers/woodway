@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from nbs.species import get_species
-from nbs.tree import biomass_closed, canopy_closure, growth_rate_from_stock
+from nbs.tree import advance_stock, biomass_closed, canopy_closure, growth_rate_from_stock
 
 SP = get_species("fagus_sylvatica")
 
@@ -34,6 +34,20 @@ def test_stock_form_reproduces_closed_form_when_undisturbed():
         m = m + dt * k2
     expected = biomass_closed(np.array([200.0]), SP)[0]
     assert m == pytest.approx(expected, rel=1e-3)
+
+
+def test_advance_stock_matches_growth_rate_from_stock_in_the_small_dt_limit():
+    """advance_stock must solve the ODE growth_rate_from_stock states, not a
+    different one: this is the only thing pinning the exact-step integrator
+    to the model it claims to be exact for. If growth_rate_from_stock ever
+    changes (a mortality term, a temperature dependence, a different p
+    convention) without a matching change to advance_stock, this is the test
+    that must catch it."""
+    sp = get_species("picea_abies")
+    dt = 1e-5
+    for m in (0.5, 12.5, 25.0, 40.0):
+        finite_diff_rate = (advance_stock(m, dt, sp) - m) / dt
+        assert finite_diff_rate == pytest.approx(growth_rate_from_stock(m, sp), rel=1e-4)
 
 
 def test_growth_rate_vanishes_at_saturation():
