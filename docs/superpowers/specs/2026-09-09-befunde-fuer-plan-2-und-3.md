@@ -72,21 +72,68 @@ Konsistenzkontrolle, keine Bestätigung. Das steht so in den Docstrings, im
 Notebook und in den beiden betroffenen Tests — und muss dranbleiben, bis die
 Duveiller-Raster sie ersetzen.
 
-## 4. Anforderung an die Rasterschicht (Plan 2, Abschnitt 6)
+## 4. Der Albedo-Effekt ist ein Frühjahrsereignis — korrigiert am 2026-09-09
 
-**Ein höherer Breitengrad verstärkt den Albedo-Effekt nicht.** In der
-Ersatztabelle fällt |Δα|·q̇ von 14,3 bei 60°N auf 12,0 bei 75°N und 9,6 bei 90°N,
-weil die Einstrahlung schneller abnimmt als Δα zunimmt.
+**Dieser Abschnitt hat ursprünglich das Falsche behauptet. Die Korrektur steht
+unten und ist an den Duveiller-Rastern gemessen, nicht hergeleitet.**
 
-Der reale Mechanismus ist **Schneemaskierung im Frühjahr** — wenn Schnee liegt
-*und* die Sonne schon hoch steht. Diese Gleichzeitigkeit verschwindet beim
-Multiplizieren zweier Jahresmittel. Die Rasterschicht muss daher
+### Was hier zuerst stand, und warum es falsch war
 
-    ⟨Δα · q̇⟩  monatlich gemittelt
+Die ursprüngliche Fassung schloss aus der kalibrierten Ersatztabelle, dass ein
+höherer Breitengrad den Albedo-Effekt nicht verstärkt, und forderte, das
+Produkt Δα·q̇ monatlich zu bilden, weil das Multiplizieren zweier Jahresmittel
+den borealen Effekt **unterschätze**.
 
-bilden, **nicht** ⟨Δα⟩ · ⟨q̇⟩. Sonst unterschätzt sie den borealen Effekt
-strukturell — und zwar genau dort, wo das Argument des Vortrags am meisten
-davon abhängt.
+Die Forderung war richtig. Die Begründung war in der Richtung falsch.
+
+### Was die Daten sagen
+
+Gemessen am JRC-Datensatz (Duveiller et al. 2018, v2.0), Übergang 38
+(immergrüner Nadelwald ↔ Grasland), Zonalmittel:
+
+| Breite | mean(Δα·q̇) / [mean(Δα)·mean(q̇)] | Spitzenmonat | Spitze / Jahresmittel |
+|---|---|---|---|
+| 45°N | 0,87 | Juli | 1,3× |
+| 55°N | 0,80 | März | 2,7× |
+| 60°N | 0,80 | April | 3,7× |
+| 65°N | 0,70 | April | 4,3× |
+
+Das Multiplizieren von Jahresmitteln **überschätzt** den borealen Antrieb um
+20 bis 30 Prozent, und der Fehler wächst polwärts. Der Grund: der
+Albedokontrast ist im Hochwinter am größten (Δα ≈ 0,25 im Januar bei 60°N),
+aber dort steht die Sonne kaum über dem Horizont (q̇ ≈ 16 W/m²). Diese Monate
+blähen das Jahresmittel von Δα auf, ohne zum Produkt beizutragen.
+
+### Der Mechanismus stimmt, und er ist schärfer als gedacht
+
+Der Monatsgang bei 60°N zeigt ihn unmittelbar:
+
+| Monat | Δα | q̇ [W/m²] | Δα·q̇ [W/m²] |
+|---|---|---|---|
+| Januar | 0,25 | 16 | 4,0 |
+| März | 0,21 | 131 | 26,9 |
+| **April** | **0,23** | **196** | **44,3** |
+| Mai | 0,10 | 221 | 21,6 |
+| Juli | 0,06 | 214 | 13,3 |
+
+Im April liegt noch Schnee **und** die Sonne steht schon hoch. Dieser eine
+Monat trägt mehr als das Dreifache des Jahresmittels. Bei 45°N verschwindet
+das Muster: dort liegt die Spitze im Juli und ist kaum ausgeprägt — keine
+Schneegeschichte, nur Sommersonne.
+
+### Folge für die Rechnung
+
+Weiterhin gilt: **monatlich multiplizieren, dann mitteln.** Niemals
+⟨Δα⟩·⟨q̇⟩. Nur die Richtung des Fehlers ist umgekehrt zur ursprünglichen
+Annahme, und er ist mit 20–30 % groß genug, um Zahlen auf einer Folie zu
+verschieben.
+
+### Folge für den Vortrag
+
+Das Bild der „Glühbirne, die nie ausgeht" (Folie 14) trifft die Sache nicht.
+Die Albedo-Strafe eines borealen Waldes ist **ein Scheinwerfer, der im April
+brennt** — und je weiter nördlich, desto ausschließlicher. Das ist anschaulicher
+als eine Jahresmittelzahl und lässt sich als Monatsgang unmittelbar zeigen.
 
 ## 5. Grenze der Kette, dokumentiert
 
