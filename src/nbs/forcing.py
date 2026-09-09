@@ -7,6 +7,10 @@ Earth's surface. Slides 21 and 22.
 Evapotranspiration is deliberately absent: it does not cross the top-of-
 atmosphere boundary and its effect sits in the feedback parameter Lambda.
 Slide 18 argues this in full.
+
+The latitude fallback tables below (_DELTA_ALPHA_TABLE, _Q_SW_TABLE) are a
+joint calibration against slide 14's ~70 W and ~half figures, not independent
+measurements: see their docstrings before citing either one as an observation.
 """
 
 from __future__ import annotations
@@ -44,6 +48,10 @@ def phi_albedo(
 
     delta_alpha is the albedo of the forest minus the albedo of the land it
     replaces, so a darker forest gives delta_alpha < 0 and a positive forcing.
+
+    Carries TAU_ATM, unlike light_bulb_watts: the light-bulb figure is what
+    the tree absorbs at the surface, while this is the part of that surface
+    anomaly which actually reaches the top of the atmosphere.
     """
     f = np.asarray(closure, dtype=float)
     return -delta_alpha * q_sw_w_m2 * TAU_ATM * f * sp.stand_area_m2 / A_EARTH_M2
@@ -68,7 +76,13 @@ def fallback_delta_alpha(lat_deg: float) -> float:
     """Annual-mean forest-minus-open albedo change, by latitude.
 
     Stand-in until the Duveiller transition rasters land in plan 2. Values are
-    tuned so that a boreal tree comes out near the 70 W quoted on slide 14.
+    tuned, jointly with _Q_SW_TABLE in fallback_q_sw, so that a boreal tree
+    comes out near the 70 W quoted on slide 14. Neither table should be cited
+    as an observation until the raster data replaces them.
+
+    lat_deg is mirrored by absolute value, so southern latitudes reuse the
+    northern-hemisphere row; inputs beyond +/-90 degrees clamp to the 90 degree
+    table edge (np.interp does not extrapolate).
     """
     return float(np.interp(abs(lat_deg), _LAT_TABLE, _DELTA_ALPHA_TABLE))
 
@@ -76,6 +90,15 @@ def fallback_delta_alpha(lat_deg: float) -> float:
 def fallback_q_sw(lat_deg: float) -> float:
     """Annual-mean downward shortwave at the surface [W/m^2], by latitude.
 
-    Stand-in until CERES or ERA5 fields land in plan 2.
+    Stand-in until CERES or ERA5 fields land in plan 2. Values are tuned,
+    jointly with _DELTA_ALPHA_TABLE in fallback_delta_alpha, so that the
+    boreal-vs-tropical light-bulb figures on slide 14 (~70 W, ~half in the
+    tropics) come out right — both slide numbers depend on the product of
+    the two tables. Neither table should be cited as an observation until
+    the raster data replaces them.
+
+    lat_deg is mirrored by absolute value, so southern latitudes reuse the
+    northern-hemisphere row; inputs beyond +/-90 degrees clamp to the 90 degree
+    table edge (np.interp does not extrapolate).
     """
     return float(np.interp(abs(lat_deg), _LAT_TABLE, _Q_SW_TABLE))
