@@ -68,13 +68,25 @@ def test_albedo_forcing_follows_canopy_closure():
 
 
 def test_boreal_tree_is_a_seventy_watt_light_bulb():
-    """Slide 14 quotes about 70 W for a boreal tree. Code and slide must agree."""
+    """Slide 14 quotes about 70 W for a boreal tree. Code and slide must agree.
+
+    This is a regression guard, not a physical validation: _DELTA_ALPHA_TABLE
+    and _Q_SW_TABLE in nbs.forcing were fitted specifically to reproduce this
+    figure, so a pass here only confirms the calibration was applied
+    correctly, not that the slide's number is right.
+    """
     w = light_bulb_watts(fallback_delta_alpha(60.0), fallback_q_sw(60.0), BOREAL)
     assert 55.0 < w < 90.0
 
 
 def test_tropical_tree_is_about_half_a_boreal_one():
-    """Slide 14: 'in den Tropen etwa halb so viel'."""
+    """Slide 14: 'in den Tropen etwa halb so viel'.
+
+    This is a regression guard, not a physical validation: _DELTA_ALPHA_TABLE
+    and _Q_SW_TABLE in nbs.forcing were fitted specifically to reproduce this
+    figure, so a pass here only confirms the calibration was applied
+    correctly, not that the slide's number is right.
+    """
     boreal = light_bulb_watts(fallback_delta_alpha(60.0), fallback_q_sw(60.0), BOREAL)
     tropical = light_bulb_watts(fallback_delta_alpha(0.0), fallback_q_sw(0.0), TROPICAL)
     assert 0.3 < tropical / boreal < 0.7
