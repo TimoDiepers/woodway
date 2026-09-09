@@ -144,3 +144,73 @@ def test_convolution_reproduces_a_full_fair_run():
 
     scale = np.abs(direct).max()
     assert np.abs(direct - via_convolution).max() < 0.05 * scale
+
+
+@pytest.mark.slow
+def test_co2_chain_reproduces_a_full_fair_run_for_both_variants():
+    """Mirror of test_convolution_reproduces_a_full_fair_run for the OTHER
+    half of the chain: flux -> forcing, never checked against FaIR before
+    this task. That gap is how the review's 26-40% CO2-channel deviation
+    survived undetected.
+
+    Build a CO2 removal flux (a ramp reaching a few tenths of a GtCO2/yr),
+    push it through nbs.fair_module.run_fair_perturbed directly as NEE
+    emissions with zero albedo forcing, and compare the resulting
+    temperature against the study chain (flux -> phi_co2[_background] ->
+    convolve with g_T) for both CO2 forcing variants.
+
+    Units: run_fair_perturbed takes GtCO2/yr on the 125-entry fair_module
+    axis (2025..2149); the chain works in kg CO2/yr on the 126-entry study
+    axis (YEARS). g_c is the scenario-conditioned green_carbon, which is
+    itself derived from FaIR's own marginal pulse response -- so this test
+    isolates the forcing *law* (linear vs logarithmic), not the airborne
+    fraction.
+
+    Measured deviations (max |direct - chain| over the run, as a fraction of
+    the direct FaIR run's peak |ΔT|, recorded here as required by the task
+    spec): linear ~34.7%, logarithmic ~15.3% -- more than a factor of two
+    smaller. Both numbers are larger than the review's 26-40% CO2-*channel*
+    figure alone because this test also carries the chain's other known
+    approximations (the pulse-superposition assumption behind convolving a
+    continuous flux with green_carbon's single-pulse kernel, and the ~5%
+    forcing-to-temperature convolution error already pinned by
+    test_convolution_reproduces_a_full_fair_run above). The ordering --
+    logarithmic tracking FaIR clearly better than linear -- is what this
+    test exists to confirm. If the logarithmic variant did not come out
+    substantially closer, that would mean phi_co2_background is wrong.
+    """
+    from nbs.fair_module import run_fair_baseline, run_fair_perturbed
+    from nbs.forcing import phi_co2, phi_co2_background
+    from nbs.response import background_co2_ppm
+
+    n = len(YEARS) - 1  # fair_module works on 125 years
+    flux_gtco2_yr = np.linspace(0.0, -0.3, n)  # a growing removal, GtCO2/yr
+
+    direct = (
+        run_fair_perturbed(flux_gtco2_yr, np.zeros(n), scenario="ssp245")
+        - run_fair_baseline("ssp245")
+    )
+
+    flux_kg_yr = np.append(flux_gtco2_yr, flux_gtco2_yr[-1]) * 1.0e12  # -> kg, 126 entries
+    g_c = green_carbon("ssp245")
+    g_t = green_temperature("ssp245")
+    c_bg = background_co2_ppm("ssp245")
+
+    phi_lin = phi_co2(flux_kg_yr, g_c)
+    phi_log = phi_co2_background(flux_kg_yr, g_c, c_bg)
+
+    dt_lin = convolve_response(g_t, phi_lin)[:n]
+    dt_log = convolve_response(g_t, phi_log)[:n]
+
+    scale = np.abs(direct).max()
+    dev_lin = np.abs(direct - dt_lin).max() / scale
+    dev_log = np.abs(direct - dt_log).max() / scale
+
+    assert dev_log < dev_lin, "the logarithmic variant must track FaIR better than the linear one"
+    # Explicit, measured tolerances (see docstring: measured dev_lin ~0.347,
+    # dev_log ~0.153 when this test was written). A margin is left around
+    # each measured value so ordinary numerical noise cannot flip the
+    # comparison, but a genuinely broken implementation still fails loudly.
+    assert dev_log < 0.20, f"logarithmic deviation {dev_log:.3f} should be well below the linear one"
+    assert dev_lin > 0.25, f"linear deviation {dev_lin:.3f} should be the known large one"
+    assert dev_log < 0.5 * dev_lin, "logarithmic must be substantially -- not just marginally -- better"
