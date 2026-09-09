@@ -4,7 +4,23 @@ import pytest
 from nbs.config import ModelConfig
 from nbs.constants import YEARS
 from nbs.metrics import t_star
-from nbs.pipeline import SiteResult, run_single_tree, run_single_tree_ensemble
+from nbs.pipeline import SiteResult, _background_temperature, run_single_tree, run_single_tree_ensemble
+
+
+def test_background_temperature_rejects_a_series_of_the_wrong_length(monkeypatch):
+    """Silent-drift guard: appending exactly one element regardless of the
+    actual gap would otherwise mask a change in FaIR's window size. A
+    baseline series that is not exactly len(YEARS)-1 long must raise,
+    naming both lengths involved."""
+    import nbs.fair_module as fair_module
+
+    bad = np.zeros(len(YEARS) - 2)
+    monkeypatch.setattr(fair_module, "run_fair_baseline", lambda scenario: bad)
+    with pytest.raises(ValueError) as exc_info:
+        _background_temperature("ssp245")
+    message = str(exc_info.value)
+    assert str(len(YEARS) - 1) in message
+    assert str(len(bad)) in message
 
 
 @pytest.mark.slow

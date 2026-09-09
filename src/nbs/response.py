@@ -25,9 +25,19 @@ def _to_study_length(x: NDArray) -> NDArray:
     fair_module slices 2025..2149; YEARS runs 2025..2150 inclusive. The final
     year is filled by repeating the last value, which is well inside the noise
     of a response that is nearly flat by then.
+
+    Raises ValueError if ``x`` is not exactly one element shorter than YEARS:
+    silently appending one value regardless of the actual gap would otherwise
+    produce a truncated Green's function with no error if fair_module's
+    window ever changed.
     """
     if len(x) == len(YEARS):
         return x
+    if len(x) != len(YEARS) - 1:
+        raise ValueError(
+            f"expected a series of length {len(YEARS) - 1} (or {len(YEARS)}), "
+            f"got {len(x)}"
+        )
     return np.append(x, x[-1])
 
 
@@ -87,7 +97,9 @@ def green_carbon(scenario: str = "ssp245") -> NDArray:
     ).values[_START_IDX + 1 : _END_IDX + 1]
 
     g = (np.asarray(airborne_pert) - np.asarray(airborne_base)) / _PULSE_GTCO2
-    return _to_study_length(np.asarray(g, dtype=float))
+    result = _to_study_length(np.asarray(g, dtype=float))
+    result.setflags(write=False)
+    return result
 
 
 @functools.lru_cache(maxsize=4)
@@ -126,7 +138,9 @@ def green_temperature(scenario: str = "ssp245") -> NDArray:
     ).values[_START_IDX:_END_IDX]
 
     g = (np.asarray(perturbed, dtype=float) - baseline) / _PULSE_WM2
-    return _to_study_length(g)
+    result = _to_study_length(g)
+    result.setflags(write=False)
+    return result
 
 
 @functools.lru_cache(maxsize=4)
@@ -162,7 +176,9 @@ def background_co2_ppm(scenario: str = "ssp245") -> NDArray:
     conc = f.concentration.sel(
         scenario=scenario, config="central", specie="CO2"
     ).values[_START_IDX:_END_IDX]
-    return _to_study_length(np.asarray(conc, dtype=float))
+    result = _to_study_length(np.asarray(conc, dtype=float))
+    result.setflags(write=False)
+    return result
 
 
 _JOOS_A0 = 0.2173
@@ -200,6 +216,7 @@ def green_carbon_preindustrial() -> NDArray:
     g = np.full_like(t, _JOOS_A0)
     for a, tau in zip(_JOOS_A, _JOOS_TAU):
         g = g + a * np.exp(-t / tau)
+    g.setflags(write=False)
     return g
 
 

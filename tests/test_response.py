@@ -3,12 +3,26 @@ import pytest
 
 from nbs.constants import YEARS
 from nbs.response import (
+    _to_study_length,
     background_co2_ppm,
     convolve_response,
     green_carbon,
     green_carbon_preindustrial,
     green_temperature,
 )
+
+
+def test_to_study_length_rejects_a_series_of_the_wrong_length():
+    """Silent-drift guard: padding by exactly one element regardless of the
+    actual gap would otherwise mask a change in FaIR's window size. Any
+    length other than len(YEARS)-1 (needs padding) or len(YEARS) (already
+    the study length) must raise, naming both lengths involved."""
+    bad = np.zeros(len(YEARS) - 2)
+    with pytest.raises(ValueError) as exc_info:
+        _to_study_length(bad)
+    message = str(exc_info.value)
+    assert str(len(YEARS) - 1) in message
+    assert str(len(bad)) in message
 
 
 def test_convolution_is_causal():
@@ -81,7 +95,7 @@ def test_temperature_green_function_peaks_then_decays():
     assert g.shape == (len(YEARS),)
     assert 0.0 < g[0] <= g.max()
     peak = int(np.argmax(g))
-    assert 0 <= peak < 25, "surface response peaks within a couple of decades"
+    assert 0 < peak < 25, "surface response peaks within a couple of decades"
     assert g[-1] < g[peak], "deep ocean draws the response back down"
 
 

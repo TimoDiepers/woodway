@@ -54,11 +54,20 @@ class SiteResult:
 
 
 def _background_temperature(scenario: str) -> NDArray:
+    """Pad FaIR's 125-year baseline temperature series to the 126-year study axis.
+
+    Raises ValueError if the input is not exactly one element shorter than
+    YEARS: silently appending one value regardless of the actual gap would
+    otherwise produce a truncated background series with no error if
+    fair_module's window ever changed.
+    """
     from nbs.fair_module import run_fair_baseline
 
     base = run_fair_baseline(scenario)
-    if len(base) == len(YEARS):
-        return base
+    if len(base) != len(YEARS) - 1:
+        raise ValueError(
+            f"expected a series of length {len(YEARS) - 1}, got {len(base)}"
+        )
     return np.append(base, base[-1])
 
 
