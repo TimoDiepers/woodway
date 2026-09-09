@@ -68,10 +68,13 @@ liegt unverändert unter `nbs.legacy`.
 
 ## Quick Start
 
+The examples below exercise the previous framework, unchanged under `nbs.legacy` (see
+[Die Kette](#die-kette) above for the current single-tree chain and `nbs.pipeline`).
+
 ### Progressive complexity analysis
 
 ```python
-from nbs.credit_analysis import run_progressive_analysis, run_at_level
+from nbs.legacy.credit_analysis import run_progressive_analysis, run_at_level
 
 # Run all 7 complexity levels for a single latitude
 results = run_progressive_analysis(lat=45, scenario="ssp245", pulse_gtco2=1.0, area_mha=1.0)
@@ -93,8 +96,8 @@ print(f"Break-even year: {result['t_star']}")
 ### Generate figures
 
 ```python
-from nbs.credit_analysis import run_progressive_analysis, run_at_level
-from nbs.credit_figures import (
+from nbs.legacy.credit_analysis import run_progressive_analysis, run_at_level
+from nbs.legacy.credit_figures import (
     plot_progressive_delta_t,
     plot_equivalence_by_latitude,
     plot_breakeven_by_level,
@@ -124,7 +127,7 @@ plot_credit_depreciation(lat_results, "results/figures")
 ### Intervention comparison
 
 ```python
-from nbs.scenario_runner import run_single_scenario, run_all_scenarios
+from nbs.legacy.scenario_runner import run_single_scenario, run_all_scenarios
 
 result = run_single_scenario(
     intervention="tropical_reforestation",

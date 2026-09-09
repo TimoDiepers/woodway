@@ -142,7 +142,7 @@ SPECIES: dict[str, Species] = {
     "tropical_mixed": Species(
         key="tropical_mixed",
         name_de="Tropischer Mischbestand",
-        name_lat="gemischt, immergruen",
+        name_lat="gemischt, immergrün",
         m_max_kgC=100.0,
         k=0.080,
         p=2.5,
