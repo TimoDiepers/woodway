@@ -361,6 +361,197 @@ def _monthly_product_grid_cached(species_key: str, baseline: str, extended: bool
     return np.stack([_regrid(monthly[m]) for m in range(12)], axis=0)
 
 
+# --- Three-tier gap fill for the public alpha_q_product / monthly_product ---
+#
+# The Duveiller raster documents a land-cover *transition*: it only has a
+# retrieval where both the pre- and post-transition cover co-occur close
+# enough together (the "co-occurrence" cells Duveiller et al. 2018 -- Sci.
+# Data 5, 180014 -- describe in their Materials and Methods). For transition
+# 38 (ENF -> Grassland, the picea_abies/pinus_sylvestris case) that is only
+# 2567 of 64800 native one-degree cells even in the spatially-extended
+# variant used here. Because nbs.landscape assigns a species to a cell purely
+# by latitude band, with no correlation to where this specific transition's
+# co-occurrence cells happen to sit, a global map built only from "local"
+# cells would be almost entirely empty for every species -- and worse, an
+# earlier version of nbs.aggregate silently treated that emptiness as "zero
+# albedo effect", which would have erased the talk's central claim (the same
+# measure has opposite signs in different places) for ~91% of the affected
+# cells rather than reporting it as missing.
+#
+# Three tiers, in this priority order, are filled into every cell so that
+# alpha_q_product (and monthly_product, kept exactly consistent with it) are
+# always fully finite:
+#
+#   0 "lokal"   -- a real retrieval: the raw monthly-then-averaged product is
+#                  finite for that cell (nbs.albedo_grid's own
+#                  DELTA_ALPHA_MIN_ABS guard and the quotient's zonal climat-
+#                  ology already apply upstream of this tier -- both operate
+#                  within a co-occurrence cell, not across cells with none).
+#   1 "zonal"   -- no local retrieval, but the species' own transition has at
+#                  least one local cell somewhere in the same
+#                  ZONAL_BIN_WIDTH_DEG-wide latitude band (signed latitude,
+#                  so the Northern and Southern hemispheres never mix): the
+#                  median of those cells' product is used. Reusing the same
+#                  10-degree bin width already chosen and justified for this
+#                  dataset's insolation-quotient zonal fill
+#                  (_quotient_with_zonal_fill's docstring) rather than
+#                  picking a second, unrelated width: at this resolution a
+#                  single bin is already comfortably stable where the
+#                  species has any signal at all -- the 60-70N bin for
+#                  transition 38 (picea_abies/pinus_sylvestris's own band,
+#                  nbs.landscape) holds 623 finite native cells, and the
+#                  bins covering the other four species' own latitude bands
+#                  hold several hundred each. A bin with zero local cells at
+#                  all (every Southern-hemisphere bin for the boreal
+#                  transitions -- there is no boreal conifer forest there to
+#                  retrieve a transition from) is left for the next tier.
+#                  This is a deliberately much simpler stand-in for what
+#                  Duveiller et al. (2018) do to extend retrievals beyond
+#                  co-occurrence cells: they train a per-transition,
+#                  per-month Random Forest on climate and vegetation-index
+#                  predictors from the co-occurrence cells and predict onto
+#                  the single-class area. A latitude-zone median captures the
+#                  same first-order fact that model leans on most -- that
+#                  Delta_albedo and q_sw are primarily controlled by
+#                  latitude/climate -- without the predictor stack or a
+#                  trained model; it approximates that extension, it does
+#                  not reimplement it.
+#   2 "tabelle" -- neither of the above: the Plan 1 latitude stand-in
+#                  (nbs.forcing.fallback_delta_alpha * fallback_q_sw),
+#                  evaluated at the cell's own latitude. This is what every
+#                  cell already got, uniformly, before this module read any
+#                  raster at all -- the same fallback, just now applied per
+#                  cell instead of to the whole grid.
+_TIER_LOCAL, _TIER_ZONAL, _TIER_TABLE = 0, 1, 2
+TIER_NAMES: dict[int, str] = {
+    _TIER_LOCAL: "lokal",
+    _TIER_ZONAL: "zonal",
+    _TIER_TABLE: "tabelle",
+}
+
+
+def _zonal_annual_fill(raw_annual_native: NDArray, lat_native: NDArray) -> tuple[NDArray, NDArray]:
+    """Fill NaN cells of a native-grid annual product with the median of the
+    same species' own finite cells in the same ZONAL_BIN_WIDTH_DEG latitude
+    bin (signed latitude -- hemispheres never share a bin).
+
+    Returns (filled, was_filled); a cell whose whole bin has no finite value
+    at all is left NaN in filled (was_filled False there) for the caller's
+    table tier to handle -- a real absence of signal in that latitude range,
+    not something to paper over with a neighbouring hemisphere's number.
+    """
+    filled = raw_annual_native.copy()
+    was_filled = np.zeros(raw_annual_native.shape, dtype=bool)
+    valid = np.isfinite(raw_annual_native)
+
+    bin_edges = np.arange(-90.0, 90.0 + ZONAL_BIN_WIDTH_DEG, ZONAL_BIN_WIDTH_DEG)
+    bin_idx = np.clip(np.digitize(lat_native, bin_edges) - 1, 0, len(bin_edges) - 2)
+
+    for bi in range(len(bin_edges) - 1):
+        rows = np.where(bin_idx == bi)[0]
+        if rows.size == 0:
+            continue
+        block_valid = valid[rows, :]
+        if not block_valid.any():
+            continue
+        zonal_value = float(np.median(raw_annual_native[rows, :][block_valid]))
+        need_fill = ~valid[rows, :]
+        if need_fill.any():
+            block = filled[rows, :]
+            block[need_fill] = zonal_value
+            filled[rows, :] = block
+            wf = was_filled[rows, :]
+            wf[need_fill] = True
+            was_filled[rows, :] = wf
+
+    return filled, was_filled
+
+
+def _fill_tiers_native(
+    raw_annual_native: NDArray, lat_native: NDArray
+) -> tuple[NDArray, NDArray]:
+    """(filled, tier), both native-shaped: filled is fully finite, tier is
+    _TIER_LOCAL / _TIER_ZONAL / _TIER_TABLE per cell. See the module-level
+    comment above for the three tiers' definitions and priority order.
+    """
+    local_valid = np.isfinite(raw_annual_native)
+    filled = raw_annual_native.copy()
+    tier = np.where(local_valid, _TIER_LOCAL, _TIER_TABLE).astype(np.int8)
+
+    zonal_filled, was_zonal = _zonal_annual_fill(raw_annual_native, lat_native)
+    use_zonal = (~local_valid) & was_zonal
+    filled[use_zonal] = zonal_filled[use_zonal]
+    tier[use_zonal] = _TIER_ZONAL
+
+    remaining = ~np.isfinite(filled)
+    if remaining.any():
+        table_row = np.array(
+            [fallback_delta_alpha(float(lat)) * fallback_q_sw(float(lat)) for lat in lat_native]
+        )
+        table_grid = np.repeat(table_row[:, None], raw_annual_native.shape[1], axis=1)
+        filled[remaining] = table_grid[remaining]
+        # tier is already _TIER_TABLE here by construction (never touched by
+        # the local or zonal branches above).
+
+    assert np.isfinite(filled).all(), "Drei-Stufen-Fuellung sollte nie NaN uebrig lassen"
+    return filled, tier
+
+
+@lru_cache(maxsize=None)
+def _monthly_product_native_tiered_cached(
+    species_key: str, baseline: str, extended: bool
+) -> tuple[NDArray, NDArray] | None:
+    """((12, native_lat, native_lon) fully-finite monthly product, (native_lat,
+    native_lon) annual tier code), or None if the raster is unavailable at
+    all (the caller then uses the whole-grid fallback, as every other
+    function in this module already does in that case).
+
+    Cells that needed the zonal or table tier get the *same* value repeated
+    across all twelve months -- the same "no seasonal cycle known here"
+    convention _monthly_product_grid_cached's fallback branch already uses
+    when the whole raster is missing, just applied per cell instead of to
+    every cell. This is what makes alpha_q_product exactly the mean of
+    monthly_product for every cell, including the filled ones, not just the
+    locally-retrieved ones (see monthly_product's and alpha_q_product's
+    docstrings).
+    """
+    monthly_raw = _monthly_product_native_cached(species_key, baseline, extended)
+    lat = _native_lat_for(species_key, baseline)
+    if monthly_raw is None or lat is None:
+        return None
+
+    raw_annual = _nanmean_over_months(monthly_raw)
+    filled_annual, tier = _fill_tiers_native(raw_annual, lat)
+
+    monthly_filled = monthly_raw.copy()
+    needs_replace = tier != _TIER_LOCAL
+    if needs_replace.any():
+        monthly_filled[:, needs_replace] = filled_annual[needs_replace][None, :]
+
+    return monthly_filled, tier
+
+
+@lru_cache(maxsize=None)
+def _product_tiered_cached(
+    species_key: str, baseline: str, extended: bool
+) -> tuple[NDArray, NDArray]:
+    """((12, 360, 720) fully-finite regridded monthly product, (360, 720)
+    regridded annual tier code). The single source both alpha_q_product and
+    monthly_product read from, so the two can never drift apart."""
+    native = _monthly_product_native_tiered_cached(species_key, baseline, extended)
+    if native is None:
+        da, qsw = _fallback_row_values()
+        annual_row = _broadcast_rows(da * qsw)  # (360, 720)
+        monthly_grid = np.repeat(annual_row[None, :, :], 12, axis=0)
+        tier_grid = np.full((N_LAT, N_LON), _TIER_TABLE, dtype=np.int8)
+        return monthly_grid, tier_grid
+
+    monthly_native, tier_native = native
+    monthly_grid = np.stack([_regrid(monthly_native[m]) for m in range(12)], axis=0)
+    tier_grid = _regrid(tier_native)
+    return monthly_grid, tier_grid
+
+
 def delta_alpha_grid(
     species_key: str, *, baseline: str = "grassland", extended: bool = True
 ) -> NDArray:
@@ -455,12 +646,23 @@ def alpha_q_product(
     Negative where the forest is darker than the open land it replaces (the
     resulting forcing from phi_albedo_from_product is then positive/warming
     there). Built month by month, not from two annual means -- see
-    _annual_mean_of_monthly_product's docstring. Falls back to
-    nbs.forcing.fallback_delta_alpha * nbs.forcing.fallback_q_sw, per
-    latitude row, when the raster is unavailable; product_provenance()
-    reports which case applied.
+    _annual_mean_of_monthly_product's docstring for why that matters.
+
+    **Always fully finite.** Every cell is filled from one of three tiers, in
+    priority order: a real local retrieval, a zonal (latitude-band) median of
+    the same species' other local retrievals, or the Plan 1 latitude
+    stand-in -- see the "Three-tier gap fill" comment above
+    _zonal_annual_fill for the full reasoning and the per-tier cell counts.
+    Use product_provenance_grid / provenance_fractions to find out which
+    tier backs any given cell or region; product_provenance() only answers
+    the coarser raster-vs-fallback question at the whole-module level.
+    Exactly np.mean(monthly_product(species_key, ...), axis=0) -- monthly_product
+    is filled by the identical tiers, so the two can never drift apart.
     """
-    return _annual_mean_of_monthly_product(species_key, baseline=baseline, extended=extended)
+    monthly_grid, _tier = _product_tiered_cached(species_key, baseline, extended)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        return np.nanmean(monthly_grid, axis=0)
 
 
 def monthly_product(
@@ -470,17 +672,62 @@ def monthly_product(
     the annual averaging alpha_q_product does.
 
     Same sign convention as alpha_q_product (negative where the forest is
-    darker); alpha_q_product is exactly np.nanmean(monthly_product(...),
-    axis=0), just computed on the native 1-degree grid before regridding for
-    efficiency, not on this already-regridded array. Exposed for slide
-    material that needs the seasonal shape itself (the boreal spring spike),
-    not just its annual mean -- see seasonal_profile for a latitude-band
-    summary of the same monthly field. Falls back to
-    nbs.forcing.fallback_delta_alpha * nbs.forcing.fallback_q_sw, repeated
-    identically across all twelve months (the fallback tables carry no
-    seasonal information), when the raster is unavailable.
+    darker); alpha_q_product is exactly np.mean(monthly_product(...), axis=0)
+    -- both are now always fully finite (see alpha_q_product's docstring for
+    the three-tier fill), so that mean needs no NaN-skipping to hold exactly.
+    A cell that needed the zonal or table tier gets that single value
+    repeated across all twelve months -- the honest representation of "no
+    seasonal cycle known here", the same convention already used when the
+    whole raster is missing. A locally-retrieved cell is untouched: its real
+    monthly shape (e.g. the boreal spring spike -- see seasonal_profile for a
+    latitude-band summary of that shape) is exactly what the raster gives.
     """
-    return _monthly_product_grid_cached(species_key, baseline, extended).copy()
+    monthly_grid, _tier = _product_tiered_cached(species_key, baseline, extended)
+    return monthly_grid.copy()
+
+
+def product_provenance_grid(
+    species_key: str, *, baseline: str = "grassland", extended: bool = True
+) -> NDArray:
+    """(360, 720) int8 array: which tier filled alpha_q_product at each cell.
+
+    0 = "lokal" (a real Duveiller retrieval), 1 = "zonal" (latitude-band
+    median of the same species' other retrievals), 2 = "tabelle" (Plan 1
+    latitude stand-in). See TIER_NAMES for the code -> German-label mapping,
+    and the "Three-tier gap fill" comment above _zonal_annual_fill for the
+    full derivation. When the raster is unavailable at all, every cell is 2.
+    """
+    _monthly_grid, tier_grid = _product_tiered_cached(species_key, baseline, extended)
+    return tier_grid.copy()
+
+
+def provenance_fractions(
+    species_key: str, *, baseline: str = "grassland", extended: bool = True
+) -> dict[str, float]:
+    """Share of *this species' plantable cells* (nbs.landscape.assign_species()
+    == species_key) in each provenance tier: {"lokal": ..., "zonal": ...,
+    "tabelle": ...}, fractions summing to 1.0 (0.0/0.0/0.0 if the species has
+    no plantable cells at all).
+
+    This is the number any figure built on alpha_q_product must be able to
+    state alongside it -- a map that is mostly "zonal" or "tabelle" rather
+    than "lokal" is still a legitimate product, but only if it says so.
+    Restricted to the species' own plantable cells (not the whole grid):
+    those are the only cells nbs.aggregate ever actually reads a product
+    from, and the whole-grid share would be dominated by irrelevant ocean
+    and other-species cells that never influence any result.
+    """
+    from nbs.landscape import assign_species
+
+    tier_grid = product_provenance_grid(species_key, baseline=baseline, extended=extended)
+    mask = assign_species() == species_key
+    total = int(mask.sum())
+    if total == 0:
+        return {name: 0.0 for name in TIER_NAMES.values()}
+    sub = tier_grid[mask]
+    return {
+        TIER_NAMES[code]: float(np.sum(sub == code)) / total for code in TIER_NAMES
+    }
 
 
 def seasonal_profile(
@@ -573,11 +820,14 @@ def seasonal_profile(
 
 __all__ = [
     "DELTA_ALPHA_MIN_ABS",
+    "TIER_NAMES",
     "ZONAL_BIN_WIDTH_DEG",
     "alpha_q_product",
     "delta_alpha_grid",
     "insolation_grid",
     "monthly_product",
+    "product_provenance_grid",
+    "provenance_fractions",
     "seasonal_profile",
     "product_provenance",
 ]

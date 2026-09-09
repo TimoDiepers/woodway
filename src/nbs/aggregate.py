@@ -128,22 +128,34 @@ def unit_curves(
 
 
 def _product_no_nan(species_key: str) -> NDArray:
-    """(360, 720) afforestation Delta_alpha * q_sw product, NaN replaced by 0.
+    """(360, 720) afforestation Delta_alpha * q_sw product.
 
-    NaN in ``alpha_q_product`` means "no evidence of this specific land-cover
-    transition here" -- a real, expected geographic gap (see
-    ``nbs.albedo_grid``'s own docstrings on this point), not a bug. Because
-    ``nbs.landscape`` assigns species by latitude band alone, uncorrelated
-    with where the Duveiller raster actually carries data for that
-    transition, most plantable cells fall in that gap for every species (in
-    this repository's raster, roughly 96-97% of the grid). Rather than
-    discarding those cells (which would shrink the plantable-area estimate
-    to a sliver unrelated to nbs.landscape's own accounting) or propagating
-    NaN into every downstream sum, the albedo term is treated as zero there:
-    the CO2 channel, which never depends on P_c, is unaffected, and the
-    albedo channel is simply not claimed where it is unmeasured.
+    ``nbs.albedo_grid.alpha_q_product`` now guarantees a fully finite grid by
+    construction: every cell is filled from one of three tiers (a real local
+    Duveiller retrieval, a zonal latitude-band median of the same species'
+    other retrievals, or the Plan 1 latitude stand-in -- see
+    ``nbs.albedo_grid``'s "Three-tier gap fill" comment and
+    ``product_provenance_grid`` / ``provenance_fractions`` for which tier
+    backs any given cell). This function is a defensive check on that
+    guarantee, not a patch: if it ever finds a NaN here, the guarantee broke
+    somewhere upstream, and that must fail loudly rather than silently
+    zeroing the albedo channel -- which is exactly what an earlier version of
+    this function did, before the three-tier fill existed, for the ~91% of
+    plantable picea_abies cells the raw raster alone has no data for. A zero
+    product is a real physical statement ("this forest does not change the
+    albedo at all"); it must never be how "we have no data here" gets
+    represented.
     """
-    return np.nan_to_num(alpha_q_product(species_key), nan=0.0)
+    p = alpha_q_product(species_key)
+    if not np.all(np.isfinite(p)):
+        n_nan = int(np.sum(~np.isfinite(p)))
+        raise ValueError(
+            f"alpha_q_product({species_key!r}) enthaelt {n_nan} nicht-endliche "
+            "Werte trotz der Drei-Stufen-Fuellung in nbs.albedo_grid; das "
+            "sollte nie vorkommen -- die Fuellung ist kaputt, nicht dieser "
+            "Aufruf."
+        )
+    return p
 
 
 def aggregate_by_species() -> dict[str, tuple[float, float]]:
@@ -151,10 +163,11 @@ def aggregate_by_species() -> dict[str, tuple[float, float]]:
 
     ``N_c`` is the tree count assigned to a cell (``nbs.landscape.tree_count``)
     and ``P_c`` its afforestation Delta_alpha * q_sw product
-    (``nbs.albedo_grid.alpha_q_product``, with NaN cells treated as zero --
-    see ``_product_no_nan``). These two scalars per species are everything
-    ``global_delta_t`` needs -- purely geometric, independent of scenario or
-    model config.
+    (``nbs.albedo_grid.alpha_q_product``, always fully finite through its own
+    three-tier gap fill -- ``_product_no_nan`` here is a defensive check on
+    that guarantee, not a patch for missing data). These two scalars per
+    species are everything ``global_delta_t`` needs -- purely geometric,
+    independent of scenario or model config.
     """
     species_grid = assign_species()
     n_grid = tree_count()

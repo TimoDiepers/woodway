@@ -17,6 +17,7 @@ import pytest
 
 from nbs.albedo_grid import (
     DELTA_ALPHA_MIN_ABS,
+    TIER_NAMES,
     _annual_mean_of_monthly_product,
     _load_monthly,
     _product_of_annual_means,
@@ -26,12 +27,14 @@ from nbs.albedo_grid import (
     insolation_grid,
     monthly_product,
     product_provenance,
+    product_provenance_grid,
+    provenance_fractions,
     seasonal_profile,
 )
 from nbs.datasources import resolve
 from nbs.forcing import fallback_delta_alpha, fallback_q_sw, phi_albedo, phi_albedo_from_product
 from nbs.grid import grid_lats
-from nbs.species import get_species
+from nbs.species import SPECIES, get_species
 
 _RASTERS_PRESENT = resolve("duveiller_albedo") is not None and resolve("duveiller_swr") is not None
 _needs_rasters = pytest.mark.skipif(
@@ -194,6 +197,72 @@ def test_alpha_q_product_returns_fresh_arrays_not_shared_cache_state():
 def test_unknown_baseline_raises_a_clear_error():
     with pytest.raises(KeyError, match="grassland|cropland"):
         delta_alpha_grid("picea_abies", baseline="ocean")
+
+
+# --- Three-tier gap fill (local / zonal / table) ----------------------------
+#
+# Runs either way (with or without the raster present): the table tier alone
+# already guarantees a fully finite grid when the raster is entirely absent
+# (every cell 100% "tabelle"), so these do not need _needs_rasters.
+
+
+def test_alpha_q_product_is_fully_finite_for_every_species():
+    """The three-tier fill (local retrieval, zonal latitude-band median,
+    Plan 1 table) must leave no cell unfilled -- a NaN here would propagate
+    silently into nbs.aggregate's sums, which is exactly the failure mode
+    the fill exists to prevent."""
+    for key in SPECIES:
+        p = alpha_q_product(key)
+        assert np.all(np.isfinite(p)), f"{key}: nicht-endliche Zellen nach der Fuellung"
+
+
+def test_provenance_fractions_sum_to_one_and_local_is_a_minority():
+    """The Duveiller raster only has a retrieval where both land-cover types
+    of a transition co-occur, which is inherently a small fraction of the
+    globe for any one transition -- so "lokal" should never be the majority
+    tier, whether or not the raster is present (without it, "lokal" is
+    exactly 0)."""
+    for key in SPECIES:
+        frac = provenance_fractions(key)
+        assert set(frac) == set(TIER_NAMES.values())
+        total = sum(frac.values())
+        # 0.0 only in the degenerate case of a species with no plantable
+        # cells at all (provenance_fractions' own documented fallback);
+        # every species nbs.landscape assigns has plantable cells, so this
+        # should always be the sum-to-one branch in practice.
+        assert total == pytest.approx(1.0, rel=0.0, abs=1e-9) or total == 0.0
+        assert frac["lokal"] < 0.5, f"{key}: 'lokal' ist keine Minderheit ({frac})"
+
+
+@_needs_rasters
+def test_zonal_tier_reproduces_local_tier_magnitude_in_boreal_band():
+    """If the zonal (latitude-band median) tier gave wildly different values
+    from the local retrievals it is built from, the extrapolation would be
+    worthless. Checked in the 55-65N band for picea_abies (transition 38),
+    which this repository's raster fills mostly from the local and zonal
+    tiers (no table cells at all in this band): measured mean magnitude is
+    -11.37 W/m^2 (n=3340 local cells) vs. -11.36 W/m^2 (n=11060 zonal cells)
+    -- a 0.1% relative difference on the mean. 25% leaves ample margin while
+    still catching a real failure (a sign flip, an order-of-magnitude miss,
+    or a bin-alignment bug).
+    """
+    p = alpha_q_product("picea_abies")
+    tier = product_provenance_grid("picea_abies")
+    lat = grid_lats()
+    band = (lat >= 55.0) & (lat <= 65.0)
+
+    p_band = p[band, :]
+    tier_band = tier[band, :]
+    local_vals = p_band[tier_band == 0]
+    zonal_vals = p_band[tier_band == 1]
+    assert local_vals.size > 100 and zonal_vals.size > 100, (
+        "zu wenige lokale/zonale Zellen im borealen Band fuer einen "
+        "aussagekraeftigen Vergleich"
+    )
+
+    local_mean = float(local_vals.mean())
+    zonal_mean = float(zonal_vals.mean())
+    assert zonal_mean == pytest.approx(local_mean, rel=0.25, abs=0.0)
 
 
 # --- Raster-only checks -----------------------------------------------------

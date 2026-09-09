@@ -22,16 +22,12 @@ def test_aggregation_equals_cellwise_computation_on_a_sample():
     curves, and checks the sum matches the aggregate. If it fails, the shortcut
     is not exact and no result on the map can be trusted.
     """
-    from nbs.aggregate import _product_no_nan
+    from nbs.albedo_grid import alpha_q_product
     from nbs.landscape import assign_species, tree_count
 
-    # nbs.aggregate treats cells the Duveiller raster has no data for (NaN in
-    # alpha_q_product -- a real, expected geographic gap, not a bug; see
-    # nbs.aggregate._product_no_nan) as carrying zero albedo product, since
-    # nbs.landscape assigns species by latitude band alone, uncorrelated with
-    # the raster's own sparse coverage. Both routes below apply that same
-    # policy via _product_no_nan, so they are testing the same quantity the
-    # implementation actually computes.
+    # alpha_q_product is always fully finite (nbs.albedo_grid's three-tier
+    # gap fill -- local retrieval, zonal latitude-band median, Plan 1 table),
+    # so it can be read directly here with no NaN handling, on both routes.
     rng = np.random.default_rng(0)
     sp_grid, n_grid = assign_species(), tree_count()
     idx = np.argwhere((sp_grid != None) & (n_grid > 0))  # noqa: E711
@@ -43,7 +39,7 @@ def test_aggregation_equals_cellwise_computation_on_a_sample():
     for i, j in sample:
         key = sp_grid[i, j]
         co2, alb = unit_curves(key)
-        p = _product_no_nan(key)[i, j]
+        p = alpha_q_product(key)[i, j]
         explicit += n_grid[i, j] * (co2[year_idx] + p * alb[year_idx])
 
     # same cells, via the aggregate route
@@ -52,7 +48,7 @@ def test_aggregation_equals_cellwise_computation_on_a_sample():
         co2, alb = unit_curves(key)
         n_sum = sum(n_grid[i, j] for i, j in sample if sp_grid[i, j] == key)
         np_sum = sum(
-            n_grid[i, j] * _product_no_nan(key)[i, j]
+            n_grid[i, j] * alpha_q_product(key)[i, j]
             for i, j in sample
             if sp_grid[i, j] == key
         )
