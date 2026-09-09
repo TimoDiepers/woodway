@@ -249,3 +249,92 @@ q̇_sw als die Kombination mit dem geringsten Reibungsverlust und der besten
 Nachvollziehbarkeit, macht aber die Lücken (Proxy-Substitution für Nadelwald,
 unbestätigte Klassenlegende, 1°→0,5°-Interpolation) nicht kleiner, als sie
 sind. Task 3 beginnt erst, nachdem diese Entscheidung getroffen ist.
+
+---
+
+# Nachtrag des Controllers — Legende belegt, Befund korrigiert
+
+**Datum:** 2026-09-09, nach eigener Prüfung am Datensatz und an der
+Veröffentlichung.
+
+## Die Legende, belegt
+
+Aus Duveiller, Hooker & Cescatti (2018), Sci. Data 5, 180014, Open-Access-
+Fassung über PubMed Central (PMC5819485):
+
+**IGBPdet, 10 Klassen:**
+
+| Index | Klasse |
+|---|---|
+| 1 | Evergreen Broadleaf Forest (EBF) — **tropisch** |
+| 2 | Deciduous Broadleaf Forest (DBF) |
+| 3 | Evergreen Needleleaf Forest (ENF) — **boreal** |
+| 4 | Deciduous Needleleaf Forest (DNF) |
+| 5 | Mixed Forest (MF) |
+| 6 | Savannas (SAV) |
+| 7 | Shrublands (SHR) |
+| 8 | Grasslands (GRA) |
+| 9 | Cropland (CRO) |
+| 10 | Wetlands (WET) |
+
+**IGBPgen, 4 Klassen:** 1 Forests, 2 Shrublands, 3 Crops & Grasses, 4 Savannas.
+
+Der Übergangscode `iTr` ist die Verkettung von Ursprungs- und Zielklasse.
+
+## Der gemeldete boreale Datenmangel existiert nicht
+
+Der Untersuchungsbericht meldete „null gültige Zellen für den Übergang
+immergrüner Nadelwald → Grasland zwischen 55 und 65°N" und schloss daraus, die
+Fichte müsse über einen Ersatzübergang laufen. **Das war ein Artefakt einer
+geratenen Legende.** Klasse 1 ist nicht Nadelwald, sondern *tropischer*
+Breitlaubwald — dass sie im borealen Band fehlt, ist die korrekte Abwesenheit
+einer tropischen Klasse in der Taiga, kein Loch im Datensatz.
+
+Der tatsächlich benötigte Übergang ist **Code 38** (ENF → Grasland), und er hat
+im Band 55–65°N **2 825 satellitenbeobachtete** und 8 637 räumlich erweiterte
+Zellen. Kein Ersatz nötig, keine Fußnote nötig.
+
+## Zuordnung Art → Übergang
+
+Aufforstung ist die Umkehrung des dokumentierten Übergangs, das Vorzeichen
+dreht sich also.
+
+| Art | `igbp_class` | Klasse | Übergang auf Grasland | auf Acker |
+|---|---|---|---|---|
+| picea_abies | evergreen_needleleaf | 3 | 38 | 39 |
+| pinus_sylvestris | evergreen_needleleaf | 3 | 38 | 39 |
+| fagus_sylvatica | deciduous_broadleaf | 2 | 28 | 29 |
+| eucalyptus_grandis | evergreen_broadleaf | 1 | 18 | 19 |
+| tropical_mixed | evergreen_broadleaf | 1 | 18 | 19 |
+
+## Gemessene Werte, Jahresmittel über das jeweilige Band
+
+| Übergang | Δα (Entwaldung) | ΔSW_reflektiert |
+|---|---|---|
+| 18, Tropen ±10° | +0,0151 | +3,469 W/m² |
+| 28, 55–65°N | +0,0907 | +6,961 W/m² |
+| 38, 55–65°N | +0,1159 | +10,717 W/m² |
+
+Aufforstung kehrt das Vorzeichen um: die boreale Fichte verdunkelt also um
+Δα = −0,116 und absorbiert 10,7 W/m² mehr.
+
+## Folge für Folie 14
+
+Die Ersatztabelle aus Plan 1 gibt bei 60°N Δα = −0,130 und q̇ = 110 W/m², also
+71,5 W je Baum. Die gemessenen Daten geben **10,717 W/m² × 5 m² = 53,6 W**.
+
+Die Kalibrierung lag also in der richtigen Größenordnung, überschätzt aber um
+etwa ein Drittel. Die implizite Einstrahlung des Datensatzes ist
+10,717 / 0,1159 = **92,5 W/m²** gegen 110 W/m² in der Ersatztabelle.
+
+**Die Folie sollte auf die gemessene Zahl umgestellt werden.** Rund 54 W ist
+immer noch „eine Glühbirne, die nie ausgeht", und die Zahl ist dann belegt
+statt kalibriert — der Zirkelschluss aus Plan 1 löst sich damit auf.
+
+## Entscheidung
+
+JRC-Datensatz, Version 2, `IGBPdet`. **Beide** Größen getrennt modellieren:
+`Delta_albedo` und die daraus mit `Delta_SWreflected` implizierte Einstrahlung.
+Damit bleibt Δα eine eigene Stellschraube für die Sensitivitätsanalyse, die
+Kovarianz des Anbieters bleibt über das Produkt prüfbar, und es wird keine
+zweite Datenquelle mit fremdem Gitter und fremder Periode gebraucht.
