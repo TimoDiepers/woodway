@@ -299,23 +299,66 @@ def _insolation_grid_cached(species_key: str, baseline: str, extended: bool) -> 
     return _regrid(annual)
 
 
+def _native_lat_for(species_key: str, baseline: str) -> NDArray | None:
+    """Native 1-degree lat coordinate for the given species/baseline, or None
+    if the raster is unavailable. Validates species/baseline first, same as
+    _load_monthly, so an unknown baseline raises regardless of data
+    availability. lat is a dataset-level coordinate, the same for every iTr
+    slice, so no transition code is actually needed to read it -- the
+    validation call is for the error behaviour, not the value.
+    """
+    _transition_code(species_key, baseline)
+    ds = _open(_RAW_DIR_KEYS["albedo"])
+    if ds is None:
+        return None
+    return ds["lat"].values
+
+
+@lru_cache(maxsize=None)
+def _monthly_product_native_cached(
+    species_key: str, baseline: str, extended: bool
+) -> NDArray | None:
+    """(12, 180, 360) native-grid monthly afforestation Delta_albedo * q_sw
+    product, dataset sign already flipped to afforestation. None if the
+    raster is unavailable -- callers apply their own fallback.
+    """
+    a = _load_monthly("albedo", species_key, baseline, extended)
+    s = _load_monthly("swr", species_key, baseline, extended)
+    if a is None or s is None:
+        return None
+    lat = _native_lat_for(species_key, baseline)
+    q = _quotient_with_zonal_fill(a, s, lat)
+    afforestation = -a
+    return afforestation * q  # (12, 180, 360)
+
+
 @lru_cache(maxsize=None)
 def _annual_mean_of_monthly_product_cached(
     species_key: str, baseline: str, extended: bool
 ) -> NDArray:
-    a = _load_monthly("albedo", species_key, baseline, extended)
-    s = _load_monthly("swr", species_key, baseline, extended)
-    if a is None or s is None:
+    monthly = _monthly_product_native_cached(species_key, baseline, extended)
+    if monthly is None:
         da, qsw = _fallback_row_values()
         return _broadcast_rows(da * qsw)
-    ds_alb = _open(_RAW_DIR_KEYS["albedo"])
-    code = _transition_code(species_key, baseline)
-    lat = ds_alb["Delta_albedo"].sel(iTr=code)["lat"].values
-    q = _quotient_with_zonal_fill(a, s, lat)
-    afforestation = -a
-    monthly_product = afforestation * q  # (12, 180, 360)
-    annual = _nanmean_over_months(monthly_product)
+    annual = _nanmean_over_months(monthly)
     return _regrid(annual)
+
+
+@lru_cache(maxsize=None)
+def _monthly_product_grid_cached(species_key: str, baseline: str, extended: bool) -> NDArray:
+    """(12, 360, 720) regridded monthly product.
+
+    Fallback (no raster): the fallback tables carry no monthly information,
+    so every month is set to the same annual fallback scalar, per latitude
+    row -- the honest representation of "no seasonal cycle known", not an
+    invented one.
+    """
+    monthly = _monthly_product_native_cached(species_key, baseline, extended)
+    if monthly is None:
+        da, qsw = _fallback_row_values()
+        annual_row = _broadcast_rows(da * qsw)  # (360, 720)
+        return np.repeat(annual_row[None, :, :], 12, axis=0)
+    return np.stack([_regrid(monthly[m]) for m in range(12)], axis=0)
 
 
 def delta_alpha_grid(
@@ -354,19 +397,27 @@ def _annual_mean_of_monthly_product(
     """(360, 720) W/m^2. The correct way: multiply Delta_albedo by insolation
     month by month, then average over the year.
 
-    This is what alpha_q_product returns. The Plan 1 findings document
-    (section 4) argues that averaging Delta_albedo and insolation to two
-    annual numbers first and multiplying them (_product_of_annual_means)
-    should understate the boreal effect, because spring snow masking needs
-    both fields high at once. Measured against the actual code-38 raster this
-    module loads, the opposite direction turned up instead: at 45N and 60N
-    the monthly path is *smaller* in magnitude than the naive one, because
-    Delta_albedo (snow-masking contrast) peaks in winter while the implied
-    insolation peaks in summer -- the two are mostly out of phase across the
-    year, with only a brief spring overlap that is not enough to dominate the
-    annual mean. See task-3-report.md, section 5, for the full numbers. This
-    function's own correctness (that it multiplies monthly, not annually,
-    which is what actually preserves the within-year covariance) is
+    This is what alpha_q_product returns. The original Plan 1 hypothesis
+    (section 4 of the findings document, before its 2026-09-09 correction)
+    argued that averaging Delta_albedo and insolation to two annual numbers
+    first and multiplying them (_product_of_annual_means) should understate
+    the boreal effect, because spring snow masking needs both fields high at
+    once. Measured against the actual code-38 raster this module loads, the
+    opposite direction holds instead: at 45N-65N the monthly path is
+    *smaller* in magnitude than the naive one, by roughly 15-25% depending on
+    latitude (see task-3-report.md, section 5, for the full numbers, and
+    seasonal_profile for the underlying monthly shape at any latitude). The
+    mechanism: Delta_albedo (snow-masking contrast) peaks in deep winter
+    (e.g. January at 60N) when the implied insolation is only ~10-20 W/m^2 --
+    those winter months inflate the annual mean of Delta_albedo alone without
+    contributing much to the product, which is exactly what
+    _product_of_annual_means multiplies against the annual mean of
+    insolation. The spring overlap (Delta_albedo still substantial while
+    insolation has risen) is real and sharp -- a single spring month's
+    product commonly runs 2-4x the annual mean of the monthly path -- but it
+    is a brief spike, not enough to outweigh the winter months once averaged.
+    This function's own correctness (that it multiplies monthly, not
+    annually, which is what actually preserves the within-year covariance) is
     unaffected by that finding -- only the sign of the resulting difference
     from _product_of_annual_means is.
     """
@@ -385,11 +436,11 @@ def _product_of_annual_means(
     methodological error regardless of which way the resulting difference
     from _annual_mean_of_monthly_product happens to point. See that
     function's docstring and task-3-report.md, section 5, for the measured
-    numbers: the naive product here actually comes out *larger* in magnitude
-    than the correct monthly path for the boreal conifer transition, not
-    smaller as the original hypothesis expected -- Delta_albedo and
-    insolation are mostly out of phase across the year for that transition,
-    not in phase.
+    numbers: for the boreal conifer transition this naive product comes out
+    *larger* in magnitude than the correct monthly path, not smaller as the
+    original hypothesis expected, because deep-winter months with strong
+    Delta_albedo but almost no insolation inflate mean(Delta_albedo) without
+    contributing to the true product.
     """
     return delta_alpha_grid(species_key, baseline=baseline, extended=extended) * insolation_grid(
         species_key, baseline=baseline, extended=extended
@@ -412,11 +463,121 @@ def alpha_q_product(
     return _annual_mean_of_monthly_product(species_key, baseline=baseline, extended=extended)
 
 
+def monthly_product(
+    species_key: str, *, baseline: str = "grassland", extended: bool = True
+) -> NDArray:
+    """(12, 360, 720) W/m^2. The monthly Delta_albedo * q_sw product, before
+    the annual averaging alpha_q_product does.
+
+    Same sign convention as alpha_q_product (negative where the forest is
+    darker); alpha_q_product is exactly np.nanmean(monthly_product(...),
+    axis=0), just computed on the native 1-degree grid before regridding for
+    efficiency, not on this already-regridded array. Exposed for slide
+    material that needs the seasonal shape itself (the boreal spring spike),
+    not just its annual mean -- see seasonal_profile for a latitude-band
+    summary of the same monthly field. Falls back to
+    nbs.forcing.fallback_delta_alpha * nbs.forcing.fallback_q_sw, repeated
+    identically across all twelve months (the fallback tables carry no
+    seasonal information), when the raster is unavailable.
+    """
+    return _monthly_product_grid_cached(species_key, baseline, extended).copy()
+
+
+def seasonal_profile(
+    species_key: str,
+    lat_deg: float,
+    *,
+    half_width_deg: float = 2.5,
+    baseline: str = "grassland",
+    extended: bool = True,
+) -> dict:
+    """Monthly Delta_albedo, insolation and their product, zonally averaged
+    over [lat_deg - half_width_deg, lat_deg + half_width_deg] on the native
+    1-degree grid, plus the peak month and its ratio to the annual mean.
+
+    Returns a dict:
+      - 'delta_alpha_monthly': (12,) afforestation Delta_albedo [-]
+      - 'q_sw_monthly': (12,) insolation [W/m^2]
+      - 'product_monthly': (12,) Delta_albedo * q_sw [W/m^2], afforestation
+        sign (negative where the forest is darker)
+      - 'peak_month': int, 1-12, the month of the largest |product_monthly|
+      - 'peak_to_annual_ratio': float,
+        abs(product_monthly[peak_month]) / abs(mean(product_monthly))
+
+    This is the seasonal shape that _annual_mean_of_monthly_product's
+    docstring and task-3-report.md describe in aggregate: Delta_albedo peaks
+    in winter (snow-masking contrast), insolation peaks in summer, and the
+    product's own peak falls in the spring overlap between the two, well
+    above the annual mean -- see the measured peak_to_annual_ratio, which
+    grows with latitude in the boreal band.
+
+    Falls back to nbs.forcing.fallback_delta_alpha/fallback_q_sw when the
+    raster is unavailable. Those tables carry no monthly information, so
+    every month comes out identical: peak_month is arbitrarily 1 and
+    peak_to_annual_ratio is exactly 1.0, which is the honest answer to "what
+    is the seasonal shape" when none is known, not a real seasonal claim.
+    """
+    a = _load_monthly("albedo", species_key, baseline, extended)
+    s = _load_monthly("swr", species_key, baseline, extended)
+    lat = _native_lat_for(species_key, baseline)
+
+    if a is None or s is None or lat is None:
+        da, qsw = _fallback_row_values()
+        row = int(np.argmin(np.abs(grid_lats() - lat_deg)))
+        product_val = float(da[row] * qsw[row])
+        return {
+            "delta_alpha_monthly": np.full(12, da[row]),
+            "q_sw_monthly": np.full(12, qsw[row]),
+            "product_monthly": np.full(12, product_val),
+            "peak_month": 1,
+            "peak_to_annual_ratio": 1.0,
+        }
+
+    band = (lat >= lat_deg - half_width_deg) & (lat <= lat_deg + half_width_deg)
+    if not band.any():
+        raise ValueError(
+            f"kein Gitterpunkt in [{lat_deg - half_width_deg}, "
+            f"{lat_deg + half_width_deg}] Grad; half_width_deg vergroessern"
+        )
+
+    q = _quotient_with_zonal_fill(a, s, lat)
+    afforestation = -a
+    monthly_prod_native = afforestation * q
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        delta_alpha_monthly = np.nanmean(afforestation[:, band, :], axis=(1, 2))
+        q_sw_monthly = np.nanmean(q[:, band, :], axis=(1, 2))
+        product_monthly = np.nanmean(monthly_prod_native[:, band, :], axis=(1, 2))
+
+    abs_product = np.abs(product_monthly)
+    if not np.isfinite(abs_product).any():
+        peak_month = 1
+        peak_to_annual_ratio = float("nan")
+    else:
+        peak_idx = int(np.nanargmax(abs_product))
+        annual_mean_abs = abs(float(np.nanmean(product_monthly)))
+        peak_month = peak_idx + 1
+        peak_to_annual_ratio = (
+            float(abs_product[peak_idx] / annual_mean_abs) if annual_mean_abs > 0.0 else float("nan")
+        )
+
+    return {
+        "delta_alpha_monthly": delta_alpha_monthly,
+        "q_sw_monthly": q_sw_monthly,
+        "product_monthly": product_monthly,
+        "peak_month": peak_month,
+        "peak_to_annual_ratio": peak_to_annual_ratio,
+    }
+
+
 __all__ = [
     "DELTA_ALPHA_MIN_ABS",
     "ZONAL_BIN_WIDTH_DEG",
     "alpha_q_product",
     "delta_alpha_grid",
     "insolation_grid",
+    "monthly_product",
+    "seasonal_profile",
     "product_provenance",
 ]

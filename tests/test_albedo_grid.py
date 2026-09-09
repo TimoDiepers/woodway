@@ -24,7 +24,9 @@ from nbs.albedo_grid import (
     alpha_q_product,
     delta_alpha_grid,
     insolation_grid,
+    monthly_product,
     product_provenance,
+    seasonal_profile,
 )
 from nbs.datasources import resolve
 from nbs.forcing import fallback_delta_alpha, fallback_q_sw, phi_albedo, phi_albedo_from_product
@@ -53,38 +55,35 @@ def test_product_is_negative_where_forest_is_darker():
 
 
 @_needs_rasters
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Measured against the real code-38 (ENF -> Grassland) raster, the "
-        "monthly-then-averaged product is *smaller* in magnitude than the "
-        "naive product of two annual means at 60N, not larger as Plan 1's "
-        "latitude-table argument predicted. Verified two ways: (1) across "
-        "grid rows 45-71N the monthly path is smaller everywhere, and (2) "
-        "restricted to the 138 cells in the 55-65N band that pass the "
-        "Delta_albedo guard in all 12 months (so the comparison involves no "
-        "zonal-climatology fill at all), mean|monthly|=13.05 W/m^2 vs "
-        "mean|naive|=16.57 W/m^2, with only 8/138 cells (5.8%) showing the "
-        "opposite ordering. The physical reason: Delta_albedo (snow-masking "
-        "contrast) peaks in winter (Jan-Mar, up to 0.28) while the implied "
-        "insolation peaks in summer (May-Jul, up to ~224 W/m^2) -- the two "
-        "cycles are mostly *anti*-correlated across the year, with only a "
-        "narrow spring window (the single largest monthly product, April, "
-        "at -36.5 W/m^2) where they briefly overlap. That spike is real but "
-        "does not dominate the annual mean. This is not an implementation "
-        "bug (the first assertion below, that the two paths differ at all, "
-        "does pass) -- see task-3-report.md for the full numbers and the "
-        "per-latitude table. Left unmodified per instruction: report the "
-        "numbers, do not loosen the tolerance."
-    ),
-)
 def test_monthly_product_differs_from_product_of_annual_means():
-    """The load-bearing property this module was built to test for.
+    """The load-bearing property this module was built to test for -- and the
+    corrected version of it, after independent verification against the real
+    code-38 (ENF -> Grassland) raster (see
+    docs/superpowers/specs/2026-09-09-befunde-fuer-plan-2-und-3.md, section 4,
+    as corrected on 2026-09-09, and task-3-report.md sections 5 and 9).
 
-    Spring snow masking needs albedo change and insolation to be multiplied
-    month by month, because they peak together. Multiplying two annual means
-    loses exactly that covariance. If these two agree, the monthly path is not
-    being taken and the boreal effect is understated.
+    The original Plan 1 hypothesis was that multiplying two annual means
+    *understates* the boreal effect, because spring snow masking needs
+    Delta_albedo and insolation high at once. The measured data shows the
+    opposite: at the boreal latitudes checked here, the monthly-then-averaged
+    product is *smaller* in magnitude than the naive product of two annual
+    means, comfortably outside noise (the measured ratio is close to 0.8,
+    i.e. the naive product overstates the boreal forcing by roughly 20-25%).
+
+    Why: Delta_albedo (snow-masking contrast) peaks in deep winter -- January
+    at 60N runs Delta_albedo ~ -0.25 in afforestation sign -- when the
+    implied insolation is only ~10-20 W/m^2. Those winter months inflate
+    mean(Delta_albedo) without contributing much to the true product, which
+    is exactly what the naive path multiplies against mean(insolation). The
+    spring overlap the original hypothesis was about is real and sharp (see
+    seasonal_profile: a single spring month's product commonly runs 2-4x the
+    annual mean at boreal latitudes), but it is a brief spike, not enough to
+    outweigh the long winter stretch once averaged over the year.
+
+    This direction, not a pinned ratio, is asserted below so the test
+    survives a future data revision (a different provider version, an
+    updated transition-code mapping) without needing hand-tuning, as long as
+    the same winter-inflation mechanism holds.
     """
     monthly = _annual_mean_of_monthly_product("picea_abies")
     annual = _product_of_annual_means("picea_abies")
@@ -93,7 +92,17 @@ def test_monthly_product_differs_from_product_of_annual_means():
     finite = np.isfinite(a) & np.isfinite(b)
     assert finite.any(), "keine gueltigen borealen Zellen"
     assert not np.allclose(a[finite], b[finite], rtol=1e-3)
-    assert np.nanmean(np.abs(a[finite])) > np.nanmean(np.abs(b[finite]))
+
+    mean_abs_monthly = np.nanmean(np.abs(a[finite]))
+    mean_abs_annual = np.nanmean(np.abs(b[finite]))
+    # Measured ratio is ~0.79 at this row; 0.90 leaves ample margin on both
+    # sides while still ruling out "no real difference" or the reversed
+    # (originally hypothesised) direction.
+    assert mean_abs_monthly < 0.90 * mean_abs_annual, (
+        f"monatlicher Weg ({mean_abs_monthly:.3f} W/m^2) sollte spuerbar "
+        f"kleiner sein als das naive Jahresmittel-Produkt "
+        f"({mean_abs_annual:.3f} W/m^2), nicht nur numerisch verschieden"
+    )
 
 
 def test_provenance_is_reported():
@@ -136,6 +145,41 @@ def test_fallback_product_reproduces_the_latitude_table():
 def test_delta_alpha_grid_and_insolation_grid_have_grid_shape():
     assert delta_alpha_grid("fagus_sylvatica").shape == (360, 720)
     assert insolation_grid("fagus_sylvatica").shape == (360, 720)
+
+
+def test_monthly_product_has_twelve_grid_layers():
+    assert monthly_product("picea_abies").shape == (12, 360, 720)
+
+
+def test_monthly_product_averages_to_alpha_q_product():
+    """alpha_q_product must be exactly the annual mean of monthly_product --
+    same field, two granularities, not two independent computations that
+    could silently drift apart."""
+    mp = monthly_product("picea_abies")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        annual_from_monthly = np.nanmean(mp, axis=0)
+    annual_direct = alpha_q_product("picea_abies")
+    finite = np.isfinite(annual_from_monthly) & np.isfinite(annual_direct)
+    assert finite.sum() > 0
+    assert np.allclose(annual_from_monthly[finite], annual_direct[finite], rtol=0.0, atol=1e-9)
+
+
+def test_seasonal_profile_returns_twelve_months_of_each_field():
+    prof = seasonal_profile("picea_abies", 60.0)
+    for key in ("delta_alpha_monthly", "q_sw_monthly", "product_monthly"):
+        assert prof[key].shape == (12,)
+    assert 1 <= prof["peak_month"] <= 12
+
+
+def test_seasonal_profile_fallback_has_no_seasonal_cycle():
+    """Without a raster, the fallback tables carry no monthly information, so
+    every month must come out identical rather than an invented shape."""
+    if product_provenance() != "fallback":
+        pytest.skip("Raster vorhanden, Fallback wird nicht geprueft")
+    prof = seasonal_profile("picea_abies", 60.0)
+    assert np.allclose(prof["product_monthly"], prof["product_monthly"][0], rtol=0.0, atol=0.0)
+    assert prof["peak_to_annual_ratio"] == 1.0
 
 
 def test_alpha_q_product_returns_fresh_arrays_not_shared_cache_state():
@@ -275,3 +319,33 @@ def test_divide_guard_masks_a_documented_fraction_of_cells():
     passes = valid & (np.abs(a) >= DELTA_ALPHA_MIN_ABS)
     masked_fraction = 1.0 - passes.sum() / valid.sum()
     assert 0.15 < masked_fraction < 0.25
+
+
+@_needs_rasters
+def test_seasonal_profile_peaks_in_spring_at_60n():
+    """The controller's corrected reading of Plan 1's snow-masking argument:
+    the *seasonal peak* of the product is real and falls in spring, even
+    though the *annual mean* of the monthly path is smaller than the naive
+    annual-times-annual product (test_monthly_product_differs_from_...
+    above). Measured peak month at 60N is March, peak-to-annual-mean ratio
+    ~2.8; asserted loosely (March-May, ratio > 2) so the test survives a
+    provider data revision without needing exact reproduction.
+    """
+    prof = seasonal_profile("picea_abies", 60.0)
+    assert prof["peak_month"] in (3, 4, 5), f"peak_month={prof['peak_month']} nicht im Fruehjahr"
+    assert prof["peak_to_annual_ratio"] > 2.0
+
+
+@_needs_rasters
+def test_seasonal_profile_peak_ratio_is_far_smaller_at_45n_than_60n():
+    """The latitude dependence is the actual finding: the spring overlap
+    between winter-peaking Delta_albedo and summer-peaking insolation gets
+    sharper (a bigger peak-to-mean ratio) moving poleward, because the
+    winter snow season lengthens and the overlap window narrows and
+    intensifies. At 45N there is much less winter snow persistence, so the
+    peak is far less pronounced relative to the annual mean.
+    """
+    ratio_45 = seasonal_profile("picea_abies", 45.0)["peak_to_annual_ratio"]
+    ratio_60 = seasonal_profile("picea_abies", 60.0)["peak_to_annual_ratio"]
+    assert ratio_45 < ratio_60
+    assert ratio_45 < 2.0
