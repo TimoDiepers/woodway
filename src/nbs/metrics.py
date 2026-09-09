@@ -14,16 +14,13 @@ def t_star(delta_t: NDArray, years: NDArray) -> float:
     last sign change: from here on the net effect never turns positive again.
     """
     dt = np.asarray(delta_t, dtype=float)
-    pos = dt > 0.0
-    if not pos.any():
+    warming = np.flatnonzero(dt > 0.0)
+    if warming.size == 0:
         return float(years[0])
-    if pos[-1]:
+    last_warming = int(warming[-1])
+    if last_warming >= len(dt) - 1:
         return float(np.inf)
-    changes = np.flatnonzero(pos[1:] != pos[:-1])
-    last_change = int(changes[-1]) + 1
-    if last_change + 1 >= len(years):
-        return float(np.inf)
-    return float(years[last_change + 1])
+    return float(years[last_warming + 1])
 
 
 def _year_index(years: NDArray, year: int) -> int:

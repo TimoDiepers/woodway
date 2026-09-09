@@ -8,7 +8,7 @@ YEARS = np.arange(2025, 2035)
 
 def test_t_star_is_the_year_after_the_last_sign_change():
     dt = np.array([1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])
-    assert t_star(dt, YEARS) == 2030
+    assert t_star(dt, YEARS) == 2029
 
 
 def test_t_star_is_infinite_when_still_warming_at_the_end():

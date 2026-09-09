@@ -17,12 +17,32 @@ def test_single_tree_result_is_well_formed():
 
 @pytest.mark.slow
 def test_tropical_tree_cools_and_boreal_tree_does_not():
-    """The central claim of the talk, as a test."""
+    """The central claim of the talk, as a test.
+
+    Guards against a weaker version of this test that would still pass with
+    the albedo channel effectively switched off (e.g. delta_alpha ~ 0):
+    a tropical tree cools from the start, while a boreal tree at high
+    latitude is a net *warming* influence for an early stretch of decades —
+    the albedo penalty of a darkening canopy outweighing its still-small
+    carbon uptake — before the accumulating carbon benefit eventually wins
+    out. The shape (warms early, cools later, later break-even than the
+    tropical case, nonzero albedo forcing at the end) is asserted rather
+    than the exact years, so this stays meaningful once the latitude
+    fallback tables are replaced by real raster data.
+    """
     tropical = run_single_tree("tropical_mixed", lat_deg=0.0)
     boreal = run_single_tree("picea_abies", lat_deg=60.0)
     assert tropical.delta_t[-1] < 0.0
     assert t_star(tropical.delta_t, YEARS) < np.inf
     assert boreal.delta_t[-1] > tropical.delta_t[-1]
+
+    # The albedo channel must be doing real work: the boreal tree actually
+    # warms for a stretch early in its life before turning net cooling.
+    assert np.any(boreal.delta_t[:30] > 0.0)
+    assert boreal.phi_albedo[-1] > 0.0
+    boreal_t_star = t_star(boreal.delta_t, YEARS)
+    assert boreal_t_star < np.inf
+    assert boreal_t_star > t_star(tropical.delta_t, YEARS)
 
 
 @pytest.mark.slow
