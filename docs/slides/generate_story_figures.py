@@ -11,9 +11,9 @@ import numpy as np
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Polygon
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
-from nbs.carbon_module import area_for_credit
-from nbs.credit_analysis import REISE, run_with
-from nbs.parameters import T_END, T_START
+from nbs.legacy.carbon_module import area_for_credit
+from nbs.legacy.credit_analysis import REISE, run_with
+from nbs.legacy.parameters import T_END, T_START
 
 OUT = os.path.join(os.path.dirname(__file__), "figures")
 
@@ -24,13 +24,13 @@ STAEMME_HA = 2000      # Setzlinge je Hektar, übliche Pflanzdichte
 
 def baeume_pro_flug(lat: int) -> float:
     """Wie viele Bäume die Zertifikatsrechnung für einen Flug bucht."""
-    from nbs.carbon_module import nominal_credit_gtco2
+    from nbs.legacy.carbon_module import nominal_credit_gtco2
     t_pro_ha = nominal_credit_gtco2(lat, 1.0) * 1e3
     return FLUG_TCO2 / t_pro_ha * STAEMME_HA
 
 
 def m2_pro_flug(lat: int) -> float:
-    from nbs.carbon_module import nominal_credit_gtco2
+    from nbs.legacy.carbon_module import nominal_credit_gtco2
     t_pro_ha = nominal_credit_gtco2(lat, 1.0) * 1e3
     return FLUG_TCO2 / t_pro_ha * 1e4
 YEARS = np.arange(T_START, T_END)

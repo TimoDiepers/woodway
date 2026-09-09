@@ -8,12 +8,12 @@ import sys, os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
-from nbs.parameters import T_START, T_END
-from nbs.carbon_module import compute_nee_at_level, compute_biomass_growth
-from nbs.albedo_module import compute_albedo_forcing_timeseries
-from nbs.et_module import compute_et_forcing_timeseries
+from nbs.legacy.parameters import T_START, T_END
+from nbs.legacy.carbon_module import compute_nee_at_level, compute_biomass_growth
+from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.et_module import compute_et_forcing_timeseries
 from nbs.fair_module import run_fair_baseline, compute_pulse_warming
-from nbs.credit_analysis import run_at_level, run_progressive_analysis
+from nbs.legacy.credit_analysis import run_at_level, run_progressive_analysis
 
 YEARS = np.arange(T_START, T_END)
 OUT = os.path.join(os.path.dirname(__file__), "figures")
