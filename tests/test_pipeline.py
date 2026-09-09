@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from nbs.config import ModelConfig
 from nbs.constants import YEARS
 from nbs.metrics import t_star
 from nbs.pipeline import SiteResult, run_single_tree, run_single_tree_ensemble
@@ -74,3 +75,114 @@ def test_explicit_albedo_override_beats_the_fallback():
     a = run_single_tree("picea_abies", lat_deg=60.0, delta_alpha=-0.30, q_sw=110.0)
     b = run_single_tree("picea_abies", lat_deg=60.0, delta_alpha=-0.05, q_sw=110.0)
     assert a.phi_albedo[-1] > b.phi_albedo[-1]
+
+
+# --- ModelConfig threading ---------------------------------------------
+
+
+@pytest.mark.slow
+def test_default_config_is_attached_to_the_result():
+    r = run_single_tree("picea_abies", lat_deg=60.0)
+    assert r.config == ModelConfig()
+
+
+@pytest.mark.slow
+def test_explicit_config_is_carried_through():
+    cfg = ModelConfig(co2_forcing="linear", albedo=False)
+    r = run_single_tree("picea_abies", lat_deg=60.0, config=cfg)
+    assert r.config == cfg
+
+
+@pytest.mark.slow
+def test_albedo_switch_off_zeroes_the_albedo_channel():
+    r = run_single_tree("picea_abies", lat_deg=60.0, config=ModelConfig(albedo=False))
+    assert np.all(r.phi_albedo == 0.0)
+    assert np.allclose(r.phi_total, r.phi_co2)
+
+
+@pytest.mark.slow
+def test_disturbance_off_gives_a_species_with_zero_disturbance_probability():
+    r = run_single_tree("picea_abies", lat_deg=60.0, config=ModelConfig(disturbance="off"))
+    assert r.trajectory.n_disturbances == 0
+    # matches a deterministic run with p_disturb forced to zero directly
+    from dataclasses import replace
+
+    from nbs.species import get_species
+    from nbs.tree import simulate_deterministic
+    from nbs.pipeline import _background_temperature
+
+    quiet_sp = replace(get_species("picea_abies"), p_disturb=0.0)
+    expected = simulate_deterministic(quiet_sp, _background_temperature("ssp245"))
+    assert np.allclose(r.trajectory.stock_kgC, expected.stock_kgC)
+
+
+@pytest.mark.slow
+def test_disturbance_stochastic_is_reproducible_from_its_seed():
+    a = run_single_tree(
+        "picea_abies", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=7
+    )
+    b = run_single_tree(
+        "picea_abies", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=7
+    )
+    assert np.array_equal(a.trajectory.stock_kgC, b.trajectory.stock_kgC)
+    assert np.array_equal(a.delta_t, b.delta_t)
+
+
+@pytest.mark.slow
+def test_disturbance_stochastic_differs_across_seeds():
+    a = run_single_tree(
+        "picea_abies", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=1
+    )
+    b = run_single_tree(
+        "picea_abies", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=2
+    )
+    assert not np.array_equal(a.trajectory.stock_kgC, b.trajectory.stock_kgC)
+
+
+@pytest.mark.slow
+def test_carbon_sink_switch_changes_the_co2_channel():
+    # phi_co2 is of order 1e-13 W/m^2; np.allclose's default atol=1e-8 would
+    # call any two such arrays "close" regardless of their actual
+    # difference. Scale the tolerance to the signal instead.
+    scenario_cfg = ModelConfig(carbon_sink="scenario")
+    preindustrial_cfg = ModelConfig(carbon_sink="preindustrial")
+    r_scenario = run_single_tree("tropical_mixed", lat_deg=0.0, config=scenario_cfg)
+    r_preindustrial = run_single_tree("tropical_mixed", lat_deg=0.0, config=preindustrial_cfg)
+    scale = np.abs(r_scenario.phi_co2).max()
+    assert not np.allclose(
+        r_scenario.phi_co2, r_preindustrial.phi_co2, rtol=0.0, atol=1e-6 * scale
+    )
+
+
+@pytest.mark.slow
+def test_co2_forcing_switch_changes_the_co2_channel():
+    linear = run_single_tree("tropical_mixed", lat_deg=0.0, config=ModelConfig(co2_forcing="linear"))
+    log = run_single_tree("tropical_mixed", lat_deg=0.0, config=ModelConfig(co2_forcing="logarithmic"))
+    scale = np.abs(linear.phi_co2).max()
+    assert not np.allclose(linear.phi_co2, log.phi_co2, rtol=0.0, atol=1e-6 * scale)
+
+
+@pytest.mark.slow
+def test_ensemble_disturbance_off_removes_all_spread():
+    """With p_disturb forced to zero, every ensemble member follows the same
+    deterministic growth curve, so the spread collapses to zero."""
+    det, ens = run_single_tree_ensemble(
+        "picea_abies",
+        lat_deg=60.0,
+        n_members=10,
+        seed=0,
+        config=ModelConfig(disturbance="off"),
+    )
+    assert ens[:, -1].std() == pytest.approx(0.0, abs=1e-18)
+
+
+@pytest.mark.slow
+def test_ensemble_respects_the_albedo_switch():
+    det, ens = run_single_tree_ensemble(
+        "picea_abies",
+        lat_deg=60.0,
+        n_members=5,
+        seed=0,
+        config=ModelConfig(albedo=False),
+    )
+    assert np.all(det.phi_albedo == 0.0)

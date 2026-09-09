@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
 
+from nbs.config import ModelConfig
 from nbs.constants import YEARS
 from nbs.forcing import (
     co2_flux_kg_per_yr,
@@ -14,10 +16,22 @@ from nbs.forcing import (
     fallback_q_sw,
     phi_albedo,
     phi_co2,
+    phi_co2_background,
 )
-from nbs.response import convolve_response, green_carbon, green_temperature
+from nbs.response import (
+    background_co2_ppm,
+    convolve_response,
+    green_carbon,
+    green_carbon_preindustrial,
+    green_temperature,
+)
 from nbs.species import get_species
-from nbs.tree import TreeTrajectory, simulate_deterministic, simulate_ensemble
+from nbs.tree import (
+    TreeTrajectory,
+    simulate_deterministic,
+    simulate_ensemble,
+    simulate_stochastic,
+)
 
 
 @dataclass(frozen=True)
@@ -33,6 +47,10 @@ class SiteResult:
     phi_total: NDArray
     delta_t: NDArray
     trajectory: TreeTrajectory
+    config: ModelConfig
+    """The model-complexity switches (nbs.config.ModelConfig) that produced
+    this result. Carried on the result itself so several variants can sit in
+    one figure without losing track of what generated each one."""
 
 
 def _background_temperature(scenario: str) -> NDArray:
@@ -44,6 +62,23 @@ def _background_temperature(scenario: str) -> NDArray:
     return np.append(base, base[-1])
 
 
+def _green_carbon_for(config: ModelConfig, scenario: str) -> NDArray:
+    """g_C selected by config.carbon_sink (slide 13)."""
+    if config.carbon_sink == "preindustrial":
+        return green_carbon_preindustrial()
+    return green_carbon(scenario)
+
+
+def _species_for(species_key: str, config: ModelConfig):
+    """The species used for growth/disturbance integration, with p_disturb
+    zeroed when config.disturbance == "off". Never mutates the frozen
+    registry entry -- dataclasses.replace returns a new instance."""
+    sp = get_species(species_key)
+    if config.disturbance == "off":
+        sp = dataclasses.replace(sp, p_disturb=0.0)
+    return sp
+
+
 def _forcings(
     trajectory: TreeTrajectory,
     species_key: str,
@@ -51,15 +86,24 @@ def _forcings(
     scenario: str,
     delta_alpha: float | None,
     q_sw: float | None,
+    config: ModelConfig,
 ) -> tuple[NDArray, NDArray]:
     sp = get_species(species_key)
     d_alpha = fallback_delta_alpha(lat_deg) if delta_alpha is None else delta_alpha
     q = fallback_q_sw(lat_deg) if q_sw is None else q_sw
 
-    f_co2 = phi_co2(
-        co2_flux_kg_per_yr(trajectory.net_uptake_kgC_yr), green_carbon(scenario)
-    )
-    f_alb = phi_albedo(trajectory.closure, d_alpha, q, sp)
+    flux = co2_flux_kg_per_yr(trajectory.net_uptake_kgC_yr)
+    g_c = _green_carbon_for(config, scenario)
+    if config.co2_forcing == "linear":
+        f_co2 = phi_co2(flux, g_c)
+    else:
+        f_co2 = phi_co2_background(flux, g_c, background_co2_ppm(scenario))
+
+    if config.albedo:
+        f_alb = phi_albedo(trajectory.closure, d_alpha, q, sp)
+    else:
+        f_alb = np.zeros_like(trajectory.closure, dtype=float)
+
     return f_co2, f_alb
 
 
@@ -69,12 +113,30 @@ def run_single_tree(
     scenario: str = "ssp245",
     delta_alpha: float | None = None,
     q_sw: float | None = None,
+    config: ModelConfig | None = None,
+    seed: int = 0,
 ) -> SiteResult:
-    """Deterministic run: one tree, one place, expected-value disturbance."""
-    sp = get_species(species_key)
+    """One tree, one place, under the model-complexity choices in *config*.
+
+    ``config.disturbance`` selects the integrator: "off" and "deterministic"
+    both use the expected-value integrator (the former on a species with
+    p_disturb forced to zero, so it degenerates to the undisturbed case);
+    "stochastic" draws a single seeded Monte-Carlo realisation via *seed*
+    rather than the full ensemble (see ``run_single_tree_ensemble`` for
+    that).
+    """
+    if config is None:
+        config = ModelConfig()
+    sp = _species_for(species_key, config)
     background = _background_temperature(scenario)
-    traj = simulate_deterministic(sp, background)
-    f_co2, f_alb = _forcings(traj, species_key, lat_deg, scenario, delta_alpha, q_sw)
+    if config.disturbance == "stochastic":
+        rng = np.random.default_rng(seed)
+        traj = simulate_stochastic(sp, background, rng)
+    else:
+        traj = simulate_deterministic(sp, background)
+    f_co2, f_alb = _forcings(
+        traj, species_key, lat_deg, scenario, delta_alpha, q_sw, config
+    )
     phi = f_co2 + f_alb
     delta_t = convolve_response(green_temperature(scenario), phi)
 
@@ -88,6 +150,7 @@ def run_single_tree(
         phi_total=phi,
         delta_t=delta_t,
         trajectory=traj,
+        config=config,
     )
 
 
@@ -99,18 +162,34 @@ def run_single_tree_ensemble(
     seed: int = 0,
     delta_alpha: float | None = None,
     q_sw: float | None = None,
+    config: ModelConfig | None = None,
 ) -> tuple[SiteResult, NDArray]:
-    """Deterministic run plus a Monte-Carlo ensemble of delta_t trajectories."""
-    sp = get_species(species_key)
+    """Deterministic (or config-selected) run plus a Monte-Carlo ensemble.
+
+    The ensemble members themselves are always drawn from the discrete
+    stochastic integrator (that is the point of an ensemble); the config's
+    disturbance switch only matters here through "off", which zeroes
+    p_disturb on the species used for every member, collapsing the ensemble
+    to a single deterministic trajectory with zero spread. Every other
+    switch (co2_forcing, albedo, carbon_sink) is respected for both the
+    single companion run and every ensemble member.
+    """
+    if config is None:
+        config = ModelConfig()
+    sp = _species_for(species_key, config)
     background = _background_temperature(scenario)
-    deterministic = run_single_tree(species_key, lat_deg, scenario, delta_alpha, q_sw)
+    deterministic = run_single_tree(
+        species_key, lat_deg, scenario, delta_alpha, q_sw, config=config, seed=seed
+    )
 
     g_t = green_temperature(scenario)
     members = simulate_ensemble(sp, background, n_members=n_members, seed=seed)
 
     ensemble = np.empty((n_members, len(YEARS)))
     for i, traj in enumerate(members):
-        f_co2, f_alb = _forcings(traj, species_key, lat_deg, scenario, delta_alpha, q_sw)
+        f_co2, f_alb = _forcings(
+            traj, species_key, lat_deg, scenario, delta_alpha, q_sw, config
+        )
         ensemble[i] = convolve_response(g_t, f_co2 + f_alb)
 
     return deterministic, ensemble
