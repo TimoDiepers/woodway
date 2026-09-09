@@ -2,7 +2,13 @@ import numpy as np
 import pytest
 
 from nbs.constants import YEARS
-from nbs.response import convolve_response, green_carbon, green_temperature
+from nbs.response import (
+    background_co2_ppm,
+    convolve_response,
+    green_carbon,
+    green_carbon_preindustrial,
+    green_temperature,
+)
 
 
 def test_convolution_is_causal():
@@ -77,6 +83,47 @@ def test_temperature_green_function_peaks_then_decays():
     peak = int(np.argmax(g))
     assert 0 <= peak < 25, "surface response peaks within a couple of decades"
     assert g[-1] < g[peak], "deep ocean draws the response back down"
+
+
+def test_green_carbon_preindustrial_starts_at_one():
+    """No FaIR call: pure Joos et al. (2013) four-box impulse response, so
+    this is fast enough to run outside -m slow."""
+    g = green_carbon_preindustrial()
+    assert g.shape == (len(YEARS),)
+    assert g[0] == pytest.approx(1.0, abs=1e-9)
+
+
+def test_green_carbon_preindustrial_matches_textbook_75_year_figure():
+    """Task spec: the Joos curve at 75 years should come out substantially
+    lower than the scenario-conditioned g_C[75] (~0.700, committed value),
+    near the ~0.4 the talk's slide 13 quotes."""
+    g = green_carbon_preindustrial()
+    assert 0.35 < g[75] < 0.45
+
+
+def test_green_carbon_preindustrial_is_lower_than_scenario_conditioned_at_75_years():
+    """This is the whole point of the carbon_sink switch: a pulse on top of
+    a rising ssp245 background meets more saturated sinks than a pulse
+    against a flat pre-industrial background."""
+    g_pre = green_carbon_preindustrial()
+    assert g_pre[75] < 0.700, "must come out below the committed scenario g_C[75]"
+
+
+def test_green_carbon_preindustrial_decays_monotonically():
+    g = green_carbon_preindustrial()
+    assert np.all(np.diff(g) <= 1e-9)
+
+
+@pytest.mark.slow
+def test_background_co2_ppm_spans_the_ssp245_study_period():
+    c = background_co2_ppm("ssp245")
+    assert c.shape == (len(YEARS),)
+    assert 400.0 < c[0] < 440.0, "~424 ppm in 2025"
+    assert 590.0 < c[-1] < 660.0, "~624 ppm by 2149/2150"
+    # the final entry is a repeat of the previous one (_to_study_length pads
+    # the 125-year fair_module series to the 126-year study axis), so the
+    # last diff is exactly 0 rather than positive
+    assert np.all(np.diff(c)[:-1] > 0.0), "ssp245 CO2 background keeps rising"
 
 
 @pytest.mark.slow

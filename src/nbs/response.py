@@ -129,6 +129,80 @@ def green_temperature(scenario: str = "ssp245") -> NDArray:
     return _to_study_length(g)
 
 
+@functools.lru_cache(maxsize=4)
+def background_co2_ppm(scenario: str = "ssp245") -> NDArray:
+    """Baseline CO2 concentration C_bg(t) [ppm] under *scenario*, on YEARS.
+
+    Unlike ``green_carbon``, this is not a pulse-minus-baseline difference:
+    it is the concentration trajectory of the unperturbed baseline run
+    itself, so none of ``green_carbon``'s +1 timepoint-vs-timebound offset
+    applies here. That offset exists only because a pulse is added on the
+    *timepoint* axis (a flow during the year) and airborne_emissions is a
+    *stock* on the *timebound* axis, so a pulse added at timepoint
+    ``_START_IDX`` first shows up in the stock at timebound
+    ``_START_IDX + 1``.
+
+    Concentration, like temperature, is a state variable that already lives
+    on the timebound axis and is read directly here with no pulse involved
+    -- exactly the pattern ``green_temperature`` and ``run_fair_baseline``
+    use for temperature (also a timebound quantity): slice
+    ``[_START_IDX:_END_IDX]`` with no offset, then pad to the study length.
+    Timebound index ``_START_IDX`` (275) is by construction the calendar
+    year T_START (2025), so this reads off exactly the calendar years in
+    YEARS.
+
+    Used by ``nbs.forcing.phi_co2_background`` as C_bg(t) for the marginal
+    logarithmic CO2 forcing law. Under ssp245 this rises from about 424 ppm
+    in 2025 to about 624 ppm by the end of the study period.
+    """
+    from nbs.fair_module import _START_IDX, _END_IDX, _create_fair
+
+    f = _create_fair(scenario)
+    f.run()
+    conc = f.concentration.sel(
+        scenario=scenario, config="central", specie="CO2"
+    ).values[_START_IDX:_END_IDX]
+    return _to_study_length(np.asarray(conc, dtype=float))
+
+
+_JOOS_A0 = 0.2173
+"""Permanent airborne fraction as t -> infinity. Joos et al. (2013), Table 5."""
+_JOOS_A = (0.2240, 0.2824, 0.2763)
+"""Amplitudes of the three decaying exponential modes. Joos et al. (2013)."""
+_JOOS_TAU = (394.4, 36.54, 4.304)
+"""Time constants [a] of the three decaying modes. Joos et al. (2013)."""
+
+
+@functools.lru_cache(maxsize=1)
+def green_carbon_preindustrial() -> NDArray:
+    """Airborne fraction of a CO2 pulse against a flat, pre-industrial-style
+    background: the standard Joos et al. (2013) four-box impulse response,
+
+        IRF(t) = a0 + sum_i a_i * exp(-t / tau_i)
+
+    with the published coefficients (a0 permanent, a1/tau1, a2/tau2, a3/tau3
+    the three decaying modes). This is the textbook curve slide 13 quotes
+    (~40% still airborne after 75 years) -- unlike ``green_carbon``, it does
+    not depend on FaIR or on any scenario, because it is not a marginal
+    response superimposed on a rising background: it describes a pulse
+    against an unchanging atmosphere.
+
+    ``green_carbon`` differs from this because a pulse added on top of the
+    actual, rising ssp245 trajectory meets sinks that are already more
+    saturated (weaker ocean buffering via a higher Revelle factor, a
+    weakened land sink) than the flat background this curve assumes. That
+    is why ``green_carbon``'s marginal airborne fraction is measurably
+    higher at the same time horizon (g_C[75] ~= 0.700, scenario-conditioned,
+    versus this function's g[75] ~= 0.44, the pre-industrial-style figure)
+    -- both are real, neither is a bug. See ``ModelConfig.carbon_sink``.
+    """
+    t = np.arange(len(YEARS), dtype=float)
+    g = np.full_like(t, _JOOS_A0)
+    for a, tau in zip(_JOOS_A, _JOOS_TAU):
+        g = g + a * np.exp(-t / tau)
+    return g
+
+
 def convolve_response(g: NDArray, x: NDArray, dt: float = 1.0) -> NDArray:
     """Causal discrete convolution y[n] = dt * sum_{m<=n} g[n-m] x[m]."""
     g = np.asarray(g, dtype=float)
