@@ -120,11 +120,15 @@ def _effective_efficiency(c_background_ppm: float) -> float:
 
 
 def test_logarithmic_effective_efficiency_at_424ppm():
-    assert _effective_efficiency(424.0) == pytest.approx(1.61e-15, rel=0.01)
+    # pytest.approx's default abs=1e-12 dominates a value of order 1e-15 by
+    # three orders of magnitude and would accept almost anything (including
+    # 0.0) as "close enough". abs=0 forces the comparison to run on rel
+    # alone.
+    assert _effective_efficiency(424.0) == pytest.approx(1.61e-15, rel=0.01, abs=0)
 
 
 def test_logarithmic_effective_efficiency_at_624ppm():
-    assert _effective_efficiency(624.0) == pytest.approx(1.10e-15, rel=0.01)
+    assert _effective_efficiency(624.0) == pytest.approx(1.10e-15, rel=0.01, abs=0)
 
 
 def test_logarithmic_effective_efficiency_below_linear_constant():

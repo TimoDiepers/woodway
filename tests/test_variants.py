@@ -103,8 +103,11 @@ def test_summarise_variants_from_ladder_has_expected_columns():
         assert "t_star" in row
         assert "delta_t_2150" in row
         assert "diff_from_base" in row
-    # the first rung is its own base
-    assert rows[0]["diff_from_base"] == pytest.approx(0.0)
+    # the first rung is its own base: dt_2150 - dt_2150 is an exact 0.0 in
+    # IEEE754 for any finite value, so abs=0 (not the default abs=1e-12,
+    # which would dominate a diff_from_base of order 1e-13/1e-14 anyway) is
+    # the correct tolerance here, not a loose one.
+    assert rows[0]["diff_from_base"] == pytest.approx(0.0, abs=0)
 
 
 @pytest.mark.slow
@@ -113,15 +116,19 @@ def test_summarise_variants_from_dict_uses_first_entry_as_base():
     rows = summarise_variants(results)
     assert len(rows) == len(results)
     assert rows[0]["name"] == "Basis"
-    assert rows[0]["diff_from_base"] == pytest.approx(0.0)
+    assert rows[0]["diff_from_base"] == pytest.approx(0.0, abs=0)
 
 
 @pytest.mark.slow
 def test_summarise_variants_diff_matches_manual_computation():
+    # delta_t_2150 and diff_from_base are both of order 1e-13 to 1e-14 here;
+    # pytest.approx's default abs=1e-12 would dominate that and let a wrong
+    # value through, so both comparisons need an explicit abs=0 and rely on
+    # rel alone.
     ladder = run_ladder("picea_abies", 60.0)
     rows = summarise_variants(ladder)
     base_dt_2150 = ladder[0][1].delta_t[-1]
     for row, (_, result) in zip(rows, ladder):
         expected_diff = result.delta_t[-1] - base_dt_2150
-        assert row["diff_from_base"] == pytest.approx(expected_diff)
-        assert row["delta_t_2150"] == pytest.approx(result.delta_t[-1])
+        assert row["diff_from_base"] == pytest.approx(expected_diff, rel=1e-9, abs=0)
+        assert row["delta_t_2150"] == pytest.approx(result.delta_t[-1], rel=1e-9, abs=0)

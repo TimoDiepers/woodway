@@ -97,7 +97,12 @@ def test_explicit_config_is_carried_through():
 def test_albedo_switch_off_zeroes_the_albedo_channel():
     r = run_single_tree("picea_abies", lat_deg=60.0, config=ModelConfig(albedo=False))
     assert np.all(r.phi_albedo == 0.0)
-    assert np.allclose(r.phi_total, r.phi_co2)
+    # phi_total/phi_co2 are of order 1e-13 W/m^2; np.allclose's default
+    # atol=1e-8 would call any two such arrays "close" regardless of a real
+    # (if small) leftover albedo contribution. Scale the tolerance to the
+    # signal instead (see also test_single_tree_result_is_well_formed).
+    scale = np.abs(r.phi_co2).max()
+    assert np.allclose(r.phi_total, r.phi_co2, rtol=0.0, atol=1e-9 * scale)
 
 
 @pytest.mark.slow
