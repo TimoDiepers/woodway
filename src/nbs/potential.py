@@ -331,8 +331,10 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
             "note": (
                 f"Erster Schritt mit eigenen Modellzahlen: nbs.landscape "
                 f"liefert {area3_gha:.4f} Gha bepflanzbare Fläche nach "
-                "Landmaske (Vereinigung der Duveiller-Raster, 20,3 % der "
-                "Erdoberfläche) und Ausschluss von bestehendem Wald, "
+                "Landmaske (Vereinigung der Duveiller-Raster, 23,6 % der "
+                "Erdoberfläche nach Fläche bzw. 20,3 % der Rasterzellen -- "
+                "siehe nbs.landscape.land_mask_fractions) und Ausschluss von "
+                "bestehendem Wald, "
                 "Savanne/Grasland/Wüste, Landwirtschaft und "
                 "Kryosphäre. Das liegt geringfügig über "
                 "Bastins eigener 0,9-Gha-Angabe (zwei unabhängige "

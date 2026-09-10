@@ -730,6 +730,39 @@ def provenance_fractions(
     }
 
 
+def local_coverage(
+    species_key: str, *, baseline: str = "grassland", extended: bool = True
+) -> dict[str, float]:
+    """How far Duveiller's *local* retrievals reach for one species' transition.
+
+    ``provenance_fractions`` answers a different question -- the tier mix over
+    the cells this species is actually planted on. This one answers "how much
+    of the world does the raster cover at all for this transition", which is
+    the number a data-basis slide wants, and returns it against **both**
+    denominators, because they differ by a factor of five and quoting one as
+    the other is the mistake this function exists to prevent:
+
+    ``globus``    -- local-retrieval cells / all 259 200 grid cells [-]
+    ``landmaske`` -- local-retrieval cells / cells in nbs.landscape.land_mask [-]
+    ``zellen``    -- the local-retrieval cell count itself
+
+    Measured for picea_abies: 10 268 cells, 4.0% of the globe, 19.5% of the
+    land mask. "About 4% of the land area" is therefore wrong by a factor of
+    five in one direction, and "about 20% of the Earth" by a factor of five in
+    the other.
+    """
+    from nbs.landscape import land_mask
+
+    tier = product_provenance_grid(species_key, baseline=baseline, extended=extended)
+    local = tier == 0
+    n_local = int(local.sum())
+    return {
+        "zellen": float(n_local),
+        "globus": n_local / float(local.size),
+        "landmaske": n_local / float(land_mask().sum()),
+    }
+
+
 def seasonal_profile(
     species_key: str,
     lat_deg: float,
@@ -825,6 +858,7 @@ __all__ = [
     "alpha_q_product",
     "delta_alpha_grid",
     "insolation_grid",
+    "local_coverage",
     "monthly_product",
     "product_provenance_grid",
     "provenance_fractions",

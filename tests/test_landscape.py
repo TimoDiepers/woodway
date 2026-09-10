@@ -103,17 +103,37 @@ def test_no_species_assigned_outside_the_land_mask():
 
 
 def test_land_mask_covers_a_plausible_fraction_of_the_globe():
-    """Land is ~29% of Earth's surface; this mask is vegetated land only
-    (wherever the Duveiller raster has no land-cover-transition retrieval at
-    all -- desert, ice, bare rock, and any land cover the dataset's ten IGBP
-    classes do not reach), so it must come out noticeably below 29%, not at
-    or above it, and nowhere near 0% or 100%. Measured: 20.3%. The band
-    0.10-0.30 keeps comfortable margin on both sides of that without
-    accepting a mask so sparse or so full it could not be doing real
-    geographic work (e.g. a mask that is 95% land, or 2% land, would both
-    fail this while still passing the old 0.05-5 Gha area bound)."""
-    frac = float(land_mask().mean())
-    assert 0.10 < frac < 0.30, f"{frac:.3f} liegt ausserhalb der plausiblen Landspanne"
+    """Land is ~29% of Earth's surface **by area**; this mask is vegetated land
+    only (wherever the Duveiller raster has no land-cover-transition retrieval
+    at all -- desert, ice, bare rock, and any land cover the dataset's ten IGBP
+    classes do not reach), so it must come out noticeably below 29%, not at or
+    above it, and nowhere near 0% or 100%.
+
+    The comparison must be made against the *area* fraction. Half-degree cells
+    shrink towards the poles, so the cell-count fraction is a different number
+    (20.3% vs 23.6% here) and checking it against the 29% area figure compares
+    two different quantities -- which is how "20.3% of the Earth's surface"
+    reached a slide."""
+    from nbs.landscape import land_mask_fractions
+
+    fr = land_mask_fractions()
+    assert 0.10 < fr["flaeche"] < 0.29, (
+        f"{fr['flaeche']:.3f} liegt ausserhalb der plausiblen Landspanne"
+    )
+    assert 0.10 < fr["zellen"] < 0.30
+
+
+def test_cell_and_area_fractions_of_the_land_mask_are_not_interchangeable():
+    """Pins the gap that caused the slide error: this mask sits at low and mid
+    latitudes, where cells are large, so its area share is materially *above*
+    its cell share. Anything that quotes one as the other is wrong by this
+    margin, and the two must not be allowed to silently converge."""
+    from nbs.landscape import land_mask_fractions
+
+    fr = land_mask_fractions()
+    assert fr["flaeche"] > fr["zellen"] + 0.02
+    # Gha and area fraction must describe the same mask.
+    assert fr["gha"] == pytest.approx(fr["flaeche"] * 51.006, rel=1e-3, abs=0)
 
 
 def test_no_plantable_cell_in_the_mostly_ocean_55_to_70_south_band():

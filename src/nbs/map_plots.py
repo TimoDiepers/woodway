@@ -383,10 +383,25 @@ def plot_sign_map(
 def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp245") -> str:
     """Folie E6: continuous horizon x latitude field of net Delta_T per tree.
 
+    **This is a counterfactual sweep**, and the figure says so: it puts the
+    *same* species at every latitude, including latitudes it would never be
+    planted at. ``nbs.landscape`` assigns picea_abies to 60-70 degrees only;
+    the shaded band marks that range so the rest is read as "what if", not as
+    a recommendation. Outside it the Delta_alpha values are the three-tier
+    fill's zonal extrapolation of a transition that was never retrieved
+    there, and at 20S in particular that produces the largest albedo penalty
+    on the whole figure -- a real consequence of high subtropical insolation
+    times an extrapolated albedo contrast, not a measurement.
+
     x: study year (2025-2150, the model's own annual resolution -- the
     "continuous" axis the brief asks for, as opposed to the handful of
     support years plot_breakeven_map and plot_sign_map single out).
-    y: latitude, zonal-mean alpha_q_product per row for *species_key*.
+    y: latitude, zonal-mean alpha_q_product per row for *species_key*,
+    **averaged over that row's land cells only**. Averaging over the whole
+    row instead mixes in ~80% ocean, where the fill still supplies a value
+    and nothing is ever planted; that version put a spurious zero contour
+    through the southern ocean. Rows with no land at all are left blank
+    rather than filled.
     colour: net Delta_T per tree [K] (co2 + albedo channel), diverging
     around zero.
 
@@ -400,10 +415,15 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
     """
     co2, albedo_unit = unit_curves(species_key, scenario)
     lats = grid_lats()
-    zonal_product = alpha_q_product(species_key).mean(axis=1)  # (360,)
+    land = land_mask()
+    n_land = land.sum(axis=1)
+    product = alpha_q_product(species_key)
+    zonal_product = np.where(
+        n_land > 0, (product * land).sum(axis=1) / np.maximum(n_land, 1), np.nan
+    )  # (360,)
 
     field_k = co2[None, :] + zonal_product[:, None] * albedo_unit[None, :]  # (360, 126) K
-    field = field_k * 1e15  # 1e-15 K per tree, matches nbs.plots' convention
+    field = np.ma.masked_invalid(field_k * 1e15)  # 1e-15 K per tree, as nbs.plots
 
     vmax = float(np.max(np.abs(field)))
     norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
@@ -413,19 +433,34 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
     cbar = fig.colorbar(im, ax=ax, pad=0.02)
     cbar.set_label("Netto ΔT je Baum [10$^{-15}$ K]")
 
+    band = _assignment_band(species_key)
+    if band is not None:
+        lo_lat, hi_lat = band
+        ax.axhspan(lo_lat, hi_lat, color="0.15", alpha=0.10, zorder=1, linewidth=0)
+        ax.axhline(lo_lat, color="0.15", linewidth=0.8, linestyle="--", zorder=6)
+        ax.axhline(hi_lat, color="0.15", linewidth=0.8, linestyle="--", zorder=6)
+
     cs = ax.contour(YEARS, lats, field, levels=[0.0], colors="white", linewidths=2.4, zorder=5)
     cs.set_path_effects([pe.Stroke(linewidth=4.0, foreground="black"), pe.Normal()])
 
+    band_proxy = (
+        Patch(facecolor="0.15", alpha=0.10, label="tatsächlich zugewiesenes Gebiet")
+        if band is not None
+        else None
+    )
     zero_line_proxy = Line2D(
         [0], [0], color="white", lw=2.4,
         path_effects=[pe.Stroke(linewidth=4.0, foreground="black"), pe.Normal()],
         label="t*(Breite) — Nullkontur",
     )
-    ax.legend(handles=[zero_line_proxy], loc="upper right", frameon=True, fontsize=9)
+    handles = [zero_line_proxy] + ([band_proxy] if band_proxy is not None else [])
+    ax.legend(handles=handles, loc="upper right", frameon=True, fontsize=9)
 
     sp = get_species(species_key)
     ax.set_title(
-        f"Horizontfeld: Netto ΔT je Baum, {sp.name_de} ({sp.name_lat}), {scenario.upper()}"
+        f"Horizontfeld: Netto ΔT je Baum, {sp.name_de} ({sp.name_lat}), "
+        f"{scenario.upper()}\nGedankenexperiment: dieselbe Art auf jeder Breite, "
+        f"Zonalmittel nur über Landzellen"
     )
     ax.set_xlabel("Jahr")
     ax.set_ylabel("Breite")
@@ -454,6 +489,25 @@ def _blocks(field: NDArray, factor: int) -> NDArray:
         .transpose(0, 2, 1, 3)
         .reshape(n_lat // factor, n_lon // factor, factor * factor)
     )
+
+
+def _assignment_band(species_key: str) -> tuple[float, float] | None:
+    """Signed latitude range where this species actually has plantable cells.
+
+    Not the ``nbs.landscape._BAND_SPECIES`` band itself: that band is stated
+    in *absolute* latitude and so nominally covers both hemispheres, but the
+    land mask leaves a species with no cells at all in one of them (there is
+    no land at 60-70S). Deriving the range from ``assign_species()`` instead
+    of from the band table means the shaded strip marks where trees of this
+    species really stand, and never a southern band the model never fills.
+    """
+    from nbs.landscape import assign_species
+
+    rows = np.flatnonzero((assign_species() == species_key).any(axis=1))
+    if rows.size == 0:
+        return None
+    lats = grid_lats()
+    return float(lats[rows].min()), float(lats[rows].max())
 
 
 def plot_planting_map(

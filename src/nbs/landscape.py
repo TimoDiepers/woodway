@@ -6,11 +6,18 @@ the union, across all 45 land-cover transitions and all 12 months, of cells
 where ``Delta_albedo_ext`` is finite. The dataset only carries a value where
 the transition's vegetated land cover is actually present, so this union is
 a usable vegetated-land mask even though the raster was never built to be
-one. Measured: 52 688 of 259 200 half-degree cells, 20.3% of the globe --
-below the textbook ~29% land fraction because it excludes desert, ice and
-bare rock (nothing in a forest <-> grassland/cropland transition dataset has
-signal there), which is the expected direction and size for a
-vegetation-only mask. Falls back to an all-land grid, clearly labelled via
+one. Measured: 52 688 of 259 200 half-degree cells (20.3% of the *cells*)
+covering 12.03 Gha, **23.6% of the Earth's surface by area**. The two
+percentages are different quantities and were confused with each other in an
+earlier version of this file: half-degree cells shrink towards the poles, so
+a cell count is not an area share, and this mask sits at low and mid
+latitudes where cells are large -- hence the area share comes out *above*
+the cell share. The figure to compare against the textbook ~29% land
+fraction is the area one: 23.6%, i.e. the vegetation-only mask sees about
+four fifths of the real land area, missing desert, ice and bare rock
+(nothing in a forest <-> grassland/cropland transition dataset has signal
+there). ``land_mask_fractions()`` returns both numbers so a slide never has
+to guess which one it is quoting. Falls back to an all-land grid, clearly labelled via
 ``land_mask_provenance() == "fallback_alles_land"``, if the raster is not on
 disk -- this is deliberately not a coastline approximation; a caller without
 the raster must see loudly that nothing is being excluded, not silently get
@@ -182,6 +189,27 @@ def land_mask() -> NDArray:
     return mask.copy()
 
 
+def land_mask_fractions() -> dict[str, float]:
+    """Both sizes of the land mask, so neither can be quoted as the other.
+
+    ``zellen``  -- share of the 259 200 grid *cells* that are land [-]
+    ``flaeche`` -- share of the Earth's *surface area* that is land [-]
+    ``gha``     -- that area in Gha
+
+    Half-degree cells shrink towards the poles, so these two fractions are
+    genuinely different numbers (20.3% vs 23.6% for the current mask). Only
+    ``flaeche`` may be compared against the textbook ~29% land fraction.
+    """
+    mask = land_mask()
+    area = cell_area_m2()
+    land_area = float((area * mask).sum())
+    return {
+        "zellen": float(mask.mean()),
+        "flaeche": land_area / float(area.sum()),
+        "gha": land_area / 1e13,
+    }
+
+
 def land_mask_provenance() -> str:
     """"raster" or "fallback_alles_land" -- see ``land_mask()``."""
     _mask, prov = _land_mask_and_provenance()
@@ -316,6 +344,7 @@ __all__ = [
     "assign_species",
     "exclusion_mask",
     "land_mask",
+    "land_mask_fractions",
     "land_mask_provenance",
     "plantable_area_m2",
     "provenance",
