@@ -306,3 +306,66 @@ def plot_planting_time(
     )
     fig.tight_layout()
     return _save(fig, out_path)
+
+
+def plot_growth_curves(
+    out_path: str,
+    *,
+    scenario: str = "ssp245",
+    config: ModelConfig | None = None,
+) -> str:
+    """Folie: the five species' growth curves, the parameterisation made visible.
+
+    One panel, five curves, m(t) per tree. This is the first figure of the
+    analysis part and the simplest one in the deck on purpose: everything
+    that follows is this curve pushed through the forcing chain, so the
+    audience should see the input before the output.
+
+    Each curve is annotated with its own m_max and k, and the saturation
+    level is drawn as a faint dashed line, so the two parameters that shape
+    it can be read off the figure rather than looked up in a table. The
+    disturbed run (solid) is shown against the undisturbed one (dotted) for
+    the same species, which is what makes the gap between "what the equation
+    says" and "what the model carries" visible at a glance.
+    """
+    from nbs.pipeline import run_single_tree
+    from nbs.species import REFERENCE_SITES
+
+    base = config or ModelConfig()
+    undisturbed = ModelConfig(**{**base.__dict__, "disturbance": "off"})
+    colours = ("#2166ac", "#8073ac", "#fdb863", "#7fbc41", "#1b7837")
+
+    fig, ax = plt.subplots(figsize=(12.5, 5.6))
+    for i, (key, lat) in enumerate(REFERENCE_SITES.items()):
+        sp = get_species(key)
+        colour = colours[i % len(colours)]
+        with_dist = run_single_tree(key, lat, scenario, config=base)
+        without = run_single_tree(key, lat, scenario, config=undisturbed)
+        ax.plot(YEARS, without.trajectory.stock_kgC, color=colour, linewidth=1.1,
+                linestyle=":", alpha=0.9)
+        k_de = f"{sp.k:.3f}".replace(".", ",")
+        hemi = "S" if lat < 0 else "N"
+        ax.plot(
+            YEARS, with_dist.trajectory.stock_kgC, color=colour, linewidth=2.2,
+            label=(
+                f"{sp.name_de} ({abs(lat):.0f}°{hemi})   "
+                f"m$_{{max}}$ {sp.m_max_kgC:.0f} kgC · k {k_de} 1/a"
+            ),
+        )
+        # The parameters live in the legend, not as annotations on the
+        # saturation lines: two species share m_max = 50 kgC, so annotations
+        # placed at that level sit on top of each other.
+        ax.axhline(sp.m_max_kgC, color=colour, linewidth=0.7, linestyle="--", alpha=0.35)
+
+    ax.set_xlabel("Jahr")
+    ax.set_ylabel("Kohlenstoffvorrat je Baum [kgC]")
+    ax.set_title(
+        "Eine Wachstumsform, fünf Parametersätze\n"
+        "durchgezogen mit Störung, gepunktet ohne — gestrichelt die Sättigung m$_{max}$"
+    )
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=9.5, loc="upper left", frameon=True)
+    ax.set_xlim(YEARS[0], YEARS[-1])
+    ax.set_ylim(bottom=0.0)
+    fig.tight_layout()
+    return _save(fig, out_path)

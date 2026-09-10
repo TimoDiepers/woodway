@@ -71,3 +71,24 @@ def test_planting_time_figure_is_written(tmp_path):
 
     plot_planting_time(str(tmp_path / "pz.png"))
     assert (tmp_path / "pz.png").stat().st_size > 10_000
+
+
+@pytest.mark.slow
+def test_growth_curves_figure_is_written(tmp_path):
+    from nbs.plots import plot_growth_curves
+
+    plot_growth_curves(str(tmp_path / "e1.png"))
+    assert (tmp_path / "e1.png").stat().st_size > 10_000
+
+
+def test_growth_curve_legend_carries_the_parameters_not_the_annotations():
+    """Two species share m_max = 50 kgC, so annotations placed at the
+    saturation level sat on top of each other. The parameters belong in the
+    legend label; this pins that they are still stated somewhere."""
+    import inspect
+
+    from nbs.plots import plot_growth_curves
+
+    source = inspect.getsource(plot_growth_curves)
+    assert "label=" in source and "m$_{max}$" in source
+    assert "ax.annotate" not in source
