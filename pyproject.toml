@@ -13,6 +13,7 @@ dependencies = [
     "SALib>=1.4",
     "pandas>=2.0",
     "netcdf4>=1.7.4",
+    "python-pptx>=1.0.2",
 ]
 
 [project.optional-dependencies]
