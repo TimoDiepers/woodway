@@ -55,7 +55,7 @@ from numpy.typing import NDArray
 
 from nbs.albedo_grid import alpha_q_product
 from nbs.config import ModelConfig
-from nbs.constants import A_EARTH_M2, TAU_ATM, YEARS
+from nbs.constants import A_EARTH_M2, T_END, TAU_ATM, YEARS
 from nbs.landscape import assign_species, tree_count
 from nbs.pipeline import run_single_tree
 from nbs.response import convolve_response, green_temperature
@@ -260,7 +260,83 @@ def delta_t_field(
     return out
 
 
+def albedo_offset_field(
+    year: int = T_END, scenario: str = "ssp245", config: ModelConfig | None = None
+) -> NDArray:
+    """(360, 720) albedo offset [%] per plantable cell, NaN elsewhere.
+
+    The share of a cell's carbon cooling that its albedo warming cancels:
+
+        offset = albedo warming / carbon cooling * 100
+
+    0% means albedo costs nothing, 50% means it halves the benefit, and
+    above 100% the cell is net warming even at *year*. This is the quantity
+    Hasler et al. (2024) map globally, and the only one that lets this model
+    be compared against an external result cell by cell -- see
+    ``docs/superpowers/specs/2026-09-10-abgleich-hasler-2024.md``.
+
+    Note what it is *not*: the cascade's albedo step
+    (``nbs.potential.cascade``) removes cells that never break even at all,
+    which is a filter on 1.8% of the area. This is a discount on every cell,
+    and its median is around 39%. The two answer different questions -- "does
+    it ever cool" versus "how much of the cooling survives" -- and neither
+    substitutes for the other.
+
+    Tree count cancels out of the ratio, so this is a per-hectare quantity
+    that does not depend on the assumed stand density.
+    """
+    idx = _year_index(year)
+    species_grid = assign_species()
+    out = np.full(species_grid.shape, np.nan)
+    for key in SPECIES:
+        mask = species_grid == key
+        if not mask.any():
+            continue
+        co2, albedo_unit = unit_curves(key, scenario, config)
+        product = _product_no_nan(key)
+        carbon = float(co2[idx])
+        albedo = product[mask] * float(albedo_unit[idx])
+        out[mask] = albedo / (-carbon) * 100.0
+    return out
+
+
+def albedo_offset_summary(
+    year: int = T_END, scenario: str = "ssp245", config: ModelConfig | None = None
+) -> dict[str, float]:
+    """Area-weighted summary of ``albedo_offset_field``.
+
+    ``median``       area-weighted median offset [%]
+    ``ueber_50``     share of plantable area with more than 50% offset [-]
+    ``ueber_100``    share that is net warming at *year* [-]
+    ``p5``, ``p95``  unweighted 5th and 95th percentile [%]
+
+    Area-weighted, not cell-weighted: half-degree cells differ in size by a
+    factor of three across the plantable latitudes, and the comparison
+    figures in Hasler et al. are area shares.
+    """
+    from nbs.landscape import plantable_area_m2
+
+    field = albedo_offset_field(year, scenario, config)
+    area = plantable_area_m2()
+    finite = np.isfinite(field)
+    values, weights = field[finite], area[finite]
+
+    order = np.argsort(values)
+    v_sorted, w_sorted = values[order], weights[order]
+    total = w_sorted.sum()
+    median = float(v_sorted[np.searchsorted(np.cumsum(w_sorted), 0.5 * total)])
+    return {
+        "median": median,
+        "ueber_50": float(weights[values > 50.0].sum() / total),
+        "ueber_100": float(weights[values > 100.0].sum() / total),
+        "p5": float(np.percentile(values, 5)),
+        "p95": float(np.percentile(values, 95)),
+    }
+
+
 __all__ = [
+    "albedo_offset_field",
+    "albedo_offset_summary",
     "aggregate_by_species",
     "delta_t_at_year",
     "delta_t_field",
