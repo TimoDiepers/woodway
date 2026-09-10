@@ -76,14 +76,25 @@ def test_footer_names_both_data_provenances():
 
 def test_footer_states_the_three_tier_fractions_for_picea_abies():
     """Plan 2's instruction: the footer must state the three-tier
-    fractions, not just the coarse raster/fallback provenance flag -- for
-    Picea abies they are 8.9% local, 41.1% zonal, 50.0% table."""
+    fractions, not just the coarse raster/fallback provenance flag.
+
+    After the ``nbs.landscape.land_mask()`` fix (the 71.3%-over-ocean
+    plantable-area defect) the numbers for Picea abies changed from 8.9%
+    local / 41.1% zonal / 50.0% table to 29.3% / 70.7% / 0.0%: the species'
+    absolute-latitude band is 60-70 degrees on *both* sides of the equator,
+    and before the fix roughly half its fabricated "plantable" cells landed
+    in the 60-70S band -- almost pure Southern Ocean, where the ENF<->
+    grassland transition has no local retrieval and not even a same-
+    hemisphere zonal one, hence the 50% table fallback. The land mask now
+    correctly excludes that band entirely, so every plantable Picea abies
+    cell is real Northern Hemisphere boreal forest, where the transition has
+    either a local or a zonal retrieval -- table drops to exactly 0.0%."""
     from nbs.map_plots import footer_text
 
     footer = footer_text()
-    assert "8,9 %" in footer
-    assert "41,1 %" in footer
-    assert "50,0 %" in footer
+    assert "29,3 %" in footer
+    assert "70,7 %" in footer
+    assert "0,0 %" in footer
 
 
 def test_footer_is_composable_for_another_species():
