@@ -7,11 +7,11 @@ each:
 
 - ``plot_breakeven_map``: per-cell break-even year t* (the primary figure --
   it alone carries the whole "warming fraction by year" table the task-6
-  brief measured: 64.4% of plantable cells still warming in 2030, dropping to
-  0.8% by 2125).
+  brief measured: 62.5% of plantable cells still warming in 2030, dropping to
+  2.9% by 2125).
 - ``plot_sign_map``: the discrete warming/cooling split at one year, default
   2050 -- the year the measured table puts the split closest to 50/50
-  (48.2% warming), which is when the talk's "opposite signs" claim is most
+  (45.5% warming), which is when the talk's "opposite signs" claim is most
   visibly true on a single map. A single-year map at, say, 2125 would show
   almost no warming and understate the point: not because the albedo channel
   is missing, but because by then it is long over.
@@ -236,9 +236,9 @@ def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None =
 
 def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
     """Folie P1 (primary): per-cell break-even year t*, one still that
-    carries the whole warming-fraction-by-year table (task-6 brief): 64.4%
-    of plantable cells still warming in 2030, 49.2% in 2040, 48.2% in 2050,
-    24.7% in 2060, 1.7% in 2080, 0.8% in 2125. Early break-even years read
+    carries the whole warming-fraction-by-year table (task-6 brief): 62.5%
+    of plantable cells still warming in 2030, 49.2% in 2040, 45.5% in 2050,
+    24.7% in 2060, 1.7% in 2080, 2.9% in 2125. Early break-even years read
     bright, late ones dark, and cells that never break even within the
     2025-2150 horizon get their own distinct colour rather than being folded
     into the "late" end of the scale, which would silently equate "took 120
@@ -249,7 +249,7 @@ def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
 
     # Anchor years for the title's summary line: the same two years the
     # task-6 brief's warming-fraction table uses to bracket the transient
-    # decades (64.4% -> 0.8% under the default ssp245), recomputed here (not
+    # decades (62.5% -> 2.9% under the default ssp245), recomputed here (not
     # hardcoded) so the number stays correct if a caller passes a different
     # scenario.
     _start_year, _end_year = 2030, 2125
@@ -290,8 +290,8 @@ def plot_sign_map(
     """Folie P1b: discrete warming/cooling split at one year.
 
     Defaults to 2050 (not the horizon end): the measured warming-cell
-    fraction is 64.4% in 2030, 49.2% in 2040, 48.2% in 2050, 24.7% in 2060,
-    1.7% in 2080 and 0.8% in 2125 (task-6 brief) -- by 2125 the map would be
+    fraction is 62.5% in 2030, 49.2% in 2040, 45.5% in 2050, 24.7% in 2060,
+    1.7% in 2080 and 2.9% in 2125 (task-6 brief) -- by 2125 the map would be
     almost entirely one colour, which is correct but makes a single still
     understate the "opposite signs" claim the talk makes about the transient
     decades. 2050 is closest to an even split (48/52) and keeps the argument
