@@ -528,7 +528,7 @@ def plot_planting_map(
             rgba[i, j, 3] = 1.0
 
     fig, (ax, ax_bar) = plt.subplots(
-        1, 2, figsize=(15.5, 6.8), gridspec_kw={"width_ratios": [3.1, 1.0]}
+        1, 2, figsize=(16.0, 5.0), gridspec_kw={"width_ratios": [3.3, 1.0]}
     )
     ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
     ax.set_xlim(-180, 180)
@@ -582,8 +582,11 @@ def plot_planting_map(
             ha="left",
         )
     ax_bar.invert_yaxis()
-    ax_bar.set_xlabel("verfügbare Fläche [Gha]")
-    ax_bar.legend(fontsize=8, loc="lower right")
+    # The two bar styles are named in the axis label, not in a legend box:
+    # wherever the box went it covered one of the five rows.
+    ax_bar.set_xlabel(
+        "verfügbare Fläche [Gha]\nvoll: empfohlen  ·  gestrichelt: Breitenband"
+    )
     ax_bar.grid(axis="x", alpha=0.3)
     ax_bar.set_title(
         "Artenwahl statt Breitenband:\n"

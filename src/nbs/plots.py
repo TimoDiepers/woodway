@@ -291,7 +291,9 @@ def plot_planting_time(
             ax_t.annotate("kein t*", xy=(i, 0.5), xycoords=("data", "axes fraction"),
                           ha="center", fontsize=9, color=C_NET)
     ax_t.set_ylabel("Ausgleichsjahr t*")
-    ax_t.legend(fontsize=8.5, loc="upper left")
+    # No legend: it would sit on top of a bar or an annotation whichever
+    # corner it took. The right-hand axis label and the panel title
+    # ("t*, Rauten") already say what the diamonds are.
     ax_b.set_title(
         f"Später pflanzen kostet zweimal:\nRisiko (Balken) und Zeit (t*, Rauten)"
     )
