@@ -95,10 +95,12 @@ Gemessen am JRC-Datensatz (Duveiller et al. 2018, v2.0), Übergang 38
 |---|---|---|---|
 | 45°N | 0,87 | Februar | 1,4× |
 | 55°N | 0,80 | März | 2,7× |
-| 60°N | 0,80 | April | 3,0× |
+| 60°N | 0,80 | März/April | 2,8–3,0× |
 | 65°N | 0,70 | April | 4,3× |
 
-Die Spitze **wandert mit der Breite von Februar nach April**, und ihre Dominanz
+**März und April liegen bei 60°N praktisch gleichauf** (−33,4 gegen −33,1 W/m², unter 1 % Unterschied); welcher Monat gewinnt, kippt mit der Bandbreite. Auf einer Folie gehört „im Frühjahr" oder „März und April", nicht ein einzelner Monat.
+
+Die Spitze **wandert mit der Breite von Februar ins Frühjahr**, und ihre Dominanz
 wächst dabei. Im Süden liegt zwar Schnee, aber die Sonne ist noch schwach;
 weiter nördlich fällt der späte Schnee mit der bereits kräftigen
 Frühjahrssonne zusammen. Das ist die Schneemaskierung, als Wanderung sichtbar.
