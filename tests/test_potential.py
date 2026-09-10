@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from nbs.potential import cascade, reverse_1p5
+from nbs.potential import ICE_FREE_LAND_GHA, cascade, reverse_1p5
 
 
 @pytest.mark.slow
@@ -105,3 +105,31 @@ def test_reverse_1p5_ratio_is_consistent_with_the_two_variants():
     )
     assert r["verhaeltnis"] == pytest.approx(expected_ratio, rel=1e-9)
     assert r["verhaeltnis"] > 1.0
+
+
+@pytest.mark.slow
+def test_reverse_1p5_required_area_is_large_but_below_ice_free_land():
+    """Pins the actual relationship behind the deck's punchline slide (P5),
+    not just its prose: the required area is a large multiple of this
+    model's own plantable area (the "x exceeds what the planet has room
+    for" point still holds -- planting *this specific, corrected area
+    several times over* is not achievable), but it is NOT larger than
+    Earth's entire ice-free land area.
+
+    ``reverse_1p5``'s own ``hinweis`` string used to say the opposite of
+    the second half ("groesser als die gesamte eisfreie Flaeche der Erde"),
+    which is false for both variants (9.58 and 9.76 Gha, against a ~13 Gha
+    constant) and reached a slide before anyone checked it against the
+    numbers already computed a few lines above it. A sign flip in the
+    comparison direction below must fail this test.
+    """
+    r = reverse_1p5()
+    for key in ("mit_albedo_und_stoerung", "nur_kohlenstoff"):
+        variant = r[key]
+        # "large factor": this project's own numbers put both variants at
+        # ~10x -- 5x is a conservative floor that still rules out a
+        # near-1.0 factor slipping through unnoticed.
+        assert variant["vielfaches_der_modellierten_flaeche"] > 5.0
+        # The false claim this test exists to prevent: required area must
+        # stay strictly below the ice-free land constant, not exceed it.
+        assert variant["area_gha"] < ICE_FREE_LAND_GHA

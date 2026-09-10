@@ -98,6 +98,15 @@ BASTIN_RAW_CARBON_GTC = 205.0
 Checked 2026-09-10 against the published abstract and multiple independent
 secondary sources quoting the same figure."""
 
+ICE_FREE_LAND_GHA = 13.0
+"""Earth's ice-free land area, a rounded literature approximation -- not
+computed by this model (the same figure and rounding used in
+``notebooks/03_potenzial_global.ipynb``'s ``ICE_FREE_LAND_GHA`` constant,
+duplicated here so ``reverse_1p5``'s own ``hinweis`` text can be checked by
+a test instead of only asserted in prose). ``reverse_1p5``'s required area
+(both variants) is *below* this constant, not above it -- see the module's
+own ``test_potential.py`` for the pinned relationship."""
+
 REALISTIC_CARBON_GTC = 81.0
 """Literature correction for realistic carbon densities and soil carbon --
 **not computed by this model** (Section 4 of the design spec gives this
@@ -481,15 +490,18 @@ def reverse_1p5(scenario: str = "ssp245") -> dict:
         "nur_kohlenstoff": carbon_only,
         "verhaeltnis": full["n_trees"] / carbon_only["n_trees"],
         "hinweis": (
-            "Beide Varianten liegen bereits über dem Vielfachen der von "
-            f"diesem Modell identifizierten bepflanzbaren Fläche "
-            f"({area_gha:.3f} Gha) -- "
-            f"{full['vielfaches_der_modellierten_flaeche']:.1f}-fach mit "
-            "Albedo und Störung, "
+            "Beide Varianten liegen bereits beim Vielfachen der von diesem "
+            f"Modell identifizierten bepflanzbaren Fläche ({area_gha:.3f} "
+            f"Gha) -- {full['vielfaches_der_modellierten_flaeche']:.1f}-fach "
+            "mit Albedo und Störung, "
             f"{carbon_only['vielfaches_der_modellierten_flaeche']:.1f}-fach "
-            "bei reiner Kohlenstoffrechnung. Das ist größer als die "
-            "gesamte eisfreie Landfläche der Erde: Baumpflanzung allein "
-            "hält ssp245 nicht unter 1,5 Grad."
+            "bei reiner Kohlenstoffrechnung. Das volle Modell braucht damit "
+            f"rund {100.0 * full['area_gha'] / ICE_FREE_LAND_GHA:.0f} % der "
+            f"gesamten eisfreien Landfläche der Erde (~{ICE_FREE_LAND_GHA:.0f} "
+            "Gha, Näherung) -- weniger als diese Fläche, aber ein großer "
+            "Teil davon: Baumpflanzung allein hält ssp245 nicht unter "
+            "1,5 Grad, auch wenn die benötigte Fläche die eisfreie "
+            "Landfläche der Erde nicht überschreitet."
         ),
     }
 
@@ -497,6 +509,7 @@ def reverse_1p5(scenario: str = "ssp245") -> dict:
 __all__ = [
     "BASTIN_RAW_AREA_GHA",
     "BASTIN_RAW_CARBON_GTC",
+    "ICE_FREE_LAND_GHA",
     "REALISTIC_CARBON_GTC",
     "cascade",
     "reverse_1p5",

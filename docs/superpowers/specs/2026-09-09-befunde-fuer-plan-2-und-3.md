@@ -407,7 +407,7 @@ Kohlenstoffdichte für Stufen 3–5 ist an die *gemessene* Fläche von Stufe 3
 würde Stufe 3 einen höheren Kohlenstoffwert als Stufe 2 tragen, was der
 Kaskaden-Erzählung ("jede Stufe eine Korrektur nach unten") widerspräche.
 
-## 14. Die Umkehrrechnung: mehr Fläche als die Erde hat
+## 14. Die Umkehrrechnung: drei Viertel der eisfreien Landfläche der Erde
 
 `nbs.potential.reverse_1p5()` beantwortet: wie viele Vielfache der von
 diesem Modell identifizierten, korrigierten Art-/Flächenmischung
@@ -430,13 +430,27 @@ Abschnitt 13).
 
 **Für eine Folie, die einzige Zahl, die zählt:** beide Varianten liegen
 bereits beim rund **Zehnfachen der von diesem Modell identifizierten
-bepflanzbaren Fläche** — 9,76 bzw. 9,58 Gha, mehr als die gesamte eisfreie
-Landfläche der Erde (rund 13 Gha, gerundete literaturübliche Näherung,
-nicht aus diesem Modell gerechnet). Baumpflanzung allein hält SSP245 nicht
-unter 1,5 °C, selbst wenn jede identifizierte bepflanzbare Zelle mehrfach
-überplant würde. Das ist keine Modellschwäche, sondern die erwartete
+bepflanzbaren Fläche** — 9,76 bzw. 9,58 Gha. Das ist *weniger* als die
+gesamte eisfreie Landfläche der Erde (rund 13 Gha, gerundete
+literaturübliche Näherung, nicht aus diesem Modell gerechnet), aber **rund
+drei Viertel davon (≈75 %)** — Ackerland, Städte, Wüsten und bestehende
+Wälder eingeschlossen. Baumpflanzung allein hält SSP245 nicht unter
+1,5 °C, selbst wenn drei von vier eisfreien Hektar der Erde bepflanzt
+würden. Das ist keine Modellschwäche, sondern die erwartete
 Schlussfolgerung eines Vortrags, der die Bastin-Kritik nachvollzieht:
 Aufforstung ist ein Baustein, kein Ersatz für Emissionsminderung.
+
+**Korrigiert am 2026-09-10:** Dieser Abschnitt behauptete ursprünglich, die
+benötigte Fläche (9,76 bzw. 9,58 Gha) sei *größer* als die eisfreie
+Landfläche der Erde (~13 Gha) — das ist falsch, beide Werte liegen
+*darunter*. Der Fehler stammte aus `nbs.potential.reverse_1p5()`s eigenem
+`hinweis`-Text ("Das ist größer als die gesamte eisfreie Landfläche der
+Erde") und wurde unverändert in dieses Dokument und von dort auf
+Vortragsfolie P5 übernommen, ohne die Zahlen gegenzuprüfen. Der Code, die
+Folie und dieses Dokument sind jetzt konsistent auf die tatsächliche
+Relation (~75 %, nicht >100 %) korrigiert; ein Regressionstest
+(`tests/test_potential.py::test_reverse_1p5_required_area_is_large_but_below_ice_free_land`)
+pinnt sie.
 
 ## 15. Für Plan 3, kurz zusammengefasst
 
