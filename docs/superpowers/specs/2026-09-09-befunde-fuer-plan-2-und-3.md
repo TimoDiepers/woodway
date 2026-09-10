@@ -228,3 +228,230 @@ Bewusst zurückgestellt, keine blockiert etwas:
   Reserve, die der Bericht nahelegt.
 - `T_START`, `T_END`, `A_EARTH_M2` stehen doppelt in `nbs.constants` und
   `nbs.legacy.parameters`. Durch Längenwächter jetzt laut statt still.
+
+---
+
+# Befunde aus Plan 2 — was Plan 3 wissen muss
+
+**Datum:** 2026-09-10
+**Quelle:** Umsetzung von `2026-09-09-rasterschicht-und-potenzial.md`, Tasks
+1–8. Dieser Abschnitt setzt Abschnitte 1–9 oben fort (Plan 1) und ist für
+jemanden geschrieben, der an Plan 2 nicht beteiligt war.
+
+Plan 2 hat die Einzelbaum-Kette aus Plan 1 über das gesamte 0,5°-Gitter
+aufsummiert: eine Landmaske, echte Albedo-Raster, eine Korrekturkaskade auf
+Bastin et al. (2019) und eine Umkehrrechnung gegen 1,5 °C. Der vollständige,
+ausgeführte Durchlauf steht in `notebooks/03_potenzial_global.ipynb`.
+
+## 10. Die Landmaske hatte einen schweren Defekt — und kein Test fing ihn
+
+`nbs.landscape` wies bepflanzbare Fläche ursprünglich **ohne jede
+Landmaske** zu: jede Breitenzeile wurde per Zufallspermutation in
+Ozean/Wald/Savanne/Landwirtschaft/bepflanzbar aufgeteilt, mit erfundenen
+Landanteilen je Breitenband. Gemessen vor der Korrektur: von 5740 als
+bepflanzbar markierten Zellen lagen **4092 (71,3 %) im Ozean**; die
+Ausgleichsjahr-Karte zeigte grüne (bepflanzbare) Zellen bei 60° Süd, also
+im Südpolarmeer.
+
+**Gefunden nur durch Ansehen der Abbildung.** Weder
+`test_plantable_area_never_exceeds_the_cell` noch die
+0,05–5-Gha-Plausibilitätsgrenze schlugen an — beide sind mit Unsinn
+erfüllbar, der zufällig die richtige Größenordnung hat. Das ist das dritte
+Mal in diesem Projekt (nach zwei Fällen in Plan 1), dass eine reine
+Sichtprüfung einen Fehler fand, den die grüne Testsuite nicht auffing. Für
+Plan 3: **jede neue Karte vor der Übernahme in eine Folie ansehen, nicht
+nur testen.**
+
+**Der Fix** (`src/nbs/landscape.py`, Task 7): `land_mask()` ist jetzt die
+Vereinigung aller 45 Duveiller-Landbedeckungsübergänge über alle 12 Monate
+— wo immer der Duveiller-Datensatz irgendeinen Wert trägt, ist die Zelle
+vegetiertes Land. Gemessen: **52 688 von 259 200 Halbgrad-Zellen, 20,3 %
+der Erdoberfläche** — plausibel unterhalb der üblichen ~29 % Landanteil,
+weil das Raster nur vegetiertes Land erfasst (Wüste, Eis, Fels bleiben
+außen vor, da kein Wald↔Gras/Acker-Übergang dort Signal hat). Ohne die
+Raster fällt die Funktion sichtbar auf ein Alles-Land-Gitter zurück
+(`land_mask_provenance() == "fallback_alles_land"`), statt eine plausibel
+aussehende, aber erfundene Küstenlinie zu zeichnen.
+
+**Was der Fix NICHT behebt:** Innerhalb einer Landzeile ist die Aufteilung
+in Wald/Savanne/Landwirtschaft/bepflanzbar weiterhin eine per Zeilenindex
+geseedete Zufallspermutation der *echten* Landspalten — es gibt keine
+Landbedeckungs-/GEZ-Rasterquelle, nur fünf Breitenbänder
+(`nbs.landscape.provenance()` meldet immer `"fallback"`, unabhängig von
+`land_mask_provenance()`). Das erzeugt ein sichtbares "Konfetti"-Muster
+innerhalb der Kontinente auf jeder Karte dieses Plans — erwartet,
+dokumentiert, aber wer eine Karte auf eine Folie nimmt, sollte den
+Unterschied kennen: die Landmaske ist gemessen, die Verteilung *innerhalb*
+des Landes ist es nicht.
+
+**Neue Gesamtzahl:** bepflanzbare Fläche fiel von 1,08 Gha (Task 4, vor dem
+Fix) auf **0,9488 Gha** — ein Rückgang von nur ~12 %, kleiner als der
+71,3-Prozent-Zellbefund vermuten lässt, weil die alten, erfundenen
+Landanteile je Breitenband zufällig grob mit den heute gemessenen realen
+Anteilen übereinstimmten (die *Menge* Land pro Zeile war ungefähr richtig
+kalibriert, nur die *Lage* nicht). 0,9488 Gha liegt bemerkenswert nah an
+Bastins eigener 0,9-Gha-Angabe — das ist ein Zufall zweier unabhängiger,
+vergleichbar unsicherer Schätzungen, **keine Bestätigung der Präzision
+dieses Modells.**
+
+## 11. Die Duveiller-Daten: was gemessen ist, was nicht
+
+Der JRC-Datensatz (Duveiller, Hooker, Cescatti 2018, *Sci. Data* 5, 180014,
+v2.0, CC-BY-4.0) liefert `Delta_albedo` und `Delta_SWreflected` für 45
+Landbedeckungsübergänge auf einem 1°-Gitter, aus Satelliten-Ko-Vorkommen
+zweier benachbarter Landbedeckungen. **Die Legende der 45 Übergangscodes
+steht nicht in der Datei selbst** — sie musste aus der Begleitveröffentlichung
+(PMC5819485) rekonstruiert werden; eine geratene Legende hätte in Task 2
+beinahe zu einer falschen Übergangswahl für die Fichte geführt (Code 38,
+Nadelwald↔Gras, wurde erst nach Prüfung der echten Legende bestätigt).
+
+**Abdeckungslücke:** Der Datensatz braucht lokale Ko-Vorkommen beider
+Landbedeckungen, um einen Übergang an einer Zelle zu retrieven. Für den
+Fichten-Übergang hat selbst die räumlich erweiterte Fassung
+(`_ext`-Variante) nur an einem kleinen Teil der bepflanzbaren
+Fichten-Zellen ein echtes lokales Retrieval — ursprünglich (Task 5) fehlten
+dadurch ~91 % der bepflanzbaren Zellen jeglichen Albedowert, was still zu
+0 gerundet worden wäre und die Kernaussage des Vortrags (Albedo als
+Gegenspieler) auf der Karte gelöscht hätte.
+
+**Die Lösung, dreistufige Füllung** (`nbs.albedo_grid.alpha_q_product`,
+Task 5): jede Zelle wird aus einer von drei Quellen gefüllt, in
+Prioritätsreihenfolge —
+
+1. **lokal**: echtes Duveiller-Retrieval an dieser Zelle,
+2. **zonal**: Median über alle anderen Retrievals derselben Art im selben
+   Breitenband,
+3. **tabelle**: die Plan-1-Breitentabelle als letzter Rückfall.
+
+Jede Zelle trägt ihre Provenienz-Stufe (`product_provenance_grid`), und
+jede Art hat einen aggregierten Anteil pro Stufe
+(`provenance_fractions`). Gemessen (Task 8, mit den jetzt vorhandenen
+Rastern):
+
+| Art | lokal | zonal | tabelle |
+|---|---|---|---|
+| Gemeine Fichte (*Picea abies*) | 29,3 % | 70,7 % | 0,0 % |
+| Waldkiefer | 46,7 % | 52,2 % | 1,0 % |
+| Rotbuche | 29,3 % | 70,7 % | 0,0 % |
+| Rosen-Eukalyptus | 21,2 % | 78,8 % | 0,0 % |
+| Tropischer Mischbestand | 63,2 % | 36,8 % | 0,0 % |
+
+**Bei vier von fünf Arten ist die zonale Extrapolation die Mehrheit der
+Fläche.** Nur der tropische Mischbestand hat eine lokale Mehrheit, weil
+sein Übergang deutlich mehr Ko-Vorkommen-Zellen im Datensatz hat. Für
+Plan 3: **jede Karte und jede Zahl, die auf `alpha_q_product` beruht, trägt
+diese Zusammensetzung.** `nbs.map_plots.footer_text()` schreibt sie
+automatisch in die Fußzeile jeder Kartenabbildung — beim Export auf eine
+Folie darf diese Fußzeile nicht wegfallen, ohne dass die Aussage anderswo
+auf der Folie steht.
+
+## 12. Der Albedo-Effekt ist ein Frühjahrsereignis — bestätigt, mit einer Nuance
+
+Plan 1 hatte (Abschnitt 4 oben) bereits korrigiert festgehalten: das
+Produkt Δα·q̇ muss monatlich gebildet werden, dann gemittelt — die
+Jahresmittelbildung überschätzt den borealen Antrieb um 20–30 %, weil der
+Winterkontrast das Δα-Jahresmittel aufbläht, ohne zum Produkt beizutragen.
+Task 8 hat das mit `nbs.albedo_grid.seasonal_profile` direkt an der Fichte
+sichtbar gemacht: bei 45°N liegt die Spitze im Februar (1,6-fache
+Jahresmittelspitze), bei 60°N deutlich schärfer im Übergang März/April
+(2,8-fache Spitze).
+
+**Nuance für Plan 3:** Bei 60°N liegen März (−33,36 W/m²) und April
+(−33,13 W/m²) mit unter 1 % Unterschied praktisch gleichauf — welcher der
+beiden Monate nominell "gewinnt", hängt an der gewählten Bandbreite
+(`half_width_deg`) und ob die räumlich erweiterte Fassung des Rasters
+verwendet wird (`extended`), nicht an der physikalischen Aussage. Das
+korrigierte Plan-1-Befund-Dokument (Abschnitt 4 oben) nennt April mit
+~3,0-facher Spitze; Task 8 misst mit den Standardparametern von
+`seasonal_profile` (±2,5°-Band, erweiterte Daten) den März, bei praktisch
+identischem Verhältnis (2,8-fach). **Für eine Folie:** die Verschiebung
+und Schärfung von Februar (45°N) nach März/April (60°N) ist robust und
+belegt; ein einzelner Kalendermonat für 60°N sollte nicht ohne den Zusatz
+"März/April, nahezu gleichauf" zitiert werden.
+
+## 13. Die Kaskade (Akt 6) — Zahlen mit Quellen
+
+`nbs.potential.cascade()` liefert sechs Stufen. Die ersten beiden sind
+reine Literaturzahlen, **nicht von diesem Modell gerechnet** (die Kette
+hat keinen Bodenkohlenstoff-Term); erst ab Stufe 3 rechnet das Modell
+selbst:
+
+| # | Stufe | Fläche [Gha] | Kohlenstoff [GtC] | ΔT(2150) [K] | Quelle |
+|---|---|---|---|---|---|
+| 1 | Bastin, Rohwert | — (0,9 laut Bastin) | 205,0 | — | Bastin et al. 2019, *Science* 365(6448):76–79, geprüft gegen Original und Sekundärquellen |
+| 2 | Realistische C-Dichten + Bodenkohlenstoff | — | 81,0 | — | Science-Kommentare (Veldman et al. 2019, doi:10.1126/science.aay7976; Friedlingstein et al. 2019, doi:10.1126/science.aay8060); exakte Primärquelle der 81-GtC-Zahl hinter Bezahlschranke **nicht im Volltext geprüft**, als unbelegt gekennzeichnet |
+| 3 | Nicht-Wald-Biome ausgeschlossen | 0,9488 | 81,0 | −0,2425 | `nbs.landscape` (Modell) |
+| 4 | Albedo-Filter (kein Ausgleich bis 2150) | 0,9313 | 79,51 | −0,2432 | `nbs.map_plots._breakeven_year_field` (Modell) |
+| 5 | Störungspuffer (Ensemble) | 0,9313 | 78,23 | −0,2393 | `nbs.pipeline.run_single_tree_ensemble` (Modell) |
+| 6 | **Nutzbares Potenzial** | **0,9313** | **78,2** (Band 69,8–84,7) | **−0,2393** | Kaskadenergebnis |
+
+**Nutzbares Potenzial: 78,2 GtC, entsprechend 38,2 % von Bastins
+unkorrigiertem Rohwert (205 GtC), bei 0,2393 K globaler Abkühlung 2150
+unter SSP245 auf 0,9313 Gha.**
+
+Die Größenordnungen der Stufen sind für eine Folie wichtig: der große
+Sprung liegt bei der **Literaturkorrektur** (205 → 81 GtC, −60 %), nicht
+bei den drei modellgerechneten Stufen (81 → 78,2 GtC, weitere nur −3,4 %).
+Landmaske, Albedo-Filter und Störungspuffer verfeinern eine bereits stark
+korrigierte Zahl; sie tragen nicht den Hauptteil der Kritik an Bastin.
+**Wer diese Kaskade als "unsere Korrektur von Bastin" präsentiert, sollte
+sagen, dass der größte Teil davon bereits 2019 in der Fachdiskussion
+stand** — das Modell in diesem Projekt liefert die drei kleineren, aber
+eigenständig hergeleiteten Korrekturstufen 3–5.
+
+Modellierungsentscheidung, die auf einer Folie erklärungsbedürftig ist: die
+Kohlenstoffdichte für Stufen 3–5 ist an die *gemessene* Fläche von Stufe 3
+(0,9488 Gha) verankert, nicht an Bastins eigene 0,9-Gha-Angabe — sonst
+würde Stufe 3 einen höheren Kohlenstoffwert als Stufe 2 tragen, was der
+Kaskaden-Erzählung ("jede Stufe eine Korrektur nach unten") widerspräche.
+
+## 14. Die Umkehrrechnung: mehr Fläche als die Erde hat
+
+`nbs.potential.reverse_1p5()` beantwortet: wie viele Vielfache der von
+diesem Modell identifizierten, korrigierten Art-/Flächenmischung
+(0,9488 Gha) wären nötig, um die SSP245-Basislinie ab 2050 unter 1,5 °C zu
+bringen und bis 2150 dort zu halten? Zwei Varianten:
+
+| Variante | Vielfaches der Modellfläche | Fläche [Gha] | kritisches Jahr |
+|---|---|---|---|
+| Mit Albedo und Störung (volles Modell) | 10,28 | 9,76 | 2149 |
+| Nur Kohlenstoff (kein Albedo, keine Störung) | 10,10 | 9,58 | 2149 |
+
+**Verhältnis (volles Modell / nur Kohlenstoff): 1,018.** Das volle Modell
+braucht durchweg mehr Fläche, weil der boreale Erwärmungsanteil und der
+Störungspuffer beide die Nettokühlung je Baum senken — der Effekt ist bei
+diesem global gemischten Artenportfolio mit ~2 % moderat, weil sich
+borealer Erwärmungsanteil und tropischer/gemäßigter Kühlungsvorteil in der
+Flächensumme teilweise ausgleichen (ein reiner Fichten-Fall würde einen
+deutlich größeren Unterschied zeigen, siehe der Stufe-5-Faktor in
+Abschnitt 13).
+
+**Für eine Folie, die einzige Zahl, die zählt:** beide Varianten liegen
+bereits beim rund **Zehnfachen der von diesem Modell identifizierten
+bepflanzbaren Fläche** — 9,76 bzw. 9,58 Gha, mehr als die gesamte eisfreie
+Landfläche der Erde (rund 13 Gha, gerundete literaturübliche Näherung,
+nicht aus diesem Modell gerechnet). Baumpflanzung allein hält SSP245 nicht
+unter 1,5 °C, selbst wenn jede identifizierte bepflanzbare Zelle mehrfach
+überplant würde. Das ist keine Modellschwäche, sondern die erwartete
+Schlussfolgerung eines Vortrags, der die Bastin-Kritik nachvollzieht:
+Aufforstung ist ein Baustein, kein Ersatz für Emissionsminderung.
+
+## 15. Für Plan 3, kurz zusammengefasst
+
+- Jede Karte aus `nbs.map_plots` trägt ihre Provenienz in der Fußzeile
+  (`footer_text()`) — beim Übertragen in eine Folie diese Angabe nicht
+  weglassen, sondern gegebenenfalls in Sprechertext oder Fußnote überführen.
+- Die Landmaske selbst ist gemessen (20,3 %, `"raster"`); die Verteilung
+  von Wald/Savanne/Landwirtschaft/bepflanzbar *innerhalb* des Landes ist es
+  nicht (`"fallback"`, Breitenbänder) — beide Aussagen sind unabhängig
+  voneinander und beide gehören auf eine Folie, die eine dieser Karten
+  zeigt.
+- Die 81-GtC-Zwischenstufe der Kaskade ist Literatur, keine Modellrechnung
+  — auf einer Folie nicht als "unser Ergebnis" neben den echten
+  Modellstufen 3–5 darstellen, ohne den Unterschied zu benennen.
+- Bei der Frühjahrsspitze (Abschnitt 12) den Kalendermonat für 60°N nicht
+  ohne den Zusatz "praktisch gleichauf März/April" zitieren.
+- Alle Zahlen dieses Abschnitts sind reproduzierbar über
+  `notebooks/03_potenzial_global.ipynb` — bei Zweifel an einer Zahl auf
+  einer Folie: Notebook neu ausführen, nicht die hier notierte Zahl
+  vertrauen.

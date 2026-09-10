@@ -66,6 +66,47 @@ print(t_star(r.delta_t, r.years))
 Der vorherige Stand — Komplexitätslevel 0–6, Äquivalenzverhältnis, Sobol —
 liegt unverändert unter `nbs.legacy`.
 
+## Die globale Schicht
+
+Dieselbe Kette, aber über das gesamte 0,5°-Gitter statt für einen Baum an
+einem Ort: eine echte Landmaske, Art-/Flächenzuordnung, globale Aggregation
+über alle bepflanzbaren Zellen, eine Korrekturkaskade auf Bastin et al.
+(2019) und eine Umkehrrechnung gegen 1,5 °C. Siehe
+`notebooks/03_potenzial_global.ipynb` für den vollständigen Durchlauf mit
+Abbildungen.
+
+| Modul | Liefert |
+|---|---|
+| `nbs.grid` | das gemeinsame 0,5°-Gitter (Breiten, Längen, Zellflächen) |
+| `nbs.datasources` | Registrierung, Prüfsumme und Status externer Rasterdaten |
+| `nbs.albedo_grid` | Δα, q̇ und ihr Produkt je Zelle, monatlich und im Jahresmittel |
+| `nbs.landscape` | Landmaske, Art-Zuordnung, bepflanzbare Fläche je Zelle |
+| `nbs.aggregate` | exakte Aufsummierung der Einzelbaum-Kette über das ganze Gitter |
+| `nbs.map_plots` | Karten- und Feldabbildungen für die Ergebnisfolien |
+| `nbs.potential` | die Bastin-Korrekturkaskade und die Umkehrrechnung |
+
+**Datengrundlage:** Die Albedo-Raster stammen von Duveiller, G., Hooker, J.,
+Cescatti, A. (2018), *Sci. Data* 5, 180014 — "Biophysical effects of
+vegetation cover change from satellite and models" (JRC-Datensatz v2.0,
+CC-BY-4.0, (c) European Union). Sie sind nicht Teil des Repositories (`data/`
+ist git-ignoriert) und müssen vor dem Ausführen der globalen Schicht geholt
+werden:
+
+```bash
+uv run python scripts/fetch_data.py duveiller_bph
+```
+
+Ohne diese Raster fällt jede betroffene Funktion sichtbar auf die
+Breitengrad-Ersatztabellen aus Plan 1 zurück (`product_provenance() ==
+"fallback"`, `land_mask_provenance() == "fallback_alles_land"`) statt eine
+plausibel aussehende, aber erfundene Karte zu zeichnen. Selbst mit den
+Rastern vorhanden ist die Art-/Flächenzuordnung innerhalb der Landmaske
+weiterhin ein Fallback auf fünf Breitenbänder (`nbs.landscape.provenance()
+== "fallback"`), da keine Landbedeckungs-/GEZ-Rasterquelle registriert ist —
+und ein erheblicher Teil des Albedo-Produkts ist nur zonal, nicht lokal
+gemessen. Jede Abbildung aus `nbs.map_plots` trägt diese Provenienzangaben
+in ihrer Fußzeile.
+
 ## Quick Start
 
 The examples below exercise the previous framework, unchanged under `nbs.legacy` (see
@@ -182,10 +223,18 @@ src/nbs/
   plots.py      Abbildungen für die Ergebnisfolien
   constants.py  gemeinsame physikalische Konstanten
   fair_module.py
+  grid.py           gemeinsames 0,5°-Gitter
+  datasources.py    externe Rasterquellen, Prüfsumme, Status
+  albedo_grid.py    Δα, q̇ und ihr Produkt je Rasterzelle (Duveiller et al. 2018)
+  landscape.py      Landmaske, Art-Zuordnung, bepflanzbare Fläche je Zelle
+  aggregate.py      Kette über das ganze Gitter aufsummiert
+  map_plots.py      Karten- und Feldabbildungen (globale Schicht)
+  potential.py      Bastin-Korrekturkaskade, Umkehrrechnung 1,5 °C
   legacy/       vorheriger Stand, Tests laufen weiter
 tests/
 notebooks/
-  01_einzelbaum.ipynb
+  01_einzelbaum.ipynb        ein Baum, ein Ort
+  03_potenzial_global.ipynb  die globale Schicht: Kaskade, Karte, Umkehrrechnung
   archiv/
 ```
 
