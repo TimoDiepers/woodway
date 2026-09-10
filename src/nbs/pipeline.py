@@ -9,7 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.config import ModelConfig
-from nbs.constants import YEARS
+from nbs.constants import T_START, YEARS
 from nbs.forcing import (
     co2_flux_kg_per_yr,
     fallback_delta_alpha,
@@ -47,6 +47,10 @@ class SiteResult:
     phi_total: NDArray
     delta_t: NDArray
     trajectory: TreeTrajectory
+    plant_year: int
+    """Calendar year the tree was planted. The time axis is the common YEARS
+    grid regardless, so cohorts planted in different years can be compared on
+    one figure without realigning anything."""
     config: ModelConfig
     """The model-complexity switches (nbs.config.ModelConfig) that produced
     this result. Carried on the result itself so several variants can sit in
@@ -124,6 +128,7 @@ def run_single_tree(
     q_sw: float | None = None,
     config: ModelConfig | None = None,
     seed: int = 0,
+    plant_year: int = T_START,
 ) -> SiteResult:
     """One tree, one place, under the model-complexity choices in *config*.
 
@@ -140,9 +145,9 @@ def run_single_tree(
     background = _background_temperature(scenario)
     if config.disturbance == "stochastic":
         rng = np.random.default_rng(seed)
-        traj = simulate_stochastic(sp, background, rng)
+        traj = simulate_stochastic(sp, background, rng, plant_year=plant_year)
     else:
-        traj = simulate_deterministic(sp, background)
+        traj = simulate_deterministic(sp, background, plant_year=plant_year)
     f_co2, f_alb = _forcings(
         traj, species_key, lat_deg, scenario, delta_alpha, q_sw, config
     )
@@ -159,6 +164,7 @@ def run_single_tree(
         phi_total=phi,
         delta_t=delta_t,
         trajectory=traj,
+        plant_year=plant_year,
         config=config,
     )
 
@@ -172,6 +178,7 @@ def run_single_tree_ensemble(
     delta_alpha: float | None = None,
     q_sw: float | None = None,
     config: ModelConfig | None = None,
+    plant_year: int = T_START,
 ) -> tuple[SiteResult, NDArray]:
     """Deterministic (or config-selected) run plus a Monte-Carlo ensemble.
 
@@ -188,11 +195,20 @@ def run_single_tree_ensemble(
     sp = _species_for(species_key, config)
     background = _background_temperature(scenario)
     deterministic = run_single_tree(
-        species_key, lat_deg, scenario, delta_alpha, q_sw, config=config, seed=seed
+        species_key,
+        lat_deg,
+        scenario,
+        delta_alpha,
+        q_sw,
+        config=config,
+        seed=seed,
+        plant_year=plant_year,
     )
 
     g_t = green_temperature(scenario)
-    members = simulate_ensemble(sp, background, n_members=n_members, seed=seed)
+    members = simulate_ensemble(
+        sp, background, n_members=n_members, seed=seed, plant_year=plant_year
+    )
 
     ensemble = np.empty((n_members, len(YEARS)))
     for i, traj in enumerate(members):

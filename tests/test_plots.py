@@ -63,3 +63,11 @@ def test_fan_figure_is_written(tmp_path, result):
     ensemble = result.delta_t[None, :] + rng.normal(scale=spread, size=(30, len(YEARS)))
     p = plot_disturbance_fan(result, ensemble, str(tmp_path / "e4.png"))
     assert (tmp_path / "e4.png").stat().st_size > 10_000
+
+
+@pytest.mark.slow
+def test_planting_time_figure_is_written(tmp_path):
+    from nbs.plots import plot_planting_time
+
+    plot_planting_time(str(tmp_path / "pz.png"))
+    assert (tmp_path / "pz.png").stat().st_size > 10_000

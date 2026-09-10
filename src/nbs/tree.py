@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.constants import YEARS
+from nbs.constants import T_START, YEARS
 from nbs.species import Species
 
 
@@ -109,9 +109,25 @@ def _integrate(
     t_background_k: NDArray,
     dt: float,
     rng: np.random.Generator | None,
+    plant_year: int = T_START,
 ) -> TreeTrajectory:
-    """Shared integrator. ``rng is None`` gives the expected-value run."""
+    """Shared integrator. ``rng is None`` gives the expected-value run.
+
+    ``plant_year`` is the calendar year the seedling goes into the ground. The
+    time axis stays the common ``YEARS`` grid for every cohort -- a later
+    cohort is not a shifted copy of an earlier one, because the disturbance
+    probability it meets at every age is read from the *calendar* year it
+    lives through (p = p0 exp(gamma T_background), and T_background rises).
+    Before ``plant_year`` there is no tree: no stock, no debris, no uptake,
+    and nothing a disturbance could take.
+    """
     n_years = len(YEARS)
+    iy_plant = int(plant_year) - T_START
+    if not 0 <= iy_plant < n_years:
+        raise ValueError(
+            f"plant_year={plant_year} liegt ausserhalb der Studienachse "
+            f"{T_START}-{int(YEARS[-1])}"
+        )
     p_annual = disturbance_probability(sp, t_background_k)
     steps_per_year = int(round(1.0 / dt))
     if abs(steps_per_year * dt - 1.0) > 1e-9:
@@ -134,7 +150,7 @@ def _integrate(
 
         p_step = 1.0 - (1.0 - p_annual[iy]) ** dt
 
-        for _ in range(steps_per_year):
+        for _ in range(steps_per_year if iy >= iy_plant else 0):
             # growth: exact closed-form step, see advance_stock
             grown = advance_stock(m, dt, sp) - m
 
@@ -172,10 +188,13 @@ def _integrate(
 
 
 def simulate_deterministic(
-    sp: Species, t_background_k: NDArray, dt: float = 1.0 / 12.0
+    sp: Species,
+    t_background_k: NDArray,
+    dt: float = 1.0 / 12.0,
+    plant_year: int = T_START,
 ) -> TreeTrajectory:
     """Expected-value run: disturbance drains stock continuously at p * E[s]."""
-    return _integrate(sp, t_background_k, dt, rng=None)
+    return _integrate(sp, t_background_k, dt, rng=None, plant_year=plant_year)
 
 
 def simulate_stochastic(
@@ -183,9 +202,10 @@ def simulate_stochastic(
     t_background_k: NDArray,
     rng: np.random.Generator,
     dt: float = 1.0 / 12.0,
+    plant_year: int = T_START,
 ) -> TreeTrajectory:
     """One Monte-Carlo realisation with discrete disturbance events."""
-    return _integrate(sp, t_background_k, dt, rng=rng)
+    return _integrate(sp, t_background_k, dt, rng=rng, plant_year=plant_year)
 
 
 def simulate_ensemble(
@@ -194,10 +214,11 @@ def simulate_ensemble(
     n_members: int = 1000,
     seed: int = 0,
     dt: float = 1.0 / 12.0,
+    plant_year: int = T_START,
 ) -> list[TreeTrajectory]:
     """``n_members`` independent realisations from one seed sequence."""
     seeds = np.random.SeedSequence(seed).spawn(n_members)
     return [
-        simulate_stochastic(sp, t_background_k, np.random.default_rng(s), dt)
+        simulate_stochastic(sp, t_background_k, np.random.default_rng(s), dt, plant_year)
         for s in seeds
     ]

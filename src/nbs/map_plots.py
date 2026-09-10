@@ -60,6 +60,16 @@ from nbs.constants import T_END, T_START, YEARS  # noqa: E402
 from nbs.grid import grid_lats, grid_lons  # noqa: E402
 from nbs.landscape import assign_species  # noqa: E402
 from nbs.landscape import provenance as landscape_provenance  # noqa: E402
+from nbs.borders import CITATION as borders_citation  # noqa: E402
+from nbs.borders import add_borders, borders_available  # noqa: E402
+from nbs.landscape import land_mask, plantable_area_m2  # noqa: E402
+from nbs.recommend import (  # noqa: E402
+    MK_PER_MHA_PER_K_PER_HA,
+    M2_PER_GHA,
+    improvement,
+    recommend,
+    summary,
+)
 from nbs.species import SPECIES, get_species  # noqa: E402
 
 DPI = 300
@@ -76,6 +86,20 @@ _COLOR_WARM = "#b2182b"
 _COLOR_COOL = "#2166ac"
 _COLOR_NEVER = "#7a0421"
 _COLOR_UNPLANTABLE = "#e5e5e5"
+_COLOR_LAND = "#c9c9c9"
+"""Land that exists but is not available (forest, cropland, savanna, ice)."""
+
+_SPECIES_COLORS: dict[str, str] = {
+    "tropical_mixed": "#1b7837",
+    "eucalyptus_grandis": "#7fbc41",
+    "fagus_sylvatica": "#fdb863",
+    "pinus_sylvestris": "#8073ac",
+    "picea_abies": "#2166ac",
+}
+"""One hue per species, colour-blind-safe (PRGn/PuOr families).
+
+Fixed here rather than pulled from a colormap so the same species keeps the
+same colour on every figure and slide it appears on."""
 
 
 def _save(fig, out_path: str) -> str:
@@ -90,6 +114,16 @@ def _save(fig, out_path: str) -> str:
 def _de1(value: float) -> str:
     """One-decimal German number formatting, e.g. 48.2 -> '48,2'."""
     return f"{value:.1f}".replace(".", ",")
+
+
+def _de2(value: float) -> str:
+    """Two-decimal German number formatting, e.g. 0.9488 -> '0,95'.
+
+    Gha totals need the second decimal: the whole plantable area rounds to
+    "0,9 Gha" at one decimal, which loses the difference between 0.85 and
+    0.95 -- a hundred million hectares.
+    """
+    return f"{value:.2f}".replace(".", ",")
 
 
 def _de_pct(fraction: float) -> str:
@@ -131,6 +165,7 @@ def footer_text(species_key: str = _FOOTER_SPECIES) -> str:
         f"{sp.name_de}: {_de_pct(frac['lokal'])} lokal erhoben, "
         f"{_de_pct(frac['zonal'])} zonal extrapoliert, "
         f"{_de_pct(frac['tabelle'])} Breitentabelle"
+        + (f"  |  {borders_citation}" if borders_available() else "")
     )
 
 
@@ -170,12 +205,20 @@ def _lon_formatter(deg: float, _pos=None) -> str:
 
 
 def _add_lat_lon_grid(ax) -> None:
-    """Plain-equirectangular gridlines and degree labels -- no cartopy.
+    """Plain-equirectangular graticule, coastlines and national borders.
 
-    The maps' message is the sign/break-even pattern by latitude, not
-    coastlines, so a labelled graticule is enough context (per the task-6
-    brief: "Küstenlinien sind verzichtbar").
+    No cartopy: the fields are drawn in raw lon/lat, so Natural Earth's
+    1:110m line strings plot directly in the same coordinates (see
+    ``nbs.borders``). Borders go on before the limits are fixed, so the
+    LineCollection can never autoscale the axes out of the -180..180 /
+    -90..90 frame.
+
+    An earlier version deliberately left coastlines off ("the message is the
+    pattern by latitude"). That was wrong for a talk: without a coastline a
+    viewer cannot tell Siberia from the North Pacific, and the boreal
+    argument lives on exactly that distinction.
     """
+    add_borders(ax)
     ax.set_xlim(-180, 180)
     ax.set_ylim(-90, 90)
     ax.set_xticks(np.arange(-180, 181, 60))
@@ -394,9 +437,169 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
     return _save(fig, out_path)
 
 
+def _blocks(field: NDArray, factor: int) -> NDArray:
+    """Reshape a (360, 720) grid into (360/f, 720/f, f*f) blocks.
+
+    Display-only aggregation. The plantable/excluded split inside a latitude
+    row is a synthetic per-row permutation (see nbs.landscape) and therefore
+    scatters single plantable cells across the row; at 0.5 degrees that reads
+    as noise. Binning to whole blocks turns it into the quantity the split
+    actually carries -- the per-row *count* -- while keeping continents
+    recognisable. It changes no number: every total in the legend is summed
+    from the unbinned grid.
+    """
+    n_lat, n_lon = field.shape
+    return (
+        field.reshape(n_lat // factor, factor, n_lon // factor, factor)
+        .transpose(0, 2, 1, 3)
+        .reshape(n_lat // factor, n_lon // factor, factor * factor)
+    )
+
+
+def plot_planting_map(
+    out_path: str,
+    *,
+    year: int = 2100,
+    scenario: str = "ssp245",
+    block_deg: float = 2.0,
+) -> str:
+    """Folie P: available afforestation area, and what belongs on it.
+
+    Hue is the recommended species (``nbs.recommend.recommend`` -- the
+    admissible species with the most cooling per hectare at *year*, not the
+    latitude band's default). Saturation is how much of the block is actually
+    available: a fully saturated block is entirely plantable, a pale one has
+    a few free hectares in an otherwise forested, farmed or frozen
+    neighbourhood. Grey is land with nothing available.
+
+    The right-hand bars carry the numbers the map cannot: available area per
+    recommended species [Gha], with the latitude-band assignment behind it as
+    a hollow bar, so the difference between "what a band model plants" and
+    "what cools most" is visible as area, not just as hue.
+    """
+    ratio = block_deg / 0.5
+    factor = int(round(ratio))
+    if abs(ratio - factor) > 1e-9 or factor < 1 or 360 % factor or 720 % factor:
+        raise ValueError(f"block_deg={block_deg} teilt das 0,5°-Raster nicht auf")
+
+    rec = recommend(year, scenario)
+    stats = summary(year, scenario)
+    gain = improvement(year, scenario)
+
+    area = plantable_area_m2()
+    cell_total = np.where(land_mask(), 1.0, 0.0)
+
+    area_blocks = _blocks(area, factor)
+    land_blocks = _blocks(cell_total, factor)
+    keys = list(SPECIES)
+    key_idx = np.full(area.shape, -1, dtype=int)
+    for i, k in enumerate(keys):
+        key_idx[rec.species == k] = i
+    idx_blocks = _blocks(key_idx, factor)
+
+    n_lat_b, n_lon_b, _ = area_blocks.shape
+    rgba = np.zeros((n_lat_b, n_lon_b, 4))
+    block_area = area_blocks.sum(axis=2)
+    max_area = block_area.max()
+
+    for i in range(n_lat_b):
+        for j in range(n_lon_b):
+            has_land = land_blocks[i, j].sum() > 0
+            if not has_land:
+                continue
+            if block_area[i, j] <= 0.0:
+                rgba[i, j] = mcolors.to_rgba(_COLOR_LAND, alpha=1.0)
+                continue
+            # Dominant recommendation by available area, not by cell count:
+            # a block's colour should answer "most of the free hectares here
+            # want which species", which is the planting decision.
+            weights = np.zeros(len(keys))
+            for s_i in range(len(keys)):
+                sel = idx_blocks[i, j] == s_i
+                weights[s_i] = area_blocks[i, j][sel].sum()
+            dominant = keys[int(np.argmax(weights))]
+            share = float(block_area[i, j] / max_area)
+            rgb = np.array(mcolors.to_rgb(_SPECIES_COLORS[dominant]))
+            # Blend towards the land grey by availability rather than using
+            # alpha: alpha over a white canvas would wash out to white and
+            # read as "no land", which is a different statement.
+            base = np.array(mcolors.to_rgb(_COLOR_LAND))
+            rgba[i, j, :3] = base + (rgb - base) * (0.25 + 0.75 * share)
+            rgba[i, j, 3] = 1.0
+
+    fig, (ax, ax_bar) = plt.subplots(
+        1, 2, figsize=(15.5, 6.8), gridspec_kw={"width_ratios": [3.1, 1.0]}
+    )
+    ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
+    ax.set_xlim(-180, 180)
+    ax.set_ylim(-90, 90)
+    _add_lat_lon_grid(ax)
+
+    total_gha = float(area.sum() / M2_PER_GHA)
+    legend_handles = [
+        Patch(facecolor=_SPECIES_COLORS[k], label=get_species(k).name_de)
+        for k in keys
+        if stats[k]["flaeche_gha"] > 0.0
+    ]
+    legend_handles.append(Patch(facecolor=_COLOR_LAND, label="Land, nichts verfügbar"))
+    ax.legend(handles=legend_handles, loc="lower left", frameon=True, fontsize=8.5)
+    ax.set_title(
+        f"Verfügbare Fläche: {_de2(total_gha)} Gha  ·  "
+        f"empfohlene Art (stärkste Kühlung je Hektar bis {year})\n"
+        f"Farbsättigung = verfügbarer Anteil der {_de1(block_deg)}°-Zelle"
+    )
+
+    order = sorted(keys, key=lambda k: -stats[k]["flaeche_gha"])
+    y = np.arange(len(order))
+    ax_bar.barh(
+        y,
+        [stats[k]["flaeche_gha"] for k in order],
+        color=[_SPECIES_COLORS[k] for k in order],
+        height=0.62,
+        label="empfohlen",
+    )
+    ax_bar.barh(
+        y,
+        [stats[k]["flaeche_zugewiesen_gha"] for k in order],
+        height=0.62,
+        facecolor="none",
+        edgecolor="0.25",
+        linestyle="--",
+        linewidth=1.2,
+        label="Breitenband-Zuordnung",
+    )
+    ax_bar.set_yticks(y)
+    ax_bar.set_yticklabels([])
+    # Names inside the panel rather than on the axis: the German species names
+    # are long enough that left-hand tick labels reach into the map.
+    for pos, key in zip(y, order):
+        ax_bar.text(
+            0.012,
+            pos - 0.42,
+            get_species(key).name_de,
+            fontsize=8.5,
+            va="bottom",
+            ha="left",
+        )
+    ax_bar.invert_yaxis()
+    ax_bar.set_xlabel("verfügbare Fläche [Gha]")
+    ax_bar.legend(fontsize=8, loc="lower right")
+    ax_bar.grid(axis="x", alpha=0.3)
+    ax_bar.set_title(
+        "Artenwahl statt Breitenband:\n"
+        f"{_de1(gain['gewinn_anteil'] * 100)} % mehr "
+        f"Kühlung in {year}",
+        fontsize=10,
+    )
+
+    _add_footer(fig)
+    return _save(fig, out_path)
+
+
 __all__ = [
     "footer_text",
     "plot_breakeven_map",
     "plot_horizon_field",
+    "plot_planting_map",
     "plot_sign_map",
 ]

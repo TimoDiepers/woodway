@@ -102,3 +102,55 @@ def test_footer_is_composable_for_another_species():
 
     footer = footer_text("fagus_sylvatica")
     assert "Rotbuche" in footer
+
+
+def test_the_graticule_helper_also_draws_coastlines_and_borders():
+    """Every geographic map goes through _add_lat_lon_grid, so the borders
+    belong there rather than in each plotting function -- this is what makes
+    "all maps have borders" true by construction instead of by review."""
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import LineCollection
+
+    from nbs.map_plots import _add_lat_lon_grid
+
+    fig, ax = plt.subplots()
+    _add_lat_lon_grid(ax)
+    line_collections = [c for c in ax.collections if isinstance(c, LineCollection)]
+    assert len(line_collections) == 2  # coastline + country borders
+    assert ax.get_xlim() == (-180.0, 180.0)
+    assert ax.get_ylim() == (-90.0, 90.0)
+    plt.close(fig)
+
+
+def test_footer_names_the_border_source():
+    from nbs.map_plots import footer_text
+
+    assert "Natural Earth" in footer_text()
+
+
+@pytest.mark.slow
+def test_planting_map_is_written(tmp_path):
+    from nbs.map_plots import plot_planting_map
+
+    plot_planting_map(str(tmp_path / "p5.png"))
+    assert (tmp_path / "p5.png").stat().st_size > 10_000
+
+
+def test_planting_map_rejects_a_block_size_that_does_not_divide_the_grid():
+    from nbs.map_plots import plot_planting_map
+
+    with pytest.raises(ValueError, match="teilt das 0,5°-Raster nicht"):
+        plot_planting_map("unused.png", block_deg=0.7)
+
+
+def test_block_aggregation_preserves_every_cell_exactly():
+    """The binning is display-only: it may regroup cells, never lose or
+    duplicate them, or the legend's Gha totals would stop matching the map."""
+    from nbs.map_plots import _blocks
+
+    field = np.arange(360 * 720, dtype=float).reshape(360, 720)
+    blocks = _blocks(field, 4)
+    assert blocks.shape == (90, 180, 16)
+    assert np.array_equal(np.sort(blocks.ravel()), field.ravel())
+    # Block (0, 0) must be the top-left 4x4 corner, not a strided sample.
+    assert np.array_equal(np.sort(blocks[0, 0]), np.sort(field[:4, :4].ravel()))
