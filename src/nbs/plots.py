@@ -72,12 +72,24 @@ def plot_tree_inputs(result: SiteResult, out_path: str) -> str:
 def plot_decomposition(result: SiteResult, out_path: str) -> str:
     """Slide E3: forcing above, temperature below, both split by channel.
 
-    Two panels rather than one, not because the contrast between channels is
-    sharper in the forcing than in the temperature — the two panels are in
-    fact nearly identical, because the temperature Green's function's memory
-    is short relative to the timescale on which the forcing varies. The real
-    difference the second panel shows is timing: the net forcing crosses
-    zero about four years before the net temperature does.
+    Two panels rather than one, kept deliberately even though the two curve
+    shapes are in fact nearly identical — the temperature Green's function's
+    memory is short relative to the timescale on which the forcing varies,
+    so ΔT ≈ φ · equilibrium sensitivity. Collapsing to one panel would save
+    space but would throw away the one thing this figure can show that a
+    single panel cannot: forcing and temperature are two independently
+    computed chains (φ integrates the two physical channels directly; ΔT is
+    their convolution with the temperature Green's function) that land on
+    the same story — itself a consistency check worth showing on the core
+    result slide.
+
+    The real difference between the panels is timing, and at this line
+    width it is otherwise invisible: the net forcing settles into permanent
+    cooling a few years before the net temperature does (thermal inertia).
+    Both zero-crossings (``t*`` for φ and for ΔT, using the same "last sign
+    change" definition as ``nbs.metrics.t_star``) are marked explicitly and
+    the lag between them is annotated, so the delay is visible instead of
+    lost in the line.
     """
     g = green_temperature(result.scenario)
     dt_carbon = convolve_response(g, result.phi_co2)
@@ -101,18 +113,28 @@ def plot_decomposition(result: SiteResult, out_path: str) -> str:
     axes[1].set_ylabel("Temperatur\n[10$^{-15}$ K je Baum]")
     axes[1].set_xlabel("Jahr")
 
-    ts = t_star(result.delta_t, y)
-    if np.isfinite(ts):
-        axes[1].axvline(ts, color=C_NET, ls=":", lw=1)
-        axes[1].annotate(f"t* = {ts:.0f}", (ts, 0.0), textcoords="offset points",
-                         xytext=(6, 10), fontsize=9)
-    else:
+    ts_phi = t_star(result.phi_total, y)
+    ts_dt = t_star(result.delta_t, y)
+
+    if np.isfinite(ts_phi):
+        axes[0].axvline(ts_phi, color=C_NET, ls=":", lw=1)
+        axes[0].annotate(f"t*$_\\varphi$ = {ts_phi:.0f}", (ts_phi, 0.0),
+                         textcoords="offset points", xytext=(6, 10), fontsize=9)
+    if np.isfinite(ts_dt):
+        axes[1].axvline(ts_dt, color=C_NET, ls=":", lw=1)
+        axes[1].annotate(f"t*$_{{\\Delta T}}$ = {ts_dt:.0f}", (ts_dt, 0.0),
+                         textcoords="offset points", xytext=(6, 10), fontsize=9)
+    if not (np.isfinite(ts_phi) and np.isfinite(ts_dt)):
         axes[1].annotate("kein t* im Horizont", (y[len(y) // 2], 0.0),
                          textcoords="offset points", xytext=(0, 10), fontsize=9)
+    else:
+        lag = ts_dt - ts_phi
+        fig.text(0.5, 0.965, f"thermische Trägheit: φ wird {lag:.0f} Jahre vor ΔT dauerhaft negativ",
+                  ha="center", fontsize=10, style="italic")
 
     for ax in axes:
         ax.grid(alpha=0.25)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
     return _save(fig, out_path)
 
 
