@@ -19,6 +19,7 @@ from nbs.albedo_grid import (
     DELTA_ALPHA_MIN_ABS,
     TIER_NAMES,
     _annual_mean_of_monthly_product,
+    _interpolate_missing_months,
     _load_monthly,
     _product_of_annual_means,
     _regrid,
@@ -214,6 +215,50 @@ def test_alpha_q_product_is_fully_finite_for_every_species():
     for key in SPECIES:
         p = alpha_q_product(key)
         assert np.all(np.isfinite(p)), f"{key}: nicht-endliche Zellen nach der Fuellung"
+
+
+def test_monthly_product_is_fully_finite_for_every_species():
+    """A locally retrieved cell can still miss single months -- Duveiller has
+    no albedo under snow, in polar night or under persistent cloud. Those
+    months must be filled too, or the annual mean silently becomes a mean
+    over the sunny months only."""
+    for key in SPECIES:
+        mp = monthly_product(key)
+        assert np.all(np.isfinite(mp)), f"{key}: Monate ohne Wert nach der Fuellung"
+
+
+def test_alpha_q_product_is_the_plain_twelve_month_mean():
+    """Plain mean, not nanmean: every month counts with weight 1/12."""
+    for key in SPECIES:
+        assert np.allclose(
+            alpha_q_product(key), np.mean(monthly_product(key), axis=0), rtol=0.0, atol=1e-9
+        ), key
+
+
+def test_missing_months_are_interpolated_cyclically_within_the_cell():
+    """Gaps are bridged from the same cell's neighbouring months, across the
+    year boundary; cells with no month at all stay NaN for the zonal and
+    table tiers to handle."""
+    monthly = np.full((12, 1, 3), np.nan)
+    monthly[:, 0, 0] = np.arange(12.0)        # complete: untouched
+    monthly[:, 0, 1] = 10.0
+    monthly[[0, 1, 11], 0, 1] = np.nan        # winter gap across Dec/Jan
+    monthly[2, 0, 1] = 40.0                   # March
+    monthly[10, 0, 1] = 0.0                   # November
+    # column 2: no month at all
+
+    filled = _interpolate_missing_months(monthly)
+
+    assert np.array_equal(filled[:, 0, 0], np.arange(12.0))
+    # Nov = 0 -> Mar = 40 over four steps: Dec 10, Jan 20, Feb 30
+    assert filled[[11, 0, 1], 0, 1] == pytest.approx([10.0, 20.0, 30.0])
+    assert np.all(np.isnan(filled[:, 0, 2]))
+
+
+def test_single_month_cell_is_held_constant():
+    monthly = np.full((12, 1, 1), np.nan)
+    monthly[5, 0, 0] = -7.0
+    assert np.allclose(_interpolate_missing_months(monthly)[:, 0, 0], -7.0)
 
 
 def test_provenance_fractions_sum_to_one_and_local_is_a_minority():

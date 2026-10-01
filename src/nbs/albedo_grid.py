@@ -273,6 +273,34 @@ def _nanmean_over_months(monthly: NDArray) -> NDArray:
         return np.nanmean(monthly, axis=0)
 
 
+def _interpolate_missing_months(monthly: NDArray) -> NDArray:
+    """Bridge missing months of a (12, lat, lon) field within each cell.
+
+    A cell with a local retrieval can still lack single months: Duveiller
+    has no albedo under snow, in polar night or under persistent cloud
+    (for transition 38, 47 % of the local cells miss at least one month,
+    mostly November to February). Averaging only the months that exist
+    weights the annual mean towards the months with data. Each gap is
+    filled linearly from the same cell's neighbouring months, wrapping
+    across the year boundary (December borders January). A cell with a
+    single valid month is held at that value; a cell with none stays NaN
+    for the zonal and table tiers.
+    """
+    out = monthly.copy()
+    n_valid = np.isfinite(monthly).sum(axis=0)
+    months = np.arange(12)
+    for i, j in np.argwhere((n_valid > 0) & (n_valid < 12)):
+        series = monthly[:, i, j]
+        ok = np.isfinite(series)
+        if ok.sum() == 1:
+            out[:, i, j] = series[ok][0]
+            continue
+        xs = np.concatenate([months[ok] - 12, months[ok], months[ok] + 12])
+        ys = np.tile(series[ok], 3)
+        out[:, i, j] = np.interp(months, xs, ys)
+    return out
+
+
 @lru_cache(maxsize=None)
 def _delta_alpha_grid_cached(species_key: str, baseline: str, extended: bool) -> NDArray:
     a = _load_monthly("albedo", species_key, baseline, extended)
@@ -387,6 +415,10 @@ def _monthly_product_grid_cached(species_key: str, baseline: str, extended: bool
 #                  DELTA_ALPHA_MIN_ABS guard and the quotient's zonal climat-
 #                  ology already apply upstream of this tier -- both operate
 #                  within a co-occurrence cell, not across cells with none).
+#                  Months without a retrieval inside such a cell are bridged
+#                  from its own neighbouring months first
+#                  (_interpolate_missing_months), so the annual value is a
+#                  true twelve-month mean.
 #   1 "zonal"   -- no local retrieval, but the species' own transition has at
 #                  least one local cell somewhere in the same
 #                  ZONAL_BIN_WIDTH_DEG-wide latitude band (signed latitude,
@@ -520,6 +552,9 @@ def _monthly_product_native_tiered_cached(
     if monthly_raw is None or lat is None:
         return None
 
+    # Local cells first get their own missing months bridged, so that every
+    # month counts with weight 1/12 in the annual mean below.
+    monthly_raw = _interpolate_missing_months(monthly_raw)
     raw_annual = _nanmean_over_months(monthly_raw)
     filled_annual, tier = _fill_tiers_native(raw_annual, lat)
 
