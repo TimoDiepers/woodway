@@ -17,7 +17,8 @@ from nbs.animations import (
     carbon_curve_figure,
     albedo_watts_monthly,
     carbon_map_animation,
-    cumulative_uptake_kg_co2,
+    site_key,
+    site_uptake_kg_co2,
     interpolate_frames,
     site_cell,
     species_range_mask,
@@ -26,26 +27,29 @@ from nbs.constants import YEARS
 from nbs.species import get_species
 
 
-def test_both_sites_lie_inside_the_spruce_range():
+def test_both_sites_lie_on_reforestable_cells_with_a_typical_forest():
     mask = species_range_mask()
     for s in SITES:
-        assert mask[site_cell(s)], f"{s.name} liegt nicht im Fichtengebiet"
+        assert mask[site_cell(s)], f"{s.name}: keine wiederbewaldbare Zelle mit Waldtyp"
+        assert site_key(s).startswith("mf_"), f"{s.name}: typischer Wald ist {site_key(s)}"
 
 
 def test_cumulative_uptake_is_on_the_study_axis_and_ends_positive():
-    u = cumulative_uptake_kg_co2()
-    assert u.shape == YEARS.shape
-    assert u[-1] > 0.0
+    for s in SITES:
+        u = site_uptake_kg_co2(s)
+        assert u.shape == YEARS.shape
+        assert u[-1] > 0.0
 
 
 def test_shell_one_uptake_ignores_warming_feedback():
     """Shell 1 has no climate yet: the curve must not depend on background T,
     so it differs from the full model's (which raises the disturbance rate)."""
-    from nbs.pipeline import run_single_tree
     from nbs.constants import M_CO2_PER_C
+    from nbs.pipeline import run_single_tree
 
-    full = M_CO2_PER_C * np.cumsum(run_single_tree("picea_abies", 60.0).trajectory.net_uptake_kgC_yr)
-    assert cumulative_uptake_kg_co2()[-1] > full[-1]
+    s = SITES[0]
+    full = run_single_tree(site_key(s), s.lat, lon_deg=s.lon).trajectory.net_uptake_kgC_yr
+    assert not np.allclose(site_uptake_kg_co2(s), M_CO2_PER_C * np.cumsum(full))
 
 
 def test_interpolated_frames_hit_each_month_and_wrap_to_january():
@@ -58,18 +62,27 @@ def test_interpolated_frames_hit_each_month_and_wrap_to_january():
 
 
 def test_albedo_watts_are_the_unsmoothed_monthly_product_per_tree():
+    """Each cell with its typical forest type: at the sites, the monthly product
+    of that type times the stand area, unsmoothed."""
     watts, measured = albedo_watts_monthly()
-    area = get_species("picea_abies").stand_area_m2
-    assert np.allclose(watts, -albedo_grid.monthly_product("picea_abies") * area)
+    for s in SITES:
+        key = site_key(s)
+        cell = (slice(None), *site_cell(s))
+        expected = -albedo_grid.monthly_product(key)[cell] * get_species(key).stand_area_m2
+        assert np.allclose(watts[cell], expected)
     assert measured.dtype == bool and measured.any()
 
 
 def test_annual_mean_at_the_sites_matches_the_storyline_numbers():
-    """Aachen 43.6 W, Archangelsk 65.3 W -- the values quoted in the storyline."""
+    """Annual means quoted on the albedo slide (fakten.json, baeume.orte.*.licht_w)."""
+    import json
+    from pathlib import Path
+
+    facts = json.loads((Path(__file__).resolve().parents[1] / "docs/slides/chart_data/fakten.json").read_text())
     watts, _ = albedo_watts_monthly()
-    expected = {"Aachen": 43.6, "Archangelsk": 65.3}
     for s in SITES:
-        assert watts[(slice(None), *site_cell(s))].mean() == pytest.approx(expected[s.name], abs=0.05)
+        expected = facts["baeume"]["orte"][s.name]["licht_w"]
+        assert watts[(slice(None), *site_cell(s))].mean() == pytest.approx(expected, rel=1e-6)
 
 
 @pytest.mark.slow

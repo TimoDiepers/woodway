@@ -70,7 +70,7 @@ def test_global_plantable_area_is_plausible():
 
 
 def test_provenance_is_reported():
-    assert provenance() in {"raster", "fallback"}
+    assert provenance() in {"raster", "fallback", "daten_walker_hasler"}
 
 
 # --- Land mask: regression tests for the 71.3%-over-ocean defect ----------
@@ -88,18 +88,26 @@ def test_land_mask_provenance_is_reported():
     assert land_mask_provenance() in {"raster", "fallback_alles_land"}
 
 
+def _cru_land():
+    from nbs.dac_climate import climate_grid
+
+    return np.isfinite(climate_grid()["t_mean_c"])
+
+
 def test_no_plantable_area_outside_the_land_mask():
-    """The defect this fix targets, directly: a plantable cell wherever
-    land_mask() is False is exactly the 71.3%-over-ocean bug."""
+    """The defect this guards against: plantable area over open ocean. Since
+    2026-10-05 the area is Walker et al.'s reforestable pixels, i.e. land by
+    construction; against the CRU land grid only coastal cells may differ
+    (< 0.1 % of the area). The Duveiller footprint (land_mask) is not the
+    reference any more -- it misses vegetated coasts and islands."""
     area = plantable_area_m2()
-    land = land_mask()
-    assert np.all(area[~land] == 0.0), "bepflanzbare Flaeche ausserhalb der Landmaske"
+    assert area[~_cru_land()].sum() < 1e-3 * area.sum(), "bepflanzbare Flaeche ueber dem Meer"
 
 
 def test_no_species_assigned_outside_the_land_mask():
     sp = assign_species()
-    land = land_mask()
-    assert np.all(sp[~land] == None)  # noqa: E711
+    off = (sp != None) & ~_cru_land()  # noqa: E711
+    assert plantable_area_m2()[off].sum() < 1e-3 * plantable_area_m2().sum()
 
 
 def test_land_mask_covers_a_plausible_fraction_of_the_globe():
@@ -137,16 +145,12 @@ def test_cell_and_area_fractions_of_the_land_mask_are_not_interchangeable():
 
 
 def test_no_plantable_cell_in_the_mostly_ocean_55_to_70_south_band():
-    """55-70S is almost entirely Southern Ocean -- the only vegetated land
-    there is a sliver of southern Patagonia/Tierra del Fuego and a handful
-    of sub-Antarctic islands, none of which this half-degree grid should
-    resolve into a plantable cell once masked. This is the literal
-    60S-over-ocean failure the controller's visual check found on the
-    un-masked map."""
+    """55-70S is almost entirely Southern Ocean; only Tierra del Fuego and a few
+    islands are land. Their reforestable area must stay a sliver."""
     lats = grid_lats()
     band = (lats <= -55.0) & (lats >= -70.0)
-    sp = assign_species()
-    assert np.all(sp[band] == None), "bepflanzbare Zelle im Band 55-70 Sued"  # noqa: E711
+    area = plantable_area_m2()
+    assert area[band].sum() < 1e-3 * area.sum(), "bepflanzbare Flaeche im Band 55-70 Sued"
 
 
 def test_land_mask_is_spatially_coherent_not_confetti():

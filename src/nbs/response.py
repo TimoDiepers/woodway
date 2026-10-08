@@ -22,7 +22,7 @@ _PULSE_WM2 = 1.0
 def _to_study_length(x: NDArray) -> NDArray:
     """Pad a 125-year fair_module series to the 126-year study axis.
 
-    fair_module slices 2025..2149; YEARS runs 2025..2150 inclusive. The final
+    fair_module slices T_START..T_END-1; YEARS runs T_START..T_END inclusive. The final
     year is filled by repeating the last value, which is well inside the noise
     of a response that is nearly flat by then.
 
@@ -64,20 +64,11 @@ def green_carbon(scenario: str = "ssp245") -> NDArray:
     e-folding component of the Joos-style multi-box impulse response.
 
     Scenario dependence: this is the *marginal* response of a 1 GtCO2 pulse
-    superimposed on the full ssp245 background, not the idealised pulse
-    experiment run against a flat/pre-industrial background that produces
-    the textbook ~40% airborne fraction after 75 years (Joos et al. 2013).
-    Under ssp245, atmospheric CO2 keeps rising through the study period
-    (~424 ppm in 2025 to ~624 ppm in 2149 in this run), which weakens the
-    ocean's buffering capacity (a higher Revelle factor) and the land sink,
-    so the marginal airborne fraction of an added pulse is measurably higher
-    than the pre-industrial-background literature value, and can even creep
-    back up slightly late in the run as background warming continues to
-    weaken the sinks even after emissions start declining. This was verified
-    against this project's FaIR configuration: g_C bottoms out around
-    ~0.66 near 2046 and drifts back up to ~0.71 by 2150 (see
-    ``tests/test_response.py``). This is a real, scenario-conditioned
-    feature of the state-dependent carbon cycle, not a bug.
+    superimposed on the full scenario background, not the idealised pulse
+    experiment against a flat background (Joos et al. 2013). With the
+    calibrated FaIR (fair-calibrate 1.4.1, 2026-10-05) it decays faster than
+    Joos in the first decades (0.56 vs 0.68 after 10 years) and ends close
+    to it (0.40 vs 0.41 after 100 years); see docs/methods/klimamodell-fair.md.
     """
     from nbs.fair_module import _START_IDX, _END_IDX, _create_fair
 
@@ -124,7 +115,7 @@ def green_temperature(scenario: str = "ssp245") -> NDArray:
     timestep of lag, while leaving the raw value in place reproduces a full
     FaIR run to within numerical noise. Do not zero this value.
     """
-    from nbs.fair_module import _START_IDX, _END_IDX, _create_fair, run_fair_baseline
+    from nbs.fair_module import _START_IDX, _create_fair, _surface_temperature, run_fair_baseline
 
     baseline = run_fair_baseline(scenario)
 
@@ -133,11 +124,9 @@ def green_temperature(scenario: str = "ssp245") -> NDArray:
     solar[_START_IDX, 0, 0] += _PULSE_WM2
     f.forcing.loc[dict(specie="Solar")] = solar
     f.run()
-    perturbed = f.temperature.sel(
-        scenario=scenario, config="central", layer=0
-    ).values[_START_IDX:_END_IDX]
+    perturbed = _surface_temperature(f, scenario)  # same 1850-1900 reference as the baseline
 
-    g = (np.asarray(perturbed, dtype=float) - baseline) / _PULSE_WM2
+    g = (perturbed - baseline) / _PULSE_WM2
     result = _to_study_length(g)
     result.setflags(write=False)
     return result
@@ -162,7 +151,7 @@ def background_co2_ppm(scenario: str = "ssp245") -> NDArray:
     use for temperature (also a timebound quantity): slice
     ``[_START_IDX:_END_IDX]`` with no offset, then pad to the study length.
     Timebound index ``_START_IDX`` (275) is by construction the calendar
-    year T_START (2025), so this reads off exactly the calendar years in
+    year T_START, so this reads off exactly the calendar years in
     YEARS.
 
     Used by ``nbs.forcing.phi_co2_background`` as C_bg(t) for the marginal
@@ -190,7 +179,7 @@ _JOOS_TAU = (394.4, 36.54, 4.304)
 
 
 @functools.lru_cache(maxsize=1)
-def green_carbon_preindustrial() -> NDArray:
+def green_carbon_preindustrial(n_years: int | None = None) -> NDArray:
     """Airborne fraction of a CO2 pulse against a flat, pre-industrial-style
     background: the standard Joos et al. (2013) four-box impulse response,
 
@@ -212,7 +201,7 @@ def green_carbon_preindustrial() -> NDArray:
     versus this function's g[75] ~= 0.44, the pre-industrial-style figure)
     -- both are real, neither is a bug. See ``ModelConfig.carbon_sink``.
     """
-    t = np.arange(len(YEARS), dtype=float)
+    t = np.arange(len(YEARS) if n_years is None else n_years, dtype=float)
     g = np.full_like(t, _JOOS_A0)
     for a, tau in zip(_JOOS_A, _JOOS_TAU):
         g = g + a * np.exp(-t / tau)

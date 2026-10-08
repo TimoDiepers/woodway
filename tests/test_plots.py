@@ -16,7 +16,7 @@ from nbs.plots import (  # noqa: E402
 def result():
     from nbs.pipeline import run_single_tree
 
-    return run_single_tree("picea_abies", lat_deg=60.0)
+    return run_single_tree("enf_boreal", lat_deg=60.0)
 
 
 @pytest.mark.slow

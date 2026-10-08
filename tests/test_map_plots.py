@@ -13,13 +13,13 @@ from nbs.map_plots import (  # noqa: E402
 
 @pytest.mark.slow
 def test_sign_map_is_written(tmp_path):
-    plot_sign_map(2125, str(tmp_path / "p1.png"))
+    plot_sign_map(2090, str(tmp_path / "p1.png"))
     assert (tmp_path / "p1.png").stat().st_size > 10_000
 
 
 @pytest.mark.slow
 def test_horizon_field_is_written(tmp_path):
-    plot_horizon_field(str(tmp_path / "e6.png"), species_key="picea_abies")
+    plot_horizon_field(str(tmp_path / "e6.png"), species_key="enf_boreal")
     assert (tmp_path / "e6.png").stat().st_size > 10_000
 
 
@@ -74,7 +74,7 @@ def test_footer_names_both_data_provenances():
     assert landscape_provenance() in footer
 
 
-def test_footer_states_the_three_tier_fractions_for_picea_abies():
+def test_footer_states_the_three_tier_fractions_for_enf_boreal():
     """Plan 2's instruction: the footer must state the three-tier
     fractions, not just the coarse raster/fallback provenance flag.
 
@@ -91,17 +91,21 @@ def test_footer_states_the_three_tier_fractions_for_picea_abies():
     either a local or a zonal retrieval -- table drops to exactly 0.0%."""
     from nbs.map_plots import footer_text
 
+    # Since 2026-10-05 the footer quotes the typical forest at Aachen
+    # (mf_gemaessigt) instead of spruce; the three tiers must sum to 100 %.
+    import re
+
     footer = footer_text()
-    assert "29,3 %" in footer
-    assert "70,7 %" in footer
-    assert "0,0 %" in footer
+    assert "Mischwald" in footer
+    shares = [float(x.replace(",", ".")) for x in re.findall(r"(\d+,\d) %", footer)[-3:]]
+    assert sum(shares) == pytest.approx(100.0, abs=0.2)
 
 
 def test_footer_is_composable_for_another_species():
     from nbs.map_plots import footer_text
 
-    footer = footer_text("fagus_sylvatica")
-    assert "Rotbuche" in footer
+    footer = footer_text("dbf_gemaessigt")
+    assert "Sommergrüner Laubwald" in footer
 
 
 def test_the_graticule_helper_also_draws_coastlines_and_borders():

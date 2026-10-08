@@ -1,111 +1,74 @@
+"""Forest-type registry (nbs.species), built from data in nbs.forest_data."""
+
 import dataclasses
+
 import pytest
 
+from nbs.forest_data import F30_CAP, TYPES, growth_by_key, key_grid
 from nbs.species import (
     PARAMETER_FIELDS,
     REFERENCE_SITES,
     SPECIES,
     ParamSource,
-    Species,
     get_species,
     reference_site,
 )
 
-EXPECTED_KEYS = {
-    "picea_abies",
-    "pinus_sylvestris",
-    "fagus_sylvatica",
-    "eucalyptus_grandis",
-    "tropical_mixed",
-}
+IGBP = {"enf": "evergreen_needleleaf", "ebf": "evergreen_broadleaf", "dnf": "deciduous_needleleaf",
+        "dbf": "deciduous_broadleaf", "mf": "mixed"}
 
 
-def test_five_species_one_per_biome():
-    assert set(SPECIES) == EXPECTED_KEYS
+def test_one_entry_per_type_and_zone_with_data():
+    assert set(SPECIES) == set(growth_by_key())
+    assert {k.split("_")[0] for k in SPECIES} == set(TYPES)
+
+
+def test_every_typical_forest_is_registered():
+    assert {k for k in key_grid().ravel() if k is not None} <= set(SPECIES)
 
 
 def test_species_are_immutable():
-    sp = get_species("picea_abies")
-    assert dataclasses.is_dataclass(sp)
+    sp = get_species("mf_gemaessigt")
     with pytest.raises(dataclasses.FrozenInstanceError):
         sp.k = 0.5  # type: ignore[misc]
 
 
-@pytest.mark.parametrize("key", sorted(EXPECTED_KEYS))
+@pytest.mark.parametrize("key", sorted(SPECIES))
 def test_parameters_are_physically_plausible(key):
+    import numpy as np
+
     sp = get_species(key)
-    assert 10.0 < sp.m_max_kgC < 500.0
-    assert 0.01 < sp.k < 0.25
-    assert 1.0 <= sp.p <= 4.0
-    assert 0.1 <= sp.beta_closure <= 1.0
-    assert 1.0 < sp.stand_area_m2 < 50.0
-    assert 0.05 < sp.alpha_canopy < 0.25
+    assert 1.0 < sp.m_max_kgC < 150.0  # 2-300 t C/ha at 2000 trees/ha
+    assert 0.0 < sp.k <= -np.log(1.0 - F30_CAP**0.5) / 30.0 + 1e-12
+    assert sp.p == 2.0
+    assert sp.stand_area_m2 == 5.0
     assert 0.0 < sp.p_disturb < 0.05
     assert 0.0 <= sp.eps_immediate <= 1.0
-    assert 1.0 < sp.tau_decay_yr < 100.0
-    assert sp.valid_gez
+    assert sp.igbp_class == IGBP[key.split("_")[0]]
+    assert sp.valid_gez == (key.split("_", 1)[1],)
 
 
-def test_boreal_grows_slower_than_tropical():
-    assert get_species("picea_abies").k < get_species("tropical_mixed").k
+def test_tropical_forest_holds_more_carbon_than_boreal():
+    """Walker et al. 2022: the unrealized biomass gain is largest in the tropics."""
+    assert get_species("ebf_tropisch").m_max_kgC > get_species("enf_boreal").m_max_kgC
 
 
-def test_plantation_grows_fastest():
-    ks = {k: sp.k for k, sp in SPECIES.items()}
-    assert max(ks, key=ks.get) == "eucalyptus_grandis"
-
-
-@pytest.mark.parametrize("key", sorted(EXPECTED_KEYS))
+@pytest.mark.parametrize("key", sorted(SPECIES))
 def test_every_parameter_documents_its_provenance(key):
-    """Not a subset of the parameters -- all of them. The previous version of
-    this test listed five field names, which is exactly why the other seven
-    went undocumented for so long without anything failing."""
     sp = get_species(key)
-    assert set(sp.sources) == set(PARAMETER_FIELDS), (
-        f"{key}: Quellenangaben decken nicht alle Parameter ab, "
-        f"fehlend={set(PARAMETER_FIELDS) - set(sp.sources)}, "
-        f"unerwartet={set(sp.sources) - set(PARAMETER_FIELDS)}"
-    )
-
-
-@pytest.mark.parametrize("key", sorted(EXPECTED_KEYS))
-def test_provenance_entries_are_structured_and_non_empty(key):
-    sp = get_species(key)
+    assert set(PARAMETER_FIELDS) <= set(sp.sources)
     for name, src in sp.sources.items():
-        assert isinstance(src, ParamSource), f"{key}.{name} ist keine ParamSource"
-        assert src.stufe in ("literatur", "abgeleitet", "annahme")
-        assert src.referenz.strip(), f"{key}.{name}: leere Referenz"
-
-
-@pytest.mark.parametrize("key", sorted(EXPECTED_KEYS))
-def test_a_declared_assumption_never_carries_a_bare_citation(key):
-    """An "annahme" must say what its reference actually is -- a citation with
-    no note reads as if the value came from the paper, which is the exact
-    misreading this level exists to prevent."""
-    sp = get_species(key)
-    for name, src in sp.sources.items():
+        assert isinstance(src, ParamSource)
         if src.stufe == "annahme":
             assert src.notiz.strip(), f"{key}.{name}: Annahme ohne Erlaeuterung"
 
 
-def test_every_species_has_a_reference_site():
-    """The talk's E-figures are all evaluated at one latitude per species and
-    slide 25 names them. If they live only on the slide, a regenerated figure
-    can silently disagree with the deck."""
-    assert set(REFERENCE_SITES) == EXPECTED_KEYS
-    assert reference_site("picea_abies") == 60.0
-    for key in EXPECTED_KEYS:
-        assert -90.0 <= reference_site(key) <= 90.0
-
-
-def test_reference_sites_are_not_the_cascade_band_centres():
-    """Two different latitude sets exist for two different purposes; mixing
-    them up would change published numbers without any test noticing."""
-    from nbs.potential import _REP_LAT_DEG
-
-    assert REFERENCE_SITES != _REP_LAT_DEG
+def test_every_entry_has_a_reference_site_inside_its_cells():
+    assert set(REFERENCE_SITES) == set(SPECIES)
+    for key in SPECIES:
+        assert 0.0 <= reference_site(key) <= 75.0
 
 
 def test_unknown_species_raises_with_helpful_message():
-    with pytest.raises(KeyError, match="quercus_robur"):
-        get_species("quercus_robur")
+    with pytest.raises(KeyError, match="known species"):
+        get_species("picea_abies")

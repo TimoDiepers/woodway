@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from nbs.legacy.parameters import T_END, T_START
 from nbs.legacy.scenario_runner import (
     is_valid_combination,
     run_single_scenario,
@@ -67,7 +68,7 @@ class TestRunSingleScenario:
         assert isinstance(result["delta_t"], np.ndarray)
 
     def test_delta_t_shape(self, result):
-        assert result["delta_t"].shape == (125,)
+        assert result["delta_t"].shape == (T_END - T_START,)
 
     def test_nee_is_array(self, result):
         assert isinstance(result["nee"], np.ndarray)

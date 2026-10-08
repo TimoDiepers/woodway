@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import dataclasses
 from dataclasses import dataclass
 
@@ -25,6 +27,7 @@ from nbs.response import (
     green_carbon_preindustrial,
     green_temperature,
 )
+from nbs.site_factor import site_factor
 from nbs.species import get_species
 from nbs.tree import (
     TreeTrajectory,
@@ -82,14 +85,36 @@ def _green_carbon_for(config: ModelConfig, scenario: str) -> NDArray:
     return green_carbon(scenario)
 
 
-def _species_for(species_key: str, config: ModelConfig):
-    """The species used for growth/disturbance integration, with p_disturb
-    zeroed when config.disturbance == "off". Never mutates the frozen
-    registry entry -- dataclasses.replace returns a new instance."""
+def _species_for(species_key: str, config: ModelConfig, lat_deg: float, lon_deg: float | None = None):
+    """The species used for growth/disturbance integration at *lat_deg*:
+    growth level scaled by the site factor (``nbs.site_factor``) when
+    config.site_growth, p_disturb zeroed when config.disturbance == "off".
+    Never mutates the frozen registry entry -- dataclasses.replace returns a
+    new instance."""
     sp = get_species(species_key)
+    if config.site_growth:
+        sp = dataclasses.replace(sp, m_max_kgC=sp.m_max_kgC * site_factor(species_key, lat_deg, lon_deg))
     if config.disturbance == "off":
         sp = dataclasses.replace(sp, p_disturb=0.0)
     return sp
+
+
+@lru_cache(maxsize=None)
+def typical_product(species_key: str) -> float:
+    """Area-weighted mean measured albedo product Delta-alpha*q [W/m^2] over
+    the cells where *species_key* is the typical forest."""
+    from nbs.albedo_grid import alpha_q_product
+    from nbs.landscape import assign_species, plantable_area_m2
+
+    cells = assign_species() == species_key
+    if not cells.any():
+        from nbs.forest_data import admissible_types
+
+        cells = admissible_types()[species_key.split("_")[0]]
+    a = plantable_area_m2()[cells]
+    prod = alpha_q_product(species_key)[cells]
+    ok = np.isfinite(prod) & (a > 0)
+    return float(np.average(prod[ok], weights=a[ok]))
 
 
 def _forcings(
@@ -102,8 +127,14 @@ def _forcings(
     config: ModelConfig,
 ) -> tuple[NDArray, NDArray]:
     sp = get_species(species_key)
-    d_alpha = fallback_delta_alpha(lat_deg) if delta_alpha is None else delta_alpha
-    q = fallback_q_sw(lat_deg) if q_sw is None else q_sw
+    if delta_alpha is None and q_sw is None:
+        # No site cell given: the forest type's measured mean (Duveiller),
+        # not the old latitude table (nbs.forcing.fallback_*), which knew
+        # nothing about forest types (2026-10-05).
+        d_alpha, q = typical_product(species_key), 1.0
+    else:
+        d_alpha = fallback_delta_alpha(lat_deg) if delta_alpha is None else delta_alpha
+        q = fallback_q_sw(lat_deg) if q_sw is None else q_sw
 
     flux = co2_flux_kg_per_yr(trajectory.net_uptake_kgC_yr)
     g_c = _green_carbon_for(config, scenario)
@@ -129,6 +160,7 @@ def run_single_tree(
     config: ModelConfig | None = None,
     seed: int = 0,
     plant_year: int = T_START,
+    lon_deg: float | None = None,
 ) -> SiteResult:
     """One tree, one place, under the model-complexity choices in *config*.
 
@@ -141,7 +173,7 @@ def run_single_tree(
     """
     if config is None:
         config = ModelConfig()
-    sp = _species_for(species_key, config)
+    sp = _species_for(species_key, config, lat_deg, lon_deg)
     background = _background_temperature(scenario)
     if config.disturbance == "stochastic":
         rng = np.random.default_rng(seed)
@@ -179,6 +211,7 @@ def run_single_tree_ensemble(
     q_sw: float | None = None,
     config: ModelConfig | None = None,
     plant_year: int = T_START,
+    lon_deg: float | None = None,
 ) -> tuple[SiteResult, NDArray]:
     """Deterministic (or config-selected) run plus a Monte-Carlo ensemble.
 
@@ -192,7 +225,7 @@ def run_single_tree_ensemble(
     """
     if config is None:
         config = ModelConfig()
-    sp = _species_for(species_key, config)
+    sp = _species_for(species_key, config, lat_deg, lon_deg)
     background = _background_temperature(scenario)
     deterministic = run_single_tree(
         species_key,
@@ -203,6 +236,7 @@ def run_single_tree_ensemble(
         config=config,
         seed=seed,
         plant_year=plant_year,
+        lon_deg=lon_deg,
     )
 
     g_t = green_temperature(scenario)

@@ -108,7 +108,7 @@ def test_reverse_1p5_ratio_is_consistent_with_the_two_variants():
 
 
 @pytest.mark.slow
-def test_reverse_1p5_required_area_is_large_but_below_ice_free_land():
+def test_reverse_1p5_required_area_matches_its_ice_free_land_statement():
     """Pins the actual relationship behind the deck's punchline slide (P5),
     not just its prose: the required area is a large multiple of this
     model's own plantable area (the "x exceeds what the planet has room
@@ -125,11 +125,38 @@ def test_reverse_1p5_required_area_is_large_but_below_ice_free_land():
     """
     r = reverse_1p5()
     for key in ("mit_albedo_und_stoerung", "nur_kohlenstoff"):
-        variant = r[key]
-        # "large factor": this project's own numbers put both variants at
-        # ~10x -- 5x is a conservative floor that still rules out a
+        # "large factor": 5x is a conservative floor that rules out a
         # near-1.0 factor slipping through unnoticed.
-        assert variant["vielfaches_der_modellierten_flaeche"] > 5.0
-        # The false claim this test exists to prevent: required area must
-        # stay strictly below the ice-free land constant, not exceed it.
-        assert variant["area_gha"] < ICE_FREE_LAND_GHA
+        assert r[key]["vielfaches_der_modellierten_flaeche"] > 5.0
+    # Since the FaIR calibration (2026-10-05, ECS 2.9 K instead of ~5.6 K) the
+    # full model needs 19.4 Gha -- more than all ice-free land -- while the
+    # carbon-only variant (9.6 Gha) stays below it. Whichever way it falls,
+    # the note must say the same thing as the number.
+    full = r["mit_albedo_und_stoerung"]
+    above = full["area_gha"] > ICE_FREE_LAND_GHA
+    assert above
+    assert ("mehr als diese Fläche" in r["hinweis"]) == above
+    # Since the scaled base is the area that cools by 2150 (Walker area,
+    # 2026-10-05), even the carbon-only variant needs more than the ice-free
+    # land. What must hold: albedo and disturbance never make it cheaper.
+    assert r["nur_kohlenstoff"]["area_gha"] <= full["area_gha"]
+
+
+@pytest.mark.slow
+def test_direct_fair_run_agrees_with_the_convolution_for_the_whole_area():
+    """Area-wide numbers come from a direct FaIR run, trees and maps from the
+    convolution with FaIR's marginal pulse response. For the whole
+    reforestable area both must tell the same story: carbon-only cooling
+    within 10 %, remaining share after albedo within 5 percentage points (2100)."""
+    from nbs.config import ModelConfig
+    from nbs.constants import YEARS
+    from nbs.landscape import assign_species
+    from nbs.potential import _convolved_global_delta_t, fair_global_delta_t
+
+    m = assign_species() != None  # noqa: E711
+    i = int(np.flatnonzero(YEARS == 2100)[0])
+    co2_cfg = ModelConfig(albedo=False)
+    f_co2, c_co2 = fair_global_delta_t(m, "ssp245", co2_cfg)[i], _convolved_global_delta_t(m, "ssp245", co2_cfg)[i]
+    assert f_co2 == pytest.approx(c_co2, rel=0.10)
+    f_full, c_full = fair_global_delta_t(m, "ssp245")[i], _convolved_global_delta_t(m, "ssp245")[i]
+    assert abs(f_full / f_co2 - c_full / c_co2) < 0.05

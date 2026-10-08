@@ -59,6 +59,10 @@ _TRANSITION_CODES: dict[tuple[str, str], int] = {
     ("deciduous_broadleaf", "cropland"): 29,
     ("evergreen_broadleaf", "grassland"): 18,
     ("evergreen_broadleaf", "cropland"): 19,
+    ("deciduous_needleleaf", "grassland"): 48,
+    ("deciduous_needleleaf", "cropland"): 49,
+    ("mixed", "grassland"): 58,
+    ("mixed", "cropland"): 59,
 }
 
 DELTA_ALPHA_MIN_ABS = 0.03
@@ -90,8 +94,21 @@ some months with only a handful of qualifying cells at the band edges.
 _RAW_DIR_KEYS = {"albedo": "duveiller_albedo", "swr": "duveiller_swr"}
 
 
+OPEN_LAND = "offenland"
+"""Default baseline: the open land a tree replaces is meadow *or* cropland.
+Duveiller retrieves both transitions only where forest and that cover lie
+side by side, so each alone covers about a third of the spruce range; where
+both exist they are averaged, otherwise whichever exists is used (49 % of
+the spruce range locally measured instead of 32 % for meadow alone)."""
+_OPEN_PARTS = ("grassland", "cropland")
+
+
 def _transition_code(species_key: str, baseline: str) -> int:
     sp = get_species(species_key)
+    if baseline == OPEN_LAND:
+        for part in _OPEN_PARTS:
+            _transition_code(species_key, part)
+        return _transition_code(species_key, _OPEN_PARTS[0])
     try:
         return _TRANSITION_CODES[(sp.igbp_class, baseline)]
     except KeyError:
@@ -194,6 +211,8 @@ def _load_monthly(kind: str, species_key: str, baseline: str, extended: bool) ->
     happens to be present -- callers should not see different error behaviour
     on a fresh checkout than in an environment with the data downloaded.
     """
+    if baseline == OPEN_LAND:
+        raise ValueError("offenland is a combination; combine per transition, not per raw field")
     code = _transition_code(species_key, baseline)
     ds = _open(_RAW_DIR_KEYS[kind])
     if ds is None:
@@ -301,8 +320,21 @@ def _interpolate_missing_months(monthly: NDArray) -> NDArray:
     return out
 
 
+def _combine_open(fields: list[NDArray | None]) -> NDArray | None:
+    """Cell-wise mean over the transitions that have a value (NaN-aware)."""
+    present = [f for f in fields if f is not None]
+    if not present:
+        return None
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        return np.nanmean(np.stack(present, axis=0), axis=0)
+
+
 @lru_cache(maxsize=None)
 def _delta_alpha_grid_cached(species_key: str, baseline: str, extended: bool) -> NDArray:
+    if baseline == OPEN_LAND:
+        _transition_code(species_key, baseline)
+        return _combine_open([_delta_alpha_grid_cached(species_key, b, extended) for b in _OPEN_PARTS])
     a = _load_monthly("albedo", species_key, baseline, extended)
     if a is None:
         da, _ = _fallback_row_values()
@@ -314,6 +346,9 @@ def _delta_alpha_grid_cached(species_key: str, baseline: str, extended: bool) ->
 
 @lru_cache(maxsize=None)
 def _insolation_grid_cached(species_key: str, baseline: str, extended: bool) -> NDArray:
+    if baseline == OPEN_LAND:
+        _transition_code(species_key, baseline)
+        return _combine_open([_insolation_grid_cached(species_key, b, extended) for b in _OPEN_PARTS])
     a = _load_monthly("albedo", species_key, baseline, extended)
     s = _load_monthly("swr", species_key, baseline, extended)
     if a is None or s is None:
@@ -350,6 +385,12 @@ def _monthly_product_native_cached(
     product, dataset sign already flipped to afforestation. None if the
     raster is unavailable -- callers apply their own fallback.
     """
+    if baseline == OPEN_LAND:
+        _transition_code(species_key, baseline)
+        # Gaps are bridged within each transition first, so that both enter
+        # every month of the year with equal weight wherever both are measured.
+        parts = [_monthly_product_native_cached(species_key, b, extended) for b in _OPEN_PARTS]
+        return _combine_open([None if p is None else _interpolate_missing_months(p) for p in parts])
     a = _load_monthly("albedo", species_key, baseline, extended)
     s = _load_monthly("swr", species_key, baseline, extended)
     if a is None or s is None:
@@ -395,7 +436,7 @@ def _monthly_product_grid_cached(species_key: str, baseline: str, extended: bool
 # retrieval where both the pre- and post-transition cover co-occur close
 # enough together (the "co-occurrence" cells Duveiller et al. 2018 -- Sci.
 # Data 5, 180014 -- describe in their Materials and Methods). For transition
-# 38 (ENF -> Grassland, the picea_abies/pinus_sylvestris case) that is only
+# 38 (ENF -> Grassland, the enf_boreal/dnf_boreal case) that is only
 # 2567 of 64800 native one-degree cells even in the spatially-extended
 # variant used here. Because nbs.landscape assigns a species to a cell purely
 # by latitude band, with no correlation to where this specific transition's
@@ -430,7 +471,7 @@ def _monthly_product_grid_cached(species_key: str, baseline: str, extended: bool
 #                  picking a second, unrelated width: at this resolution a
 #                  single bin is already comfortably stable where the
 #                  species has any signal at all -- the 60-70N bin for
-#                  transition 38 (picea_abies/pinus_sylvestris's own band,
+#                  transition 38 (enf_boreal/dnf_boreal's own band,
 #                  nbs.landscape) holds 623 finite native cells, and the
 #                  bins covering the other four species' own latitude bands
 #                  hold several hundred each. A bin with zero local cells at
@@ -588,7 +629,7 @@ def _product_tiered_cached(
 
 
 def delta_alpha_grid(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) annual-mean afforestation Delta_albedo [-].
 
@@ -601,7 +642,7 @@ def delta_alpha_grid(
 
 
 def insolation_grid(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) annual-mean surface shortwave insolation [W/m^2].
 
@@ -618,7 +659,7 @@ def insolation_grid(
 
 
 def _annual_mean_of_monthly_product(
-    species_key: str, baseline: str = "grassland", extended: bool = True
+    species_key: str, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) W/m^2. The correct way: multiply Delta_albedo by insolation
     month by month, then average over the year.
@@ -651,7 +692,7 @@ def _annual_mean_of_monthly_product(
 
 
 def _product_of_annual_means(
-    species_key: str, baseline: str = "grassland", extended: bool = True
+    species_key: str, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) W/m^2. The *wrong* way, kept only so tests can compare
     against it: annual-mean Delta_albedo times annual-mean insolation.
@@ -674,7 +715,7 @@ def _product_of_annual_means(
 
 
 def alpha_q_product(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) W/m^2. Annual mean of the monthly Delta_albedo * q_sw product.
 
@@ -701,7 +742,7 @@ def alpha_q_product(
 
 
 def monthly_product(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(12, 360, 720) W/m^2. The monthly Delta_albedo * q_sw product, before
     the annual averaging alpha_q_product does.
@@ -722,7 +763,7 @@ def monthly_product(
 
 
 def product_provenance_grid(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> NDArray:
     """(360, 720) int8 array: which tier filled alpha_q_product at each cell.
 
@@ -737,7 +778,7 @@ def product_provenance_grid(
 
 
 def provenance_fractions(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> dict[str, float]:
     """Share of *this species' plantable cells* (nbs.landscape.assign_species()
     == species_key) in each provenance tier: {"lokal": ..., "zonal": ...,
@@ -766,7 +807,7 @@ def provenance_fractions(
 
 
 def local_coverage(
-    species_key: str, *, baseline: str = "grassland", extended: bool = True
+    species_key: str, *, baseline: str = OPEN_LAND, extended: bool = True
 ) -> dict[str, float]:
     """How far Duveiller's *local* retrievals reach for one species' transition.
 
@@ -781,7 +822,7 @@ def local_coverage(
     ``landmaske`` -- local-retrieval cells / cells in nbs.landscape.land_mask [-]
     ``zellen``    -- the local-retrieval cell count itself
 
-    Measured for picea_abies: 10 268 cells, 4.0% of the globe, 19.5% of the
+    Measured for enf_boreal: 10 268 cells, 4.0% of the globe, 19.5% of the
     land mask. "About 4% of the land area" is therefore wrong by a factor of
     five in one direction, and "about 20% of the Earth" by a factor of five in
     the other.
@@ -803,7 +844,7 @@ def seasonal_profile(
     lat_deg: float,
     *,
     half_width_deg: float = 2.5,
-    baseline: str = "grassland",
+    baseline: str = OPEN_LAND,
     extended: bool = True,
 ) -> dict:
     """Monthly Delta_albedo, insolation and their product, zonally averaged
@@ -832,6 +873,24 @@ def seasonal_profile(
     peak_to_annual_ratio is exactly 1.0, which is the honest answer to "what
     is the seasonal shape" when none is known, not a real seasonal claim.
     """
+    if baseline == OPEN_LAND:
+        _transition_code(species_key, baseline)
+        parts = [seasonal_profile(species_key, lat_deg, half_width_deg=half_width_deg, baseline=b,
+                                  extended=extended) for b in _OPEN_PARTS]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            combined = {
+                key: np.nanmean(np.stack([p[key] for p in parts]), axis=0)
+                for key in ("delta_alpha_monthly", "q_sw_monthly", "product_monthly")
+            }
+        abs_product = np.abs(combined["product_monthly"])
+        if not np.isfinite(abs_product).any():
+            return {**combined, "peak_month": 1, "peak_to_annual_ratio": float("nan")}
+        peak_idx = int(np.nanargmax(abs_product))
+        annual_mean_abs = abs(float(np.nanmean(combined["product_monthly"])))
+        ratio = float(abs_product[peak_idx] / annual_mean_abs) if annual_mean_abs > 0.0 else float("nan")
+        return {**combined, "peak_month": peak_idx + 1, "peak_to_annual_ratio": ratio}
+
     a = _load_monthly("albedo", species_key, baseline, extended)
     s = _load_monthly("swr", species_key, baseline, extended)
     lat = _native_lat_for(species_key, baseline)

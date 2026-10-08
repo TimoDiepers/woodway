@@ -4,7 +4,7 @@ import pytest
 from nbs.species import get_species
 from nbs.tree import advance_stock, biomass_closed, canopy_closure, growth_rate_from_stock
 
-SP = get_species("fagus_sylvatica")
+SP = get_species("dbf_gemaessigt")
 
 
 def test_closed_form_starts_at_zero_and_saturates():
@@ -43,9 +43,9 @@ def test_advance_stock_matches_growth_rate_from_stock_in_the_small_dt_limit():
     changes (a mortality term, a temperature dependence, a different p
     convention) without a matching change to advance_stock, this is the test
     that must catch it."""
-    sp = get_species("picea_abies")
+    sp = get_species("enf_boreal")
     dt = 1e-5
-    for m in (0.5, 12.5, 25.0, 40.0):
+    for m in (0.01 * sp.m_max_kgC, 0.25 * sp.m_max_kgC, 0.5 * sp.m_max_kgC, 0.8 * sp.m_max_kgC):
         finite_diff_rate = (advance_stock(m, dt, sp) - m) / dt
         assert finite_diff_rate == pytest.approx(growth_rate_from_stock(m, sp), rel=1e-4)
 
@@ -64,8 +64,16 @@ def test_canopy_closure_bounds():
     assert canopy_closure(2.0 * SP.m_max_kgC, SP) == pytest.approx(1.0)
 
 
-def test_canopy_closes_faster_than_stock_accumulates():
-    """beta < 1: a young tree shades its footprint long before it is grown."""
-    rel_stock = 0.25
-    f = canopy_closure(rel_stock * SP.m_max_kgC, SP)
-    assert f > rel_stock
+def test_albedo_effect_reaches_half_after_forty_years():
+    """Williams et al. (2026): about half of the albedo decline after
+    reforestation within 40 years, 80 % only after 50-120 years. The canopy
+    closure drives the albedo channel, so it must follow that timing --
+    slower than a young tree's stock (beta > 1), not faster as assumed
+    before 2026-10-05 (beta = 0.5)."""
+    from nbs.species import SPECIES
+
+    for key, sp in SPECIES.items():
+        f = lambda t: canopy_closure(float(biomass_closed(np.array([t]), sp)[0]), sp)  # noqa: E731
+        assert f(40.0) == pytest.approx(0.5, abs=1e-6), key
+        assert 0.8 <= f(120.0), key
+        assert sp.beta_closure > 1.0, key

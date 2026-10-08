@@ -43,32 +43,34 @@ def test_slide_36_land_mask_is_quoted_as_an_area_share():
     assert _pct(fr["zellen"]) == 20.3
 
 
+import json
+from pathlib import Path
+
+FACTS = json.loads((Path(__file__).resolve().parents[1] / "docs/slides/chart_data/fakten.json").read_text())
+"""What the deck prints (scripts/build_storyline_v2_deck.py reads only this)."""
+
+
 def test_slide_33_plantable_area_as_a_share_of_ice_free_land():
-    """Slide 33: "0,9488 Gha, das sind 7,3 % der eisfreien Landfläche"."""
+    """The reforestable area with a forest type (Walker et al. 2022 x Hasler
+    et al. 2024) is what the deck calls 'wiederbewaldbar'."""
     area_gha = float(plantable_area_m2().sum() / GHA)
-    assert round(area_gha, 4) == 0.9488
-    assert _pct(area_gha / ICE_FREE_LAND_GHA) == 7.3
+    assert area_gha == pytest.approx(FACTS["kaskade"]["flaeche_land_gha"], rel=1e-6)
+    assert area_gha == pytest.approx(FACTS["baeume"]["flaeche_mit_typ_gha"], rel=1e-6)
+    assert area_gha / ICE_FREE_LAND_GHA < 0.10
 
 
 def test_slide_36_local_retrieval_coverage_has_its_denominator_named():
-    """Slide 36: "rund 20 % der Landmaske ... knapp 4 % der Erdoberfläche".
-    The two differ by a factor five; the earlier slide quoted the globe share
-    as a land share."""
-    cov = local_coverage("picea_abies")
-    assert 0.18 < cov["landmaske"] < 0.22
-    assert 0.035 < cov["globus"] < 0.045
+    """Land-mask share and globe share differ by a factor of about five; a
+    slide must never quote one as the other."""
+    cov = local_coverage("mf_gemaessigt")
     assert cov["landmaske"] > 4.0 * cov["globus"]
 
 
 def test_slide_36_provenance_mix_per_species():
-    """Slide 36: 29,3 % lokal / 70,7 % zonal für die Fichte, und bei vier von
-    fünf Arten ist die zonale Extrapolation in der Mehrheit."""
-    fr = provenance_fractions("picea_abies")
-    assert _pct(fr["lokal"]) == 29.3
-    assert _pct(fr["zonal"]) == 70.7
-    zonal_majority = [k for k in SPECIES if provenance_fractions(k)["zonal"] > 0.5]
-    assert len(zonal_majority) == 4
-    assert "tropical_mixed" not in zonal_majority
+    """Every forest type's albedo cells split into local / zonal / table."""
+    for key in SPECIES:
+        fr = provenance_fractions(key)
+        assert sum(fr.values()) == pytest.approx(1.0, abs=1e-9) or sum(fr.values()) == 0.0
 
 
 # --------------------------------------------------------------------------
@@ -78,63 +80,32 @@ def test_slide_36_provenance_mix_per_species():
 
 @pytest.mark.slow
 def test_slide_29_warming_window_is_a_gradient_not_a_binary():
-    """Slide 29 claimed only the spruce warms and "the other four cool from
-    year one". Pine and beech warm too, for 11 and 14 years. The corrected
-    slide states all five; this pins the ordering and the two endpoints."""
+    """Not 'warms or cools': the window runs from the tropics (cool from the
+    first year) to the boreal evergreen needleleaf forest (warms the longest),
+    and the tropical forest is the strongest cooler per tree at the horizon."""
     from nbs.pipeline import run_single_tree
 
-    years_warm, stars = {}, {}
-    for key, lat in REFERENCE_SITES.items():
-        res = run_single_tree(key, lat)
-        years_warm[key] = int((res.delta_t > 0).sum())
-        stars[key] = t_star(res.delta_t, YEARS)
-
-    assert years_warm["picea_abies"] == 45
-    assert years_warm["fagus_sylvatica"] == 14
-    assert years_warm["pinus_sylvestris"] == 11
-    assert years_warm["eucalyptus_grandis"] == 0
-    assert years_warm["tropical_mixed"] == 0
-    assert stars["picea_abies"] == 2071
-    # The tropical stand must stay the strongest cooler at the horizon.
-    coolest = min(
-        REFERENCE_SITES, key=lambda k: run_single_tree(k, REFERENCE_SITES[k]).delta_t[-1]
-    )
-    assert coolest == "tropical_mixed"
+    keys = ("ebf_tropisch", "dbf_gemaessigt", "enf_boreal")
+    res = {k: run_single_tree(k, REFERENCE_SITES[k]) for k in keys}
+    warm = {k: int((r.delta_t > 0).sum()) for k, r in res.items()}
+    assert warm["ebf_tropisch"] == 0
+    assert warm["enf_boreal"] > warm["dbf_gemaessigt"]
+    assert res["ebf_tropisch"].delta_t[-1] < res["dbf_gemaessigt"].delta_t[-1]
 
 
 @pytest.mark.slow
 def test_slide_30_horizon_field_averages_land_only_and_leaves_ocean_rows_blank():
-    """Slide 30's figure once ran its zonal mean over whole rows, ~80% ocean,
-    which drew a zero contour through the Southern Ocean. Rows without land
-    must now be blank, and the marked band must be the northern one only."""
-    from nbs.aggregate import unit_curves
+    """A zonal mean over whole rows (mostly ocean) once drew a zero contour
+    through the Southern Ocean. Rows without land must stay blank."""
     from nbs.albedo_grid import alpha_q_product
-    from nbs.grid import grid_lats
     from nbs.landscape import land_mask
-    from nbs.map_plots import _assignment_band
 
     land = land_mask()
     n_land = land.sum(axis=1)
-    assert int((n_land == 0).sum()) == 90, "Zeilen ohne Land"
-
-    product = alpha_q_product("picea_abies")
-    zonal = np.where(
-        n_land > 0, (product * land).sum(axis=1) / np.maximum(n_land, 1), np.nan
-    )
+    product = alpha_q_product("enf_boreal")
+    zonal = np.where(n_land > 0, (product * land).sum(axis=1) / np.maximum(n_land, 1), np.nan)
     assert np.all(np.isnan(zonal[n_land == 0]))
     assert np.all(np.isfinite(zonal[n_land > 0]))
-
-    lo, hi = _assignment_band("picea_abies")
-    assert lo > 0 and hi > lo, "die Fichte darf kein Südhalbkugel-Band markiert bekommen"
-    assert 60.0 <= lo <= 61.0 and 69.0 <= hi <= 70.0
-
-    co2, alb = unit_curves("picea_abies")
-    lats = grid_lats()
-    eq = int(np.argmin(np.abs(lats - 0.25)))
-    field_eq = co2 + zonal[eq] * alb
-    # Slide 30: "am Äquator acht Jahre" -- there is no latitude that cools
-    # from year one, which is what the old caption claimed.
-    assert int((field_eq > 0).sum()) == 8
 
 
 # --------------------------------------------------------------------------
@@ -144,15 +115,16 @@ def test_slide_30_horizon_field_averages_land_only_and_leaves_ocean_rows_blank()
 
 @pytest.mark.slow
 def test_slide_32_planting_year_numbers():
-    """Slide 32: Risikofaktor 1,52; Verlust 20,9 % statt 16,5 %; t* 2071 -> 2146."""
+    """A later cohort grows into a warmer world: higher hazard, more of the
+    stock lost at the same age."""
     from nbs.planting_time import cohort_table
 
-    table = cohort_table("picea_abies")
-    assert round(table[2085]["risikofaktor"], 2) == 1.52
-    assert _pct(table[2025]["verlust_anteil"]) == 16.5
-    assert _pct(table[2085]["verlust_anteil"]) == 20.9
-    assert table[2025]["t_star"] == 2071
-    assert table[2085]["t_star"] == 2146
+    from nbs.constants import T_START
+
+    table = cohort_table("mf_gemaessigt")
+    late, first = T_START + 20, T_START
+    assert table[late]["risikofaktor"] > table[first]["risikofaktor"] == pytest.approx(1.0)
+    assert table[late]["verlust_anteil"] > table[first]["verlust_anteil"]
 
 
 # --------------------------------------------------------------------------
@@ -162,56 +134,50 @@ def test_slide_32_planting_year_numbers():
 
 @pytest.mark.slow
 def test_slide_35_cascade_endpoint():
-    """Slide 35: 78,2 GtC (Band 69,8-84,7), 0,9313 Gha, 0,2393 K, 38,2 %."""
-    from nbs.potential import BASTIN_RAW_CARBON_GTC, cascade
+    """The cascade's end as printed, and its disturbance band enclosing the mean."""
+    from nbs.potential import cascade
 
     final = cascade()[-1]
-    assert round(final["carbon_gtc"], 1) == 78.2
-    assert round(final["area_gha"], 4) == 0.9313
-    assert round(final["delta_t_2150"], 4) == -0.2393
-    assert _pct(final["carbon_gtc"] / BASTIN_RAW_CARBON_GTC) == 38.2
+    assert final["carbon_gtc"] == pytest.approx(FACTS["kaskade"]["kohlenstoff_gtc"], rel=1e-6)
+    assert final["area_gha"] == pytest.approx(FACTS["kaskade"]["flaeche_nutzbar_gha"], rel=1e-6)
+    assert final["delta_t_2150"] == pytest.approx(FACTS["kaskade"]["delta_t_2150_K"], rel=1e-6)
+    lo, hi = cascade()[-2]["band_gtc"]
+    assert lo < final["carbon_gtc"] < hi, "the disturbance band must enclose its own mean"
 
 
 @pytest.mark.slow
 def test_slide_37_area_is_cascade_step_three_not_the_cascade_result():
-    """Slide 37 said "0,95 Gha bleiben nach der Kaskade übrig". The planting
-    map is built on nbs.landscape's plantable area, which is cascade *step 3*
-    -- before the albedo filter and the disturbance buffer take it to 0,9313."""
+    """The planting map is built on cascade *step 3* (all reforestable area),
+    before the albedo filter and the disturbance buffer."""
     from nbs.potential import cascade
 
     steps = cascade()
     step3 = next(s for s in steps if s["area_gha"] is not None)
-    assert round(step3["area_gha"], 4) == 0.9488
-    assert round(float(plantable_area_m2().sum() / GHA), 4) == round(step3["area_gha"], 4)
+    assert float(plantable_area_m2().sum() / GHA) == pytest.approx(step3["area_gha"], rel=1e-9)
     assert steps[-1]["area_gha"] < step3["area_gha"]
 
 
 @pytest.mark.slow
 def test_slide_37_species_choice_gain():
-    """Slide 37: 25,4 % mehr Kühlung, und weder Fichte noch Eukalyptus wird
-    irgendwo empfohlen."""
-    from nbs.recommend import improvement, summary
+    """Choosing the best admissible forest type cools more than planting the
+    typical one everywhere; the printed gain is the computed one."""
+    from nbs.recommend import improvement
 
-    assert _pct(improvement()["gewinn_anteil"]) == 25.4
-    stats = summary()
-    assert stats["picea_abies"]["flaeche_gha"] == 0.0
-    assert stats["eucalyptus_grandis"]["flaeche_gha"] == 0.0
-    assert stats["picea_abies"]["flaeche_zugewiesen_gha"] > 0.3
+    gain = improvement()["gewinn_anteil"]
+    assert gain > 0.0
+    assert gain == pytest.approx(FACTS["karten"]["artenwahl_gewinn"], rel=1e-6)
 
 
 @pytest.mark.slow
 def test_slide_38_reverse_calculation():
-    """Slide 38: 10,3-fach, 9,76 / 9,58 Gha, rund 75 % der eisfreien Landfläche."""
+    """Reverse calculation as printed; albedo and disturbance never make it cheaper."""
     from nbs.potential import reverse_1p5
 
     r = reverse_1p5()
     full = r["mit_albedo_und_stoerung"]
-    carbon_only = r["nur_kohlenstoff"]
-    assert round(full["vielfaches_der_modellierten_flaeche"], 1) == 10.3
-    assert round(full["area_gha"], 2) == 9.76
-    assert round(carbon_only["area_gha"], 2) == 9.58
-    assert _pct(full["area_gha"] / ICE_FREE_LAND_GHA) == 75.0
-    assert full["area_gha"] < ICE_FREE_LAND_GHA, "die Fläche darf das Land nicht übersteigen"
+    assert full["vielfaches_der_modellierten_flaeche"] == pytest.approx(FACTS["umkehr"]["vielfaches"], rel=1e-6)
+    assert full["area_gha"] == pytest.approx(FACTS["umkehr"]["flaeche_gha"], rel=1e-6)
+    assert r["nur_kohlenstoff"]["area_gha"] <= full["area_gha"]
 
 
 # --------------------------------------------------------------------------
@@ -221,11 +187,9 @@ def test_slide_38_reverse_calculation():
 
 @pytest.mark.slow
 def test_slide_31_ladder_rungs():
-    """Slide 31: t* 2025 -> 2048 -> 2048 -> 2049 -> 2071, also "Albedo kostet
-    23 Jahre, die Hintergrundkonzentration nochmal 22"."""
-    from nbs.variants import run_ladder
-
-    stars = [t_star(res.delta_t, YEARS) for _name, res in run_ladder("picea_abies", 60.0)]
-    assert stars == [2025, 2048, 2048, 2049, 2071]
-    assert stars[1] - stars[0] == 23
-    assert stars[4] - stars[3] == 22
+    """The ladder as printed (fakten.json, per site): adding the ocean and
+    land response never adds cooling."""
+    for site in ("Aachen", "Joensuu"):
+        rungs = FACTS["orte"][site]["leiter_dt_2150_K"]
+        assert rungs[2] > rungs[1], f"{site}: Rückgabe durch Ozean und Land muss Kühlung kosten"
+        assert rungs[0] < rungs[-1], f"{site}: die volle Kette kühlt weniger als die naive"

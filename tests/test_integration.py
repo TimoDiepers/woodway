@@ -31,7 +31,7 @@ def test_tropical_reforestation_end_to_end(baseline):
     assert set(result.keys()) == {"delta_t", "t_star", "delta_f_alpha", "nee"}
 
     # Timeseries has sufficient length
-    assert len(result["delta_t"]) > 100
+    assert len(result["delta_t"]) > 70
 
     # Break-even before 2150 (small albedo penalty, strong carbon uptake)
     assert result["t_star"] < 2150

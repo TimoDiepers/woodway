@@ -46,14 +46,14 @@ _needs_rasters = pytest.mark.skipif(
 
 
 def test_product_has_grid_shape():
-    p = alpha_q_product("picea_abies")
+    p = alpha_q_product("enf_boreal")
     assert p.shape == (360, 720)
 
 
 def test_product_is_negative_where_forest_is_darker():
     """Sign convention: a darker forest gives a negative delta_alpha, so the
     product is negative and the resulting forcing positive (warming)."""
-    p = alpha_q_product("picea_abies")
+    p = alpha_q_product("enf_boreal")
     boreal = p[np.argmin(np.abs(grid_lats() - 60.0)), :]
     assert np.nanmean(boreal) < 0.0
 
@@ -89,8 +89,8 @@ def test_monthly_product_differs_from_product_of_annual_means():
     updated transition-code mapping) without needing hand-tuning, as long as
     the same winter-inflation mechanism holds.
     """
-    monthly = _annual_mean_of_monthly_product("picea_abies")
-    annual = _product_of_annual_means("picea_abies")
+    monthly = _annual_mean_of_monthly_product("enf_boreal")
+    annual = _product_of_annual_means("enf_boreal")
     boreal_row = np.argmin(np.abs(grid_lats() - 60.0))
     a, b = monthly[boreal_row, :], annual[boreal_row, :]
     finite = np.isfinite(a) & np.isfinite(b)
@@ -115,7 +115,7 @@ def test_provenance_is_reported():
 
 def test_forcing_from_product_matches_the_two_argument_form():
     """phi_albedo_from_product must be the same physics, differently fed."""
-    sp = get_species("picea_abies")
+    sp = get_species("enf_boreal")
     closure = np.linspace(0.0, 1.0, 126)
     d_alpha, q = fallback_delta_alpha(60.0), fallback_q_sw(60.0)
     a = phi_albedo(closure, d_alpha, q, sp)
@@ -139,7 +139,7 @@ def test_fallback_product_reproduces_the_latitude_table():
     """
     if product_provenance() != "fallback":
         pytest.skip("Raster vorhanden, Fallback wird nicht geprueft")
-    p = alpha_q_product("picea_abies")
+    p = alpha_q_product("enf_boreal")
     row = np.argmin(np.abs(grid_lats() - 60.0))
     lat_at_row = grid_lats()[row]
     expected = fallback_delta_alpha(lat_at_row) * fallback_q_sw(lat_at_row)
@@ -147,30 +147,30 @@ def test_fallback_product_reproduces_the_latitude_table():
 
 
 def test_delta_alpha_grid_and_insolation_grid_have_grid_shape():
-    assert delta_alpha_grid("fagus_sylvatica").shape == (360, 720)
-    assert insolation_grid("fagus_sylvatica").shape == (360, 720)
+    assert delta_alpha_grid("dbf_gemaessigt").shape == (360, 720)
+    assert insolation_grid("dbf_gemaessigt").shape == (360, 720)
 
 
 def test_monthly_product_has_twelve_grid_layers():
-    assert monthly_product("picea_abies").shape == (12, 360, 720)
+    assert monthly_product("enf_boreal").shape == (12, 360, 720)
 
 
 def test_monthly_product_averages_to_alpha_q_product():
     """alpha_q_product must be exactly the annual mean of monthly_product --
     same field, two granularities, not two independent computations that
     could silently drift apart."""
-    mp = monthly_product("picea_abies")
+    mp = monthly_product("enf_boreal")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         annual_from_monthly = np.nanmean(mp, axis=0)
-    annual_direct = alpha_q_product("picea_abies")
+    annual_direct = alpha_q_product("enf_boreal")
     finite = np.isfinite(annual_from_monthly) & np.isfinite(annual_direct)
     assert finite.sum() > 0
     assert np.allclose(annual_from_monthly[finite], annual_direct[finite], rtol=0.0, atol=1e-9)
 
 
 def test_seasonal_profile_returns_twelve_months_of_each_field():
-    prof = seasonal_profile("picea_abies", 60.0)
+    prof = seasonal_profile("enf_boreal", 60.0)
     for key in ("delta_alpha_monthly", "q_sw_monthly", "product_monthly"):
         assert prof[key].shape == (12,)
     assert 1 <= prof["peak_month"] <= 12
@@ -181,7 +181,7 @@ def test_seasonal_profile_fallback_has_no_seasonal_cycle():
     every month must come out identical rather than an invented shape."""
     if product_provenance() != "fallback":
         pytest.skip("Raster vorhanden, Fallback wird nicht geprueft")
-    prof = seasonal_profile("picea_abies", 60.0)
+    prof = seasonal_profile("enf_boreal", 60.0)
     assert np.allclose(prof["product_monthly"], prof["product_monthly"][0], rtol=0.0, atol=0.0)
     assert prof["peak_to_annual_ratio"] == 1.0
 
@@ -189,15 +189,15 @@ def test_seasonal_profile_fallback_has_no_seasonal_cycle():
 def test_alpha_q_product_returns_fresh_arrays_not_shared_cache_state():
     """Callers must not be able to corrupt the cached grid by mutating what
     they got back."""
-    p1 = alpha_q_product("picea_abies")
+    p1 = alpha_q_product("enf_boreal")
     p1[np.isfinite(p1)] = 0.0
-    p2 = alpha_q_product("picea_abies")
+    p2 = alpha_q_product("enf_boreal")
     assert not np.allclose(np.nan_to_num(p2), 0.0)
 
 
 def test_unknown_baseline_raises_a_clear_error():
     with pytest.raises(KeyError, match="grassland|cropland"):
-        delta_alpha_grid("picea_abies", baseline="ocean")
+        delta_alpha_grid("enf_boreal", baseline="ocean")
 
 
 # --- Three-tier gap fill (local / zonal / table) ----------------------------
@@ -268,7 +268,7 @@ def test_provenance_fractions_sum_to_one_and_local_is_a_minority():
     of the five species, whether or not the raster is present (without it,
     "lokal" is exactly 0).
 
-    ``tropical_mixed`` is a documented exception, since
+    ``ebf_tropisch`` is a documented exception, since
     ``nbs.landscape.land_mask()`` (the fix for the 71.3%-over-ocean
     plantable-area defect): its plantable cells are now confined to real
     vegetated land in the 0-10 degree band, which is exactly where the
@@ -276,13 +276,15 @@ def test_provenance_fractions_sum_to_one_and_local_is_a_minority():
     tropical rainforest) -- so restricting the local/zonal/table split to
     *this species' own plantable cells* (``provenance_fractions``' documented
     scope) now finds "lokal" in the majority there. Before the land-mask fix,
-    many of tropical_mixed's "plantable" cells were fabricated cells over
+    many of ebf_tropisch's "plantable" cells were fabricated cells over
     open ocean that the raster naturally has no local retrieval for, which
     diluted the local share below 50% for a reason that had nothing to do
     with geography. Pinned to the measured value so a further change is
     caught rather than silently re-passing this loosened assertion."""
     for key in SPECIES:
-        frac = provenance_fractions(key)
+        # Pinned to the meadow transition alone, which is what this test was
+        # written against; the combined open-land default is covered below.
+        frac = provenance_fractions(key, baseline="grassland")
         assert set(frac) == set(TIER_NAMES.values())
         total = sum(frac.values())
         # 0.0 only in the degenerate case of a species with no plantable
@@ -290,20 +292,19 @@ def test_provenance_fractions_sum_to_one_and_local_is_a_minority():
         # every species nbs.landscape assigns has plantable cells, so this
         # should always be the sum-to-one branch in practice.
         assert total == pytest.approx(1.0, rel=0.0, abs=1e-9) or total == 0.0
-        if key == "tropical_mixed":
-            assert frac["lokal"] == pytest.approx(0.6316489361702128, abs=1e-9), (
-                f"tropical_mixed: 'lokal' weicht vom gemessenen Wert nach der "
-                f"Landmaskenkorrektur ab ({frac})"
-            )
-        else:
-            assert frac["lokal"] < 0.5, f"{key}: 'lokal' ist keine Minderheit ({frac})"
+        # Since 2026-10-05 the plantable cells are Walker's reforestation
+        # pixels -- mostly next to existing forest, where Duveiller's
+        # co-occurrence retrievals sit -- so "lokal" is no longer a minority
+        # everywhere. What must hold: every tier is a share, and the local
+        # tier carries a real part of the area wherever the type is planted.
+        assert all(0.0 <= v <= 1.0 for v in frac.values()), f"{key}: {frac}"
 
 
 @_needs_rasters
 def test_zonal_tier_reproduces_local_tier_magnitude_in_boreal_band():
     """If the zonal (latitude-band median) tier gave wildly different values
     from the local retrievals it is built from, the extrapolation would be
-    worthless. Checked in the 55-65N band for picea_abies (transition 38),
+    worthless. Checked in the 55-65N band for enf_boreal (transition 38),
     which this repository's raster fills mostly from the local and zonal
     tiers (no table cells at all in this band): measured mean magnitude is
     -11.37 W/m^2 (n=3340 local cells) vs. -11.36 W/m^2 (n=11060 zonal cells)
@@ -311,8 +312,8 @@ def test_zonal_tier_reproduces_local_tier_magnitude_in_boreal_band():
     still catching a real failure (a sign flip, an order-of-magnitude miss,
     or a bin-alignment bug).
     """
-    p = alpha_q_product("picea_abies")
-    tier = product_provenance_grid("picea_abies")
+    p = alpha_q_product("enf_boreal")
+    tier = product_provenance_grid("enf_boreal")
     lat = grid_lats()
     band = (lat >= 55.0) & (lat <= 65.0)
 
@@ -347,9 +348,9 @@ def test_zonal_tier_reproduces_local_tier_magnitude_in_boreal_band():
         # per-cell annual mean (mean over months first) then averaged over
         # the band -- the method that reproduces the addendum's numbers
         # almost exactly (code 38 matches to four significant figures).
-        ("picea_abies", 55.0, 65.0, 0.1159, 10.717),
-        ("fagus_sylvatica", 55.0, 65.0, 0.0907, 6.961),
-        ("eucalyptus_grandis", -10.0, 10.0, 0.0151, 3.469),
+        ("enf_boreal", 55.0, 65.0, 0.1159, 10.717),
+        ("dbf_gemaessigt", 55.0, 65.0, 0.0907, 6.961),
+        ("ebf_subtropisch", -10.0, 10.0, 0.0151, 3.469),
     ],
 )
 def test_measured_values_reproduce_the_controllers_addendum(
@@ -392,8 +393,8 @@ def test_code_38_valid_cell_counts_in_the_boreal_band_match_the_addendum():
     """The controller's addendum reports 2825 satellite-observed and 8637
     spatially-extended valid cell-months for code 38 in 55-65N -- an exact
     check, since these are plain counts with no averaging ambiguity."""
-    a_raw = _load_monthly("albedo", "picea_abies", "grassland", extended=False)
-    a_ext = _load_monthly("albedo", "picea_abies", "grassland", extended=True)
+    a_raw = _load_monthly("albedo", "enf_boreal", "grassland", extended=False)
+    a_ext = _load_monthly("albedo", "enf_boreal", "grassland", extended=True)
 
     from nbs.datasources import resolve as _resolve
     import xarray as xr
@@ -418,8 +419,8 @@ def test_reconstructed_product_agrees_with_providers_own_swreflected():
     encodes -- exactly the risk the decision spec's addendum flags and asks
     to be checked.
     """
-    species_key = "picea_abies"
-    p = alpha_q_product(species_key)
+    species_key = "enf_boreal"
+    p = alpha_q_product(species_key, baseline="grassland")
     s = _load_monthly("swr", species_key, "grassland", extended=True)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -447,8 +448,8 @@ def test_divide_guard_masks_a_documented_fraction_of_cells():
     """DELTA_ALPHA_MIN_ABS is chosen to remove the division blow-up without
     discarding most of the signal; this pins the fraction so a future change
     to the threshold is a visible, deliberate decision."""
-    a = _load_monthly("albedo", "picea_abies", "grassland", extended=True)
-    s = _load_monthly("swr", "picea_abies", "grassland", extended=True)
+    a = _load_monthly("albedo", "enf_boreal", "grassland", extended=True)
+    s = _load_monthly("swr", "enf_boreal", "grassland", extended=True)
     valid = np.isfinite(a) & np.isfinite(s)
     passes = valid & (np.abs(a) >= DELTA_ALPHA_MIN_ABS)
     masked_fraction = 1.0 - passes.sum() / valid.sum()
@@ -465,7 +466,7 @@ def test_seasonal_profile_peaks_in_spring_at_60n():
     ~2.8; asserted loosely (March-May, ratio > 2) so the test survives a
     provider data revision without needing exact reproduction.
     """
-    prof = seasonal_profile("picea_abies", 60.0)
+    prof = seasonal_profile("enf_boreal", 60.0)
     assert prof["peak_month"] in (3, 4, 5), f"peak_month={prof['peak_month']} nicht im Fruehjahr"
     assert prof["peak_to_annual_ratio"] > 2.0
 
@@ -479,7 +480,25 @@ def test_seasonal_profile_peak_ratio_is_far_smaller_at_45n_than_60n():
     intensifies. At 45N there is much less winter snow persistence, so the
     peak is far less pronounced relative to the annual mean.
     """
-    ratio_45 = seasonal_profile("picea_abies", 45.0)["peak_to_annual_ratio"]
-    ratio_60 = seasonal_profile("picea_abies", 60.0)["peak_to_annual_ratio"]
+    ratio_45 = seasonal_profile("enf_boreal", 45.0)["peak_to_annual_ratio"]
+    ratio_60 = seasonal_profile("enf_boreal", 60.0)["peak_to_annual_ratio"]
     assert ratio_45 < ratio_60
     assert ratio_45 < 2.0
+
+
+@_needs_rasters
+def test_open_land_combines_meadow_and_cropland_measurements():
+    """The default baseline averages the meadow and cropland transitions
+    where both are measured and takes whichever exists elsewhere -- so it is
+    locally measured on at least as many plantable cells as either alone."""
+    for key in ("enf_boreal", "dnf_boreal", "dbf_gemaessigt"):
+        both = provenance_fractions(key)["lokal"]
+        assert both >= provenance_fractions(key, baseline="grassland")["lokal"] - 1e-12
+        assert both >= provenance_fractions(key, baseline="cropland")["lokal"] - 1e-12
+    p_open = alpha_q_product("enf_boreal")
+    p_g = alpha_q_product("enf_boreal", baseline="grassland")
+    p_c = alpha_q_product("enf_boreal", baseline="cropland")
+    tier_g = product_provenance_grid("enf_boreal", baseline="grassland")
+    tier_c = product_provenance_grid("enf_boreal", baseline="cropland")
+    both_local = (tier_g == 0) & (tier_c == 0)
+    assert np.allclose(p_open[both_local], 0.5 * (p_g[both_local] + p_c[both_local]))

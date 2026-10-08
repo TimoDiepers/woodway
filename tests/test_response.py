@@ -65,14 +65,19 @@ def test_carbon_green_function_is_a_decaying_airborne_fraction():
     cycle), so the marginal airborne fraction of an added pulse is measurably
     higher than that literature value, and can drift back up slightly late in
     the run as continued warming keeps weakening the sinks even after
-    emissions decline (verified against this project's FaIR configuration:
-    g_C bottoms out around ~0.66 near 2046 and drifts back to ~0.71 by 2150 —
-    a real feature of the state-dependent carbon cycle, not noise).
+    emissions decline.
+
+    g[0] is about 0.90, not 1: the calibrated carbon cycle (fair-calibrate
+    1.4.1, 2026-10-05) already takes up ~10 % within the pulse year -- Joos
+    (2013) gives 0.875 after one year. The old value of ~1 came from a FaIR
+    set-up that started CO2 at 0 ppm in 1750.
     """
     g = green_carbon("ssp245")
     assert g.shape == (len(YEARS),)
-    assert g[0] == pytest.approx(1.0, abs=0.06)
-    assert 0.55 < g[75] < 0.85, "ssp245's rising CO2 background keeps more of the pulse airborne than the pre-industrial Joos (2013) figure"
+    assert 0.85 < g[0] <= 1.0
+    # Calibrated FaIR (2026-10-05): 0.42 in 2100, close to Joos (2013) at
+    # 0.44 -- the old FaIR set-up gave 0.55-0.85. Not "more airborne than Joos".
+    assert 0.35 < g[2100 - int(YEARS[0])] < 0.55
     assert g[30] < 0.75 * g[0], "fast initial decay within a few decades"
     assert np.argmax(g) == 0, "no later point exceeds the immediate post-pulse airborne fraction"
 
@@ -95,7 +100,9 @@ def test_temperature_green_function_peaks_then_decays():
     assert g.shape == (len(YEARS),)
     assert 0.0 < g[0] <= g.max()
     peak = int(np.argmax(g))
-    assert 0 < peak < 25, "surface response peaks within a couple of decades"
+    # With the calibrated mixed layer (heat capacity 3.7 W yr m^-2 K^-1,
+    # ensemble median 4.1) the surface responds within the pulse year itself.
+    assert 0 <= peak < 25, "surface response peaks within a couple of decades"
     assert g[-1] < g[peak], "deep ocean draws the response back down"
 
 
@@ -111,7 +118,7 @@ def test_green_carbon_preindustrial_matches_textbook_75_year_figure():
     """Task spec: the Joos curve at 75 years should come out substantially
     lower than the scenario-conditioned g_C[75] (~0.700, committed value),
     near the ~0.4 the talk's slide 13 quotes."""
-    g = green_carbon_preindustrial()
+    g = green_carbon_preindustrial(76)
     assert 0.35 < g[75] < 0.45
 
 
@@ -119,7 +126,7 @@ def test_green_carbon_preindustrial_is_lower_than_scenario_conditioned_at_75_yea
     """This is the whole point of the carbon_sink switch: a pulse on top of
     a rising ssp245 background meets more saturated sinks than a pulse
     against a flat pre-industrial background."""
-    g_pre = green_carbon_preindustrial()
+    g_pre = green_carbon_preindustrial(76)
     assert g_pre[75] < 0.700, "must come out below the committed scenario g_C[75]"
 
 
@@ -132,12 +139,15 @@ def test_green_carbon_preindustrial_decays_monotonically():
 def test_background_co2_ppm_spans_the_ssp245_study_period():
     c = background_co2_ppm("ssp245")
     assert c.shape == (len(YEARS),)
-    assert 400.0 < c[0] < 440.0, "~424 ppm in 2025"
-    assert 590.0 < c[-1] < 660.0, "~624 ppm by 2149/2150"
-    # the final entry is a repeat of the previous one (_to_study_length pads
-    # the 125-year fair_module series to the 126-year study axis), so the
-    # last diff is exactly 0 rather than positive
-    assert np.all(np.diff(c)[:-1] > 0.0), "ssp245 CO2 background keeps rising"
+    # Emission-driven calibrated FaIR with RCMIP emissions: 414 ppm in 2025
+    # (observed ~425) and ~520 ppm by 2100, where the CMIP6 concentration
+    # path (MAGICC) has ~603. The whole 841-member ensemble sits there
+    # (2100: median 533, 5-95 % 488-560), see docs/methods/klimamodell-fair.md.
+    assert 400.0 < c[0] < 440.0
+    assert 490.0 < c[2100 - int(YEARS[0])] < 560.0
+    # SSP2-4.5 emissions fall after 2100, so the background levels off.
+    assert np.all(np.diff(c)[:60] > 0.0), "ssp245 CO2 background rises to 2085"
+    assert abs(c[-1] - c[2100 - int(YEARS[0])]) < 20.0, "and levels off after 2100"
 
 
 @pytest.mark.slow

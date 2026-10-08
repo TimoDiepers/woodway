@@ -28,24 +28,11 @@ Section 8:
 6. The usable potential: step 5's numbers restated as the cascade's answer,
    with the ensemble's 5-95% band spelled out in ``note``.
 
-Every area-derived carbon number from step 3 onward uses one density,
-carried from step 2's literature correction but **anchored to this
-model's own step-3 area, not Bastin's original 0.9 Gha claim**:
-
-    density_gtc_per_gha = carbon_gtc(step 2) / area_gha(step 3)
-
-This is a deliberate choice, not an approximation error: the model's own
-land mask plus biome exclusion (``nbs.landscape``) measures a plantable
-area that comes out a few percent *larger* than Bastin's own headline
-figure -- an honest and, on reflection, unsurprising result given the two
-areas are independent estimates with a shared ~10% order of uncertainty,
-not a claim that this model found *more* restorable land than Bastin did.
-Anchoring the density to this model's own denominator means step 3 carries
-step 2's literature carbon correction forward *unchanged*
-(``81 GtC = area_gha(step 3) * density`` by construction) rather than
-manufacturing an increase purely from the area mismatch; every step after 3
-is then a genuine, monotonic reduction in both area and carbon, driven only
-by this model's own filters.
+From step 3 onward carbon is this model's own (since 2026-10-05): the
+Walker et al. (2022) unrealized above- plus belowground carbon of each
+reforestable cell, summed over the cells a step keeps. Soil carbon is not
+in it, which is why step 3 lies below step 2's literature correction; every
+later step is a genuine reduction by this model's own filters.
 
 ``reverse_1p5()`` answers the talk's closing question: scaling up *the
 same* corrected species/area mix that ``nbs.landscape`` and
@@ -65,11 +52,12 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.aggregate import aggregate_by_species, global_delta_t, unit_curves
+from nbs.aggregate import aggregate_by_species, co2_factor_grid, global_delta_t, unit_curves
 from nbs.albedo_grid import alpha_q_product
 from nbs.config import ModelConfig
 from nbs.constants import T_END, YEARS
-from nbs.fair_module import run_fair_baseline
+from nbs.fair_module import run_fair_baseline, run_fair_perturbed
+from nbs.grid import grid_lats, grid_lons
 from nbs.landscape import assign_species, plantable_area_m2, tree_count
 from nbs.map_plots import _breakeven_year_field
 from nbs.metrics import quantile_band
@@ -144,23 +132,6 @@ _REALISTIC_CARBON_SOURCE_NOTE = (
     "nicht stillschweigend übernommen."
 )
 
-_REP_LAT_DEG: dict[str, float] = {
-    "tropical_mixed": 5.0,
-    "eucalyptus_grandis": 22.5,
-    "fagus_sylvatica": 42.5,
-    "pinus_sylvestris": 55.0,
-    "picea_abies": 65.0,
-}
-"""Representative latitude per species: the centre of its assigned band in
-``nbs.landscape._BAND_SPECIES``. Disturbance parameters (p_disturb,
-severity_beta, gamma_warming) are species properties, not per-cell ones, so
-a single representative-latitude ensemble per species is enough to size the
-*relative* disturbance buffer (ensemble mean / deterministic, at year
-T_END) -- re-running a 300-member ensemble at each of ~5000 plantable cells
-would cost nothing physically new, since only the ratio, not the absolute
-per-tree magnitude, is carried over to the (raster-based, per-cell-correct)
-grid aggregate."""
-
 _ENSEMBLE_MEMBERS = 300
 """Ensemble size for the disturbance-buffer ratio. Not the spec's 1000
 (Section 7) -- this only needs to size a per-species *ratio* precisely
@@ -170,6 +141,14 @@ members), and keeping it at 300 x 5 species keeps ``cascade()`` in the
 "seconds" budget the task requires."""
 
 
+def _carbon_gtc(mask: NDArray) -> float:
+    """Walker et al. (2022) unrealized AGB+BGB carbon summed over *mask*'s
+    plantable area [GtC] (Mg C/ha x ha / 1e9)."""
+    from nbs.forest_data import carbon_gain_mgc_ha
+
+    return float((carbon_gain_mgc_ha() * plantable_area_m2() / 1e4)[mask].sum() / 1e9)
+
+
 def _gtc_per_gha(area_gha: float, carbon_gtc: float) -> float:
     if area_gha <= 0.0:
         raise ValueError("Fläche muss positiv sein, um eine Dichte abzuleiten")
@@ -177,7 +156,7 @@ def _gtc_per_gha(area_gha: float, carbon_gtc: float) -> float:
 
 
 def _masked_aggregate_by_species(
-    retain_mask: NDArray,
+    retain_mask: NDArray, config: ModelConfig | None = None
 ) -> dict[str, tuple[float, float]]:
     """Same shape as ``nbs.aggregate.aggregate_by_species``, restricted to
     cells where *retain_mask* is True. Mirrors that function's logic exactly
@@ -188,7 +167,7 @@ def _masked_aggregate_by_species(
     out: dict[str, tuple[float, float]] = {}
     for key in SPECIES:
         mask = (species_grid == key) & retain_mask
-        n_sum = float(n_grid[mask].sum())
+        n_sum = float((n_grid[mask] * co2_factor_grid(key, config)[mask]).sum())
         if mask.any():
             p = alpha_q_product(key)
             np_sum = float(np.sum(n_grid[mask] * p[mask]))
@@ -198,14 +177,15 @@ def _masked_aggregate_by_species(
     return out
 
 
-def _masked_global_delta_t(
+def _convolved_global_delta_t(
     retain_mask: NDArray, scenario: str, config: ModelConfig | None = None
 ) -> NDArray:
-    """Length-126 global delta-T(t) [K], restricted to *retain_mask* -- the
-    exact same construction as ``nbs.aggregate.global_delta_t``, just summed
-    over a subset of cells instead of every plantable one."""
+    """Global delta-T(t) [K] over *retain_mask* by convolution with FaIR's
+    marginal response to a small 2025 pulse (nbs.aggregate.unit_curves) --
+    linear in the trees, exact for small signals. Kept for the didactic
+    variants FaIR cannot run directly (Joos response, constant effect per kg)."""
     total = np.zeros(len(YEARS), dtype=float)
-    for key, (n_sum, np_sum) in _masked_aggregate_by_species(retain_mask).items():
+    for key, (n_sum, np_sum) in _masked_aggregate_by_species(retain_mask, config).items():
         if n_sum == 0.0 and np_sum == 0.0:
             continue
         co2, albedo_unit = unit_curves(key, scenario, config)
@@ -213,19 +193,119 @@ def _masked_global_delta_t(
     return total
 
 
+def _forcing_series(
+    retain_mask: NDArray, scenario: str, config: ModelConfig
+) -> tuple[NDArray, NDArray]:
+    """(net CO2 exchange [GtCO2/yr], albedo forcing [W/m^2]) of all trees in
+    *retain_mask*, on YEARS: the same trees, carbon levels and albedo products
+    as the convolution, summed before the climate model instead of after."""
+    from nbs.constants import A_EARTH_M2, M_CO2_PER_C, TAU_ATM
+    from nbs.pipeline import run_single_tree
+    from nbs.species import get_species, reference_site
+
+    nee = np.zeros(len(YEARS))
+    rf = np.zeros(len(YEARS))
+    for key, (n_sum, np_sum) in _masked_aggregate_by_species(retain_mask, config).items():
+        if n_sum == 0.0 and np_sum == 0.0:
+            continue
+        res = run_single_tree(key, reference_site(key), scenario, config=config)
+        nee -= M_CO2_PER_C * np.asarray(res.trajectory.net_uptake_kgC_yr) * n_sum / 1e12
+        if config.albedo:
+            closure = np.asarray(res.trajectory.closure, dtype=float)
+            rf += -TAU_ATM * closure * get_species(key).stand_area_m2 / A_EARTH_M2 * np_sum
+    return nee, rf
+
+
+@lru_cache(maxsize=256)
+def _fair_cached(mask_hash: str, scenario: str, config: ModelConfig, scale: float) -> NDArray:
+    mask = _MASKS[mask_hash]
+    nee, rf = _forcing_series(mask, scenario, config)
+    base = run_fair_baseline(scenario)
+    pert = run_fair_perturbed(scale * nee[: len(base)], scale * rf[: len(base)], scenario)
+    dt = np.append(pert - base, (pert - base)[-1])  # pad to len(YEARS), as nbs.pipeline does
+    dt.setflags(write=False)
+    return dt
+
+
+_MASKS: dict[str, NDArray] = {}
+
+
+def fair_global_delta_t(
+    retain_mask: NDArray, scenario: str = "ssp245", config: ModelConfig | None = None, scale: float = 1.0
+) -> NDArray:
+    """Global delta-T(t) [K] of all trees in *retain_mask* (times *scale*)
+    from one full FaIR run: removals as negative CO2 emissions, albedo as an
+    added forcing. FaIR then computes everything state-dependent -- sinks
+    that weaken as they fill, a forcing per kg that falls as CO2 rises.
+    Used for every area-wide number (since 2026-10-05); a single tree stays
+    with the convolution, its 1e-15 K are below FaIR's numerical precision."""
+    import hashlib
+
+    config = config or ModelConfig()
+    mask = np.asarray(retain_mask, dtype=bool)
+    h = hashlib.sha1(mask.tobytes()).hexdigest()
+    _MASKS[h] = mask
+    return _fair_cached(h, scenario, config, float(scale)).copy()
+
+
+def _fair_runnable(config: ModelConfig) -> bool:
+    return config.carbon_sink == "scenario" and config.co2_forcing == "logarithmic"
+
+
+def _masked_global_delta_t(
+    retain_mask: NDArray, scenario: str, config: ModelConfig | None = None
+) -> NDArray:
+    """Length-126 global delta-T(t) [K], restricted to *retain_mask*: a direct
+    FaIR run where the configuration is FaIR's own physics, else the
+    convolution (didactic variants)."""
+    config = config or ModelConfig()
+    if _fair_runnable(config):
+        return fair_global_delta_t(retain_mask, scenario, config)
+    return _convolved_global_delta_t(retain_mask, scenario, config)
+
+
+def _representative_tree(key: str, retain_mask: NDArray) -> tuple[float, float, float] | None:
+    """(latitude, longitude, albedo product) of the representative tree of
+    forest type *key* inside *retain_mask*, or None if the key keeps no area.
+
+    The disturbance ensemble runs one tree per key and carries only the
+    ratio ensemble/deterministic over to the grid. That tree must stand
+    where the key actually stays after the filters (a cell the albedo filter
+    removed warms, and dividing by a positive Delta-T flips the meaning of
+    the quantiles). Since 2026-10-05 the carbon level varies per cell
+    (nbs.site_factor), so the tree is a real retained cell: the one closest
+    to the area-weighted mean of albedo product and carbon factor."""
+    from nbs.site_factor import site_factor_grid
+
+    cells = (assign_species() == key) & retain_mask
+    if not cells.any():
+        return None
+    w = plantable_area_m2()[cells]
+    product = alpha_q_product(key)[cells]
+    factor = site_factor_grid(key)[cells]
+    d = ((product - np.average(product, weights=w)) / (np.std(product) + 1e-12)) ** 2 + (
+        (factor - np.average(factor, weights=w)) / (np.std(factor) + 1e-12)
+    ) ** 2
+    k = int(np.argmin(d))
+    rows, cols = np.nonzero(cells)
+    return float(grid_lats()[rows[k]]), float(grid_lons()[cols[k]]), float(product[k])
+
+
 def _disturbance_factor(
     retain_mask: NDArray, scenario: str
 ) -> tuple[float, float, float]:
-    """Area-weighted (mean, q5-ratio, q95-ratio) disturbance factor at
-    T_END, from a representative-latitude ensemble per species (see
-    ``_REP_LAT_DEG``), weighted by each species' share of *retain_mask*'s
-    plantable area. A factor of 1.0 would mean disturbance changes nothing;
-    every measured mean factor here is below 1.0 (the ensemble mean is
-    always less cooling than the deterministic run -- disturbance risk,
-    ignored deterministically, flatters the result, exactly
-    ``nbs.metrics.risk_premium``'s documented sign) and the 5-95% band
-    straddles 1.0 (some realisations are luckier than the deterministic
-    run, most are not)."""
+    """Area-weighted (mean, low, high) disturbance factor at T_END: ensemble
+    Delta-T over deterministic Delta-T of each species' representative tree
+    (``_representative_tree``), weighted by its share of *retain_mask*'s
+    plantable area.
+
+    Every retained cell cools at T_END by construction (its t* is finite),
+    so every ratio is positive; low/high are each species' 5 % / 95 %
+    ensemble quantiles mapped to "less cooling" / "more cooling" before
+    weighting, so the band always encloses the mean. Summing quantiles over
+    species treats all trees as hit together (one stand, fully correlated
+    disturbances) -- an upper bound on the spread; independent disturbances
+    across millions of trees would average out to the mean."""
     species_grid = assign_species()
     area = plantable_area_m2()
     area_by_species = {
@@ -238,18 +318,27 @@ def _disturbance_factor(
     w_mean = 0.0
     w_lo = 0.0
     w_hi = 0.0
-    for key, lat in _REP_LAT_DEG.items():
-        weight = area_by_species[key] / total_area
-        if weight == 0.0:
+    for key in SPECIES:
+        site = _representative_tree(key, retain_mask)
+        if site is None:
             continue
+        lat, lon, product = site
+        weight = area_by_species[key] / total_area
         det, ens = run_single_tree_ensemble(
-            key, lat_deg=lat, scenario=scenario, n_members=_ENSEMBLE_MEMBERS, seed=0
+            key, lat_deg=lat, scenario=scenario, n_members=_ENSEMBLE_MEMBERS, seed=0,
+            delta_alpha=product, q_sw=1.0, lon_deg=lon,
         )
         det_end = float(det.delta_t[-1])
+        if det_end >= 0.0:
+            raise ValueError(
+                f"repräsentativer Baum {key} bei {lat:.1f}° kühlt {T_END} nicht -- "
+                "Verhältnis Ensemble/deterministisch nicht definiert"
+            )
         lo, _med, hi = quantile_band(ens)
+        r_lo, r_hi = sorted((float(lo[-1]) / det_end, float(hi[-1]) / det_end))
         w_mean += weight * (float(np.mean(ens[:, -1])) / det_end)
-        w_lo += weight * (float(lo[-1]) / det_end)
-        w_hi += weight * (float(hi[-1]) / det_end)
+        w_lo += weight * r_lo
+        w_hi += weight * r_hi
     return w_mean, w_lo, w_hi
 
 
@@ -264,7 +353,7 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
     cache already use."""
     plantable_mask = assign_species() != None  # noqa: E711
     area3_gha = float(plantable_area_m2().sum()) / GHA_TO_M2
-    density = _gtc_per_gha(area3_gha, REALISTIC_CARBON_GTC)
+    carbon3_gtc = _carbon_gtc(plantable_mask)
 
     delta_t3 = _masked_global_delta_t(plantable_mask, scenario)
 
@@ -275,7 +364,7 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
         float(plantable_area_m2()[plantable_mask & never_breaks_even].sum()) / GHA_TO_M2
     )
     area4_gha = float(plantable_area_m2()[retain4].sum()) / GHA_TO_M2
-    carbon4_gtc = area4_gha * density
+    carbon4_gtc = _carbon_gtc(retain4)
     delta_t4 = _masked_global_delta_t(retain4, scenario)
 
     # Supplementary, stricter check for the brief's "or only after a stated
@@ -288,8 +377,7 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
     )
     late_or_never_gha = float(plantable_area_m2()[late_or_never].sum()) / GHA_TO_M2
 
-    w_mean, w_lo, w_hi = _disturbance_factor(retain4, scenario)
-    lo_factor, hi_factor = sorted((w_lo, w_hi))
+    w_mean, lo_factor, hi_factor = _disturbance_factor(retain4, scenario)
     carbon5_gtc = carbon4_gtc * w_mean
     carbon5_lo, carbon5_hi = carbon4_gtc * lo_factor, carbon4_gtc * hi_factor
     delta_t5 = float(delta_t4[-1]) * w_mean
@@ -326,24 +414,16 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
         {
             "name_de": "Nicht-Wald-Biome ausgeschlossen",
             "area_gha": area3_gha,
-            "carbon_gtc": REALISTIC_CARBON_GTC,
+            "carbon_gtc": carbon3_gtc,
             "delta_t_2150": float(delta_t3[-1]),
             "note": (
-                f"Erster Schritt mit eigenen Modellzahlen: nbs.landscape "
-                f"liefert {area3_gha:.4f} Gha bepflanzbare Fläche nach "
-                "Landmaske (Vereinigung der Duveiller-Raster, 23,6 % der "
-                "Erdoberfläche nach Fläche bzw. 20,3 % der Rasterzellen -- "
-                "siehe nbs.landscape.land_mask_fractions) und Ausschluss von "
-                "bestehendem Wald, "
-                "Savanne/Grasland/Wüste, Landwirtschaft und "
-                "Kryosphäre. Das liegt geringfügig über "
-                "Bastins eigener 0,9-Gha-Angabe (zwei unabhängige "
-                "Schätzungen mit vergleichbarer Unsicherheit) -- die "
-                "Kohlenstoffdichte wird daher an DIESE Fläche verankert "
-                "(81 GtC / Fläche dieses Schritts), nicht an Bastins "
-                "eigene, damit dieser Schritt Stufe 2 unverändert "
-                "weiterträgt statt sie durch den Flächenunterschied "
-                "künstlich zu erhöhen -- siehe Moduldoku."
+                f"Erster Schritt mit eigenen Modellzahlen: {area3_gha:.4f} Gha "
+                "wiederbewaldbare Fläche (Walker et al. 2022, R/L + R/H, ohne "
+                "Flächen für Ernährung und Siedlung) mit bekanntem Waldtyp "
+                "(Hasler et al. 2024). Kohlenstoff = nicht realisiertes "
+                "Potenzial ober- und unterirdisch je Zelle (Walker), "
+                f"summiert: {carbon3_gtc:.1f} GtC -- ohne Bodenkohlenstoff, "
+                "daher unter der Literaturkorrektur von Stufe 2."
             ),
             "quelle": "nbs.landscape.plantable_area_m2 (dieses Modell)",
         },
@@ -373,11 +453,12 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
             "area_gha": area4_gha,
             "carbon_gtc": carbon5_gtc,
             "delta_t_2150": delta_t5,
+            "band_gtc": (carbon5_lo, carbon5_hi),
             "note": (
                 f"Flächenweiter Mittel-Faktor Ensemble/deterministisch "
                 f"bei {T_END}: {w_mean:.4f} (5-95%-Band: {lo_factor:.4f} "
                 f"bis {hi_factor:.4f}), aus {_ENSEMBLE_MEMBERS}-Mitglieder-"
-                "Ensembles je Art an einer repräsentativen Breite "
+                "Ensembles je Art am mittleren Baum ihrer verbliebenen Zellen "
                 "(nbs.pipeline.run_single_tree_ensemble), flächen-"
                 "gewichtet über die nach Stufe 4 verbleibenden Arten "
                 f"kombiniert. Band Kohlenstoff: {min(carbon5_lo, carbon5_hi):.2f} "
@@ -463,25 +544,54 @@ def reverse_1p5(scenario: str = "ssp245") -> dict:
     gap = baseline[start_idx:] - 1.5
     years_window = YEARS[start_idx:]
 
-    area_gha = float(plantable_area_m2().sum()) / GHA_TO_M2
-    n_trees_base = sum(n for n, _ in aggregate_by_species().values())
+    # Base: the cells that cool by T_END (the cascade's usable area). Since the
+    # switch to Walker's area and carbon (2026-10-05) the full reforestable
+    # mix warms on net at T_END, and multiples of a warming mix answer nothing.
+    from nbs.map_plots import _breakeven_year_field
+
+    base = (assign_species() != None) & np.isfinite(_breakeven_year_field(scenario))  # noqa: E711
+    area_gha = float(plantable_area_m2()[base].sum()) / GHA_TO_M2
+    n_trees_base = float(tree_count()[base].sum())
 
     def _variant(config: ModelConfig) -> dict:
-        dt = global_delta_t(scenario, config)[start_idx:]
-        if np.any(dt >= 0.0):
+        """Smallest multiple k of the cooling area that keeps the scenario at
+        or below 1.5 K over the whole window -- searched with full FaIR runs
+        (bisection), not by scaling one run: at tens of times the area the
+        response is no longer linear (sinks fill, each kg works less)."""
+        def excess(k: float) -> NDArray:
+            dt = fair_global_delta_t(base, scenario, config, scale=k)[start_idx:]
+            return gap + dt  # > 0: still above 1.5 K
+
+        # linear first guess from the convolution, then bracket and bisect
+        dt1 = _convolved_global_delta_t(base, scenario, config)[start_idx:]
+        if np.any(dt1 >= 0.0):
             raise ValueError(
                 "Modellvariante kühlt im Fenster 2050.."
                 f"{T_END} nicht durchgehend -- Umkehrrechnung nicht definiert"
             )
         with np.errstate(divide="ignore", invalid="ignore"):
-            k_series = gap / (-dt)
-        i_crit = int(np.argmax(k_series))
-        k = float(k_series[i_crit])
+            k_lin = float(np.max(gap / (-dt1)))
+        lo, hi = 0.0, max(k_lin, 1.0)
+        while np.any(excess(hi) > 0.0):
+            lo, hi = hi, 2.0 * hi
+            if hi > 1e4:
+                raise ValueError("Umkehrrechnung: kein Vielfaches bis 10 000 erreicht 1,5 K")
+        for _ in range(30):
+            mid = 0.5 * (lo + hi)
+            if np.any(excess(mid) > 0.0):
+                lo = mid
+            else:
+                hi = mid
+            if hi - lo < 1e-3 * hi:
+                break
+        k = hi
+        i_crit = int(np.argmax(excess(k)))
         return {
             "n_trees": k * n_trees_base,
             "area_gha": k * area_gha,
             "vielfaches_der_modellierten_flaeche": k,
             "kritisches_jahr": int(years_window[i_crit]),
+            "vielfaches_linear": k_lin,
         }
 
     full = _variant(ModelConfig())
@@ -492,18 +602,20 @@ def reverse_1p5(scenario: str = "ssp245") -> dict:
         "nur_kohlenstoff": carbon_only,
         "verhaeltnis": full["n_trees"] / carbon_only["n_trees"],
         "hinweis": (
-            "Beide Varianten liegen bereits beim Vielfachen der von diesem "
-            f"Modell identifizierten bepflanzbaren Fläche ({area_gha:.3f} "
-            f"Gha) -- {full['vielfaches_der_modellierten_flaeche']:.1f}-fach "
+            "Beide Varianten liegen beim Vielfachen der Fläche, die in diesem "
+            f"Modell bis {T_END} kühlt ({area_gha:.3f} Gha) -- {full['vielfaches_der_modellierten_flaeche']:.1f}-fach "
             "mit Albedo und Störung, "
             f"{carbon_only['vielfaches_der_modellierten_flaeche']:.1f}-fach "
             "bei reiner Kohlenstoffrechnung. Das volle Modell braucht damit "
             f"rund {100.0 * full['area_gha'] / ICE_FREE_LAND_GHA:.0f} % der "
             f"gesamten eisfreien Landfläche der Erde (~{ICE_FREE_LAND_GHA:.0f} "
-            "Gha, Näherung) -- weniger als diese Fläche, aber ein großer "
-            "Teil davon: Baumpflanzung allein hält ssp245 nicht unter "
-            "1,5 Grad, auch wenn die benötigte Fläche die eisfreie "
-            "Landfläche der Erde nicht überschreitet."
+            "Gha, Näherung) -- "
+            + (
+                "mehr als diese Fläche überhaupt hergibt"
+                if full["area_gha"] > ICE_FREE_LAND_GHA
+                else "weniger als diese Fläche, aber ein großer Teil davon"
+            )
+            + ": Baumpflanzung allein hält ssp245 nicht unter 1,5 Grad."
         ),
     }
 

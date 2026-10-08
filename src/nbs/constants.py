@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
-T_START = 2025
-T_END = 2150
+T_START = 2026  # the current year: planting, DAC start and every time axis begin here (was 2025 until 2026-10-07)
+T_END = 2100  # evaluation horizon: keep warming low until 2100 (was 2150 until 2026-10-06)
 YEARS = np.arange(T_START, T_END + 1, dtype=int)
 
 A_EARTH_M2 = 5.1006e14
@@ -51,5 +51,8 @@ concentration anomaly Delta_C [ppm] in ``nbs.forcing.phi_co2_background``.
 M_CO2_PER_C = 44.0 / 12.0
 """Molar mass ratio CO2 to C. Slide 13."""
 
-TAU_ATM = 0.8
-"""Upward atmospheric transmittance for surface shortwave anomalies. Slide 22."""
+TAU_ATM = 0.854
+"""Upward atmospheric transmittance for surface shortwave anomalies: the share of a change in
+surface reflection that reaches the top of the atmosphere. Global annual clear-sky mean,
+T_a = sqrt(f_a) with the two-way transmittance f_a = 0.730 (Lacis and Hansen 1974), as used by
+Lenton and Vaughan (2009, ACP 9, 5539) and Cherubini et al. (2012)."""

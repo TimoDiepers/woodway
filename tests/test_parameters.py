@@ -45,8 +45,8 @@ class TestConstants:
         assert len(SOIL_RESP_BASE) == 5
 
     def test_time_range(self):
-        assert T_START == 2025
-        assert T_END == 2150
+        assert T_START == 2026  # the current year (2026-10-07)
+        assert T_END == 2100
 
     def test_solar_constant(self):
         assert S0 == 1361.0
@@ -133,12 +133,12 @@ class TestDisturbanceProbability:
             assert np.all(result <= 1)
 
     def test_increases_over_time(self):
-        years = np.array([2025, 2150])
+        years = np.array([T_START, 2100])
         result = get_disturbance_probability("tropical_reforestation", 0, years)
         assert result[-1] > result[0]
 
     def test_increases_by_50_percent(self):
-        years = np.array([2025, 2150])
+        years = np.array([T_START, 2100])
         result = get_disturbance_probability("tropical_reforestation", 0, years)
         assert np.isclose(result[-1] / result[0], 1.5)
 

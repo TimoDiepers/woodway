@@ -36,14 +36,14 @@ matches one species' registered GEZ list:
 ============  ========================  ================================
 |lat| (deg)   species                   representative GEZ
 ============  ========================  ================================
- 0 - 10       tropical_mixed            tropical_rainforest
-10 - 35       eucalyptus_grandis        tropical_moist_deciduous_forest /
+ 0 - 10       ebf_tropisch            tropical_rainforest
+10 - 35       ebf_subtropisch        tropical_moist_deciduous_forest /
                                          subtropical_humid_forest
-35 - 50       fagus_sylvatica           temperate_oceanic_forest /
+35 - 50       dbf_gemaessigt           temperate_oceanic_forest /
                                          temperate_continental_forest
-50 - 60       pinus_sylvestris          temperate_continental_forest /
+50 - 60       dnf_boreal          temperate_continental_forest /
                                          boreal_coniferous_forest
-60 - 70       picea_abies               boreal_coniferous_forest /
+60 - 70       enf_boreal               boreal_coniferous_forest /
                                          boreal_tundra_woodland
 ============  ========================  ================================
 
@@ -110,11 +110,11 @@ from nbs.species import get_species
 # (lower bound, upper bound) absolute latitude [deg], exclusive of the upper
 # bound except for the last band, and the species assigned to that band.
 _BAND_SPECIES: tuple[tuple[float, float, str], ...] = (
-    (0.0, 10.0, "tropical_mixed"),
-    (10.0, 35.0, "eucalyptus_grandis"),
-    (35.0, 50.0, "fagus_sylvatica"),
-    (50.0, 60.0, "pinus_sylvestris"),
-    (60.0, 70.0, "picea_abies"),
+    (0.0, 10.0, "ebf_tropisch"),
+    (10.0, 35.0, "ebf_subtropisch"),
+    (35.0, 50.0, "dbf_gemaessigt"),
+    (50.0, 60.0, "dnf_boreal"),
+    (60.0, 70.0, "enf_boreal"),
 )
 KRYOSPHERE_LAT_DEG = 70.0
 """Cells beyond this absolute latitude are entirely kryosphaere (no species)."""
@@ -218,72 +218,38 @@ def land_mask_provenance() -> str:
 
 @lru_cache(maxsize=1)
 def _compute() -> tuple[NDArray, NDArray, NDArray, dict[str, NDArray]]:
-    """Build the species grid, plantable area, tree count and exclusion masks.
+    """Forest type, plantable area, tree count and exclusion masks from data
+    (2026-10-05; replaces the latitude bands and the synthetic random split).
 
-    Computed once and cached; the public functions below return copies so a
-    caller can never mutate the cached arrays out from under later calls.
+    * Plantable: Walker et al. (2022) reforestation opportunity (NCS R/L +
+      R/H) outside food production and habitation, per 0.5-degree cell
+      (nbs.forest_data.reforestable_area_m2), where a forest type is known.
+    * Type: the typical forest x climate zone key (nbs.forest_data.key_grid).
+    * Masks, for the cascade text only: "kein_land" = not in the land mask;
+      "savanne_grasland" = land whose most likely woody class is savanna and
+      that is not reforestable; "bestehender_wald" = other land without
+      reforestation opportunity; "kryosphaere" = |lat| >= 70 without
+      opportunity; "landwirtschaft" = reforestable but without a forest type
+      (not separately mapped by Walker; kept for the interface).
     """
-    species_grid = np.full((N_LAT, N_LON), None, dtype=object)
-    area_grid = np.zeros((N_LAT, N_LON), dtype=float)
-    count_grid = np.zeros((N_LAT, N_LON), dtype=float)
-    masks = {name: np.zeros((N_LAT, N_LON), dtype=bool) for name in _MASK_NAMES}
+    from nbs.forest_data import TREES_PER_HA, key_grid, raw, reforestable_area_m2
 
-    cell_area = cell_area_m2()
-    lats = grid_lats()
+    keys = key_grid()
+    area = np.where(keys != None, reforestable_area_m2(), 0.0)  # noqa: E711
+    species_grid = np.where(area > 0, keys, None)
+    count_grid = area / (1e4 / TREES_PER_HA)
     land = land_mask()
-
-    for i in range(N_LAT):
-        abs_lat = abs(float(lats[i]))
-        row_area = float(cell_area[i, 0])  # constant along a latitude row
-
-        if abs_lat >= KRYOSPHERE_LAT_DEG:
-            masks["kryosphaere"][i, :] = True
-            continue
-
-        land_row = land[i, :]
-        land_cols = np.flatnonzero(land_row)
-        n_land = land_cols.size
-        masks["kein_land"][i, :] = ~land_row
-
-        if n_land == 0:
-            continue
-
-        band_idx = _band_index(abs_lat)
-        assert band_idx is not None, f"lat {lats[i]} not covered by any band"
-        species_key = _BAND_SPECIES[band_idx][2]
-        forest_frac = _FOREST_FRAC[band_idx]
-        savanna_frac = _SAVANNA_FRAC[band_idx]
-        agri_frac = _AGRI_FRAC[band_idx]
-
-        n_forest = round(n_land * forest_frac)
-        n_savanna = round(n_land * savanna_frac)
-        n_agri = round(n_land * agri_frac)
-        n_used = n_forest + n_savanna + n_agri
-        if n_used > n_land:
-            # Rounding overshoot on a near-full land row; trim agriculture
-            # last -- it is the smallest share everywhere it matters.
-            n_agri = max(0, n_agri - (n_used - n_land))
-            n_used = n_forest + n_savanna + n_agri
-
-        order = np.random.default_rng(i).permutation(n_land)
-        pos = 0
-        forest_cols = land_cols[order[pos : pos + n_forest]]
-        pos += n_forest
-        savanna_cols = land_cols[order[pos : pos + n_savanna]]
-        pos += n_savanna
-        agri_cols = land_cols[order[pos : pos + n_agri]]
-        pos += n_agri
-        plantable_cols = land_cols[order[pos:]]
-
-        masks["bestehender_wald"][i, forest_cols] = True
-        masks["savanne_grasland"][i, savanna_cols] = True
-        masks["landwirtschaft"][i, agri_cols] = True
-
-        species_grid[i, plantable_cols] = species_key
-        area_grid[i, plantable_cols] = row_area
-        count_grid[i, plantable_cols] = row_area / get_species(species_key).stand_area_m2
-
-    return species_grid, area_grid, count_grid, masks
+    lat = np.abs(grid_lats())[:, None] * np.ones((1, N_LON))
+    typical_raw = raw()["typical"]
+    refo = reforestable_area_m2() > 0
+    masks = {
+        "kein_land": ~land & ~refo,  # Walker's reforestable pixels are land even where Duveiller has no data
+        "kryosphaere": land & (lat >= KRYOSPHERE_LAT_DEG) & ~refo,
+        "savanne_grasland": land & (typical_raw == 8) & ~refo & (lat < KRYOSPHERE_LAT_DEG),
+        "bestehender_wald": land & (typical_raw != 8) & ~refo & (lat < KRYOSPHERE_LAT_DEG),
+        "landwirtschaft": refo & (area <= 0),
+    }
+    return species_grid, area, count_grid, masks
 
 
 def assign_species() -> NDArray:
@@ -336,7 +302,7 @@ def provenance() -> str:
     which the land mask itself (built from the Duveiller raster union when
     available) now does report honestly.
     """
-    return "fallback"
+    return "daten_walker_hasler"
 
 
 __all__ = [

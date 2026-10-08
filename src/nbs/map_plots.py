@@ -49,7 +49,7 @@ from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 from numpy.typing import NDArray  # noqa: E402
 
-from nbs.aggregate import delta_t_at_year, unit_curves  # noqa: E402
+from nbs.aggregate import co2_factor_grid, delta_t_at_year, unit_curves  # noqa: E402
 from nbs.albedo_grid import (  # noqa: E402
     alpha_q_product,
     product_provenance,
@@ -73,14 +73,9 @@ from nbs.recommend import (  # noqa: E402
 from nbs.species import SPECIES, get_species  # noqa: E402
 
 DPI = 300
-_FOOTER_SPECIES = "picea_abies"
-"""Species whose three-tier fractions footer_text() quotes.
-
-Picea abies is the boreal conifer the talk's slides (14, the ladder, the
-light-bulb image) all foreground, so it is the fraction figure a reader
-would otherwise assume applies everywhere -- naming it explicitly instead of
-an average across species avoids implying a number that was never computed.
-"""
+_FOOTER_SPECIES = "mf_gemaessigt"
+"""Forest type whose three-tier albedo fractions footer_text() quotes: the
+typical forest at Aachen, the talk's running example."""
 
 _COLOR_WARM = "#b2182b"
 _COLOR_COOL = "#2166ac"
@@ -89,17 +84,40 @@ _COLOR_UNPLANTABLE = "#e5e5e5"
 _COLOR_LAND = "#c9c9c9"
 """Land that exists but is not available (forest, cropland, savanna, ice)."""
 
-_SPECIES_COLORS: dict[str, str] = {
-    "tropical_mixed": "#1b7837",
-    "eucalyptus_grandis": "#7fbc41",
-    "fagus_sylvatica": "#fdb863",
-    "pinus_sylvestris": "#8073ac",
-    "picea_abies": "#2166ac",
+TYPE_COLORS: dict[str, str] = {
+    "enf": "#2a78d6",  # slot 1 blue   -- immergrüner Nadelwald
+    "dbf": "#eb6834",  # slot 2 orange -- sommergrüner Laubwald
+    "ebf": "#1baf7a",  # slot 3 aqua   -- immergrüner Laubwald
+    "dnf": "#eda100",  # slot 4 yellow -- Lärchenwald
+    "mf": "#e87ba4",   # slot 5 magenta -- Mischwald
 }
-"""One hue per species, colour-blind-safe (PRGn/PuOr families).
+"""One hue per forest type, the dataviz reference palette in fixed order
+(passes the adjacent-pair CVD and normal-vision checks; maps carry a legend
+with direct labels because five classes cannot pass all-pairs)."""
 
-Fixed here rather than pulled from a colormap so the same species keeps the
-same colour on every figure and slide it appears on."""
+TYPE_NAMES: dict[str, str] = {
+    "enf": "Immergrüner Nadelwald",
+    "dbf": "Sommergrüner Laubwald",
+    "ebf": "Immergrüner Laubwald",
+    "dnf": "Lärchenwald",
+    "mf": "Mischwald",
+}
+
+
+def forest_type(key: str) -> str:
+    """'mf_gemaessigt' -> 'mf'."""
+    return key.split("_")[0]
+
+
+class _ByType(dict):
+    """Colour lookup by registry key ('mf_boreal') or by type ('mf')."""
+
+    def __missing__(self, key: str) -> str:
+        return TYPE_COLORS[forest_type(key)]
+
+
+_SPECIES_COLORS: dict[str, str] = _ByType()
+"""Same colour for a forest type in every climate zone."""
 
 
 def _save(fig, out_path: str) -> str:
@@ -161,7 +179,7 @@ def footer_text(species_key: str = _FOOTER_SPECIES) -> str:
     sp = get_species(species_key)
     return (
         f"Albedo-Rasterquelle (Duveiller et al. 2018, JRC v2.0): {prod}  |  "
-        f"Art-/Flächenzuordnung (Breitenbänder, keine GEZ-Rasterquelle): {land}  |  "
+        f"Flächen und Waldtypen: Walker et al. 2022, Hasler et al. 2024 ({land})  |  "
         f"{sp.name_de}: {_de_pct(frac['lokal'])} lokal erhoben, "
         f"{_de_pct(frac['zonal'])} zonal extrapoliert, "
         f"{_de_pct(frac['tabelle'])} Breitentabelle"
@@ -272,7 +290,8 @@ def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None =
             continue
         co2, albedo_unit = unit_curves(key, scenario, config)
         p = alpha_q_product(key)[mask]
-        traj = co2[None, :] + p[:, None] * albedo_unit[None, :]
+        f = co2_factor_grid(key, config)[mask]
+        traj = f[:, None] * co2[None, :] + p[:, None] * albedo_unit[None, :]
         field[mask] = _t_star_batch(traj, YEARS)
     return field
 
@@ -283,7 +302,7 @@ def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
     of plantable cells still warming in 2030, 49.2% in 2040, 45.5% in 2050,
     24.7% in 2060, 1.7% in 2080, 2.9% in 2125. Early break-even years read
     bright, late ones dark, and cells that never break even within the
-    2025-2150 horizon get their own distinct colour rather than being folded
+    2025-2100 horizon get their own distinct colour rather than being folded
     into the "late" end of the scale, which would silently equate "took 120
     years" with "never".
     """
@@ -295,7 +314,7 @@ def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
     # decades (62.5% -> 2.9% under the default ssp245), recomputed here (not
     # hardcoded) so the number stays correct if a caller passes a different
     # scenario.
-    _start_year, _end_year = 2030, 2125
+    _start_year, _end_year = 2030, T_END
     _warm_start, _ = _warming_cooling_pct(_start_year, scenario)
     _warm_end, _ = _warming_cooling_pct(_end_year, scenario)
 
@@ -385,7 +404,7 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
 
     **This is a counterfactual sweep**, and the figure says so: it puts the
     *same* species at every latitude, including latitudes it would never be
-    planted at. ``nbs.landscape`` assigns picea_abies to 60-70 degrees only;
+    planted at. ``nbs.landscape`` assigns enf_boreal to 60-70 degrees only;
     the shaded band marks that range so the rest is read as "what if", not as
     a recommendation. Outside it the Delta_alpha values are the three-tier
     fill's zonal extrapolation of a transition that was never retrieved
@@ -393,7 +412,7 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
     on the whole figure -- a real consequence of high subtropical insolation
     times an extrapolated albedo contrast, not a measurement.
 
-    x: study year (2025-2150, the model's own annual resolution -- the
+    x: study year (2025-2100, the model's own annual resolution -- the
     "continuous" axis the brief asks for, as opposed to the handful of
     support years plot_breakeven_map and plot_sign_map single out).
     y: latitude, zonal-mean alpha_q_product per row for *species_key*,
@@ -422,7 +441,8 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
         n_land > 0, (product * land).sum(axis=1) / np.maximum(n_land, 1), np.nan
     )  # (360,)
 
-    field_k = co2[None, :] + zonal_product[:, None] * albedo_unit[None, :]  # (360, 126) K
+    f_rows = co2_factor_grid(species_key)[:, 0]  # depends on latitude only
+    field_k = f_rows[:, None] * co2[None, :] + zonal_product[:, None] * albedo_unit[None, :]  # (360, 126) K
     field = np.ma.masked_invalid(field_k * 1e15)  # 1e-15 K per tree, as nbs.plots
 
     vmax = float(np.max(np.abs(field)))

@@ -10,7 +10,7 @@ results slides:
   ending at the full default model.
 
 ``summarise_variants`` turns either shape of result into a small table (t*,
-Delta-T(2150), difference from the base) that a notebook or figure can
+Delta-T(T_END), difference from the base) that a notebook or figure can
 render without recomputing anything.
 """
 
@@ -147,7 +147,7 @@ def run_ladder(
 def summarise_variants(
     results: dict[str, SiteResult] | Iterable[tuple[str, SiteResult]],
 ) -> list[dict[str, Any]]:
-    """Small table for a notebook or figure: per variant, t*, Delta-T(2150)
+    """Small table for a notebook or figure: per variant, t*, Delta-T(T_END)
     and the difference from the base.
 
     Accepts either shape of result -- the dict from ``run_variants`` or the

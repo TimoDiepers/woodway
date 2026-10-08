@@ -13,8 +13,8 @@ from nbs.forcing import (
 )
 from nbs.species import get_species
 
-BOREAL = get_species("picea_abies")
-TROPICAL = get_species("tropical_mixed")
+BOREAL = get_species("enf_boreal")
+TROPICAL = get_species("ebf_tropisch")
 
 
 def test_uptake_becomes_negative_co2_flux():

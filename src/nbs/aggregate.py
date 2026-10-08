@@ -59,7 +59,8 @@ from nbs.constants import A_EARTH_M2, T_END, TAU_ATM, YEARS
 from nbs.landscape import assign_species, tree_count
 from nbs.pipeline import run_single_tree
 from nbs.response import convolve_response, green_temperature
-from nbs.species import SPECIES, get_species
+from nbs.site_factor import site_factor_grid
+from nbs.species import SPECIES, get_species, reference_site
 
 
 def _year_index(year: int) -> int:
@@ -86,15 +87,25 @@ def _unit_curves_cached(
     (arbitrary) lat_deg=0.0, which is not the per-unit quantity this function
     needs.
     """
-    result = run_single_tree(species_key, lat_deg=0.0, scenario=scenario, config=config)
+    # At the species' reference site the site factor is 1: the CO2 curve is
+    # the per-tree curve of slide 12, scaled per cell by co2_factor_grid.
+    result = run_single_tree(
+        species_key, lat_deg=reference_site(species_key), scenario=scenario, config=config
+    )
     g_t = green_temperature(scenario)
 
     delta_t_co2 = convolve_response(g_t, result.phi_co2)
 
-    sp = get_species(species_key)
-    closure = np.asarray(result.trajectory.closure, dtype=float)
-    unit_phi_albedo = -TAU_ATM * closure * sp.stand_area_m2 / A_EARTH_M2
-    delta_t_albedo_unit = convolve_response(g_t, unit_phi_albedo)
+    if config.albedo:
+        sp = get_species(species_key)
+        closure = np.asarray(result.trajectory.closure, dtype=float)
+        unit_phi_albedo = -TAU_ATM * closure * sp.stand_area_m2 / A_EARTH_M2
+        delta_t_albedo_unit = convolve_response(g_t, unit_phi_albedo)
+    else:
+        # config.albedo=False switches the channel off, as in nbs.pipeline.
+        # Before 2026-10-05 this branch was missing, so every aggregate
+        # "carbon only" variant still carried the albedo.
+        delta_t_albedo_unit = np.zeros(len(YEARS), dtype=float)
 
     delta_t_co2.setflags(write=False)
     delta_t_albedo_unit.setflags(write=False)
@@ -127,6 +138,21 @@ def unit_curves(
     return co2.copy(), albedo_unit.copy()
 
 
+def co2_factor_grid(species_key: str, config: ModelConfig | None = None) -> NDArray:
+    """(360, 720) factor on the CO2 unit curve per cell: the site factor
+    (``nbs.site_factor``) when config.site_growth, else 1 everywhere.
+
+    Exact, not an approximation: the site factor scales only m_max, so stock,
+    net uptake and disturbance losses -- and with them phi_CO2 -- scale
+    linearly with it, while canopy closure (and the albedo unit curve) does not
+    change at all."""
+    if config is None:
+        config = ModelConfig()
+    if not config.site_growth:
+        return np.ones((360, 720))
+    return site_factor_grid(species_key)
+
+
 def _product_no_nan(species_key: str) -> NDArray:
     """(360, 720) afforestation Delta_alpha * q_sw product.
 
@@ -141,7 +167,7 @@ def _product_no_nan(species_key: str) -> NDArray:
     somewhere upstream, and that must fail loudly rather than silently
     zeroing the albedo channel -- which is exactly what an earlier version of
     this function did, before the three-tier fill existed, for the ~91% of
-    plantable picea_abies cells the raw raster alone has no data for. A zero
+    plantable enf_boreal cells the raw raster alone has no data for. A zero
     product is a real physical statement ("this forest does not change the
     albedo at all"); it must never be how "we have no data here" gets
     represented.
@@ -158,10 +184,13 @@ def _product_no_nan(species_key: str) -> NDArray:
     return p
 
 
-def aggregate_by_species() -> dict[str, tuple[float, float]]:
+def aggregate_by_species(config: ModelConfig | None = None) -> dict[str, tuple[float, float]]:
     """Per species, ``(sum_c N_c, sum_c N_c * P_c)`` over every grid cell.
 
-    ``N_c`` is the tree count assigned to a cell (``nbs.landscape.tree_count``)
+    ``N_c`` is the tree count assigned to a cell (``nbs.landscape.tree_count``),
+    in the first scalar weighted by the cell's site factor ``f_c``
+    (``co2_factor_grid``) because only the CO2 channel scales with it, so the
+    pair is really ``(sum_c N_c f_c, sum_c N_c P_c)``;
     and ``P_c`` its afforestation Delta_alpha * q_sw product
     (``nbs.albedo_grid.alpha_q_product``, always fully finite through its own
     three-tier gap fill -- ``_product_no_nan`` here is a defensive check on
@@ -175,7 +204,7 @@ def aggregate_by_species() -> dict[str, tuple[float, float]]:
     out: dict[str, tuple[float, float]] = {}
     for key in SPECIES:
         mask = species_grid == key
-        n_sum = float(n_grid[mask].sum())
+        n_sum = float((n_grid[mask] * co2_factor_grid(key, config)[mask]).sum())
         if mask.any():
             p = _product_no_nan(key)
             np_sum = float(np.sum(n_grid[mask] * p[mask]))
@@ -195,7 +224,7 @@ def global_delta_t(scenario: str = "ssp245", config: ModelConfig | None = None) 
     test_aggregation_equals_cellwise_computation_on_a_sample``.
     """
     total = np.zeros(len(YEARS), dtype=float)
-    for key, (n_sum, np_sum) in aggregate_by_species().items():
+    for key, (n_sum, np_sum) in aggregate_by_species(config).items():
         if n_sum == 0.0 and np_sum == 0.0:
             continue
         co2, albedo_unit = unit_curves(key, scenario, config)
@@ -225,7 +254,8 @@ def delta_t_at_year(
         c = float(co2[idx])
         a = float(albedo_unit[idx])
         p = _product_no_nan(key)
-        field[mask] = n_grid[mask] * (c + a * p[mask])
+        f = co2_factor_grid(key, config)
+        field[mask] = n_grid[mask] * (f[mask] * c + a * p[mask])
     return field
 
 
@@ -253,10 +283,11 @@ def delta_t_field(
         p = _product_no_nan(key)
         n_masked = n_grid[mask]
         p_masked = p[mask]
+        f_masked = co2_factor_grid(key, config)[mask]
         for k, idx in enumerate(idxs):
             c = float(co2[idx])
             a = float(albedo_unit[idx])
-            out[k][mask] = n_masked * (c + a * p_masked)
+            out[k][mask] = n_masked * (f_masked * c + a * p_masked)
     return out
 
 
@@ -294,7 +325,7 @@ def albedo_offset_field(
             continue
         co2, albedo_unit = unit_curves(key, scenario, config)
         product = _product_no_nan(key)
-        carbon = float(co2[idx])
+        carbon = co2_factor_grid(key, config)[mask] * float(co2[idx])
         albedo = product[mask] * float(albedo_unit[idx])
         out[mask] = albedo / (-carbon) * 100.0
     return out

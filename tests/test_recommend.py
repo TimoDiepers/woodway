@@ -5,7 +5,6 @@ from nbs.landscape import plantable_area_m2
 from nbs.recommend import (
     M2_PER_GHA,
     admissible_mask,
-    candidate_lat_range,
     improvement,
     recommend,
     score_field,
@@ -13,26 +12,6 @@ from nbs.recommend import (
     total_delta_t,
 )
 from nbs.species import SPECIES, get_species
-
-_GEZ_TO_SPECIES_BAND = {
-    "tropical_mixed": (0.0, 35.0),
-    "eucalyptus_grandis": (10.0, 35.0),
-    "fagus_sylvatica": (35.0, 60.0),
-    "pinus_sylvestris": (35.0, 70.0),
-    "picea_abies": (35.0, 70.0),
-}
-
-
-@pytest.mark.parametrize("key", list(SPECIES))
-def test_candidate_range_is_the_hull_of_the_species_zones(key):
-    assert candidate_lat_range(key) == _GEZ_TO_SPECIES_BAND[key]
-
-
-@pytest.mark.parametrize("key", list(SPECIES))
-def test_candidate_range_is_non_empty_and_inside_the_planted_latitudes(key):
-    lo, hi = candidate_lat_range(key)
-    assert 0.0 <= lo < hi <= 70.0
-
 
 def test_every_plantable_latitude_has_at_least_one_candidate():
     """No plantable cell may be left without an admissible species -- that
@@ -45,22 +24,14 @@ def test_every_plantable_latitude_has_at_least_one_candidate():
     assert not np.any(plantable & ~any_admissible)
 
 
-def test_unknown_gez_raises_rather_than_shrinking_the_range():
-    import dataclasses
-
-    import nbs.recommend as rec
-
-    broken = dataclasses.replace(get_species("picea_abies"), valid_gez=("mondkrater",))
-    original = SPECIES["picea_abies"]
-    SPECIES["picea_abies"] = broken
-    try:
-        with pytest.raises(KeyError, match="mondkrater"):
-            rec.candidate_lat_range("picea_abies")
-    finally:
-        SPECIES["picea_abies"] = original
+def test_typical_forest_is_always_admissible():
+    """The typical forest of a cell (Hasler et al. 2024) must be among its
+    admissible types -- otherwise the comparison could drop the default."""
+    species = recommend.__globals__["assign_species"]()
+    for key in SPECIES:
+        assert np.all(admissible_mask(key)[species == key])
 
 
-@pytest.mark.slow
 def test_recommended_species_is_none_exactly_where_nothing_is_plantable():
     rec = recommend()
     plantable = plantable_area_m2() > 0.0

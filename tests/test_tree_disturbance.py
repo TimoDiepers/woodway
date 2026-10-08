@@ -14,7 +14,7 @@ from nbs.tree import (
     simulate_stochastic,
 )
 
-SP = get_species("picea_abies")
+SP = get_species("enf_boreal")
 NO_WARMING = np.zeros(len(YEARS))
 STRONG_WARMING = np.linspace(0.0, 4.0, len(YEARS))
 
@@ -29,7 +29,7 @@ def test_disturbance_probability_rises_with_background_warming():
 
 def test_disturbance_probability_stays_a_probability():
     # SP.p_disturb * exp(SP.gamma_warming * T) only exceeds 1 above about
-    # 22.1 K for picea_abies; 30 K is comfortably past that so the clip(...,
+    # 22.1 K for enf_boreal; 30 K is comfortably past that so the clip(...,
     # 0.0, 1.0) in disturbance_probability is actually exercised here.
     p = disturbance_probability(SP, np.full(len(YEARS), 30.0))
     assert SP.p_disturb * np.exp(SP.gamma_warming * 30.0) > 1.0, "clamp must be binding at this temperature"
@@ -38,7 +38,7 @@ def test_disturbance_probability_stays_a_probability():
 
 
 def test_deterministic_run_without_disturbance_matches_closed_form():
-    sp = get_species("fagus_sylvatica")
+    sp = get_species("dbf_gemaessigt")
     quiet = dataclasses.replace(sp, p_disturb=0.0)
     traj = simulate_deterministic(quiet, NO_WARMING)
     expected = biomass_closed(YEARS - YEARS[0], quiet)
@@ -103,7 +103,10 @@ def test_disturbance_moves_carbon_to_debris_not_out_of_the_ecosystem():
     fires. dt=1.0 makes that spiked year exactly one disturbance step, so the
     recorded transition *is* the single event.
     """
-    sp = dataclasses.replace(get_species("eucalyptus_grandis"), p_disturb=1e-9)
+    # Fast saturation forced via k: the data-derived k of every forest type
+    # is capped at the Poorter bound (90 % after 66 years), too slow to pin
+    # the stock at m_max by the next-to-last year.
+    sp = dataclasses.replace(get_species("ebf_subtropisch"), p_disturb=1e-9, k=0.2)
     spike_idx = len(YEARS) - 2
     t_background = np.zeros(len(YEARS))
     t_background[spike_idx] = 200.0  # forces p_annual to clip to 1.0 there
@@ -128,9 +131,9 @@ def test_stochastic_run_is_reproducible_from_its_seed():
 
 
 def test_stochastic_runs_differ_across_seeds():
-    a = simulate_stochastic(SP, NO_WARMING, np.random.default_rng(1))
-    b = simulate_stochastic(SP, NO_WARMING, np.random.default_rng(2))
-    assert not np.array_equal(a.stock_kgC, b.stock_kgC)
+    # with the 2100 horizon a single pair of seeds may both draw no disturbance; some must differ
+    runs = [simulate_stochastic(SP, NO_WARMING, np.random.default_rng(s)).stock_kgC for s in range(1, 9)]
+    assert any(not np.array_equal(runs[0], r) for r in runs[1:])
 
 
 def test_disturbed_tree_regrows():

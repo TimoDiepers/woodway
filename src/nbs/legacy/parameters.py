@@ -24,8 +24,7 @@ SCENARIOS = ["ssp126", "ssp245", "ssp370"]
 
 COMPLEXITY_LEVELS = [0, 1, 2, 3, 4, 5, 6]
 
-T_START = 2025
-T_END = 2150
+from nbs.constants import T_END, T_START  # noqa: E402  single source
 
 S0 = 1361.0  # Solar constant [W/m²]
 

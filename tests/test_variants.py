@@ -10,7 +10,7 @@ from nbs.variants import run_ladder, run_variants, summarise_variants
 
 @pytest.mark.slow
 def test_run_variants_returns_base_plus_one_flip_per_switch():
-    results = run_variants("picea_abies", 60.0)
+    results = run_variants("enf_boreal", 60.0)
     assert isinstance(results, dict)
     # base + one flip each for co2_forcing, albedo, disturbance, carbon_sink
     assert len(results) == 5
@@ -22,14 +22,14 @@ def test_run_variants_returns_base_plus_one_flip_per_switch():
 @pytest.mark.slow
 def test_run_variants_base_result_uses_the_base_config():
     base = ModelConfig(co2_forcing="linear")
-    results = run_variants("picea_abies", 60.0, base=base)
+    results = run_variants("enf_boreal", 60.0, base=base)
     assert results["Basis"].config == base
 
 
 @pytest.mark.slow
 def test_run_variants_each_non_base_result_differs_in_exactly_one_field():
     base = ModelConfig()
-    results = run_variants("picea_abies", 60.0, base=base)
+    results = run_variants("enf_boreal", 60.0, base=base)
     for name, r in results.items():
         if name == "Basis":
             continue
@@ -43,7 +43,7 @@ def test_run_variants_each_non_base_result_differs_in_exactly_one_field():
 
 @pytest.mark.slow
 def test_run_variants_keys_are_short_german_strings():
-    results = run_variants("picea_abies", 60.0)
+    results = run_variants("enf_boreal", 60.0)
     for name in results:
         assert isinstance(name, str)
         assert len(name) < 60
@@ -51,7 +51,7 @@ def test_run_variants_keys_are_short_german_strings():
 
 @pytest.mark.slow
 def test_run_ladder_default_has_five_rungs_in_narrative_order():
-    ladder = run_ladder("picea_abies", 60.0)
+    ladder = run_ladder("enf_boreal", 60.0)
     assert isinstance(ladder, list)
     assert len(ladder) == 5
     names = [name for name, _ in ladder]
@@ -68,7 +68,7 @@ def test_run_ladder_default_has_five_rungs_in_narrative_order():
 
 @pytest.mark.slow
 def test_run_ladder_first_rung_is_naive():
-    ladder = run_ladder("picea_abies", 60.0)
+    ladder = run_ladder("enf_boreal", 60.0)
     _, first = ladder[0]
     assert first.config.co2_forcing == "linear"
     assert first.config.carbon_sink == "preindustrial"
@@ -78,7 +78,7 @@ def test_run_ladder_first_rung_is_naive():
 
 @pytest.mark.slow
 def test_run_ladder_last_rung_is_the_full_default_model():
-    ladder = run_ladder("picea_abies", 60.0)
+    ladder = run_ladder("enf_boreal", 60.0)
     _, last = ladder[-1]
     assert last.config == ModelConfig()
 
@@ -89,13 +89,13 @@ def test_run_ladder_accepts_a_custom_ladder():
         ("A", ModelConfig(albedo=False)),
         ("B", ModelConfig(albedo=True)),
     ]
-    ladder = run_ladder("picea_abies", 60.0, ladder=custom)
+    ladder = run_ladder("enf_boreal", 60.0, ladder=custom)
     assert [name for name, _ in ladder] == ["A", "B"]
 
 
 @pytest.mark.slow
 def test_summarise_variants_from_ladder_has_expected_columns():
-    ladder = run_ladder("picea_abies", 60.0)
+    ladder = run_ladder("enf_boreal", 60.0)
     rows = summarise_variants(ladder)
     assert len(rows) == len(ladder)
     for row in rows:
@@ -112,7 +112,7 @@ def test_summarise_variants_from_ladder_has_expected_columns():
 
 @pytest.mark.slow
 def test_summarise_variants_from_dict_uses_first_entry_as_base():
-    results = run_variants("picea_abies", 60.0)
+    results = run_variants("enf_boreal", 60.0)
     rows = summarise_variants(results)
     assert len(rows) == len(results)
     assert rows[0]["name"] == "Basis"
@@ -125,7 +125,7 @@ def test_summarise_variants_diff_matches_manual_computation():
     # pytest.approx's default abs=1e-12 would dominate that and let a wrong
     # value through, so both comparisons need an explicit abs=0 and rely on
     # rel alone.
-    ladder = run_ladder("picea_abies", 60.0)
+    ladder = run_ladder("enf_boreal", 60.0)
     rows = summarise_variants(ladder)
     base_dt_2150 = ladder[0][1].delta_t[-1]
     for row, (_, result) in zip(rows, ladder):

@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from nbs.legacy.albedo_module import compute_albedo_forcing_timeseries
+from nbs.legacy.parameters import T_END, T_START
 
 
 class TestAlbedoForcingTimeseries:
@@ -10,7 +11,7 @@ class TestAlbedoForcingTimeseries:
     def test_ad_returns_all_zeros(self):
         """Avoided deforestation has zero albedo forcing at all latitudes."""
         result = compute_albedo_forcing_timeseries("avoided_deforestation", 0)
-        np.testing.assert_array_equal(result, np.zeros(125))
+        np.testing.assert_array_equal(result, np.zeros(T_END - T_START))
 
     def test_tr_at_equator_is_negative(self):
         """Tropical reforestation at 0 deg has negative (cooling) forcing."""
@@ -46,4 +47,4 @@ class TestAlbedoForcingTimeseries:
     def test_output_shape(self):
         """Output shape must be (125,)."""
         result = compute_albedo_forcing_timeseries("tropical_reforestation", 0)
-        assert result.shape == (125,)
+        assert result.shape == (T_END - T_START,)

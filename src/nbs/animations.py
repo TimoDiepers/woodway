@@ -2,13 +2,13 @@
 
 Main deck, static (decided 2026-10-01 after reviewing the clips):
 
-- ``carbon_curve_figure`` (B6) -- CO2 one tree has taken out of the air: one
-  curve, valid for both sites. No map, because it would be one colour.
+- ``carbon_curve_figure`` (B6) -- CO2 one tree has taken out of the air at
+  the two sites (growth level from nbs.site_factor).
 - ``albedo_annual_map_figure`` (B8) -- annual extra shortwave per tree as a
   map, plus the monthly cycle at both sites as the reason why.
 
 Optional material, looping clips. Both a map of where the Norway spruce can grow next to a curve
-for the two example sites (Aachen, Archangelsk):
+for the two example sites (Aachen, Joensuu):
 
 - ``carbon_map_animation`` -- CO2 one tree has taken out of the air, over the
   years. Growth depends on the species only, so the map fills uniformly and
@@ -28,6 +28,7 @@ from __future__ import annotations
 import dataclasses
 import os
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import matplotlib
@@ -42,26 +43,36 @@ from numpy.typing import NDArray  # noqa: E402
 
 from nbs import albedo_grid  # noqa: E402
 from nbs.borders import add_borders  # noqa: E402
-from nbs.constants import M_CO2_PER_C, YEARS  # noqa: E402
+from nbs.constants import M_CO2_PER_C, T_START, YEARS  # noqa: E402
 from nbs.grid import grid_lats, grid_lons  # noqa: E402
 from nbs.landscape import land_mask  # noqa: E402
-from nbs.recommend import candidate_lat_range  # noqa: E402
-from nbs.species import get_species  # noqa: E402
+from nbs.site_factor import site_factor, site_factor_grid  # noqa: E402
+from nbs.forest_data import TYPES, key_grid, typical_type  # noqa: E402
+from nbs.species import SPECIES, get_species  # noqa: E402
 from nbs.tree import simulate_deterministic  # noqa: E402
 
-SPECIES_KEY = "picea_abies"
+SPECIES_KEY: str | None = None
+_STAND_AREA_M2 = 5.0  # 2000 trees/ha (nbs.forest_data.TREES_PER_HA)
+"""None = each cell / site with its own typical forest (2026-10-05). The
+running example used to be one species, Norway spruce, everywhere."""
 
 # Deck surface and ink (docs/slides/dissvortrag.pptx).
 C_SURFACE = "#f3eee6"
 C_INK = "#1a2320"
 C_INK_MUTED = "#5f6b66"
-C_LAND_OUTSIDE = "#e6e0d4"
-C_RANGE_UNMEASURED = "#cfc7b6"
+C_LAND_OUTSIDE = "#f3eee6"  # outside the range: no fill, borders only
+C_RANGE_UNMEASURED = "#e2ddd3"  # validated apart from the ramps' light ends
 
 # Sequential ramps, light -> dark, validated against C_SURFACE (dataviz
 # validate_palette.js --ordinal: monotone L, step gaps, light end >= 2:1).
 RAMP_CARBON = ("#8db57d", "#64955a", "#437541", "#2a582d", "#163b1b")
 RAMP_ALBEDO = ("#e3934f", "#d07a30", "#b25f17", "#86420a", "#552704")
+# Map ramps, validated the same way. Multi-hue sand -> brick -> wine for the
+# extra absorbed light (more steps that read apart than a single hue), and one
+# ramp per ingredient so the three maps are never confused for each other.
+RAMP_ABSORBED = ("#cf9534", "#c9762c", "#b85328", "#97332d", "#6a1f40", "#3a1338")
+RAMP_SUN = ("#cf9e33", "#bb8428", "#9c6921", "#7a4f1b", "#513413")
+RAMP_SNOW = ("#88aad2", "#5e8cc1", "#3b6ba5", "#25507e", "#143154")
 
 MONTHS_DE = ("Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez")
 MONTHS_DE_LONG = (
@@ -71,6 +82,9 @@ MONTHS_DE_LONG = (
 
 # Europe + western Russia: both sites in view, at a size that reads on a slide.
 EXTENT = (-12.0, 65.0, 35.0, 72.0)  # lon_min, lon_max, lat_min, lat_max
+WORLD = (-180.0, 180.0, -58.0, 84.0)
+# the light maps since a tropical site joined (2026-10-06): the part of the world with all three sites
+SITES_VIEW = (-85.0, 55.0, -30.0, 72.0)
 
 FIG_SIZE_IN = (12.0, 5.625)  # 16:7.5 -> 1920 x 900 px at FIG_DPI
 FIG_DPI = 160
@@ -83,13 +97,21 @@ class Site:
     lon: float
     color: str
     marker: str
+    cc: str = ""  # ISO country code, shown with the name
+
+    @property
+    def label(self) -> str:
+        return f"{self.name} ({self.cc})" if self.cc else self.name
 
 
 # Validated as a categorical pair against C_SURFACE (CVD and normal-vision
 # separation pass); markers differ in shape too, so identity is never colour alone.
 SITES = (
-    Site("Aachen", 50.78, 6.08, "#2f6fb7", "o"),
-    Site("Archangelsk", 64.5, 40.6, "#b8357f", "s"),
+    Site("Aachen", 50.78, 6.08, "#2f6fb7", "o", "DE"),
+    Site("Joensuu", 62.60, 29.76, "#b8357f", "s", "FI"),
+    # south-eastern Amazon (Pará), "arc of deforestation": much reforestable land, much sun, a typical
+    # tropical carbon potential (Walker et al. 2022: 139 Mg C/ha; Belém, tried first, has only 80) -- 2026-10-06
+    Site("Marabá", -5.37, -49.12, "#6a4c9c", "D", "BR"),
 )
 
 
@@ -103,26 +125,95 @@ def site_cell(site: Site) -> tuple[int, int]:
     return int(np.argmin(np.abs(grid_lats() - site.lat))), int(np.argmin(np.abs(grid_lons() - site.lon)))
 
 
-def species_range_mask(species_key: str = SPECIES_KEY) -> NDArray:
-    """(360, 720) bool: land within the species' latitude hull.
-
-    Where it *can* grow, not where it is planted in the potential cascade --
-    the latter also drops cropland and settlements, which would remove Aachen.
-    """
-    lo, hi = candidate_lat_range(species_key)
-    abs_lat = np.abs(grid_lats())[:, None]
-    return land_mask() & (abs_lat >= lo) & (abs_lat < hi)
+def site_key(site: Site) -> str:
+    """Typical forest x climate zone at the site (nbs.forest_data.key_grid)."""
+    return str(key_grid()[site_cell(site)])
 
 
-def cumulative_uptake_kg_co2(species_key: str = SPECIES_KEY) -> NDArray:
+def species_range_mask(species_key: str | None = SPECIES_KEY) -> NDArray:
+    """(360, 720) bool: reforestable cells (Walker et al. 2022) with a known
+    typical forest -- all of them for None, else where *species_key* is the
+    typical forest."""
+    keys = key_grid()
+    return keys != None if species_key is None else keys == species_key  # noqa: E711
+
+
+def cumulative_uptake_kg_co2(
+    species_key: str | None = SPECIES_KEY, lat_deg: float | None = None, lon_deg: float | None = None
+) -> NDArray:
     """CO2 one tree has taken out of the air since planting [kg CO2], on YEARS.
 
     Shell 1: disturbance at its present-day rate, no warming feedback.
-    Net uptake already nets out what disturbance returns to the air.
+    Net uptake already nets out what disturbance returns to the air. Carbon
+    level at the site's cell via the site factor (nbs.site_factor); no
+    latitude = the key's median cell.
     """
-    sp = dataclasses.replace(get_species(species_key), gamma_warming=0.0)
+    sp = get_species(species_key)
+    f = 1.0 if lat_deg is None else site_factor(species_key, lat_deg, lon_deg)
+    sp = dataclasses.replace(sp, gamma_warming=0.0, m_max_kgC=sp.m_max_kgC * f)
     traj = simulate_deterministic(sp, np.zeros(len(YEARS)))
     return M_CO2_PER_C * np.cumsum(traj.net_uptake_kgC_yr)
+
+
+def site_uptake_kg_co2(site: Site) -> NDArray:
+    """cumulative_uptake_kg_co2 for the typical forest at *site*'s cell."""
+    return cumulative_uptake_kg_co2(site_key(site), site.lat, site.lon)
+
+
+@lru_cache(maxsize=1)
+def _uptake_parts() -> tuple[NDArray, NDArray, NDArray]:
+    """(curves (n_keys, n_years), key index grid (-1 = none), factor grid):
+    the uptake field is curves[idx][:, n] * factor, without holding all years
+    of the full grid in memory."""
+    keys = key_grid()
+    names = sorted({k for k in keys.ravel() if k is not None})
+    curves = np.stack([cumulative_uptake_kg_co2(k) for k in names])
+    idx = np.full(keys.shape, -1)
+    factor = np.zeros(keys.shape)
+    for n, k in enumerate(names):
+        sel = keys == k
+        idx[sel] = n
+        factor[sel] = site_factor_grid(k)[sel]
+    return curves, idx, factor
+
+
+def uptake_field(year_index: int) -> NDArray:
+    """(360, 720) cumulative uptake per tree [kg CO2] of the typical forest
+    in each cell at YEARS[year_index]; NaN where no typical forest."""
+    curves, idx, factor = _uptake_parts()
+    return np.where(idx >= 0, curves[np.maximum(idx, 0), year_index] * factor, np.nan)
+
+
+def _type_representative(ftype: str) -> str:
+    """Any registry key of the forest type: albedo depends on the IGBP class only."""
+    return next(k for k in SPECIES if k.startswith(ftype + "_"))
+
+
+def _by_type(fn) -> NDArray:
+    """Compose a per-key albedo grid: each cell takes its typical forest type."""
+    typ = typical_type()
+    out = None
+    for t in TYPES:
+        sel = typ == t
+        if not sel.any():
+            continue
+        g = np.asarray(fn(_type_representative(t)))
+        if out is None:
+            out = np.full(g.shape, np.nan)
+        out[..., sel] = g[..., sel]
+    return out
+
+
+@lru_cache(maxsize=1)
+def typical_alpha_q_product() -> NDArray:
+    """(360, 720) annual alpha*Q product of the typical forest per cell."""
+    return _by_type(albedo_grid.alpha_q_product)
+
+
+@lru_cache(maxsize=1)
+def typical_measured_mask() -> NDArray:
+    """(360, 720) bool: albedo of the cell's typical forest locally measured."""
+    return _by_type(lambda k: (albedo_grid.product_provenance_grid(k) == 0).astype(float)) == 1.0
 
 
 def interpolate_frames(monthly: NDArray, steps_per_month: int) -> NDArray:
@@ -136,21 +227,27 @@ def interpolate_frames(monthly: NDArray, steps_per_month: int) -> NDArray:
     return np.stack(frames, axis=0)
 
 
-def albedo_watts_monthly(species_key: str = SPECIES_KEY) -> tuple[NDArray, NDArray]:
+def albedo_watts_monthly(species_key: str | None = SPECIES_KEY) -> tuple[NDArray, NDArray]:
     """((12, 360, 720) W per full-grown tree, (360, 720) bool measured).
 
-    Positive = the tree absorbs more than the open land it replaces. Measured
-    monthly values, unsmoothed: the in-between frames already make the loop
-    continuous, and smoothing would flatten the spring peak that is the point.
+    None: each cell with its typical forest type. Positive = the tree
+    absorbs more than the open land it replaces. Measured monthly values,
+    unsmoothed: the in-between frames already make the loop continuous, and
+    smoothing would flatten the spring peak that is the point.
     """
-    area = get_species(species_key).stand_area_m2
+    from nbs.forest_data import TREES_PER_HA
+
+    area = 1e4 / TREES_PER_HA
+    if species_key is None:
+        watts = -_by_type(albedo_grid.monthly_product) * area
+        return watts, typical_measured_mask()
     watts = -albedo_grid.monthly_product(species_key) * area
     measured = albedo_grid.product_provenance_grid(species_key) == 0
     return watts, measured
 
 
 # --------------------------------------------------------------------------
-# Drawing
+# Drawing helpers
 # --------------------------------------------------------------------------
 
 
@@ -196,7 +293,7 @@ def _layout():
     return fig, ax_map, ax_cbar, ax_curve
 
 
-def _map_base(ax, field_mask_outside: NDArray, unmeasured: NDArray | None) -> None:
+def _map_base(ax, field_mask_outside: NDArray, unmeasured: NDArray | None, extent=EXTENT) -> None:
     """Background layers: land outside the range, range without data."""
     lons, lats = grid_lons(), grid_lats()
     ax.pcolormesh(
@@ -209,21 +306,33 @@ def _map_base(ax, field_mask_outside: NDArray, unmeasured: NDArray | None) -> No
             cmap=mcolors.ListedColormap([C_RANGE_UNMEASURED]), shading="auto", zorder=2,
         )
     add_borders(ax, linewidth=0.5, alpha=0.7)
-    lon0, lon1, lat0, lat1 = EXTENT
+    lon0, lon1, lat0, lat1 = extent
     ax.set_xlim(lon0, lon1)
     ax.set_ylim(lat0, lat1)
-    ax.set_aspect(1.0 / np.cos(np.deg2rad(0.5 * (lat0 + lat1))))
+    # Europe: equal distances at its middle latitude; world: plain lon/lat like the other world maps
+    ax.set_aspect(1.0 / np.cos(np.deg2rad(0.5 * (lat0 + lat1))) if extent == EXTENT else 1.0)
     ax.set_axis_off()
 
 
-def _site_markers(ax) -> None:
+def _site_markers(ax, values=None) -> None:
+    """The three sites; *values* maps a site to a second label line (the value of its cell)."""
+    (x0, x1), (y0, y1) = ax.get_xlim(), ax.get_ylim()
     for s in SITES:
+        if not (min(x0, x1) <= s.lon <= max(x0, x1) and min(y0, y1) <= s.lat <= max(y0, y1)):
+            continue  # e.g. Marabá on a map of Europe
         ax.plot(
             s.lon, s.lat, marker=s.marker, ms=11, mfc=s.color, mec="white", mew=2.0,
             zorder=10, linestyle="none",
         )
+        # with values (two lines), Aachen and Joensuu sit close: both labels go left of their marker
+        left = values is not None and s.lon > 0
+        # Joensuu (north) on one line beside its marker, Aachen below-left of its own
+        north = left and s.lat > 55
+        off, ha, va = ((-12, 0), "right", "center") if north else ((-11, -4), "right", "top") if left else ((9, 7), "left", "baseline")
+        text = s.label if values is None else f"{s.label}: {values(s)}" if north else f"{s.label}\n{values(s)}"
         ax.annotate(
-            s.name, (s.lon, s.lat), xytext=(9, 7), textcoords="offset points",
+            text, (s.lon, s.lat), xytext=off, textcoords="offset points",
+            ha=ha, va=va,
             fontsize=13, fontweight="bold", color=C_INK, zorder=11,
             bbox=dict(boxstyle="round,pad=0.2", fc=C_SURFACE, ec="none", alpha=0.85),
         )
@@ -265,10 +374,13 @@ def carbon_map_animation(
     heading_font, body_font = _register_fonts()
     _style(body_font)
 
-    uptake = cumulative_uptake_kg_co2()
+    site_curves = [site_uptake_kg_co2(s) for s in SITES]
     in_range = species_range_mask()
     outside = land_mask() & ~in_range
-    vmax = float(np.ceil(uptake.max() / 10.0) * 10.0)
+    lon0, lon1, lat0, lat1 = EXTENT
+    view = in_range & (grid_lons()[None, :] >= lon0) & (grid_lons()[None, :] <= lon1) \
+        & (grid_lats()[:, None] >= lat0) & (grid_lats()[:, None] <= lat1)
+    vmax = float(np.ceil(max(float(np.nanpercentile(uptake_field(len(YEARS) - 1)[view], 98)), 1.0) / 50.0) * 50.0)
     norm = mcolors.Normalize(0.0, vmax)
     cmap = _ramp_cmap(RAMP_CARBON)
     cmap.set_under(C_RANGE_UNMEASURED)
@@ -287,38 +399,36 @@ def carbon_map_animation(
     )
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=_ramp_cmap(RAMP_CARBON)), cax=ax_cbar,
-                      orientation="horizontal")
+                      orientation="horizontal", extend="max")
     cb.outline.set_visible(False)
-    cb.set_label("CO$_2$, das eine Fichte der Luft entnommen hat [kg]", fontsize=12, color=C_INK)
+    cb.set_label("CO$_2$, das ein Baum des typischen Waldes der Luft entnommen hat [kg]", fontsize=12, color=C_INK)
 
     _clean_axes(ax_curve)
     ax_curve.set_xlim(YEARS[0], YEARS[-1])
-    ax_curve.set_ylim(0.0, vmax)
-    ax_curve.set_xticks([2025, 2050, 2075, 2100, 2125, 2150])
+    ax_curve.set_ylim(0.0, float(np.ceil(max(float(c.max()) for c in site_curves) / 50.0) * 50.0))
+    ax_curve.set_xticks([T_START, 2050, 2075, 2100])
     ax_curve.set_ylabel("kg CO$_2$ je Baum")
-    ax_curve.plot(YEARS, uptake, color=RAMP_CARBON[0], linewidth=2.0, alpha=0.35)
-    (line,) = ax_curve.plot([], [], color=RAMP_CARBON[3], linewidth=2.5)
-    dots = [
-        ax_curve.plot([], [], marker=s.marker, ms=10, mfc=s.color, mec="white", mew=1.8,
-                      linestyle="none", zorder=5, clip_on=False)[0]
-        for s in SITES
-    ]
-    ax_curve.set_title("Aachen und Archangelsk: dieselbe Kurve", fontsize=13, loc="left", color=C_INK)
-    fig.text(0.69, 0.06, "Im Modell wächst eine Art überall gleich schnell.\n"
-             "Gemeine Fichte, Störung mit heutiger Rate.", fontsize=10, color=C_INK_MUTED, va="bottom")
+    lines, dots = [], []
+    for st, curve in zip(SITES, site_curves):
+        ax_curve.plot(YEARS, curve, color=st.color, linewidth=2.0, alpha=0.25)
+        lines.append(ax_curve.plot([], [], color=st.color, linewidth=2.5)[0])
+        dots.append(ax_curve.plot([], [], marker=st.marker, ms=10, mfc=st.color, mec="white", mew=1.8,
+                                  linestyle="none", zorder=5, clip_on=False)[0])
+    ax_curve.set_title("Aachen und Joensuu", fontsize=13, loc="left", color=C_INK)
+    fig.text(0.69, 0.06, "Farbig: wiederbewaldbare Flächen (Walker et al. 2022),\n"
+             "typischer Wald je Ort, Störung mit heutiger Rate.", fontsize=10, color=C_INK_MUTED, va="bottom")
 
     n_hold = int(round(hold_s * fps))
     frame_idx = list(range(len(YEARS))) + [len(YEARS) - 1] * n_hold
 
     def draw(k: int):
         n = frame_idx[k]
-        mesh.set_array(np.ma.masked_invalid(np.where(in_range, uptake[n], np.nan)))
+        mesh.set_array(np.ma.masked_invalid(np.where(in_range, uptake_field(n), np.nan)))
         year_txt.set_text(str(int(YEARS[n])))
-        line.set_data(YEARS[: n + 1], uptake[: n + 1])
-        for i, d in enumerate(dots):
-            # the two sites lie on the same curve; offset the markers slightly
-            d.set_data([YEARS[n] - (3.2 if i == 0 else 0.0)], [uptake[n]])
-        return [mesh, year_txt, line, *dots]
+        for ln, d, curve in zip(lines, dots, site_curves):
+            ln.set_data(YEARS[: n + 1], curve[: n + 1])
+            d.set_data([YEARS[n]], [curve[n]])
+        return [mesh, year_txt, *lines, *dots]
 
     if poster_path:
         draw(len(frame_idx) - 1)
@@ -353,7 +463,7 @@ def albedo_map_animation(
     measured = in_range & measured_all
     outside = land_mask() & ~in_range
     frames = interpolate_frames(watts, steps_per_month)
-    annual = albedo_grid.alpha_q_product(SPECIES_KEY) * -get_species(SPECIES_KEY).stand_area_m2
+    annual = -typical_alpha_q_product() * _STAND_AREA_M2
 
     norm = mcolors.Normalize(0.0, vmax)
     cmap = _ramp_cmap(RAMP_ALBEDO)
@@ -373,7 +483,7 @@ def albedo_map_animation(
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="max")
     cb.outline.set_visible(False)
-    cb.set_label("zusätzlich absorbiertes Sonnenlicht je ausgewachsener Fichte [W]", fontsize=12,
+    cb.set_label("zusätzlich absorbiertes Sonnenlicht je ausgewachsenem Baum [W]", fontsize=12,
                  color=C_INK)
 
     _clean_axes(ax_curve)
@@ -392,9 +502,11 @@ def albedo_map_animation(
     ax_curve.set_xlim(0, 12)
     ax_curve.set_xticks(x_month + 0.0)
     ax_curve.set_xticklabels([m[0] for m in MONTHS_DE])
-    ax_curve.set_ylim(0, max(float(s.max()) for s in site_series) * 1.12)
+    ax_curve.set_ylim(min(0.0, min(float(s.min()) for s in site_series)) - 6,
+                      max(float(s.max()) for s in site_series) * 1.12)
+    ax_curve.axhline(0, color=C_INK_MUTED, linewidth=0.8)
     ax_curve.set_ylabel("W je Baum")
-    ax_curve.set_title("Jahresgang an beiden Orten", fontsize=13, loc="left", color=C_INK)
+    ax_curve.set_title("Jahresgang an den drei Orten", fontsize=13, loc="left", color=C_INK)
     dots = [
         ax_curve.plot([], [], marker=s.marker, ms=10, mfc=s.color, mec="white", mew=1.8, linestyle="none",
                       zorder=5, clip_on=False)[0]
@@ -402,10 +514,10 @@ def albedo_map_animation(
     ]
     cursor = ax_curve.axvline(0, color=C_INK_MUTED, linewidth=1.0, alpha=0.6)
     fig.text(0.69, 0.06, "Farbig: lokal gemessen (Duveiller et al. 2018).\n"
-             "Ausgewachsene Gemeine Fichte statt Wiese.", fontsize=10, color=C_INK_MUTED, va="bottom")
+             "Ausgewachsener typischer Wald statt Wiese.", fontsize=10, color=C_INK_MUTED, va="bottom")
     fig.patches.append(plt.Rectangle((0.555, 0.115), 0.018, 0.03, transform=fig.transFigure,
                                      fc=C_RANGE_UNMEASURED, ec="none"))
-    fig.text(0.578, 0.13, "Fichtengebiet,\nnicht gemessen", fontsize=10, color=C_INK, va="center")
+    fig.text(0.578, 0.13, "wiederbewaldbar,\nnicht gemessen", fontsize=10, color=C_INK, va="center")
 
     def draw(k: int):
         mesh.set_array(np.ma.masked_where(~measured, frames[k]))
@@ -438,31 +550,26 @@ def carbon_curve_figure(out_path: str) -> str:
     """
     _heading_font, body_font = _register_fonts()
     _style(body_font)
-    uptake = cumulative_uptake_kg_co2()
+    curves = {s.name: site_uptake_kg_co2(s) for s in SITES}
+    top = max(float(c.max()) for c in curves.values())
 
     fig = plt.figure(figsize=FIG_SIZE_IN, dpi=FIG_DPI)
     ax = fig.add_axes((0.08, 0.14, 0.74, 0.76))
     _clean_axes(ax)
-    ax.plot(YEARS, uptake, color=RAMP_CARBON[3], linewidth=3.0)
     ax.set_xlim(YEARS[0], YEARS[-1])
-    ax.set_ylim(0.0, float(np.ceil(uptake.max() / 20.0) * 20.0))
-    ax.set_xticks([2025, 2050, 2075, 2100, 2125, 2150])
-    ax.set_ylabel("CO$_2$ aus der Luft geholt, je Baum [kg]")
-
-    x_end, y_end = float(YEARS[-1]), float(uptake[-1])
-    ax.plot(x_end, y_end, marker="o", ms=9, mfc=RAMP_CARBON[3], mec="white", mew=2.0, linestyle="none",
-            zorder=5, clip_on=False)
-    ax.annotate(f"{y_end:.0f} kg", (x_end, y_end), xytext=(14, 0), textcoords="offset points", fontsize=14,
-                fontweight="bold", color=C_INK, va="center", annotation_clip=False)
-    from matplotlib.lines import Line2D
-
-    handles = [Line2D([], [], marker=s.marker, ms=11, mfc=s.color, mec="white", mew=1.8, linestyle="none")
-               for s in SITES]
-    ax.legend(handles, [s.name for s in SITES], title="gilt für", loc="upper left",
-              bbox_to_anchor=(1.01, y_end / ax.get_ylim()[1] - 0.06), frameon=False, fontsize=13,
-              title_fontsize=12, handletextpad=0.4, borderaxespad=0.0)
-    fig.text(0.08, 0.025, "Gemeine Fichte, Störung mit heutiger Rate. Im Modell wächst eine Art überall gleich "
-             "schnell — an beiden Orten dieselbe Kurve.", fontsize=10.5, color=C_INK_MUTED)
+    ax.set_ylim(0.0, float(np.ceil(top / 50.0) * 50.0))
+    ax.set_xticks([T_START, 2050, 2075, 2100])
+    ax.set_ylabel("CO$_2$-Aufnahme je Baum [kg]")
+    for s in SITES:
+        c = curves[s.name]
+        ax.plot(YEARS, c, color=s.color, linewidth=3.0)
+        ax.plot(YEARS[-1], c[-1], marker=s.marker, ms=11, mfc=s.color, mec="white", mew=2.0,
+                linestyle="none", zorder=5, clip_on=False)
+        ax.annotate(f"{s.label}  {c[-1]:.0f} kg", (YEARS[-1], c[-1]), xytext=(14, 0), textcoords="offset points",
+                    fontsize=14, fontweight="bold", color=C_INK, va="center", annotation_clip=False)
+    fig.text(0.08, 0.025, "Typischer Wald je Ort (Hasler et al. 2024): Mischwald. Zusätzlicher Kohlenstoff je Ort "
+             "(Walker et al. 2022), Tempo aus Cook-Patton et al. (2020), 2000 Bäume/ha, Störung mit heutiger Rate.",
+             fontsize=10.5, color=C_INK_MUTED)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)
@@ -470,7 +577,7 @@ def carbon_curve_figure(out_path: str) -> str:
     return out_path
 
 
-def albedo_annual_map_figure(out_path: str, *, vmin: float = 20.0, vmax: float = 100.0) -> str:
+def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 100.0) -> str:
     """B8: yearly extra shortwave per full-grown tree as a map, plus the
     monthly cycle at both sites as the reason why.
 
@@ -484,30 +591,29 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 20.0, vmax: float =
     _heading_font, body_font = _register_fonts()
     _style(body_font)
 
-    area = get_species(SPECIES_KEY).stand_area_m2
-    annual = -albedo_grid.alpha_q_product(SPECIES_KEY) * area
+    annual = -typical_alpha_q_product() * _STAND_AREA_M2
     watts, measured_all = albedo_watts_monthly()
     in_range = species_range_mask()
     measured = in_range & measured_all
     estimated = in_range & ~measured_all
     outside = land_mask() & ~in_range
 
-    cmap = _ramp_cmap(RAMP_ALBEDO)
+    cmap = _ramp_cmap(RAMP_ABSORBED)
     norm = mcolors.Normalize(vmin, vmax)
     fig, ax_map, ax_cbar, ax_curve = _layout()
-    _map_base(ax_map, outside, estimated)
+    _map_base(ax_map, outside, estimated, SITES_VIEW)
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
-    _site_markers(ax_map)
+    _site_markers(ax_map, lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
     cb.outline.set_visible(False)
-    cb.set_label("zusätzlich absorbiertes Sonnenlicht je ausgewachsener Fichte, Jahresmittel [W]",
+    cb.set_label("zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel [W]",
                  fontsize=12, color=C_INK)
     fig.patches.append(plt.Rectangle((0.555, 0.115), 0.018, 0.03, transform=fig.transFigure,
                                      fc=C_RANGE_UNMEASURED, ec="none"))
-    legend_txt = "Fichtengebiet,\nnicht gemessen"
+    legend_txt = "wiederbewaldbar,\nnicht gemessen"
     fig.text(0.578, 0.13, legend_txt, fontsize=10, color=C_INK, va="center")
 
     _clean_axes(ax_curve)
@@ -526,11 +632,62 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 20.0, vmax: float =
     ax_curve.set_xlim(-0.3, 11.3)
     ax_curve.set_xticks(x)
     ax_curve.set_xticklabels([m[0] for m in MONTHS_DE])
-    ax_curve.set_ylim(0, top * 1.12)
+    low = min(0.0, min(float(watts[:, site_cell(s_)[0], site_cell(s_)[1]].min()) for s_ in SITES))
+    ax_curve.set_ylim(low - 6, top * 1.12)
+    ax_curve.axhline(0, color=C_INK_MUTED, linewidth=0.8)
     ax_curve.set_ylabel("W je Baum")
-    ax_curve.set_title("Warum: Jahresgang an beiden Orten", fontsize=13, loc="left", color=C_INK)
-    fig.text(0.69, 0.06, "Lokal gemessen nach Duveiller et al. (2018).\nAusgewachsene Gemeine Fichte statt Wiese.",
+    ax_curve.set_title("Jahresgang an den drei Orten", fontsize=13, loc="left", color=C_INK)
+    fig.text(0.69, 0.06, "Lokal gemessen nach Duveiller et al. (2018).\nAusgewachsener typischer Wald statt Wiese oder Acker.",
              fontsize=10, color=C_INK_MUTED, va="bottom")
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=FIG_DPI)
+    plt.close(fig)
+    return out_path
+
+
+def albedo_ingredients_figure(out_path: str) -> str:
+    """B8a: the two ingredients of the extra absorbed light, as two maps.
+
+    Left: sunlight reaching the ground [W/m^2], annual mean. Right: how much
+    darker the full-grown spruce is than the open land it replaces
+    (-Delta_alpha, percentage points), annual mean -- large where snow lies
+    under the open land. Same cells as the result map: locally measured only.
+    The result map multiplies them month by month, not as these annual means.
+    """
+    _heading_font, body_font = _register_fonts()
+    _style(body_font)
+
+    in_range = species_range_mask()
+    measured = in_range & typical_measured_mask()
+    unmeasured = in_range & ~measured
+    outside = land_mask() & ~in_range
+    q = _by_type(albedo_grid.insolation_grid)
+    darker = -100.0 * _by_type(albedo_grid.delta_alpha_grid)
+
+    fig = plt.figure(figsize=(12.0, 5.1), dpi=FIG_DPI)
+    panels = [
+        (fig.add_axes((0.01, 0.24, 0.48, 0.66)), fig.add_axes((0.08, 0.17, 0.34, 0.03)), q, RAMP_SUN,
+         (90.0, 260.0), "Kurzwellige Einstrahlung an der Oberfläche, Jahresmittel [W/m²]", "Einstrahlung an der Oberfläche"),
+        (fig.add_axes((0.51, 0.24, 0.48, 0.66)), fig.add_axes((0.58, 0.17, 0.34, 0.03)), darker, RAMP_SNOW,
+         (0.0, 18.0), "Albedo-Differenz Offenland − Wald [Prozentpunkte]",
+         "Albedo-Kontrast Wald gegen Offenland"),
+    ]
+    units = {id(q): "W/m²", id(darker): "%-Punkte"}
+    for ax, cax, field, ramp, (lo, hi), label, title in panels:
+        _map_base(ax, outside, unmeasured, SITES_VIEW)
+        cmap = _ramp_cmap(ramp)
+        norm = mcolors.Normalize(lo, hi)
+        ax.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
+                      shading="auto", zorder=3)
+        _site_markers(ax, lambda s, f=field: f"{f[site_cell(s)]:.0f} {units[id(f)]}")
+        ax.set_title(title, loc="left", fontsize=15, color=C_INK, fontweight="bold")
+        cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal",
+                          extend="both")
+        cb.outline.set_visible(False)
+        cb.set_label(label, fontsize=11, color=C_INK)
+    fig.text(0.02, 0.015, "Grau: wiederbewaldbar, ohne lokale Messung. Lokal gemessen nach Duveiller et al. (2018). "
+             "Die zusätzlich absorbierte Strahlung ist das monatliche Produkt beider Größen.", fontsize=10, color=C_INK_MUTED)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)

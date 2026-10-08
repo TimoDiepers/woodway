@@ -18,11 +18,11 @@ cell:
 ======================  ==============  ====================================
 species                 |lat| hull      competitors in the overlap
 ======================  ==============  ====================================
-tropical_mixed          0 - 35 deg      eucalyptus_grandis above 10 deg
-eucalyptus_grandis      10 - 35 deg     tropical_mixed
-fagus_sylvatica         35 - 60 deg     pinus_sylvestris, picea_abies
-pinus_sylvestris        35 - 70 deg     fagus_sylvatica, picea_abies
-picea_abies             35 - 70 deg     fagus_sylvatica, pinus_sylvestris
+ebf_tropisch          0 - 35 deg      ebf_subtropisch above 10 deg
+ebf_subtropisch      10 - 35 deg     ebf_tropisch
+dbf_gemaessigt         35 - 60 deg     dnf_boreal, enf_boreal
+dnf_boreal        35 - 70 deg     dbf_gemaessigt, enf_boreal
+enf_boreal             35 - 70 deg     dbf_gemaessigt, dnf_boreal
 ======================  ==============  ====================================
 
 **The score.** Per hectare, not per tree -- the question is what to do with a
@@ -55,7 +55,7 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.aggregate import _product_no_nan, _year_index, unit_curves
+from nbs.aggregate import _product_no_nan, _year_index, co2_factor_grid, unit_curves
 from nbs.config import ModelConfig
 from nbs.grid import grid_lats
 from nbs.landscape import assign_species, plantable_area_m2
@@ -71,47 +71,18 @@ as -0.0 in any table a human looks at. Per Mha and in milli-kelvin the same
 number is ~0.3, and a million hectares is the unit afforestation programmes
 are actually announced in."""
 
-# Inverse of the band table in nbs.landscape's docstring: the absolute
-# latitude range [deg] each FAO Global Ecological Zone is approximated by.
-# Same raster-free stand-in, same caveat -- see this module's docstring.
-_GEZ_LAT_BANDS: dict[str, tuple[float, float]] = {
-    "tropical_rainforest": (0.0, 10.0),
-    "tropical_moist_deciduous_forest": (10.0, 35.0),
-    "subtropical_humid_forest": (10.0, 35.0),
-    "temperate_oceanic_forest": (35.0, 50.0),
-    "temperate_continental_forest": (35.0, 60.0),
-    "temperate_mountain_system": (35.0, 50.0),
-    "boreal_coniferous_forest": (50.0, 70.0),
-    "boreal_tundra_woodland": (60.0, 70.0),
-}
-
-
-def candidate_lat_range(species_key: str) -> tuple[float, float]:
-    """(lo, hi) absolute latitude [deg] a species may be planted in.
-
-    The hull of its ``valid_gez`` zones' bands. Every registered zone must be
-    in ``_GEZ_LAT_BANDS``: an unknown zone means a species was added without
-    deciding where it grows, which must fail loudly rather than quietly
-    shrinking that species' range to its known zones.
-    """
-    zones = get_species(species_key).valid_gez
-    unknown = [z for z in zones if z not in _GEZ_LAT_BANDS]
-    if unknown:
-        raise KeyError(
-            f"{species_key}: keine Breitenbaender fuer die Zonen {unknown} "
-            "hinterlegt (nbs.recommend._GEZ_LAT_BANDS)"
-        )
-    los = [_GEZ_LAT_BANDS[z][0] for z in zones]
-    his = [_GEZ_LAT_BANDS[z][1] for z in zones]
-    return min(los), max(his)
-
-
 def admissible_mask(species_key: str) -> NDArray:
-    """(360, 720) bool: cells that are plantable *and* in the species' hull."""
-    lo, hi = candidate_lat_range(species_key)
-    abs_lat = np.abs(grid_lats())[:, None]
-    in_band = (abs_lat >= lo) & (abs_lat < hi)
-    return np.broadcast_to(in_band, (360, 720)) & (plantable_area_m2() > 0.0)
+    """(360, 720) bool: plantable cells where this forest type grows nearby
+    (Hasler et al. 2024 most likely forest, >= 10 % in the 3x3 neighbourhood,
+    nbs.forest_data.admissible_types) and the cell lies in the key's climate
+    zone. Replaces the latitude hulls of the former species (2026-10-05)."""
+    from nbs.forest_data import admissible_types, zone_name
+    from nbs.species import get_species
+
+    sp = get_species(species_key)
+    ftype = species_key.split("_")[0]
+    zone = sp.valid_gez[0]
+    return admissible_types()[ftype] & (zone_name() == zone) & (plantable_area_m2() > 0.0)
 
 
 def score_field(
@@ -130,7 +101,8 @@ def score_field(
     trees_per_ha = M2_PER_HA / get_species(species_key).stand_area_m2
     product = _product_no_nan(species_key)
 
-    field = trees_per_ha * (float(co2[idx]) + float(albedo_unit[idx]) * product)
+    f = co2_factor_grid(species_key, config)
+    field = trees_per_ha * (f * float(co2[idx]) + float(albedo_unit[idx]) * product)
     return np.where(admissible_mask(species_key), field, np.nan)
 
 
@@ -222,7 +194,8 @@ def total_delta_t(
         co2, albedo_unit = unit_curves(key, scenario, config)
         trees_per_ha = M2_PER_HA / get_species(key).stand_area_m2
         product = _product_no_nan(key)
-        per_ha = trees_per_ha * (float(co2[idx]) + float(albedo_unit[idx]) * product[mask])
+        f = co2_factor_grid(key, config)[mask]
+        per_ha = trees_per_ha * (f * float(co2[idx]) + float(albedo_unit[idx]) * product[mask])
         total += float(np.sum(area_ha[mask] * per_ha))
     return total
 
@@ -290,7 +263,6 @@ __all__ = [
     "M2_PER_HA",
     "Recommendation",
     "admissible_mask",
-    "candidate_lat_range",
     "improvement",
     "recommend",
     "score_field",

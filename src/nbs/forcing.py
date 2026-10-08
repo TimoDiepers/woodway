@@ -96,7 +96,10 @@ def phi_co2_background(
     delta_m = convolve_response(g_c, np.asarray(co2_flux_kg_per_yr, dtype=float))
     delta_c_ppm = delta_m / KG_CO2_PER_PPM
     c_bg = np.asarray(c_background_ppm, dtype=float)
-    return A_CO2_LOG_W_M2_PER_PPM * np.log((c_bg + delta_c_ppm) / c_bg)
+    # log1p, not log((c_bg + dC) / c_bg): for one tree dC is ~1e-13 ppm, so the
+    # quotient is 1 + 1e-16 and rounds -- the old form carried 0.3 % (up to
+    # 2.7 %) rounding noise per tree. Mathematically identical, numerically exact.
+    return A_CO2_LOG_W_M2_PER_PPM * np.log1p(delta_c_ppm / c_bg)
 
 
 def phi_albedo(

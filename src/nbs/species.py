@@ -7,6 +7,8 @@ needs the tree's own footprint.
 
 from __future__ import annotations
 
+import numpy as np
+
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -198,126 +200,122 @@ def _sources(**overrides: ParamSource) -> dict[str, ParamSource]:
     table.update(overrides)
     return table
 
-SPECIES: dict[str, Species] = {
-    "picea_abies": Species(
-        key="picea_abies",
-        name_de="Gemeine Fichte",
-        name_lat="Picea abies",
-        m_max_kgC=50.0,
-        k=0.030,
-        p=2.0,
-        beta_closure=0.5,
-        stand_area_m2=5.0,
-        alpha_canopy=0.09,
-        igbp_class="evergreen_needleleaf",
-        p_disturb=0.012,
-        severity_beta=(2.0, 2.0),
-        gamma_warming=0.20,
-        eps_immediate=0.30,
-        tau_decay_yr=30.0,
-        valid_gez=("boreal_coniferous_forest", "boreal_tundra_woodland",
-                   "temperate_continental_forest"),
-        sources=_sources(),
-    ),
-    "pinus_sylvestris": Species(
-        key="pinus_sylvestris",
-        name_de="Waldkiefer",
-        name_lat="Pinus sylvestris",
-        m_max_kgC=60.0,
-        k=0.045,
-        p=2.0,
-        beta_closure=0.5,
-        stand_area_m2=5.0,
-        alpha_canopy=0.10,
-        igbp_class="evergreen_needleleaf",
-        p_disturb=0.008,
-        severity_beta=(2.0, 2.5),
-        gamma_warming=0.20,
-        eps_immediate=0.35,
-        tau_decay_yr=25.0,
-        valid_gez=("temperate_continental_forest", "temperate_oceanic_forest",
-                   "boreal_coniferous_forest"),
-        sources=_sources(),
-    ),
-    "fagus_sylvatica": Species(
-        key="fagus_sylvatica",
-        name_de="Rotbuche",
-        name_lat="Fagus sylvatica",
-        m_max_kgC=75.0,
-        k=0.040,
-        p=2.2,
-        beta_closure=0.5,
-        stand_area_m2=6.0,
-        alpha_canopy=0.15,
-        igbp_class="deciduous_broadleaf",
-        p_disturb=0.005,
-        severity_beta=(2.0, 3.0),
-        gamma_warming=0.20,
-        eps_immediate=0.15,
-        tau_decay_yr=20.0,
-        valid_gez=("temperate_oceanic_forest", "temperate_continental_forest",
-                   "temperate_mountain_system"),
-        sources=_sources(),
-    ),
-    "eucalyptus_grandis": Species(
-        key="eucalyptus_grandis",
-        name_de="Rosen-Eukalyptus (Plantage)",
-        name_lat="Eucalyptus grandis",
-        m_max_kgC=50.0,
-        k=0.120,
-        p=1.75,
-        beta_closure=0.4,
-        stand_area_m2=4.0,
-        alpha_canopy=0.13,
-        igbp_class="evergreen_broadleaf",
-        p_disturb=0.010,
-        severity_beta=(2.0, 2.0),
-        gamma_warming=0.20,
-        eps_immediate=0.45,
-        tau_decay_yr=12.0,
-        valid_gez=("subtropical_humid_forest", "tropical_moist_deciduous_forest"),
-        sources=_sources(),
-    ),
-    "tropical_mixed": Species(
-        key="tropical_mixed",
-        name_de="Tropischer Mischbestand",
-        name_lat="gemischt, immergrün",
-        m_max_kgC=100.0,
-        k=0.080,
-        p=2.5,
-        beta_closure=0.5,
-        stand_area_m2=5.0,
-        alpha_canopy=0.12,
-        igbp_class="evergreen_broadleaf",
-        p_disturb=0.005,
-        severity_beta=(2.0, 4.0),
-        gamma_warming=0.20,
-        eps_immediate=0.25,
-        tau_decay_yr=10.0,
-        valid_gez=("tropical_rainforest", "tropical_moist_deciduous_forest"),
-        sources=_sources(),
-    ),
+# ---- Forest types per climate zone (2026-10-05) -------------------------
+# Replaces the five hand-parameterised species. One entry per forest type
+# (Hasler et al. 2024, IGBP classes) and climate zone (Walker et al. 2022,
+# from FAO GEZ); growth and carbon from published global data, see
+# nbs.forest_data. Disturbance per type carries over the earlier species
+# values (evergreen needleleaf <- spruce, deciduous needleleaf <- pine,
+# deciduous broadleaf <- beech, evergreen broadleaf <- tropical mixed stand,
+# mixed forest <- mean of spruce and beech).
+
+_WALKER = "Walker et al. 2022, PNAS 119, e2111312119"
+_COOK_PATTON = "Cook-Patton et al. 2020, Nature 585, 545-550"
+_POORTER = "Poorter et al. 2016, Nature 530, 211-214"
+_HASLER = "Hasler et al. 2024, Nat. Commun. 15, 2275"
+_WILLIAMS = "Williams et al. 2026, J. Geophys. Res. Biogeosci. 131, doi:10.1029/2025JG009284"
+
+ALBEDO_HALF_YEARS = 40.0
+"""Williams et al. (2026), from satellite chronosequences worldwide: about half
+of the albedo decline after reforestation occurs within 40 years, 80 % takes
+50-120 years. The canopy closure f = (m/m_max)^beta drives the albedo channel,
+so beta is set per entry such that f(40 a) = 0.5. One global rule; Williams
+also report slower declines in extratropical and broadleaf forests and faster
+ones in the tropics and in needleleaf/mixed forests -- not resolved here."""
+
+
+_GRUENIG = "Grünig et al. 2026, Science, doi:10.1126/science.adx6329"
+_AR6 = "IPCC AR6 WG1 SPM, Tab. SPM.1"
+
+GAMMA_WARMING = 0.26
+"""Rise of the disturbance rate with background warming, p = p0 exp(gamma T).
+Grünig et al. (2026) project stand-replacing disturbance in Europe by
+2081-2100 at +31 / +61 / +122 % (RCP2.6 / 4.5 / 8.5) relative to 1986-2020;
+with the global warming of the matching SSPs relative to 1995-2014 (IPCC
+AR6: about 0.9 / 1.8 / 3.5 K), gamma = ln(1 + increase) / Delta T gives
+0.30 / 0.26 / 0.23 per K; the mean is used. European forests only -- the
+one continental projection available; applied to all forest types."""
+
+
+def _beta_for_half_at(k: float, p: float, years: float = ALBEDO_HALF_YEARS) -> float:
+    """beta with ((1 - e^{-k t})^p)^beta = 0.5 at t = *years*."""
+    return float(np.log(0.5) / (p * np.log(1.0 - np.exp(-k * years))))
+
+_TYPE_META: dict[str, dict] = {
+    "enf": dict(name="Immergrüner Nadelwald", igbp="evergreen_needleleaf", alpha=0.09,
+                p_disturb=0.012, severity=(2.0, 2.0), eps=0.30, tau=30.0),
+    "dnf": dict(name="Lärchenwald", igbp="deciduous_needleleaf", alpha=0.10,
+                p_disturb=0.008, severity=(2.0, 2.5), eps=0.35, tau=25.0),
+    "dbf": dict(name="Sommergrüner Laubwald", igbp="deciduous_broadleaf", alpha=0.15,
+                p_disturb=0.005, severity=(2.0, 3.0), eps=0.15, tau=20.0),
+    "ebf": dict(name="Immergrüner Laubwald", igbp="evergreen_broadleaf", alpha=0.12,
+                p_disturb=0.005, severity=(2.0, 4.0), eps=0.25, tau=10.0),
+    "mf": dict(name="Mischwald", igbp="mixed", alpha=0.12,
+               p_disturb=0.0085, severity=(2.0, 2.5), eps=0.225, tau=25.0),
 }
+_ZONE_DE = {"tropisch": "tropisch", "subtropisch": "subtropisch", "gemaessigt": "gemäßigt", "boreal": "boreal"}
 
 
-REFERENCE_SITES: dict[str, float] = {
-    "picea_abies": 60.0,
-    "pinus_sylvestris": 52.0,
-    "fagus_sylvatica": 50.0,
-    "eucalyptus_grandis": 25.0,
-    "tropical_mixed": 0.0,
-}
-"""Reference latitude per species [deg N] for the talk's single-tree figures.
+def _type_sources() -> dict[str, ParamSource]:
+    table = dict(_COMMON_SOURCES)
+    table.update({
+        "m_max_kgC": ParamSource(
+            "abgeleitet", _WALKER,
+            "Median des nicht realisierten Potenzials (oberirdisch + unterirdisch, ohne Boden) auf den "
+            "wiederbewaldbaren Flächen dieses Typs und dieser Zone, je Baum bei 2000 Bäumen/ha. Je Zelle "
+            "skaliert mit dem Wert der Zelle (nbs.site_factor)."),
+        "k": ParamSource(
+            "abgeleitet", f"{_COOK_PATTON}; {_POORTER}",
+            "Flächengewichteter Median je Typ und Zone aus der Zuwachsrate der ersten 30 Jahre relativ zum "
+            "Walker-Potenzial; begrenzt auf 55 % des Potenzials nach 30 Jahren (Poorter: 90 % nach 66 Jahren)."),
+        "p": ParamSource("annahme", "Chapman-Richards", "Formparameter einheitlich 2."),
+        "igbp_class": ParamSource("literatur", _HASLER, "Wahrscheinlichste Waldklasse (IGBP) je Zelle."),
+        "gamma_warming": ParamSource(
+            "abgeleitet", f"{_GRUENIG}; {_AR6}",
+            "Mittel aus ln(1 + Zunahme) / Erwärmung über drei Szenarien (0,30 / 0,26 / 0,23 je K). Nur für Europa "
+            "projiziert; für alle Waldtypen übernommen."),
+        "beta_closure": ParamSource(
+            "abgeleitet", _WILLIAMS,
+            "So gewählt, dass der Kronenschluss und damit die Albedo-Wirkung nach 40 Jahren die Hälfte erreicht "
+            "(Williams et al. 2026: rund die Hälfte des Albedo-Rückgangs in 40 Jahren). Globale Regel, nicht je Typ."),
+        "valid_gez": ParamSource("abgeleitet", _WALKER,
+                                 "Klimazone aus Walkers Bioklimazonen (aus FAO GEZ); Codes 1/5 vertauscht im README."),
+    })
+    return table
 
-These are the sites slide 25 announces and every E-figure is evaluated at.
-They lived only on the slide until this entry existed, so a regenerated
-figure could silently have used a different latitude than the one the deck
-claims. Chosen as typical planting latitudes for each species, not as band
-centres -- ``nbs.potential._REP_LAT_DEG`` is a *different* set (the centres
-of the assignment bands, 65/55/42.5/22.5/5), used only to size the
-disturbance-buffer ratio. Do not substitute one for the other: the two answer
-different questions and legitimately differ.
-"""
+
+def _build_registry() -> tuple[dict[str, Species], dict[str, float]]:
+    from nbs.forest_data import TREES_PER_HA, growth_by_key
+
+    species, sites = {}, {}
+    for key, g in growth_by_key().items():
+        meta = _TYPE_META[g["type"]]
+        species[key] = Species(
+            key=key,
+            name_de=f"{meta['name']} ({_ZONE_DE[g['zone']]})",
+            name_lat=meta["igbp"],
+            m_max_kgC=g["m_ref_mgc_ha"] * 1000.0 / TREES_PER_HA,
+            k=g["k"],
+            p=2.0,
+            beta_closure=_beta_for_half_at(g["k"], 2.0),
+            stand_area_m2=1e4 / TREES_PER_HA,
+            alpha_canopy=meta["alpha"],
+            igbp_class=meta["igbp"],
+            p_disturb=meta["p_disturb"],
+            severity_beta=meta["severity"],
+            gamma_warming=GAMMA_WARMING,
+            eps_immediate=meta["eps"],
+            tau_decay_yr=meta["tau"],
+            valid_gez=(g["zone"],),
+            sources=_type_sources(),
+        )
+        sites[key] = g["lat_ref"]
+    return species, sites
+
+
+SPECIES, REFERENCE_SITES = _build_registry()
+"""Forest type per climate zone -> parameters. REFERENCE_SITES: the
+area-weighted mean |latitude| of the type's reforestable cells in that zone."""
 
 
 def reference_site(key: str) -> float:

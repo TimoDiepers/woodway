@@ -7,10 +7,10 @@ the talk needs: the disturbance hazard is not a species constant, it is
 
 read from the *calendar* year the tree is standing in, not from its age. A
 seedling planted in 2085 therefore spends its whole life in a hotter world
-than one planted in 2025 spends in its. Two things follow, and this module
+than one planted in the start year spends in its. Two things follow, and this module
 separates them because they are easy to confuse:
 
-1. **The calendar cost.** A late cohort has fewer years before the 2150
+1. **The calendar cost.** A late cohort has fewer years before the 2100
    horizon, so less stock and less cooling on the table by then. Trivially
    true, nothing to do with fire.
 2. **The risk cost.** At the *same age*, a late cohort has lost more stock,
@@ -20,14 +20,16 @@ separates them because they are easy to confuse:
    age, run once with ``disturbance="off"`` and once with the hazard on.
 
 ``risk_ratio`` states the mechanism in one number: the annual hazard in the
-planting year relative to the 2025 hazard. It depends only on gamma and the
+planting year relative to the start-year hazard. It depends only on gamma and the
 background warming between the two years, not on the species' base rate.
 
 The default age is 50 years, the largest round age every cohort in
-``PLANT_YEARS`` still reaches inside the 2025-2150 axis (2085 + 50 = 2135).
+``PLANT_YEARS`` still reaches inside the T_START-2100 axis (T_START + 20 + 50 < 2100).
 """
 
 from __future__ import annotations
+
+from functools import lru_cache
 
 import numpy as np
 from numpy.typing import NDArray
@@ -39,7 +41,7 @@ from nbs.pipeline import SiteResult, _background_temperature, run_single_tree
 from nbs.species import get_species
 from nbs.tree import disturbance_probability
 
-PLANT_YEARS: tuple[int, ...] = (2025, 2045, 2065, 2085)
+PLANT_YEARS: tuple[int, ...] = (T_START, T_START + 10, T_START + 20)
 """The cohorts the talk compares: 20-year steps from today."""
 
 DEFAULT_AGE_YR = 50
@@ -96,19 +98,25 @@ def survival_probability(
 def cohort(
     species_key: str,
     plant_year: int,
-    lat_deg: float = 60.0,
+    lat_deg: float | None = None,
     scenario: str = "ssp245",
     config: ModelConfig | None = None,
 ) -> SiteResult:
-    """One cohort's full chain, on the common ``YEARS`` axis."""
+    """One cohort's full chain, on the common ``YEARS`` axis. Default site:
+    the forest type's reference latitude (nbs.species.reference_site)."""
+    from nbs.species import reference_site
+
+    if lat_deg is None:
+        lat_deg = reference_site(species_key)
     return run_single_tree(
-        species_key, lat_deg, scenario, config=config, plant_year=plant_year
+        species_key, lat_deg, scenario, config=config, plant_year=plant_year,
     )
+
 
 
 def cohort_table(
     species_key: str,
-    lat_deg: float = 60.0,
+    lat_deg: float | None = None,
     scenario: str = "ssp245",
     plant_years: tuple[int, ...] = PLANT_YEARS,
     age_yr: int = DEFAULT_AGE_YR,
@@ -118,7 +126,7 @@ def cohort_table(
 
     Columns:
 
-    ``risikofaktor``        annual hazard relative to a 2025 planting [-]
+    ``risikofaktor``        annual hazard relative to a start-year planting [-]
     ``p_stoerung``          probability of at least one disturbance within
                             ``age_yr`` years of planting [-]
     ``vorrat_kgC``          stock at age ``age_yr``, hazard on [kgC]
@@ -146,7 +154,9 @@ def cohort_table(
             "vorrat_ungestoert": stock_ref,
             "verlust_anteil": (1.0 - stock / stock_ref) if stock_ref > 0.0 else float("nan"),
             "delta_t_2150_k": float(res.delta_t[-1]),
-            "t_star": find_breakeven_year(res.delta_t),
+            # A cohort cannot break even before it exists: before planting
+            # Delta-T is exactly 0, which t* would otherwise count as cooling.
+            "t_star": max(find_breakeven_year(res.delta_t), float(py)),
         }
     return out
 

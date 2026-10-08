@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from nbs.legacy.parameters import T_END, T_START
 from nbs.legacy.carbon_module import (
     compute_biomass_growth,
     compute_disturbance_loss,
@@ -127,7 +128,7 @@ class TestNEETimeseries:
 
     def test_tr_shape(self):
         nee = compute_nee_timeseries("tropical_reforestation", 0)
-        assert nee.shape == (125,)
+        assert nee.shape == (T_END - T_START,)
 
     def test_tr_cumulative_negative(self):
         """Net removal: cumulative NEE should be negative."""
@@ -212,7 +213,7 @@ class TestNEEAtLevel:
 
     def test_output_shape(self):
         nee = compute_nee_at_level(level=3, lat=30, area_mha=1.0)
-        assert nee.shape == (125,)
+        assert nee.shape == (T_END - T_START,)
 
     def test_area_scaling(self):
         nee_1 = compute_nee_at_level(level=2, lat=0, area_mha=1.0)

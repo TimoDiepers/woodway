@@ -103,6 +103,16 @@ class ModelConfig:
     identical rows.
     """
 
+    site_growth: bool = True
+    """Whether the growth level depends on the planting latitude
+    (``nbs.site_factor``: m_max * f(latitude)).
+
+    ``True``: Norway spruce and Scots pine grow faster in the south and slower
+    in the north, scaled from forest-inventory increments inside the IPCC 2019
+    species range. ``False``: every species grows identically wherever it is
+    planted -- the behaviour before 2026-10-02, kept for comparison.
+    """
+
     carbon_sink: CarbonSink = "scenario"
     """Which airborne-fraction curve g_C represents the carbon sink (slide 13).
 

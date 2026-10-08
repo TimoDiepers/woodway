@@ -7,8 +7,11 @@ differences (delta-T), and finds break-even years.
 from __future__ import annotations
 
 import functools
+import tempfile
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from numpy.typing import NDArray
 
 from fair import FAIR
@@ -18,45 +21,118 @@ from fair.io import read_properties
 from nbs.legacy.parameters import T_START, T_END
 
 # Index offsets: FaIR time axis starts at 1750
-_START_IDX = T_START - 1750  # 275
-_END_IDX = T_END - 1750      # 400
+_START_IDX = T_START - 1750
+_END_IDX = T_END - 1750      # 350
+
+
+# fair-calibrate v1.4.1 (Smith et al. 2024, GMD 17, 8569): the constrained
+# 841-member ensemble FaIR's own documentation uses, run without internal
+# variability. "central" is one member of it, chosen by
+# scripts/select_fair_member.py as the one closest to the ensemble median at
+# once in historical warming (2011-2020: 1.08 K, observed 1.09; 2015-2024)
+# and in 2081-2100 warming under SSP1-2.6/2-4.5/3-7.0/5-8.5 (1.83 / 2.62 /
+# 3.21 / 4.10 K; IPCC AR6: 1.8 / 2.7 / 3.6 / 4.4). ECS 2.9 K.
+# Emissions are RCMIP, as in FaIR's SSP example; with them the whole
+# ensemble reaches about 403 ppm CO2 in 2020 (observed 412).
+# This replaces hand-set EBM parameters whose feedback (0.65 W/m^2/K) meant
+# an ECS of about 5.6 K and SSP2-4.5 warming of 3.5 K by 2100.
+_CALIBRATION = Path(__file__).resolve().parents[2] / "data" / "fair_calibrate_1.4.1"
+_PARAMS_CSV = _CALIBRATION / "calibrated_constrained_parameters_calibration1.4.1.csv"
+_SPECIES_CSV = _CALIBRATION / "species_configs_properties_calibration1.4.1.csv"
+CENTRAL_MEMBER = 787474
+
+# Temperatures are reported relative to 1850-1900, the reference of the
+# Paris 1.5 degC target and of the IPCC assessment (timebounds 1850..1900).
+_PRE_SLICE = slice(1850 - 1750, 1900 - 1750 + 1)
+
+
+@functools.lru_cache(maxsize=1)
+def _central_params_csv() -> str:
+    """The chosen member's parameter row as a one-row CSV indexed 'central'
+    (FAIR.override_defaults reads its configs from a file)."""
+    df = pd.read_csv(_PARAMS_CSV, index_col=0)
+    row = df.loc[[CENTRAL_MEMBER]].copy()
+    row.index = ["central"]
+    path = Path(tempfile.mkdtemp(prefix="fair_central_")) / "central.csv"
+    row.to_csv(path)
+    return str(path)
+
+
+_CMIP7_INPUTS = Path(__file__).resolve().parents[2] / "data" / "cmip7" / "fair-inputs"
+
+
+@functools.lru_cache(maxsize=None)
+def _cmip7_inputs(scenario: str) -> tuple[str, str]:
+    """(emissions file, forcing file) of one CMIP7 marker, with the scenario column renamed to *scenario*
+    ("cmip7-VL", ...), so that FaIR's arrays carry the same name as every other scenario in this module."""
+    code = scenario.removeprefix("cmip7-")
+    d = Path(tempfile.mkdtemp(prefix=f"fair_{code}_"))
+    em = pd.read_csv(_CMIP7_INPUTS / "emissions_1750-2500.csv")
+    em = em[em["scenario"] == code].drop(columns=["long_scenario"]).copy()
+    em["scenario"] = scenario
+    fo = pd.read_csv(_CMIP7_INPUTS / "volcanic_solar.csv")
+    fo = fo[fo["Scenario"] == code].copy()
+    fo["Scenario"] = scenario
+    em.to_csv(d / "emissions.csv", index=False)
+    fo.to_csv(d / "forcing.csv", index=False)
+    return str(d / "emissions.csv"), str(d / "forcing.csv")
 
 
 def _create_fair(scenario: str = "ssp245") -> FAIR:
-    """Create and configure a FaIR instance with AR6-calibrated parameters."""
+    """FaIR with the constrained fair-calibrate 1.4.1 parameters (one member)."""
     f = FAIR(ch4_method="Thornhill2021")
-    f.define_time(1750, 2150, 1)
+    f.define_time(1750, T_END, 1)
     f.define_scenarios([scenario])
     f.define_configs(["central"])
 
-    species, properties = read_properties()
+    species, properties = read_properties(filename=str(_SPECIES_CSV))
     f.define_species(species, properties)
     f.allocate()
-    f.fill_from_rcmip()
-    f.fill_species_configs()
+    if scenario.startswith("cmip7-"):
+        # CMIP7 marker scenarios (VL, LN, L, ML, M, H, HL): emissions and volcanic/solar forcing as the
+        # ScenarioMIP description paper runs them (van Vuuren et al. 2026; scripts/run_fair_simulations.py
+        # of its archive: fill_from_csv, then solar forcing set to zero)
+        emis, forc = _cmip7_inputs(scenario)
+        # fair registers unknown unit spellings of the CSV (e.g. "kt HFC4310/yr") in its module-wide unit
+        # tables; that breaks every later fill_from_rcmip in the same process (KeyError 'HFC4310'), so the
+        # tables are restored afterwards
+        import copy
 
-    # EBM parameters (AR6 calibrated)
-    for i, val in enumerate([3.18, 8.95, 142.73]):
-        fill(f.climate_configs["ocean_heat_capacity"], val, config="central", layer=i)
-    for i, val in enumerate([0.65, 2.15, 0.67]):
-        fill(f.climate_configs["ocean_heat_transfer"], val, config="central", layer=i)
-    fill(f.climate_configs["deep_ocean_efficacy"], 1.28, config="central")
+        from fair.structure import units as fair_units
+
+        saved = {k: copy.deepcopy(getattr(fair_units, k))
+                 for k in ("compound_convert", "desired_emissions_units", "desired_concentration_units")}
+        try:
+            f.fill_from_csv(forcing_file=forc, emissions_file=emis)
+        finally:
+            for k, v in saved.items():
+                getattr(fair_units, k).clear()
+                getattr(fair_units, k).update(v)
+        f.forcing.loc[dict(scenario=scenario, specie="Solar")] = 0
+    else:
+        f.fill_from_rcmip()
+    f.fill_species_configs(str(_SPECIES_CSV))
+    f.override_defaults(_central_params_csv())
+    # The calibration samples internal variability (stochastic_run=True,
+    # sigma_eta/sigma_xi). The model needs the forced response: a smooth
+    # baseline, and pulse responses that are not differences of noise.
     fill(f.climate_configs["stochastic_run"], False, config="central")
-    fill(f.climate_configs["forcing_4co2"], 7.33, config="central")
-    fill(f.climate_configs["sigma_eta"], 0.5, config="central")
-    fill(f.climate_configs["sigma_xi"], 0.5, config="central")
-    fill(f.climate_configs["gamma_autocorrelation"], 2.0, config="central")
-    fill(f.climate_configs["seed"], 0, config="central")
-    fill(f.climate_configs["use_seed"], False, config="central")
 
-    # Initialise state variables at t=0
-    initialise(f.concentration, 0, specie="CO2", config="central", scenario=scenario)
-    initialise(f.forcing, 0, config="central", scenario=scenario)
-    initialise(f.temperature, 0, config="central", scenario=scenario)
-    initialise(f.airborne_emissions, 0, config="central", scenario=scenario)
-    initialise(f.cumulative_emissions, 0, config="central", scenario=scenario)
-
+    initialise(f.concentration, f.species_configs["baseline_concentration"])
+    initialise(f.forcing, 0)
+    initialise(f.temperature, 0)
+    initialise(f.cumulative_emissions, 0)
+    initialise(f.airborne_emissions, 0)
+    initialise(f.ocean_heat_content_change, 0)
     return f
+
+
+def _surface_temperature(f: FAIR, scenario: str) -> NDArray:
+    """Study-window surface temperature [K] relative to 1850-1900."""
+    temp = np.asarray(
+        f.temperature.sel(scenario=scenario, config="central", layer=0).values, dtype=np.float64
+    )
+    return temp[_START_IDX:_END_IDX] - temp[_PRE_SLICE].mean()
 
 
 @functools.lru_cache(maxsize=4)
@@ -70,11 +146,7 @@ def run_fair_baseline(scenario: str = "ssp245") -> NDArray:
     """
     f = _create_fair(scenario)
     f.run()
-    temp = (
-        f.temperature.sel(scenario=scenario, config="central", layer=0)
-        .values[_START_IDX:_END_IDX]
-    )
-    return np.asarray(temp, dtype=np.float64)
+    return _surface_temperature(f, scenario)
 
 
 def run_fair_perturbed(
@@ -114,11 +186,7 @@ def run_fair_perturbed(
 
     f.run()
 
-    temp = (
-        f.temperature.sel(scenario=scenario, config="central", layer=0)
-        .values[_START_IDX:_END_IDX]
-    )
-    return np.asarray(temp, dtype=np.float64)
+    return _surface_temperature(f, scenario)
 
 
 def compute_pulse_warming(
@@ -153,13 +221,7 @@ def compute_pulse_warming(
 
     f.run()
 
-    temp = (
-        f.temperature.sel(scenario=scenario, config="central", layer=0)
-        .values[_START_IDX:_END_IDX]
-    )
-    perturbed = np.asarray(temp, dtype=np.float64)
-
-    return perturbed - baseline
+    return _surface_temperature(f, scenario) - baseline
 
 
 def compute_delta_t(t_perturbed: NDArray, t_baseline: NDArray) -> NDArray:

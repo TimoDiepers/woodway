@@ -15,7 +15,7 @@ import numpy as np  # noqa: E402
 from numpy.typing import NDArray  # noqa: E402
 
 from nbs.config import ModelConfig  # noqa: E402
-from nbs.constants import YEARS  # noqa: E402
+from nbs.constants import M_CO2_PER_C, YEARS  # noqa: E402
 from nbs.forcing import co2_flux_kg_per_yr  # noqa: E402
 from nbs.metrics import quantile_band, t_star  # noqa: E402
 from nbs.pipeline import SiteResult  # noqa: E402
@@ -169,7 +169,7 @@ def plot_disturbance_fan(result: SiteResult, ensemble: NDArray, out_path: str) -
 def plot_planting_time(
     out_path: str,
     *,
-    species_key: str = "picea_abies",
+    species_key: str = "enf_boreal",
     lat_deg: float = 60.0,
     scenario: str = "ssp245",
     age_yr: int | None = None,
@@ -368,4 +368,146 @@ def plot_growth_curves(
     ax.set_xlim(YEARS[0], YEARS[-1])
     ax.set_ylim(bottom=0.0)
     fig.tight_layout()
+    return _save(fig, out_path)
+
+
+C_GROWTH = "#1b7837"
+C_LOSS_TODAY = "#d6604d"
+C_LOSS_WARM = "#a50f15"
+
+
+def plot_stock_loss_terms(
+    out_path: str,
+    *,
+    species_key: str = "enf_boreal",
+    warming_per_century_k: float = 1.0,
+    dt: float = 1.0 / 12.0,
+) -> str:
+    """Folie 11: what each term of m(t) does to the stock of one tree.
+
+    Three runs of the same tree, so the two factors of the slide's equation
+    can be read off one figure:
+
+    ``nur Wachstum``    the closed Chapman-Richards form, ``m_max (1 -
+                        exp(-k t))^p`` -- the growth factor alone.
+    ``mit Verlustterm`` the same tree with today's disturbance rate
+                        ``s_0`` acting on the *stock* every year.
+    ``mit steigendem``  the same tree again, with ``s(t) = s_0 exp(gamma
+                        Delta T_w)`` under a linear background warming of
+                        ``warming_per_century_k`` per century.
+
+    The loss runs come from ``nbs.tree.simulate_deterministic``, i.e. from
+    the integrator the notebooks use, not from the slide's algebraic factor
+    ``(1 - s_0 exp(gamma Delta T_w))``. The two are not the same thing and
+    the difference is the point of the figure: as a one-off factor the loss
+    term is about one per cent, while the same rate applied to the standing
+    stock year after year costs about a sixth of the saturation stock. What
+    is drawn is the model, not the shorthand.
+
+    The lower panel carries the disturbance rate itself. Without it the
+    warming line is hard to read: ``gamma = 0,20 1/K`` over a single degree
+    raises the rate by a bit more than a fifth, which is clearly visible as
+    a rate and only a couple of kgC as a stock.
+    """
+    from nbs.tree import biomass_closed, disturbance_probability, simulate_deterministic
+
+    sp = get_species(species_key)
+    t_age = YEARS - YEARS[0]
+    t_warm = warming_per_century_k * t_age / 100.0
+    t_flat = np.zeros_like(t_warm, dtype=float)
+
+    m_growth = biomass_closed(t_age, sp)
+    m_today = simulate_deterministic(sp, t_flat, dt=dt).stock_kgC
+    m_warm = simulate_deterministic(sp, t_warm, dt=dt).stock_kgC
+
+    s_today = disturbance_probability(sp, t_flat) * 100.0
+    s_warm = disturbance_probability(sp, t_warm) * 100.0
+
+    fig, (ax, ax_s) = plt.subplots(
+        2, 1, figsize=(9.5, 6.2), sharex=True,
+        gridspec_kw={"height_ratios": [3.0, 1.0], "hspace": 0.12},
+    )
+
+    ax.fill_between(YEARS, m_warm, m_growth, color=C_LOSS_TODAY, alpha=0.13, lw=0)
+    ax.fill_between(YEARS, m_warm, m_today, color=C_LOSS_WARM, alpha=0.30, lw=0)
+
+    ax.axhline(sp.m_max_kgC, color=C_GROWTH, lw=0.8, ls="--", alpha=0.45)
+    ax.annotate(
+        f"$m^c_{{max}}$ = {sp.m_max_kgC:.0f} kgC",
+        xy=(YEARS[0] + 2, sp.m_max_kgC), xytext=(0, 4),
+        textcoords="offset points", fontsize=9, color=C_GROWTH, alpha=0.9,
+    )
+
+    ax.plot(
+        YEARS, m_growth, color=C_GROWTH, lw=2.4,
+        label="nur Wachstum: $m^c_{max}(1-e^{-k\\,t})^{\\,p}$",
+    )
+    ax.plot(
+        YEARS, m_today, color=C_LOSS_TODAY, lw=2.2,
+        label=(
+            "mit Verlustterm, heutige Störungsrate  "
+            f"($s_0$ = {sp.p_disturb * 100:.1f} %/a,  $\\Delta T_w$ = 0)"
+        ).replace(".", ","),
+    )
+    ax.plot(
+        YEARS, m_warm, color=C_LOSS_WARM, lw=2.2,
+        label=(
+            "mit Verlustterm, steigende Störungsrate  "
+            f"($\\Delta T_w$ = +{warming_per_century_k:.0f} K je Jahrhundert,  "
+            f"$\\gamma$ = {sp.gamma_warming:.2f} 1/K)"
+        ).replace(".", ","),
+    )
+
+    # end-of-horizon values inside the axes, staggered so the two loss labels
+    # (about 1,5 kgC apart) do not sit on top of each other
+    y_end = int(YEARS[-1])
+    for value, colour, dy in (
+        (m_growth[-1], C_GROWTH, -14),
+        (m_today[-1], C_LOSS_TODAY, 10),
+        (m_warm[-1], C_LOSS_WARM, -11),
+    ):
+        label = (
+            f"{value:.1f} kgC  ({value * M_CO2_PER_C:.0f} kg CO$_2$)".replace(".", ",")
+        )
+        ax.annotate(
+            label, xy=(y_end - 1, value), xytext=(0, dy),
+            textcoords="offset points", fontsize=9.5, color=colour,
+            ha="right", va="center",
+        )
+    ax.annotate(
+        f"Verlust bis {y_end}:  −{(1 - m_today[-1] / m_growth[-1]) * 100:.0f} %"
+        f"\nmit Erwärmung:  −{(1 - m_warm[-1] / m_growth[-1]) * 100:.0f} %",
+        xy=(YEARS[0] + 3, sp.m_max_kgC * 0.89), ha="left", va="top",
+        fontsize=10.5, color=C_LOSS_WARM,
+    )
+
+    ax.set_ylabel("Kohlenstoffvorrat $m^c_{Baum}$ [kgC je Baum]")
+    ax.set_ylim(0.0, sp.m_max_kgC * 1.12)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=9.5, loc="lower right", frameon=True, borderpad=0.7)
+    ax.set_title(
+        f"{sp.name_de} ({sp.name_lat}): was der Verlustterm vom Vorrat nimmt",
+        fontsize=12,
+    )
+
+    ax_s.plot(YEARS, s_today, color=C_LOSS_TODAY, lw=2.0)
+    ax_s.plot(YEARS, s_warm, color=C_LOSS_WARM, lw=2.0)
+    ax_s.fill_between(YEARS, s_today, s_warm, color=C_LOSS_WARM, alpha=0.20, lw=0)
+    ax_s.annotate(
+        f"$s(t) = s_0\\,e^{{\\gamma \\Delta T_w}}$:  "
+        f"+{(s_warm[-1] / s_today[-1] - 1) * 100:.0f} % bis {y_end}",
+        xy=(YEARS[0] + 4, s_warm[-1]), fontsize=10, color=C_LOSS_WARM, va="top",
+    )
+    ax_s.annotate(
+        "$s_0$ konstant", xy=(y_end - 2, s_today[-1]), xytext=(0, 5),
+        textcoords="offset points", fontsize=9, color=C_LOSS_TODAY,
+        ha="right", va="bottom",
+    )
+    ax_s.set_ylim(s_today[0] - 0.06, s_warm[-1] + 0.06)
+    ax_s.set_ylabel("Störungsrate $s$\n[%/a]", fontsize=9.5)
+    ax_s.set_xlabel("Jahr")
+    ax_s.grid(alpha=0.3)
+    ax_s.set_xlim(YEARS[0], YEARS[-1])
+
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.925, bottom=0.095)
     return _save(fig, out_path)
