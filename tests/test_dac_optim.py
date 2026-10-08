@@ -132,3 +132,15 @@ def test_slow_growth_still_returns():
     r = solve(growth=1.11)
     assert r["status"] in ("geschlossen", "annaeherung")
     assert np.all(np.isfinite(r["kuehlung_k"]))
+
+
+def test_export_file_is_complete():
+    import json
+    from pathlib import Path
+
+    d = json.loads((Path(__file__).resolve().parents[1] / "data" / "dac" / "optim.json").read_text())
+    h = d["haupt"]
+    assert len(h["region"]) == len(h["laender"])
+    assert len(h["fair_kuehlung_k"]) == 74
+    assert np.isfinite(d["fair_abweichung_2100_rel"])
+    assert set(d["sens"]) == {"wachstum_11", "technisch", "median"}

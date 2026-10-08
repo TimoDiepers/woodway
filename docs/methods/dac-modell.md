@@ -1,0 +1,152 @@
+# DAC-Modell und Vergleich mit Aufforstung
+
+Stand: 2026-10-06
+
+- **Code:** `src/nbs/dac_climate.py`, `src/nbs/dac.py`, `src/nbs/dac_compare.py`, `src/nbs/dac_figures.py`.
+- **LCA-Vorberechnung:** `scripts/dac_lca_precompute.py`, läuft in einer Brightway-Umgebung.
+- **Folien:** im Kapitel Vergleich „DAC: Strom je Tonne …“ bis „Ab wann DAC sauberer entnimmt“.
+
+## Kurz
+
+Für jede 0,5°-Landzelle und jedes Jahr von 2025 bis 2100 wird gerechnet, wie viel einer mit Direct Air Capture (DAC) entnommenen Tonne CO₂ netto übrig bleibt. Abgezogen werden die Lebenszyklus-Emissionen der Anlage und ihrer Energie. Dieselbe Größe wird für den an diesem Ort empfohlenen Baum gebildet, mit der Albedo als Abzug. Wo und ab wann DAC den höheren Netto-Wirkungsgrad hat, zeigen die Karten.
+
+## 1  Technologie und Niveau: premise
+
+Grundlage ist der premise-Datensatz *carbon dioxide, captured and stored, with a sorbent-based direct air capture system, 100ktCO2*. Er stammt aus dem Brightway-Projekt `ei312_REMIND_EU` (ecoinvent 3.12 cut-off, premise mit REMIND-EU, SSP2-NDC, Vintages 2020/2030/2040/2050/2075/2100).
+
+- **Energie je t CO₂ (premise):**
+  - 0,5 MWh Strom und 5,4 GJ (1,5 MWh) Wärme.
+  - Die Wärmepumpen-Variante braucht insgesamt 1,02 MWh Strom; daraus folgt ein COP von rund 2,9.
+- **Alles andere je kg CO₂:** Sorbens (Amin auf Silica), Anlage und ihr Rückbau, Verdichtung, Transport und Speicherung.
+  - Diese Teile bleiben, wie premise sie verknüpft. Bau-Inputs laufen über die globalen bzw. regionalen Märkte des Datensatzes.
+  - Ihr GWP100 ist der „Rest“: 0,088 (2020) → 0,021 kg CO₂e je kg (2100).
+
+## 2  Abhängigkeit vom Klima: Sendi et al. (2022)
+
+Quelle: Sendi, Bui, Mac Dowell, Fennell (2022): *Geospatial analysis of regional climate impacts to accelerate cost-efficient direct air capture deployment.* One Earth 5, 1153–1164, doi:10.1016/j.oneear.2022.09.003 (CC-BY).
+
+Die Autoren simulieren denselben Prozesstyp mit stündlichem Wetter weltweit: Amin-Sorbens Lewatit VP OC 1065, dampfunterstützte Temperatur-Vakuum-Wechseladsorption. Die Wärme liefern Luft-Wärmepumpen.
+
+**Wärmepumpe (ihre Gl. 29–31):**
+
+$$COP = \eta\,\frac{T_H}{T_H - T_C},\quad \eta = 0{,}5,\; T_H = 110\,°C + 10\,K,\; T_C = T_{Umgebung} - 10\,K$$
+
+Daraus ergibt sich ein COP von 1,5 (bei ≤ 1 °C; darunter wird die Leistung wie bei Sendi festgehalten) bis 2,0 (bei 30 °C). Der COP ist niedriger als in premise; er entspricht dem, was Hochtemperatur-Wärmepumpen bei rund 100 K Hub erreichen (Marktübersicht: 2,2–2,8 bei 70 K).
+
+**Wärmebedarf:** Sendi et al. geben den Gesamtstrombedarf (Wärmepumpen eingerechnet) nur als Mittel von vier Klimaklassen an. Die Grenzen liegen bei 18 °C und 65 % relativer Feuchte (Table 1):
+
+| Klasse | Sendi Table 1 [MWh/t] | dieses Modell |
+|---|---|---|
+| kalt-trocken | 1,76 | 1,77 |
+| kalt-feucht | 2,15 | 2,14 |
+| warm-trocken | 1,64 | 1,63 |
+| warm-feucht | 2,11 | 2,12 |
+
+**Anpassung:** Gesucht ist ein linearer Faktor für den Wärmebedarf:
+
+$$Q(T, RH) = Q_{ref}\,[1 + a_T\,(T-20)/10 + a_{RH}\,(RH-50)/10]$$
+
+- Er wird so angepasst, dass das flächengewichtete Mittel über unsere Zellen je Klasse die vier Werte trifft. Dabei gelten Sendis COP und seine 0,32 MWh/t für Vakuum, Verdichter und Gebläse.
+- **Ergebnis:**
+  - Wärmebedarf +12,6 % je 10 Prozentpunkte Feuchte: Wasser wird mitadsorbiert und muss wieder desorbiert werden.
+  - +9,4 % je 10 K.
+  - Größter Fehler: 0,012 MWh/t.
+
+**Übertragung auf premise:** Das Modell verwendet nur den *relativen* Faktor Q/Q_ref, angewandt auf premises 1,5 MWh Wärme. Strom je t = 0,5 + 1,5·Q/Q_ref/COP(T). Ergebnis: 1,1–1,9 MWh/t, Median 1,5.
+
+**Ausschluss:** Sendi et al. schließen Gebiete aus, die an mehr als 30 Tagen im Jahr unter −15 °C liegen. Hier stehen nur Monatsmittel zur Verfügung, deshalb lautet die Regel: kältester Monat im Mittel unter −15 °C. Das betrifft 20 % der Landfläche (Sendi: rund 25 %) und 40 % der bepflanzbaren Fläche, nämlich den borealen Gürtel.
+
+**Klima:** CRU TS 4.09 (Harris et al. 2020), Monatsmittel 2011–2020 auf 0,5°.
+- Temperatur direkt.
+- Relative Feuchte aus Dampfdruck und Sättigungsdampfdruck nach Magnus (WMO).
+- Beides jeweils als Jahresmittel.
+
+## 3  Strom: premise mit REMIND-EU, je Land
+
+- **GWP100 je kWh:** aus dem Markt „electricity, medium voltage“ des jeweiligen Landes, je Vintage. Zwischen den Vintages wird linear interpoliert.
+- **Ländermix = Regionsmix:** premise verknüpft jeden Ländermarkt mit dem Markt seiner **REMIND-EU-Region**. Länder einer Region teilen sich also einen Mix. In Europa ist das fein aufgelöst: Deutschland, Frankreich und UK sind eigene Regionen; Nordeuropa (NEN) und Mittel-/Osteuropa (ECE) sind zusammengefasst. Anderswo sind die Regionen groß (z. B. SSA, LAM, OAS).
+- **Länder ohne eigenen Markt (50 Stück):** Sie erhalten den Regionsmarkt nach der premise-Topologie (`data/dac/remind-eu-topology.json`, premise-Commit 82b7475). Dazu gehören z. B. Tschad → SSA und Grönland → NEN.
+- **Länderzuordnung:** Natural Earth 1:50m. Küstenzellen ohne Treffer erhalten den häufigsten Code im Umkreis von bis zu 3 Zellen. 358 Inselzellen bleiben ohne Land und erhalten den Weltmix.
+- **Methode:** IPCC 2021, climate change: total (excl. biogenic CO₂), GWP100.
+- **Rechnung:** `bw2calc.JacobiGMRESLCA` mit Warmstart. Je Vintage ist das eine Matrix mit rund 190 Nachfragen; das Ergebnis stimmt mit dem direkten Löser überein.
+- **Was das Szenario annimmt:** REMIND-EU SSP2-NDC dekarbonisiert sehr schnell. Deutschland: 0,42 (2020) → 0,09 (2030) → 0,013 kg/kWh (2050). Polen 0,92 → 0,16 → 0,011. Das trägt die Aussage „DAC wird schnell sauber“ wesentlich.
+
+## 4  Netto-Wirkungsgrad
+
+$$\eta_{DAC}(Zelle, Jahr) = 1 - \big(E_{Strom}\cdot GWP_{Strom}(Land, Jahr) + GWP_{Rest}(Jahr)\big) \;/\; 1\,t$$
+
+$$\eta_{Baum}(Zelle, Pflanzjahr) = \frac{\Delta T_{CO_2} + \Delta T_{Albedo}}{\Delta T_{CO_2}}\Big|_{2150} = 1 - \text{Albedo-Offset}$$
+
+- **Baum:**
+  - Es ist der typische Wald der Zelle (Hasler et al. 2024, `nbs.landscape.assign_species`), derselbe Baum wie in allen anderen Kapiteln. Gepflanzt im Entscheidungsjahr, mit Störung bei deterministischer Rate. (Bis 2026-10-06 stand hier die je Zelle am stärksten kühlende Art; vereinheitlicht, damit alle Folien dieselbe Regel und dieselbe Fläche von 0,36 Gha nutzen.)
+  - Der Albedo-Offset ist dieselbe Größe wie in der Hasler-Gegenprobe.
+  - Für spätere Pflanzjahre wird die Wachstumskurve mit dem Pflanzjahr neu gerechnet. Bewertet wird immer 2150, der Horizont des Modells. Für sehr späte Pflanzjahre ist dieser Horizont kurz.
+- **DAC:** Betrieb im Entscheidungsjahr. Emissionen und Entnahme fallen zeitgleich an; GWP100 macht Nicht-CO₂-Gase vergleichbar.
+- **Bessere Option je Zelle und Jahr:** die mit dem höheren η, sofern η > 0. Sonst heißt es „keins kühlt“.
+- **Karten:** Je 2°-Block zeigen sie die Option mit dem größten Anteil an der bepflanzbaren Fläche, wie die Pflanzkarte. Wo keine Bäume möglich sind, ist DAC die einzige Option; dort zeigen die Vergleichskarten grau.
+
+## 5  Ergebnis (Hauptfall: Wärmepumpe, premise-Niveau)
+
+| | 2025 | 2030 | 2040 | 2050 | 2100 |
+|---|---|---|---|---|---|
+| η_DAC, Median über Land | 42 % | 65 % | 92 % | 94 % | 95 % |
+| DAC besser auf … der bepflanzbaren Fläche | 34 % | 45 % | 57 % | 59 % | 59 % |
+| keins kühlt (bepflanzbar) | 34 % | 33 % | 32 % | 32 % | 24 % |
+
+- Baum, η Median 2025: 13 %.
+- Woher der Sprung gegenüber älteren Fassungen dieser Tabelle kommt (dort 8 % / 20 % / 43 % / 53 % / 54 %): Sie stammten von vor dem Wechsel auf Walkers Fläche und Kohlenstoff und auf die Waldtypen (2026-10-05). Seitdem bindet der Baum etwa halb so viel Kohlenstoff, und die Fläche liegt öfter im Norden und im Trockenen, wo er wärmt; der Baum-Median fiel von 40 % auf 20 %. Die Vereinheitlichung auf den typischen Wald (2026-10-06) verschob den DAC-Anteil 2025 nur noch von 32 % auf 34 %.
+- Zusammensetzung der 34 % (2025): auf 22 Prozentpunkten wärmt der Baum ohnehin, auf 12 Prozentpunkten kühlt er, aber DAC mit dem Strommix 2025 entnimmt sauberer (vor allem Nordeuropa, Frankreich, Teile Amerikas).
+- **Umstieg** (Median-Jahr, ab dem DAC auf der bepflanzbaren Fläche eines Landes besser ist): Norwegen, Schweden, Finnland, Frankreich, Spanien, USA, Brasilien 2025; Deutschland 2026; China 2027; Polen 2029; Indien 2032; Indonesien 2040; DR Kongo 2040 (Stand 2026-10-06, `fakten.json`).
+- **Wo der Baum bis 2100 vorn bleibt:** vor allem dort, wo es für Sorbens-DAC zu kalt ist. Wo beides geht (37 % der bepflanzbaren Fläche), überholt DAC den Baum bis 2100 fast überall (im Mittel 2030); nur auf 1,5 % bleibt der Baum vorn.
+
+## 6  Sensitivitäten (Median η_DAC)
+
+| Variante | 2025 | 2050 |
+|---|---|---|
+| Hauptfall | 42 % | 94 % |
+| Wärme aus Industriedampf (Erdgas-dominierter Wärmemarkt, DEU) statt Wärmepumpe | 62 % | 96 % |
+| gemessene Climeworks-Energie (3,31 MWh Wärme + 0,70 MWh Strom, Sendi SI) | **−5 %** | 90 % |
+
+- **Dampf heute besser:** Mit heutigem Strom ist Wärme aus Dampf sauberer als über die Wärmepumpe.
+- **Climeworks-Werte:** Mit dem heute gemessenen Energiebedarf wäre DAC 2025 im Median netto emittierend.
+
+## 7  Was nicht enthalten ist
+
+- **Kosten, Flächenbedarf, Tempo und Mengen:** Der Vergleich gilt je Tonne. 1 Gt CO₂ mit DAC braucht rund 1 500 TWh Strom, etwa 5 % der heutigen Weltstromerzeugung.
+- **Produktivität:** Die Klimaabhängigkeit der Produktivität (Sendi: ±10 %) und damit der Bauaufwand je Tonne bleibt fest.
+- **Zeitliche Auflösung:** Stundenwetter und Teillast gehen nicht ein, nur Jahresmittel (Jensen-Effekt beim COP). Ein künftig wärmeres Klima ebenfalls nicht (Klimanormal 2011–2020).
+- **Andere DAC-Wege:** Flüssig-DAC (KOH) ist nicht enthalten. Sie verhält sich klimatisch anders: Sie leidet unter Trockenheit und funktioniert in der Kälte.
+- **Stromverfügbarkeit:** DAC bezieht den durchschnittlichen Netzmix, keine zusätzlich gebaute Erzeugung.
+
+## 8  Optimierung: wo, wann, wie viel
+
+Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_gidden.py`, `scripts/dac_optim_export.py`; Ergebnis `data/dac/optim.json`.
+
+- **Frage:** Ab welchem Jahr X kann DAC die Lücke von Very Low zu 1,5 °C (nach Abzug der Bäume auf kühlenden Flächen, Folie 25) dauerhaft schließen, und mit welchem kleinsten Ausbau, wo und wann?
+- **Variablen:** Brutto-Entnahme x[Land, Jahr] in Gt/a, 2026–2100.
+- **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100). Gegenprobe mit vollem FaIR: in 2099 kühlt der optimierte Pfad dort um 8,5 % stärker als im LP gerechnet. Die Linearisierung ist also leicht konservativ.
+- **η je Land:** Median der besten 10 % der DAC-tauglichen Zellen mit einem Sedimentbecken innerhalb von 100 km (Gidden-Raster). 148 Länder kommen in Frage.
+- **Speicher:** Gidden et al. 2025, prudent limit je Land (Welt 1 460 Gt; Deutschland 1,3, Norwegen 6,9, UK 8,9, Russland 244, USA 141 Gt). Kein Transport über Grenzen.
+- **Wachstum:** 8,8 Mt/a in 2030 (geplante Kapazität), danach ≤ +20 %/a (Wind-Analogie), beides Zurbriggen et al. 2026.
+- **Ergebnis Hauptfall:**
+  - Die Lücke ist ab **2082** dauerhaft geschlossen, mit 655 Gt Brutto-Entnahme.
+  - 2050 entnimmt DAC 0,34 Gt/a und kühlt um 0,5 mK, bei 309 mK Lücke.
+  - Die Entnahme verteilt sich auf OECD/EU 373 Gt, Naher Osten/Afrika 223 Gt und Asien 59 Gt.
+  - Nordeuropa (NOR, SWE, FIN, FRA, DEU, GBR) bekommt nur 3 %, weil dort der Speicher fehlt.
+  - Die Speicher der USA (141 Gt), Australiens (112 Gt) und Kanadas (70 Gt) werden voll genutzt.
+  - Wegen der Zielfunktion (kleinste Gesamtmenge) steigt die Entnahme bis rund 13 Gt/a um 2070 und fällt danach wieder ab. Das ist ein Mengenpfad, kein Anlagenbestand.
+- **Sensitivitäten:**
+  - 11 %/a (Ammoniak-Analogie): nicht schließbar, 2100 bleiben 50 mK von 87 mK übrig.
+  - Technisches Potenzial statt prudent limit: ebenfalls 2082 (650 Gt). Das Jahr X setzt das Wachstum, nicht der Speicher.
+  - Median statt bestes Dezil: 2082 (656 Gt).
+- **Nicht enthalten:** Kosten, Strom- und Wasserverfügbarkeit, Injektionsraten je Becken, Anlagenlebensdauer, Basalt-Mineralisierung.
+
+## Quellen
+
+- Sendi, M., Bui, M., Mac Dowell, N., Fennell, P. (2022): One Earth 5, 1153–1164. Supplement: Vergleich mit Climeworks-Daten.
+- Harris, I., Osborn, T. J., Jones, P., Lister, D. (2020): Version 4 of the CRU TS monthly high-resolution gridded multivariate climate dataset. Sci. Data 7, 109.
+- Sacchi, R. et al. (2022): PRospective EnvironMental Impact asSEment (premise). Renew. Sustain. Energy Rev. 160, 112311. REMIND-EU-Szenarien über premise.
+- Natural Earth, Admin 0 Countries 1:50m (public domain).
+- Hasler, N. et al. (2024): Nat. Commun. 15, 2275 (Albedo-Offset).
+- Gidden, M. J. et al. (2025): A prudent planetary limit for geologic carbon storage. Nature 645, 124–132. Daten: doi:10.5281/zenodo.18343187.
+- Zurbriggen, T. et al. (2026): Short-term action is key for gigaton-scale Direct Air Capture by 2050. Nat. Commun. 17, 6184.
