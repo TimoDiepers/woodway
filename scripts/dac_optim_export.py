@@ -7,18 +7,18 @@ import json
 
 import numpy as np
 
-from nbs.dac_optim import PATHWAYS, ROOT, capacity_by_target, fair_cooling, solve
+from nbs.dac_optim import PATHWAYS, ROOT, capacity_by_target, fair_cooling, growth_limit, solve
 from nbs.dac_storage import region_by_country
 
 OUT = ROOT / "data" / "dac" / "optim.json"
 
 
 def short(r):
-    return {"ziel_jahr": r["ziel_jahr"], "status": r["status"], "kuehlung_k": r["kuehlung_k"],
+    return {"ziel_jahr": r["ziel_jahr"], "status": r["status"], "kuehlung_k": r["kuehlung_k"], "netto_gt": r["netto_gt"],
             "kapazitaet_gt": r["kapazitaet_gt"], "summe_gt": float(np.sum(r["x"]))}
 
 
-main = solve()
+main = solve(ziel="co2")
 reg = region_by_country()
 main["region"] = [reg[c] for c in main["laender"]]
 net = (np.array(main["x"]) * np.array(main["eta"])).sum(axis=0)        # Gt/a net removal, 2026..2100
@@ -28,12 +28,13 @@ j = int(np.flatnonzero(np.isfinite(fair))[-1])                         # last co
 dev = float((fair[j] - main["kuehlung_k"][j]) / main["kuehlung_k"][j])
 pathways = []
 for pw in PATHWAYS:
-    r = main if pw == "SSP2-NDC" else solve(pathway=pw)
+    r = main if pw == "SSP2-NDC" else solve(pathway=pw, ziel="co2")
     pathways.append({"strompfad": pw, "kapazitaet_gt": r["kapazitaet_gt"], "summe_gt": float(np.sum(r["x"])),
                      "eta_median": np.median(np.array(r["eta"]), axis=0).tolist()})
 out = {"haupt": main, "fair_abweichung_2100_rel": dev,
-       "sens": {"wachstum_11": short(solve(growth=1.11)), "technisch": short(solve(stufe="technisch")),
-                "median": short(solve(quantil=0.5))},
+       "sens": {"wachstum_11": short(solve(growth=1.11, ziel="co2")), "technisch": short(solve(stufe="technisch", ziel="co2")),
+                "median": short(solve(quantil=0.5, ziel="co2"))},
+       "wachstumsgrenze_gt": growth_limit().tolist(),
        "ziel_kurve": capacity_by_target(), "strompfade": pathways}
 OUT.write_text(json.dumps(out, ensure_ascii=False))
 print("ok", main["status"], main["ziel_jahr"], f"{main['kapazitaet_gt']:.1f} Gt/a", f"{np.sum(main['x']):.0f} Gt brutto",

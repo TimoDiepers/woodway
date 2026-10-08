@@ -126,6 +126,10 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
   - Dafür muss DAC 2100 zusätzlich zu den Bäumen auf kühlenden Flächen 87 mK kühlen (Folie 25).
   - Der Overshoot davor bleibt.
 - **Variablen:** Brutto-Entnahme x[Land, Jahr] in Gt/a, 2026–2100.
+- **Ziel auf CO₂-Ebene (Hauptfall seit 2026-10-08):** Bis 2100 netto **262 Gt CO₂** entnehmen.
+  - Das ist die Nettomenge, die über die Klimaantwort (FaIR-Kernel) 2100 genau die 87 mK kühlt, bestimmt aus dem Pfad mit der kleinsten Kapazität und dem Temperaturziel (`co2_target_gt`).
+  - Die Rahmenbedingung lautet dann: kumulierte Netto-Entnahme ≥ 262 Gt.
+  - Die Temperaturwirkung ist Ergebnis, nicht Bedingung: 2100 genau 87 mK, bis 2050 aber erst 1,9 Gt entnommen.
 - **Zielfunktion:**
   1. Kleinste Kapazität, also die größte Jahresentnahme weltweit.
   2. Bei dieser Kapazität die kleinste Gesamtmenge.
@@ -139,13 +143,12 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
 - **η je Land:** Median der besten 10 % der DAC-tauglichen Zellen mit einem Sedimentbecken innerhalb von 100 km (Gidden-Raster, bewertete und nicht bewertete Becken; 39 % der Gitterzellen). 148 Länder kommen in Frage.
 - **Ergebnis Hauptfall (Strompfad SSP2-NDC):**
   - Nötig sind **6,9 Gt/a**, voll ab 2067, insgesamt 272 Gt.
-  - **Reihenfolge:** Frankreich ab 2028, Sudan 2039, Libyen, Ägypten und Algerien 2041–2043. Ab 2062 kommen die USA, Spanien und Portugal dazu, ab 2067 Australien, Griechenland und Italien.
-  - **2050:** 0,34 Gt/a, davon Algerien 0,26.
-  - **2060:** 2,1 Gt/a (Algerien 0,9, Libyen 0,7, Ägypten 0,4).
-  - **Ab 2070:** USA 3,9, Libyen 1,0, Algerien 0,9, Ägypten 0,4, Australien 0,3 Gt/a.
-  - **Kumuliert:** USA 141, Algerien 45, Libyen 43, Ägypten 17, Australien 11 Gt.
+  - **2040:** vor allem Frankreich (0,04 Gt/a).
+  - **2050:** 0,34 Gt/a, davon Algerien 0,24.
+  - **2060:** 2,1 Gt/a (Libyen 1,0, Ägypten 0,3, Algerien 0,2, USA 0,2).
+  - **Ab 2070:** USA 3,75, Australien 1,25, Libyen 1,0, Ägypten 0,3, Algerien 0,2 Gt/a (CO₂-Ziel; mit dem Temperaturziel ist die Aufteilung leicht anders, die Kapazität gleich).
   - Der Netto-Anteil der genutzten Anlagen liegt in jedem Jahrzehnt bei 96–97 %. Gebaut wird dort, wo der Strom dann schon sauber ist.
-- **Kapazität nach Zieljahr:** 2085: 32 Gt/a; 2090: 17 Gt/a; 2095: 9,7 Gt/a; 2100: 6,9 Gt/a.
+- **Kapazität nach Zieljahr** (dieselben 262 Gt netto schon bis zum Zieljahr): 2085: 12,9 Gt/a; 2090: 9,9 Gt/a; 2095: 8,1 Gt/a; 2100: 6,9 Gt/a. Mit dem Temperaturziel ab dem Zieljahr wäre es mehr (2085: 32 Gt/a), weil die Lücke vor 2100 größer ist.
 - **Strompfade** (Netto-Anteil, Median über die Länder 2026 → 2040 → 2060; nötige Kapazität):
 
   | Strompfad | Netto-Anteil | Kapazität |
@@ -156,7 +159,7 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
 
   Der Strommix ändert die Menge kaum: Wegen der Wachstumsgrenze wird DAC erst groß, wenn der Strom ohnehin sauber ist.
 - **Sensitivitäten:**
-  - 11 %/a (Ammoniak-Analogie): 2100 nicht erreichbar, es bleiben 50 von 87 mK.
+  - 11 %/a (Ammoniak-Analogie): 2100 nicht erreichbar, 128 von 262 Gt (Temperaturziel: es bleiben 50 von 87 mK).
   - Technisches Potenzial statt prudent limit: 6,9 Gt/a.
   - Median statt bestes Dezil: 6,9 Gt/a.
 - **Einordnung:** 6,9 Gt/a liegen über den vorsichtigen Schätzungen (3–4 Gt/a, Chiquier et al. 2025) und im Bereich der optimistischen Modelle. Mit rund 1,5 MWh/t braucht das etwa 10 000 TWh Strom, ein Drittel der heutigen Weltstromerzeugung.

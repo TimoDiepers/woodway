@@ -175,6 +175,8 @@ def test_export_file_is_complete():
     assert all(len(p["eta_median"]) == 75 for p in d["strompfade"])
     assert 0.0 < d["fair_abweichung_2100_rel"] < 0.15
     assert len(h["fair_kuehlung_k"]) == 75
+    assert h["ziel"] == "co2" and h["co2_ziel_gt"] > 0
+    assert len(d["wachstumsgrenze_gt"]) == 75 and d["wachstumsgrenze_gt"][4] == pytest.approx(0.0088)
 
 
 def test_mini_keep_running_never_shuts_down():
@@ -218,3 +220,41 @@ def test_fair_cooling_is_aligned_with_kernel():
 def test_target_year_out_of_range():
     with pytest.raises(ValueError):
         solve(ziel_jahr=2101)
+
+
+def test_mini_co2_target_counts_net_removal():
+    # 9 Gt net needed by the end, eta 0.9 -> 10 Gt gross, spread evenly at least capacity
+    k, eta = _mini()
+    ok, x = build_and_solve(eta[:1], k, np.zeros(10), storage=np.array([50.0]), x_from=9, growth=10.0, start_2030=None,
+                            objective="min_peak", co2_target=9.0)
+    assert ok
+    assert (x * eta[:1]).sum() == pytest.approx(9.0, rel=1e-5)
+    assert x.sum(axis=0).max() == pytest.approx(1.0, rel=1e-4)
+
+
+def test_co2_target_matches_the_temperature_gap():
+    from nbs.dac_optim import co2_target_gt
+
+    r = co2_target_gt()
+    assert 200 < r < 320
+
+
+@pytest.fixture(scope="module")
+def co2_case():
+    return solve(ziel="co2")
+
+
+def test_co2_case_reaches_target(co2_case):
+    from nbs.dac_optim import co2_target_gt
+
+    r = co2_case
+    net = (np.array(r["x"]) * np.array(r["eta"])).sum()
+    assert net == pytest.approx(co2_target_gt(), rel=1e-4)
+    assert r["co2_ziel_gt"] == pytest.approx(co2_target_gt())
+    assert np.all(np.diff(np.array(r["x"]), axis=1) >= -1e-7)
+
+
+def test_slow_growth_co2_target_approaches():
+    r = solve(growth=1.11, ziel="co2")
+    assert r["status"] == "annaeherung"
+    assert r["netto_gt"] < r["co2_ziel_gt"]

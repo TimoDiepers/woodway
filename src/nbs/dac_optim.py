@@ -80,9 +80,15 @@ def gap_series() -> NDArray:
     d = json.loads(GAP_FILE.read_text())
     assert d["y"] == YEARS.tolist()
     return np.maximum(0.0, (np.array(d["need"]) - np.array(d["k"])) / 1000.0)
+def _infeasible(res) -> bool:
+    """HiGHS infeasible -- also when presolve leaves the model status unknown but the primal status infeasible."""
+    return res.status == 2 or (res.status == 4 and "primal_status is Infeasible" in res.message)
+
+
 def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArray, x_from: int | None,
                     growth: float, start_2030: float | None = START_2030_GT, objective: str = "min_total",
-                    years: NDArray | None = None, keep_running: bool = False) -> tuple[bool, NDArray | None]:
+                    years: NDArray | None = None, keep_running: bool = False,
+                    co2_target: float | None = None) -> tuple[bool, NDArray | None]:
     """The LP on plain arrays. x is flattened country-major: x[c * n + y].
 
     objective "min_total": cooling >= gap for t >= x_from, minimise sum x.
@@ -90,6 +96,8 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     that peak (+1e-6 relative) minimise sum x.
     objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum of s[t] for t >= x_from
     (all years if x_from is None).
+    co2_target: the target on the CO2 level instead: cumulative net removal sum_{c, y<=t} eta * x >= co2_target
+    [Gt] for t >= x_from (kernel and gap are not used then).
     keep_running: plants once built run on, x[c, t] >= x[c, t-1] (makes where/when unique enough to show).
     start_2030=None drops the 2026-2030 caps (unit tests); growth applies to every year after the
     first then.
@@ -104,8 +112,13 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     nv = nx + (n if slack else 0)
     # cooling(t) = sum_{c,y} -K[y, t] * eta[c, y] * x[c, y]
     cool = np.zeros((n, nx))
-    for c in range(n_c):
-        cool[:, c * n:(c + 1) * n] = (-kernel * eta[c][:, None]).T
+    if co2_target is not None:  # cumulative net removal up to year t
+        for c in range(n_c):
+            cool[:, c * n:(c + 1) * n] = np.tril(np.ones((n, n))) * eta[c][None, :]
+        gap = np.full(n, float(co2_target))
+    else:
+        for c in range(n_c):
+            cool[:, c * n:(c + 1) * n] = (-kernel * eta[c][:, None]).T
     a, b = [], []
     if slack:
         rows = np.hstack([-cool, -np.eye(n)])          # -cooling - s <= -gap
@@ -152,7 +165,7 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
         A1 = np.vstack([np.hstack([A, np.zeros((A.shape[0], 1))]), world])
         B1 = np.r_[B, np.zeros(n)]
         res = linprog(np.r_[np.zeros(nv), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
-        if res.status == 2:
+        if _infeasible(res):
             return False, None
         if res.status != 0:
             raise RuntimeError(f"LP stage 1: {res.message}")
@@ -161,7 +174,7 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     c_obj = (np.r_[np.zeros(nx), (np.arange(n) >= (x_from or 0)).astype(float)] if slack
              else np.r_[np.ones(nx), np.zeros(nv - nx)])
     res = linprog(c_obj, A_ub=A, b_ub=B, bounds=bounds, method="highs")
-    if res.status == 2:
+    if _infeasible(res):
         return False, None
     if res.status != 0:
         raise RuntimeError(f"LP: {res.message}")
@@ -183,33 +196,55 @@ def _setup(stufe: str, quantil: float, pathway: str):
 
 
 def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9, ziel_jahr: int = TARGET_YEAR,
-          pathway: str = "SSP2-NDC", keep_running: bool = True) -> dict:
+          pathway: str = "SSP2-NDC", keep_running: bool = True, ziel: str = "temperatur") -> dict:
     """Least DAC capacity (then least total) that closes the gap from *ziel_jahr* on, plants running on once
-    built; if impossible, the closest approach (least summed shortfall from *ziel_jahr* on)."""
+    built; if impossible, the closest approach (least summed shortfall from *ziel_jahr* on).
+    ziel="co2": the target is the net CO2 removal co2_target_gt() by *ziel_jahr* instead of the cooling."""
     if not YEARS[0] <= ziel_jahr <= YEARS[-1]:
         raise ValueError(f"ziel_jahr {ziel_jahr} outside {YEARS[0]}..{YEARS[-1]}")
     countries, eta, storage = _setup(stufe, quantil, pathway)
     k, gap = removal_kernel_matrix(), gap_series()
     i = int(ziel_jahr - YEARS[0])
-    ok, x = build_and_solve(eta, k, gap, storage, i, growth, objective="min_peak", years=YEARS, keep_running=keep_running)
+    co2 = co2_target_gt() if ziel == "co2" else None
+    ok, x = build_and_solve(eta, k, gap, storage, i, growth, objective="min_peak", years=YEARS, keep_running=keep_running,
+                            co2_target=co2)
     status = "geschlossen"
     if not ok:
         ok, x = build_and_solve(eta, k, gap, storage, i, growth, objective="min_shortfall", years=YEARS,
-                                keep_running=keep_running)
+                                keep_running=keep_running, co2_target=co2)
         assert ok, "closest-approach LP must always be feasible (x = 0 is a solution)"
         status = "annaeherung"
     cooling = -np.einsum("yt,cy,cy->t", k, eta, x)
     return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(),
             "kuehlung_k": cooling.tolist(), "luecke_k": gap.tolist(), "ziel_jahr": int(ziel_jahr), "status": status,
             "kapazitaet_gt": float(x.sum(axis=0).max()), "wachstum": growth, "stufe": stufe, "quantil": quantil,
-            "strompfad": pathway}
+            "strompfad": pathway, "ziel": ziel, "co2_ziel_gt": co2,
+            "netto_gt": float((x * eta).sum())}
 
 
-def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROWTH) -> list[dict]:
-    """Least capacity [Gt/a] and total [Gt] needed to hold 1.5 deg C from each target year on."""
+@lru_cache(maxsize=1)
+def co2_target_gt() -> float:
+    """The 1.5 deg C gap of 2100 on the CO2 level [Gt net]: the net removal of the least-capacity path that cools
+    the gap in 2100 (temperature target, main case). Fixed by this rule, not tuned: the CO2 target then asks for
+    the same amount of CO2, and the result shows what that amount does to the temperature over time."""
+    r = solve(ziel="temperatur")
+    assert r["status"] == "geschlossen"
+    return r["netto_gt"]
+
+
+def growth_limit(growth: float = GROWTH) -> NDArray:
+    """Largest world removal the growth limit allows each year [Gt/a] (linear to 8.8 Mt/a in 2030, then x growth)."""
+    out = np.zeros(N_Y)
+    for i, y in enumerate(YEARS):
+        out[i] = START_2030_GT * (y - 2025) / 5 if y <= 2030 else out[i - 1] * growth
+    return out
+
+
+def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROWTH, ziel: str = "co2") -> list[dict]:
+    """Least capacity [Gt/a] and total [Gt] needed to reach the target by each target year."""
     out = []
     for z in ziel_jahre:
-        r = solve(growth=growth, ziel_jahr=z)
+        r = solve(growth=growth, ziel_jahr=z, ziel=ziel)
         out.append({"ziel_jahr": int(z), "status": r["status"], "kapazitaet_gt": r["kapazitaet_gt"],
                     "summe_gt": float(np.sum(r["x"]))})
     return out
