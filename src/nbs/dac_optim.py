@@ -77,3 +77,94 @@ def gap_series() -> NDArray:
     d = json.loads(GAP_FILE.read_text())
     assert d["y"] == YEARS.tolist()
     return np.maximum(0.0, (np.array(d["need"]) - np.array(d["k"])) / 1000.0)
+def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArray, x_from: int | None,
+                    growth: float, start_2030: float | None = START_2030_GT, objective: str = "min_total",
+                    years: NDArray | None = None) -> tuple[bool, NDArray | None]:
+    """The LP on plain arrays. x is flattened country-major: x[c * n + y].
+
+    objective "min_total": cooling >= gap for t >= x_from, minimise sum x.
+    objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum s (x_from ignored).
+    start_2030=None drops the 2026-2030 caps (unit tests); growth applies to every year after the
+    first then.
+    """
+    from scipy.optimize import linprog
+    from scipy.sparse import lil_matrix
+
+    n_c, n = eta.shape
+    years = np.arange(2026, 2026 + n) if years is None else years
+    nx = n_c * n
+    slack = objective == "min_shortfall"
+    nv = nx + (n if slack else 0)
+    # cooling(t) = sum_{c,y} -K[y, t] * eta[c, y] * x[c, y]
+    cool = np.zeros((n, nx))
+    for c in range(n_c):
+        cool[:, c * n:(c + 1) * n] = (-kernel * eta[c][:, None]).T
+    a, b = [], []
+    if slack:
+        rows = np.hstack([-cool, -np.eye(n)])          # -cooling - s <= -gap
+        a.append(rows); b.append(-gap)
+    else:
+        a.append(np.hstack([-cool[x_from:], np.zeros((n - x_from, nv - nx))])); b.append(-gap[x_from:])
+    st = lil_matrix((n_c, nv))                          # storage per country
+    for c in range(n_c):
+        st[c, c * n:(c + 1) * n] = 1.0
+    a.append(st.toarray()); b.append(storage)
+    first = 1 if start_2030 is None else int(np.where(years == 2030)[0][0]) + 1
+    gr = np.zeros((n - first, nv))                       # sum_c x[c, t] - growth * sum_c x[c, t-1] <= 0
+    for j, t in enumerate(range(first, n)):
+        gr[j, t::n][:n_c] = 1.0
+        gr[j, t - 1::n][:n_c] = -growth
+    a.append(gr); b.append(np.zeros(n - first))
+    bounds = [(0.0, None)] * nv
+    for c in range(n_c):
+        for y in range(n):
+            hi = None
+            if start_2030 is not None and years[y] <= 2030:
+                hi = start_2030 * (years[y] - 2025) / 5          # per-country cap; the sum cap follows below
+            if eta[c, y] <= 0:
+                hi = 0.0                                          # a plant that warms is never built
+            bounds[c * n + y] = (0.0, hi)
+    if start_2030 is not None:                                    # world caps 2026-2030
+        for y in np.where(years <= 2030)[0]:
+            row = np.zeros(nv); row[y:nx:n] = 1.0
+            a.append(row[None, :]); b.append(np.array([START_2030_GT * (years[y] - 2025) / 5]))
+    c_obj = np.r_[np.zeros(nx), np.ones(n)] if slack else np.r_[np.ones(nx), np.zeros(nv - nx)]
+    res = linprog(c_obj, A_ub=np.vstack(a), b_ub=np.concatenate(b), bounds=bounds, method="highs")
+    if res.status != 0:
+        return False, None
+    return True, res.x[:nx].reshape(n_c, n)
+
+
+def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9) -> dict:
+    """Stage 1: earliest year X from which the gap stays closed; stage 2: least total removal at X.
+    No feasible X: closest approach (least summed shortfall)."""
+    from nbs.dac_storage import storage_by_country
+
+    countries, eta = eta_by_country(quantil, stufe)
+    store = storage_by_country(stufe)
+    storage = np.array([store[c] for c in countries])
+    k, gap = removal_kernel_matrix(), gap_series()
+
+    def attempt(i):
+        return build_and_solve(eta, k, gap, storage, i, growth, years=YEARS)
+
+    lo, hi, best = 0, N_Y - 1, None
+    ok, x = attempt(hi)
+    if ok:
+        best = (hi, x)
+        while lo < hi:                       # feasibility is monotone in X: a later X drops constraints
+            mid = (lo + hi) // 2
+            ok, x = attempt(mid)
+            if ok:
+                hi, best = mid, (mid, x)
+            else:
+                lo = mid + 1
+        jahr_x, x, status = int(YEARS[best[0]]), best[1], "geschlossen"
+    else:
+        ok, x = build_and_solve(eta, k, gap, storage, None, growth, objective="min_shortfall", years=YEARS)
+        assert ok, "closest-approach LP must always be feasible (x = 0 is a solution)"
+        jahr_x, status = None, "annaeherung"
+    cooling = -np.einsum("yt,cy,cy->t", k, eta, x)
+    return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(),
+            "kuehlung_k": cooling.tolist(), "luecke_k": gap.tolist(), "jahr_x": jahr_x, "status": status,
+            "wachstum": growth, "stufe": stufe, "quantil": quantil}
