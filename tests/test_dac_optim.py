@@ -124,7 +124,7 @@ def test_main_case_closes_or_approaches(main_case):
     r = main_case
     assert r["status"] in ("geschlossen", "annaeherung")
     if r["status"] == "geschlossen":
-        i = r["jahre"].index(r["jahr_x"])
+        i = r["jahre"].index(r["ziel_jahr"])
         assert np.all(np.array(r["kuehlung_k"])[i:] >= np.array(r["luecke_k"])[i:] - 1e-9)
 
 
@@ -132,6 +132,33 @@ def test_slow_growth_still_returns():
     r = solve(growth=1.11)
     assert r["status"] in ("geschlossen", "annaeherung")
     assert np.all(np.isfinite(r["kuehlung_k"]))
+
+
+def test_mini_min_peak_spreads_removal_evenly():
+    # flat kernel, gap only in the last year: 9 mK at eta 0.9 needs 10 Gt in total, at best 1 Gt/a over 10 years
+    k, eta = _mini()
+    gap = np.zeros(10)
+    gap[-1] = 9e-3
+    ok, x = build_and_solve(eta[:1], k, gap, storage=np.array([50.0]), x_from=9, growth=10.0, start_2030=None,
+                            objective="min_peak")
+    assert ok
+    assert x.sum(axis=0).max() == pytest.approx(1.0, rel=1e-4)
+    assert x.sum() == pytest.approx(10.0, rel=1e-4)
+
+
+def test_main_case_reaches_target_with_least_capacity(main_case):
+    r = main_case
+    assert r["ziel_jahr"] == 2100 and r["status"] == "geschlossen"
+    tot = np.array(r["x"]).sum(axis=0)
+    assert r["kapazitaet_gt"] == pytest.approx(tot.max(), rel=1e-6)
+    assert 3.0 < r["kapazitaet_gt"] < 15.0
+
+
+def test_capacity_falls_with_later_target():
+    from nbs.dac_optim import capacity_by_target
+
+    c = capacity_by_target((2090, 2100))
+    assert c[0]["kapazitaet_gt"] > c[1]["kapazitaet_gt"]
 
 
 def test_export_file_is_complete():
@@ -144,3 +171,4 @@ def test_export_file_is_complete():
     assert len(h["fair_kuehlung_k"]) == 74
     assert np.isfinite(d["fair_abweichung_2100_rel"])
     assert set(d["sens"]) == {"wachstum_11", "technisch", "median"}
+    assert [c["ziel_jahr"] for c in d["ziel_kurve"]] == [2085, 2090, 2095, 2100]

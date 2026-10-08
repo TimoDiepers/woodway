@@ -9,8 +9,11 @@ the same chain as the trees) and the country's net efficiency eta[c, y] (nbs.dac
     sum_c x[c, t] <= GROWTH * sum_c x[c, t-1], t > 2030;  sum_c x[c, 2030] <= 0.0088
                                                                (Zurbriggen et al. 2026)
 
-Stage 1 finds the earliest X; stage 2 minimises total gross removal at that X. If no X <= 2100 is
-feasible, the closest approach minimises the summed shortfall instead.
+X is the target year (2100: the gap of slide 25 is closed at the end of the century, the overshoot before
+stays). Objective: the least DAC capacity -- the largest yearly removal, max_t sum_c x[c, t] -- and at that
+capacity the least total removal. Minimising only the total would bunch the removal into a few years of
+enormous capacity, because a tonne removed late cools slightly more by the target year. If the target
+cannot be met, the closest approach minimises the summed shortfall instead.
 """
 
 from __future__ import annotations
@@ -83,6 +86,8 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     """The LP on plain arrays. x is flattened country-major: x[c * n + y].
 
     objective "min_total": cooling >= gap for t >= x_from, minimise sum x.
+    objective "min_peak": cooling >= gap for t >= x_from, minimise the largest yearly world removal, then at
+    that peak (+1e-6 relative) minimise sum x.
     objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum s (x_from ignored).
     start_2030=None drops the 2026-2030 caps (unit tests); growth applies to every year after the
     first then.
@@ -128,43 +133,60 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
         for y in np.where(years <= 2030)[0]:
             row = np.zeros(nv); row[y:nx:n] = 1.0
             a.append(row[None, :]); b.append(np.array([START_2030_GT * (years[y] - 2025) / 5]))
+    A, B = np.vstack(a), np.concatenate(b)
+    if objective == "min_peak":
+        # one more variable P >= sum_c x[c, t] for every t; minimise P first
+        world = np.zeros((n, nv + 1))
+        for t in range(n):
+            world[t, t:nx:n] = 1.0
+            world[t, -1] = -1.0
+        A1 = np.vstack([np.hstack([A, np.zeros((A.shape[0], 1))]), world])
+        B1 = np.r_[B, np.zeros(n)]
+        res = linprog(np.r_[np.zeros(nv), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
+        if res.status != 0:
+            return False, None
+        peak = res.x[-1] * (1 + 1e-6) + 1e-12
+        A, B = np.vstack([A, world[:, :-1]]), np.r_[B, np.full(n, peak)]
     c_obj = np.r_[np.zeros(nx), np.ones(n)] if slack else np.r_[np.ones(nx), np.zeros(nv - nx)]
-    res = linprog(c_obj, A_ub=np.vstack(a), b_ub=np.concatenate(b), bounds=bounds, method="highs")
+    res = linprog(c_obj, A_ub=A, b_ub=B, bounds=bounds, method="highs")
     if res.status != 0:
         return False, None
     return True, res.x[:nx].reshape(n_c, n)
 
 
-def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9) -> dict:
-    """Stage 1: earliest year X from which the gap stays closed; stage 2: least total removal at X.
-    No feasible X: closest approach (least summed shortfall)."""
+TARGET_YEAR = 2100
+
+
+def _setup(stufe: str, quantil: float):
     from nbs.dac_storage import storage_by_country
 
     countries, eta = eta_by_country(quantil, stufe)
     store = storage_by_country(stufe)
-    storage = np.array([store[c] for c in countries])
+    return countries, eta, np.array([store[c] for c in countries])
+
+
+def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9, ziel_jahr: int = TARGET_YEAR) -> dict:
+    """Least DAC capacity (then least total) that closes the gap from *ziel_jahr* on; if impossible,
+    the closest approach (least summed shortfall)."""
+    countries, eta, storage = _setup(stufe, quantil)
     k, gap = removal_kernel_matrix(), gap_series()
-
-    def attempt(i):
-        return build_and_solve(eta, k, gap, storage, i, growth, years=YEARS)
-
-    lo, hi, best = 0, N_Y - 1, None
-    ok, x = attempt(hi)
-    if ok:
-        best = (hi, x)
-        while lo < hi:                       # feasibility is monotone in X: a later X drops constraints
-            mid = (lo + hi) // 2
-            ok, x = attempt(mid)
-            if ok:
-                hi, best = mid, (mid, x)
-            else:
-                lo = mid + 1
-        jahr_x, x, status = int(YEARS[best[0]]), best[1], "geschlossen"
-    else:
+    ok, x = build_and_solve(eta, k, gap, storage, int(ziel_jahr - YEARS[0]), growth, objective="min_peak", years=YEARS)
+    status = "geschlossen"
+    if not ok:
         ok, x = build_and_solve(eta, k, gap, storage, None, growth, objective="min_shortfall", years=YEARS)
         assert ok, "closest-approach LP must always be feasible (x = 0 is a solution)"
-        jahr_x, status = None, "annaeherung"
+        status = "annaeherung"
     cooling = -np.einsum("yt,cy,cy->t", k, eta, x)
     return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(),
-            "kuehlung_k": cooling.tolist(), "luecke_k": gap.tolist(), "jahr_x": jahr_x, "status": status,
-            "wachstum": growth, "stufe": stufe, "quantil": quantil}
+            "kuehlung_k": cooling.tolist(), "luecke_k": gap.tolist(), "ziel_jahr": int(ziel_jahr), "status": status,
+            "kapazitaet_gt": float(x.sum(axis=0).max()), "wachstum": growth, "stufe": stufe, "quantil": quantil}
+
+
+def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROWTH) -> list[dict]:
+    """Least capacity [Gt/a] and total [Gt] needed to hold 1.5 deg C from each target year on."""
+    out = []
+    for z in ziel_jahre:
+        r = solve(growth=growth, ziel_jahr=z)
+        out.append({"ziel_jahr": int(z), "status": r["status"], "kapazitaet_gt": r["kapazitaet_gt"],
+                    "summe_gt": float(np.sum(r["x"]))})
+    return out

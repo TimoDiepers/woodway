@@ -122,23 +122,28 @@ $$\eta_{Baum}(Zelle, Pflanzjahr) = \frac{\Delta T_{CO_2} + \Delta T_{Albedo}}{\D
 
 Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_gidden.py`, `scripts/dac_optim_export.py`; Ergebnis `data/dac/optim.json`.
 
-- **Frage:** Ab welchem Jahr X kann DAC die Lücke von Very Low zu 1,5 °C (nach Abzug der Bäume auf kühlenden Flächen, Folie 25) dauerhaft schließen, und mit welchem kleinsten Ausbau, wo und wann?
+- **Frage:** Wie viel DAC-Kapazität braucht es mindestens, wo und wann, damit die Lücke von Very Low zu 1,5 °C (nach Abzug der Bäume auf kühlenden Flächen, Folie 25) ab einem Zieljahr geschlossen ist? Hauptfall: Zieljahr 2100; der Overshoot davor bleibt.
 - **Variablen:** Brutto-Entnahme x[Land, Jahr] in Gt/a, 2026–2100.
-- **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100). Gegenprobe mit vollem FaIR: in 2099 kühlt der optimierte Pfad dort um 8,5 % stärker als im LP gerechnet. Die Linearisierung ist also leicht konservativ.
-- **η je Land:** Median der besten 10 % der DAC-tauglichen Zellen mit einem Sedimentbecken innerhalb von 100 km (Gidden-Raster). 148 Länder kommen in Frage.
+- **Zielfunktion:**
+  1. Kleinste Kapazität, also die größte Jahresentnahme weltweit.
+  2. Bei dieser Kapazität die kleinste Gesamtmenge.
+  - Die erste Fassung (2026-10-08) suchte das früheste Zieljahr und minimierte nur die Gesamtmenge. Weil eine späte Tonne zum Zieljahr etwas mehr kühlt, ballte sie die Entnahme in wenigen Jahren: bis 96 Gt/a im Jahr 2081, danach null.
+- **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100). Gegenprobe mit vollem FaIR: 2099 kühlt der optimierte Pfad um 4,7 % stärker als im LP gerechnet. Die Linearisierung ist also leicht konservativ.
+- **η je Land:** Median der besten 10 % der DAC-tauglichen Zellen mit einem Sedimentbecken innerhalb von 100 km (Gidden-Raster, bewertete und nicht bewertete Becken; 39 % der Gitterzellen). 148 Länder kommen in Frage.
 - **Speicher:** Gidden et al. 2025, prudent limit je Land (Welt 1 460 Gt; Deutschland 1,3, Norwegen 6,9, UK 8,9, Russland 244, USA 141 Gt). Kein Transport über Grenzen.
 - **Wachstum:** 8,8 Mt/a in 2030 (geplante Kapazität), danach ≤ +20 %/a (Wind-Analogie), beides Zurbriggen et al. 2026.
 - **Ergebnis Hauptfall:**
-  - Die Lücke ist ab **2082** dauerhaft geschlossen, mit 655 Gt Brutto-Entnahme.
-  - 2050 entnimmt DAC 0,34 Gt/a und kühlt um 0,5 mK, bei 309 mK Lücke.
-  - Die Entnahme verteilt sich auf OECD/EU 373 Gt, Naher Osten/Afrika 223 Gt und Asien 59 Gt.
-  - Nordeuropa (NOR, SWE, FIN, FRA, DEU, GBR) bekommt nur 3 %, weil dort der Speicher fehlt.
-  - Die Speicher der USA (141 Gt), Australiens (112 Gt) und Kanadas (70 Gt) werden voll genutzt.
-  - Wegen der Zielfunktion (kleinste Gesamtmenge) steigt die Entnahme bis rund 13 Gt/a um 2070 und fällt danach wieder ab. Das ist ein Mengenpfad, kein Anlagenbestand.
+  - Nötig sind **6,9 Gt/a**, erreicht 2067, und 271 Gt insgesamt.
+  - 2050 entnimmt DAC 0,34 Gt/a (Wachstumsgrenze) und kühlt um 0,5 mK, bei 309 mK Lücke. Der Overshoot bleibt bis in die 2090er; 2075 fehlen noch 181 mK.
+  - Die Entnahme liegt bei OECD/EU 159 Gt (USA 141, Norwegen 7, Australien 5) und Naher Osten/Afrika 113 Gt (Algerien 45, Libyen 43, Ägypten 17).
+  - Nordeuropa (NOR, SWE, FIN, FRA, DEU, GBR) bekommt 3 %, weil dort der Speicher fehlt.
+- **Kapazität nach Zieljahr:** 2085: 32 Gt/a (514 Gt); 2090: 17 Gt/a (409 Gt); 2095: 9,7 Gt/a (317 Gt); 2100: 6,9 Gt/a (271 Gt).
 - **Sensitivitäten:**
-  - 11 %/a (Ammoniak-Analogie): nicht schließbar, 2100 bleiben 50 mK von 87 mK übrig.
-  - Technisches Potenzial statt prudent limit: ebenfalls 2082 (650 Gt). Das Jahr X setzt das Wachstum, nicht der Speicher.
-  - Median statt bestes Dezil: 2082 (656 Gt).
+  - 11 %/a (Ammoniak-Analogie): 2100 nicht erreichbar, es bleiben 50 von 87 mK.
+  - Technisches Potenzial statt prudent limit: 6,9 Gt/a.
+  - Median statt bestes Dezil: 6,9 Gt/a.
+  - Die Kapazität bestimmt das Klima, nicht die Wahl der Orte.
+- **Einordnung:** 6,9 Gt/a liegen über den vorsichtigen Schätzungen (3–4 Gt/a, Chiquier et al. 2025) und im Bereich der optimistischen Modelle. Mit rund 1,5 MWh/t braucht das etwa 10 000 TWh Strom, ein Drittel der heutigen Weltstromerzeugung.
 - **Nicht enthalten:** Kosten, Strom- und Wasserverfügbarkeit, Injektionsraten je Becken, Anlagenlebensdauer, Basalt-Mineralisierung.
 
 ## Quellen

@@ -16,7 +16,7 @@ Erfolgskriterien:
 | Thema | Entscheidung |
 |---|---|
 | Zielgröße | Lücke(t) = Overshoot Very Low über 1,5 °C (Median, 7-Jahres-Mittel, `overshoot_series`) minus Kühlung der Bäume auf kühlenden Flächen (`area_series()["kuehlt"]`), für alle t ≥ X. DAC kommt zusätzlich zu den 335 Gt, die Very Low schon enthält (Notes). |
-| Zielfunktion | Stufe 1: kleinstes machbares X (Bisektion über ganze Jahre). Stufe 2: bei diesem X die Summe der Brutto-Entnahme minimieren. |
+| Zielfunktion | Zieljahr X = 2100 (fest). Stufe 1: kleinste Kapazität = größte weltweite Jahresentnahme. Stufe 2: bei dieser Kapazität die kleinste Gesamtmenge. Zusätzlich die nötige Kapazität für X = 2085/2090/2095/2100. (Geändert 2026-10-08: „frühestes X, kleinste Gesamtmenge“ ballte die Entnahme auf bis zu 96 Gt/a.) |
 | Räumliche Ebene | Länder (ISO3). Kein Transport über Landesgrenzen. |
 | η je Land und Jahr | Median der besten 10 % der Zellen, die DAC-tauglich (`dac_possible`) und speichernah sind, aus `efficiency_grid(year)` (Wärmepumpe, SSP2-NDC). |
 | speichernah | Sedimentbecken (onshore oder offshore, bewertet oder global) innerhalb von 100 km um den Zellmittelpunkt, aus dem Gidden-Raster. |
@@ -39,7 +39,7 @@ Nebenbedingungen:
 2. Speicher: Σ_y x[c, y] ≤ S[c] für alle c. Das Lager füllt sich mit der Brutto-Entnahme.
 3. Wachstum: Σ_c x[c, t] ≤ 1,2 · Σ_c x[c, t−1] für t > 2030; Σ_c x[c, 2030] ≤ 0,0088; für 2026–2029 Obergrenze 0,0088 · (y − 2025)/5.
 
-Ziel (Stufe 2): min Σ_c Σ_y x[c, y].
+Ziel: min P mit P ≥ Σ_c x[c, t] für alle t; danach bei P die Summe Σ_c Σ_y x[c, y] minimieren.
 
 Ist kein X ≤ 2100 machbar, löst ein Ersatzproblem die bestmögliche Annäherung: min Σ_t max(0, Lücke(t) − Kühlung(t)) über 2026–2100, mit den Nebenbedingungen 2 und 3. Die Folie zeigt dann diese Annäherung; das ist die Aussage.
 
