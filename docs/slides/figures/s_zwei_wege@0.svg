@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1424 600" aria-label="Der Baum holt CO₂ seit Jahrmillionen von selbst aus der Luft; Ingenieure bauen dafür eine Maschine mit Gebläsen, Wärme, Strom und Speicher. Braucht es die?" xmlns="http://www.w3.org/2000/svg" width="1424" height="600">
+      <defs><marker id="ah-zw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        <!-- the tree: there already, by itself -->
+        <g>
+          <g stroke="#d9a441" stroke-width="4" stroke-linecap="round">
+            <line x1="80" y1="34" x2="80" y2="48"/><line x1="80" y1="132" x2="80" y2="146"/><line x1="24" y1="90" x2="38" y2="90"/><line x1="122" y1="90" x2="136" y2="90"/>
+            <line x1="41" y1="51" x2="51" y2="61"/><line x1="109" y1="119" x2="119" y2="129"/><line x1="41" y1="129" x2="51" y2="119"/><line x1="109" y1="61" x2="119" y2="51"/>
+          </g>
+          <circle cx="80" cy="90" r="30" fill="#e8b84f"/>
+          <path d="M0 470 C 90 410 300 396 420 430 L420 470Z" fill="#cbd6b4"/>
+          <rect x="300" y="300" width="14" height="118" fill="#3b3024"/>
+          <circle cx="307" cy="270" r="54" fill="#8ea477"/><circle cx="276" cy="306" r="37" fill="#a9bc8f"/><circle cx="339" cy="308" r="35" fill="#7f9c64"/>
+          <rect x="178" y="214" width="24" height="210" fill="#3b3024"/>
+          <circle cx="190" cy="154" r="96" fill="#6f8f55"/><circle cx="135" cy="224" r="66" fill="#7f9c64"/><circle cx="248" cy="228" r="62" fill="#5f7f48"/>
+          <text x="440" y="150" font-size="16" letter-spacing="1.5" fill="rgb(93,102,95)">DIE NATUR</text>
+          <text x="440" y="198" font-family="Georgia" font-size="38" font-weight="bold" fill="rgb(61,85,45)">Der Baum</text>
+          <text x="440" y="252" font-size="23" fill="rgb(27,36,32)">seit Jahrmillionen</text>
+          <text x="440" y="288" font-size="23" fill="rgb(27,36,32)">mit Sonnenlicht</text>
+          <text x="440" y="324" font-size="23" fill="rgb(27,36,32)">wächst von selbst</text>
+        </g>
+        
+        <!-- the machine: built, powered, complicated -->
+        
+        <!-- the question -->
+        
+      </g>
+    </svg>

@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1424 470" aria-label="Sorbens-DAC in drei Schritten und sein Energiebedarf je Tonne CO₂" xmlns="http://www.w3.org/2000/svg" width="1424" height="470">
+      <defs><marker id="ah-dp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        <!-- 1 Ansaugen -->
+        <g>
+          <rect x="40" y="60" width="210" height="140" rx="10" fill="rgb(231,224,208)" stroke="rgb(30,83,109)" stroke-width="3"/>
+          <circle cx="90" cy="130" r="30" fill="rgb(30,83,109)"/>
+          <path d="M90 108 V152 M68 130 H112" stroke="rgb(231,224,208)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="140" y="72" width="60" height="116" fill="#d8cfbb"/>
+          <path d="M150 72 V188 M160 72 V188 M170 72 V188 M180 72 V188 M190 72 V188" stroke="#b8ab8e" stroke-width="2"/>
+          <g fill="rgb(46,125,79)"><circle cx="146" cy="92" r="6"/><circle cx="168" cy="120" r="6"/><circle cx="152" cy="150" r="6"/><circle cx="186" cy="104" r="6"/><circle cx="176" cy="168" r="6"/></g>
+          <path d="M2 110 H36 M2 150 H36" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
+          <path d="M226 56 V22" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
+          <text x="240" y="24" font-size="18" fill="rgb(93,102,95)">Luft ohne CO₂</text>
+          <circle cx="24" cy="272" r="20" fill="rgb(30,83,109)"/><text x="24" y="280" text-anchor="middle" font-size="22" font-weight="bold" fill="rgb(242,237,226)">1</text>
+          <text x="56" y="281" font-size="26" font-weight="bold" fill="rgb(27,36,32)">Ansaugen</text>
+          <text x="4" y="326" font-size="20" fill="rgb(63,74,68)">Gebläse drücken Luft durch</text>
+          <text x="4" y="354" font-size="20" fill="rgb(63,74,68)">ein Sorbens (Amin). Das CO₂</text>
+          <text x="4" y="382" font-size="20" fill="rgb(63,74,68)">bleibt daran haften.</text>
+          <rect x="4" y="408" width="90" height="38" rx="19" fill="rgb(157,191,207)"/><text x="49" y="434" text-anchor="middle" font-size="19" fill="rgb(27,36,32)">Strom</text>
+        </g>
+        
+        <!-- 2 Ablösen -->
+        
+        
+        <!-- 3 Speichern -->
+        
+        <!-- Energie je Tonne -->
+        
+      </g>
+    </svg>

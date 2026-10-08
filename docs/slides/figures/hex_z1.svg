@@ -1,0 +1,109 @@
+<svg width="1600" height="680" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 1600 680">
+<rect width="1600" height="680" x="0" y="0" fill="none"></rect>
+<path d="M128 591.5L1280 591.5" fill="none" stroke="#d9d2c4" stroke-width="1.4833333333333334" class="zr29-cls-2362"></path>
+<path d="M128 471.5L1280 471.5" fill="none" stroke="#d9d2c4" stroke-width="1.4833333333333334" class="zr29-cls-2362"></path>
+<path d="M128 352.5L1280 352.5" fill="none" stroke="#d9d2c4" stroke-width="1.4833333333333334" class="zr29-cls-2362"></path>
+<path d="M128 232.5L1280 232.5" fill="none" stroke="#d9d2c4" stroke-width="1.4833333333333334" class="zr29-cls-2362"></path>
+<path d="M128 112.5L1280 112.5" fill="none" stroke="#d9d2c4" stroke-width="1.4833333333333334" class="zr29-cls-2362"></path>
+<path d="M128.5 591.6L128.5 54.4" fill="none" stroke="#5f6b66" stroke-linecap="round" class="zr29-cls-2362"></path>
+<path d="M128 591.5L1280 591.5" fill="none" stroke="#5f6b66" stroke-linecap="round" class="zr29-cls-2362"></path>
+<path d="M128 591.5L123.8333 591.5" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M128 471.5L123.8333 471.5" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M128 352.5L123.8333 352.5" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M128 232.5L123.8333 232.5" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M128 112.5L123.8333 112.5" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M128.5 591.6L128.5 595.7667" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M512.5 591.6L512.5 595.7667" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M896.5 591.6L896.5 595.7667" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<path d="M1280.5 591.6L1280.5 595.7667" fill="none" stroke="#5f6b66" class="zr29-cls-2362"></path>
+<text text-anchor="end" transform="translate(122.1667 591.6)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">0</text>
+<text text-anchor="end" xml:space="preserve" transform="translate(122.1667 471.6893)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">25 %</text>
+<text text-anchor="end" xml:space="preserve" transform="translate(122.1667 351.7786)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">50 %</text>
+<text text-anchor="end" xml:space="preserve" transform="translate(122.1667 231.8679)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">75 %</text>
+<text text-anchor="end" xml:space="preserve" transform="translate(122.1667 111.9571)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">100 %</text>
+<text text-anchor="middle" y="12.191452026367188" transform="translate(128 597.4333)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">2025</text>
+<text text-anchor="middle" y="12.191452026367188" transform="translate(512 597.4333)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">2050</text>
+<text text-anchor="middle" y="12.191452026367188" transform="translate(896 597.4333)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">2075</text>
+<text text-anchor="middle" y="12.191452026367188" transform="translate(1280 597.4333)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">2100</text>
+<g clip-path="url(#zr29-c0)">
+<path d="M128 111.9571L1280 111.9571" fill="none" stroke="#01a8a8" stroke-width="5.558333333333334" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<g clip-path="url(#zr29-c1)">
+<path d="M128 590.6407L143.36 588.0027L158.72 583.8777L174.08 578.4099L189.44 571.8387L204.8 564.3563L220.16 556.0105L235.52 546.9932L250.88 537.4483L266.24 527.4238L281.6 517.0156L296.96 506.3195L312.32 495.4316L327.68 484.3519L343.04 473.2242L358.4 462.0485L373.76 450.8728L389.12 439.7451L404.48 428.7133L419.84 417.7774L435.2 406.9375L450.56 396.2894L465.92 385.8332L481.28 375.5209L496.64 365.4484L512 355.5677L527.36 345.879L542.72 336.43L558.08 327.2688L573.44 318.2995L588.8 309.57L604.16 301.0803L619.52 292.8305L634.88 284.8204L650.24 277.0502L665.6 269.5198L680.96 262.2292L696.32 255.1785L711.68 248.3676L727.04 241.7485L742.4 235.3213L757.76 229.1339L773.12 223.1863L788.48 217.4306L803.84 211.8667L819.2 206.4948L834.56 201.3146L849.92 196.3263L865.28 191.4819L880.64 186.8294L896 182.3687L911.36 178.0519L926.72 173.927L942.08 169.898L957.44 166.0609L972.8 162.3676L988.16 158.7703L1003.52 155.3648L1018.88 152.0553L1034.24 148.8896L1049.6 145.8199L1064.96 142.8941L1080.3199 140.0642L1095.6801 137.3302L1111.04 134.7402L1126.4 132.246L1141.76 129.7999L1157.12 127.4976L1172.48 125.2912L1187.84 123.1328L1203.2 121.0704L1218.5601 119.1038L1233.92 117.2332L1249.28 115.4106L1264.64 113.6359L1280 111.9571" fill="none" stroke="#2f6fb7" stroke-width="4.816666666666667" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<g clip-path="url(#zr29-c2)">
+<path d="M128 590.5928L143.36 587.7149L158.72 583.3022L174.08 577.4506L189.44 570.4478L204.8 562.4857L220.16 553.6603L235.52 544.1154L250.88 534.0428L266.24 523.4907L281.6 512.6028L296.96 501.4272L312.32 490.0596L327.68 478.5961L343.04 467.0367L358.4 455.4774L373.76 443.9659L389.12 432.5504L404.48 421.2309L419.84 410.0072L435.2 398.9754L450.56 388.1355L465.92 377.5354L481.28 367.1271L496.64 356.9107L512 346.9821L527.36 337.2934L542.72 327.8444L558.08 318.6353L573.44 309.7139L588.8 301.0323L604.16 292.6386L619.52 284.4847L634.88 276.5706L650.24 268.9442L665.6 261.5098L680.96 254.3631L696.32 247.4563L711.68 240.7892L727.04 234.362L742.4 228.1746L757.76 222.1791L773.12 216.4234L788.48 210.8595L803.84 205.4875L819.2 200.3553L834.56 195.367L849.92 190.6186L865.28 186.014L880.64 181.6013L896 177.3325L911.36 173.2555L926.72 169.3224L942.08 165.5812L957.44 161.9359L972.8 158.4825L988.16 155.125L1003.52 151.9114L1018.88 148.8417L1034.24 145.8679L1049.6 143.038L1064.96 140.304L1080.3199 137.666L1095.6801 135.1719L1111.04 132.7736L1126.4 130.4714L1141.76 128.217L1157.12 126.1066L1172.48 124.0921L1187.84 122.1256L1203.2 120.255L1218.5601 118.4323L1233.92 116.7056L1249.28 115.0748L1264.64 113.492L1280 111.9571" fill="none" stroke="#b8357f" stroke-width="4.816666666666667" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<g clip-path="url(#zr29-c3)">
+<path d="M128 590.5928L143.36 587.7149L158.72 583.2062L174.08 577.3546L189.44 570.3038L204.8 562.2458L220.16 553.3724L235.52 543.7316L250.88 533.5632L266.24 522.9152L281.6 511.9313L296.96 500.6118L312.32 489.1483L327.68 477.5409L343.04 465.8856L358.4 454.2303L373.76 442.575L389.12 431.0156L404.48 419.5521L419.84 408.2805L435.2 397.1528L450.56 386.169L465.92 375.4729L481.28 364.9208L496.64 354.6564L512 344.6319L527.36 334.8472L542.72 325.3503L558.08 316.0931L573.44 307.1238L588.8 298.3943L604.16 289.9526L619.52 281.7507L634.88 273.8366L650.24 266.1623L665.6 258.7758L680.96 251.6292L696.32 244.7223L711.68 238.0553L727.04 231.628L742.4 225.4406L757.76 219.4931L773.12 213.7374L788.48 208.2215L803.84 202.8974L819.2 197.8132L834.56 192.9209L849.92 188.1724L865.28 183.6638L880.64 179.299L896 175.1261L911.36 171.0971L926.72 167.26L942.08 163.5667L957.44 160.0174L972.8 156.6119L988.16 153.3503L1003.52 150.2326L1018.88 147.2589L1034.24 144.381L1049.6 141.5991L1064.96 138.961L1080.3199 136.4669L1095.6801 134.0207L1111.04 131.7184L1126.4 129.5121L1141.76 127.4016L1157.12 125.3392L1172.48 123.4206L1187.84 121.55L1203.2 119.7753L1218.5601 118.0486L1233.92 116.4178L1249.28 114.883L1264.64 113.3961L1280 111.9571" fill="none" stroke="#6a4c9c" stroke-width="4.816666666666667" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<g clip-path="url(#zr29-c4)">
+<path d="M281.6 591.6L281.6 517.0156" fill="none" stroke="#5f6b66" stroke-width="1.8500000000000003" stroke-dasharray="7.416666666666667,5.583333333333334" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<g clip-path="url(#zr29-c5)">
+<path d="M512 591.6L512 355.5677" fill="none" stroke="#5f6b66" stroke-width="1.8500000000000003" stroke-dasharray="7.416666666666667,5.583333333333334" stroke-linecap="round" stroke-linejoin="bevel" class="zr29-cls-2364"></path>
+</g>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(7.408,0,0,7.408,281.6,517.0155)" fill="#1a2320" fill-opacity="0.8" stroke="#ffffff" stroke-width="0.374578177727784" stroke-opacity="0.8" class="zr29-cls-2365"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(7.408,0,0,7.408,512,355.5678)" fill="#1a2320" fill-opacity="0.8" stroke="#ffffff" stroke-width="0.374578177727784" stroke-opacity="0.8" class="zr29-cls-2365"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,143.36,86.656)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,1294.8149,111.9571)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,1294.8149,131.1429)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,1294.8149,150.3286)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,296.4149,535.242)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.0001" transform="matrix(0,0,0,0,526.8149,373.7846)" fill="#5070dd" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<path d="M0 -13.6585l638.8516 0l0 27.317l-638.8516 0Z" transform="translate(143.36 86.656)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(143.36 86.656)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em" fill="none">DAC: die Tonne zählt ab dem Jahr, in dem die Anlage läuft</text><text text-anchor="start" xml:space="preserve" transform="translate(143.36 86.656)" fill="#01a8a8" fill-opacity="0.8" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em">DAC: die Tonne zählt ab dem Jahr, in dem die Anlage läuft</text>
+<path d="M0 -13.1127l132.1048 0l0 26.2255l-132.1048 0Z" transform="translate(1294.8149 111.9571)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 111.9571)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em" fill="none">Aachen (DE)</text><text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 111.9571)" fill="#2f6fb7" fill-opacity="0.8" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em">Aachen (DE)</text>
+<path d="M0 -13.1127l132.0831 0l0 26.2255l-132.0831 0Z" transform="translate(1294.8149 131.1429)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 131.1429)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em" fill="none">Joensuu (FI)</text><text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 131.1429)" fill="#b8357f" fill-opacity="0.8" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em">Joensuu (FI)</text>
+<path d="M0 -13.1127l130.8679 0l0 26.2255l-130.8679 0Z" transform="translate(1294.8149 150.3286)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 150.3286)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em" fill="none">Marabá (BR)</text><text text-anchor="start" xml:space="preserve" transform="translate(1294.8149 150.3286)" fill="#6a4c9c" fill-opacity="0.8" font-family="Arial" font-size="22.23" font-weight="bold" dy="0.35em">Marabá (BR)</text>
+<path d="M0 -13.6585l118.4063 0l0 27.317l-118.4063 0Z" transform="translate(296.4149 535.242)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(296.4149 535.242)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em" fill="none">2035: 16 %</text><text text-anchor="start" xml:space="preserve" transform="translate(296.4149 535.242)" fill="#1a2320" fill-opacity="0.8" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em">2035: 16 %</text>
+<path d="M0 -13.6585l118.4063 0l0 27.317l-118.4063 0Z" transform="translate(526.8149 373.7846)" fill="none" fill-opacity="0.8" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(526.8149 373.7846)" stroke="rgb(242,237,226)" stroke-width="2.666666666666667" stroke-opacity="0.7360000000000001" stroke-miterlimit="2" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em" fill="none">2050: 49 %</text><text text-anchor="start" xml:space="preserve" transform="translate(526.8149 373.7846)" fill="#1a2320" fill-opacity="0.8" font-family="Arial" font-size="23.15" font-weight="bold" dy="0.35em">2050: 49 %</text>
+<path d="M0 -14.2042l832.2715 0l0 28.4085l-832.2715 0Z" transform="translate(128 36.6248)" fill="none" class="zr29-cls-2362"></path>
+<text text-anchor="start" xml:space="preserve" transform="translate(128 36.6248)" fill="#1a2320" font-family="Arial" font-size="24.08" dy="0.35em">Baum gepflanzt 2025: wie viel seiner Entnahme bis 2100 schon geschehen ist</text>
+<path d="M-245.5303 -14.2042l491.0606 0l0 28.4085l-491.0606 0Z" transform="matrix(0,-1,1,0,27.632,323)" fill="none" class="zr29-cls-2362"></path>
+<text text-anchor="middle" xml:space="preserve" transform="matrix(0,-1,1,0,27.632,323)" fill="#5f6b66" font-family="Arial" font-size="24.08" dy="0.35em">schon entnommen, Anteil der Menge bis 2100</text>
+<defs >
+<clipPath id="zr29-c0">
+<path d="M125 51.6208l1159 0l0 542.7583l-1159 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+<clipPath id="zr29-c1">
+<path d="M125 51.9917l1158 0l0 542.0167l-1158 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+<clipPath id="zr29-c2">
+<path d="M125 51.9917l1158 0l0 542.0167l-1158 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+<clipPath id="zr29-c3">
+<path d="M125 51.9917l1158 0l0 542.0167l-1158 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+<clipPath id="zr29-c4">
+<path d="M127 53.475l1155 0l0 539.05l-1155 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+<clipPath id="zr29-c5">
+<path d="M127 53.475l1155 0l0 539.05l-1155 0Z" fill="#000" class="zr29-cls-2363"></path>
+</clipPath>
+</defs>
+<style ><![CDATA[
+.zr29-cls-2362:hover {
+pointer-events:none;
+}
+.zr29-cls-2363:hover {
+cursor:pointer;
+fill:rgba(0,0,0,1);
+}
+.zr29-cls-2364:hover {
+cursor:pointer;
+}
+.zr29-cls-2365:hover {
+cursor:pointer;
+fill:rgba(28,38,35,1);
+}
+
+]]>
+
+</style>
+</svg>

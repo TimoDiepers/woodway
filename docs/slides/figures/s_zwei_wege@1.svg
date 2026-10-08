@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1424 600" aria-label="Der Baum holt CO₂ seit Jahrmillionen von selbst aus der Luft; Ingenieure bauen dafür eine Maschine mit Gebläsen, Wärme, Strom und Speicher. Braucht es die?" xmlns="http://www.w3.org/2000/svg" width="1424" height="600">
+      <defs><marker id="ah-zw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        <!-- the tree: there already, by itself -->
+        
+        <line x1="742" y1="40" x2="742" y2="440" stroke="rgb(214,204,182)" stroke-width="2"/>
+        <!-- the machine: built, powered, complicated -->
+        <g>
+          <rect x="780" y="430" width="380" height="40" fill="#d9cfb9"/>
+          <path d="M780 450 H1160" stroke="#c3b79c" stroke-width="2"/>
+          <line x1="780" y1="430" x2="1160" y2="430" stroke="#8c7a58" stroke-width="3" stroke-linecap="round"/>
+          <rect x="912" y="330" width="30" height="100" fill="#5d665f"/>
+          <rect x="800" y="220" width="200" height="110" rx="10" fill="rgb(30,83,109)"/>
+          <g fill="rgb(242,237,226)"><circle cx="840" cy="275" r="26"/><circle cx="900" cy="275" r="26"/><circle cx="960" cy="275" r="26"/></g>
+          <g stroke="rgb(30,83,109)" stroke-width="4" stroke-linecap="round"><path d="M840 256 V294 M821 275 H859"/><path d="M900 256 V294 M881 275 H919"/><path d="M960 256 V294 M941 275 H979"/></g>
+          <g stroke="rgb(200,100,26)" stroke-width="3.5" fill="none" stroke-linecap="round">
+            <path d="M826 370 q7 -7 0 -14 q-7 -7 0 -14"/><path d="M856 370 q7 -7 0 -14 q-7 -7 0 -14"/><path d="M886 370 q7 -7 0 -14 q-7 -7 0 -14"/>
+          </g>
+          <path d="M1000 300 H1060 V346" stroke="#5d665f" stroke-width="8" fill="none"/>
+          <rect x="1036" y="346" width="58" height="44" rx="6" fill="#5d665f"/>
+          <path d="M1065 390 V466" stroke="#5d665f" stroke-width="8"/>
+          <path d="M1036 126 L1020 160 H1036 L1022 194 L1056 150 H1040 L1052 126Z" fill="#d9a441"/>
+          <path d="M1036 196 L1004 222" stroke="#d9a441" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>
+          <g font-size="17" fill="rgb(93,102,95)">
+            <text x="800" y="206">Gebläse</text>
+            <text x="1064" y="160">Strom</text>
+            <text x="1100" y="380">Verdichter</text>
+            <text x="796" y="398">Dampf, 100 °C</text>
+            <text x="1080" y="498" text-anchor="middle">Speicher im Gestein</text>
+          </g>
+          <text x="1168" y="150" font-size="16" letter-spacing="1.5" fill="rgb(93,102,95)">INGENIEURE</text>
+          <text x="1168" y="198" font-family="Georgia" font-size="38" font-weight="bold" fill="rgb(30,83,109)">Die Maschine</text>
+          <text x="1168" y="252" font-size="23" fill="rgb(27,36,32)">Direct Air Capture</text>
+          <text x="1168" y="288" font-size="23" fill="rgb(27,36,32)">braucht Energie</text>
+          <text x="1168" y="324" font-size="23" fill="rgb(27,36,32)">muss gebaut werden</text>
+        </g>
+        <!-- the question -->
+        
+      </g>
+    </svg>

@@ -1,0 +1,16 @@
+<svg viewBox="0 0 1424 470" aria-label="Rechenweg: Wetter und Prozessmodell ergeben den Strom je Tonne; mit dem Strommix rechnet die Ökobilanz daraus die Emissionen; daraus der Netto-Wirkungsgrad" xmlns="http://www.w3.org/2000/svg" width="1424" height="470">
+      <defs><marker id="ah-dr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        
+        
+        <g>
+          <path d="M1064 312 H1112" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dr)"/>
+          <rect x="1120" y="234" width="300" height="156" rx="10" fill="rgb(30,83,109)"/>
+          <text x="1138" y="272" font-size="23" font-weight="bold" fill="rgb(242,237,226)">Netto-Wirkungsgrad</text>
+          <text x="1138" y="310" font-size="21" fill="rgb(242,237,226)">η = 1 − Emissionen je</text>
+          <text x="1138" y="338" font-size="21" fill="rgb(242,237,226)">entnommener Tonne</text>
+          <text x="1138" y="370" font-size="17" fill="rgb(157,191,207)">je Zelle und Jahr</text>
+        </g>
+        
+      </g>
+    </svg>

@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1424 470" aria-label="Rechenweg: Wetter und Prozessmodell ergeben den Strom je Tonne; mit dem Strommix rechnet die Ökobilanz daraus die Emissionen; daraus der Netto-Wirkungsgrad" xmlns="http://www.w3.org/2000/svg" width="1424" height="470">
+      <defs><marker id="ah-dr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        <g>
+          <text x="0" y="104" font-family="Georgia" font-size="28" font-weight="bold" fill="rgb(30,83,109)">je Ort</text>
+          <text x="0" y="132" font-size="18" fill="rgb(93,102,95)">0,5°-Zelle</text>
+          <rect x="150" y="50" width="270" height="124" rx="10" fill="rgb(231,224,208)" stroke="rgb(214,204,182)" stroke-width="2"/>
+          <text x="168" y="86" font-size="23" font-weight="bold" fill="rgb(27,36,32)">Wetter</text>
+          <text x="168" y="116" font-size="18" fill="rgb(63,74,68)">Temperatur und Feuchte</text>
+          <text x="168" y="142" font-size="17" fill="rgb(93,102,95)">CRU TS 4.09, Mittel 2011–2020</text>
+          <path d="M424 112 H462" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dr)"/>
+          <rect x="470" y="50" width="270" height="124" rx="10" fill="rgb(231,224,208)" stroke="rgb(214,204,182)" stroke-width="2"/>
+          <text x="488" y="86" font-size="23" font-weight="bold" fill="rgb(27,36,32)">Prozessmodell</text>
+          <text x="488" y="116" font-size="18" fill="rgb(63,74,68)">Wärmebedarf, Wärmepumpe</text>
+          <text x="488" y="142" font-size="17" fill="rgb(93,102,95)">Sendi et al. 2022</text>
+          <path d="M744 112 H782" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dr)"/>
+          <rect x="790" y="50" width="270" height="124" rx="10" fill="rgb(231,224,208)" stroke="rgb(214,204,182)" stroke-width="2"/>
+          <text x="808" y="86" font-size="23" font-weight="bold" fill="rgb(27,36,32)">Strom je Tonne</text>
+          <text x="808" y="116" font-size="18" fill="rgb(63,74,68)">1,1 bis 1,9 MWh</text>
+          <text x="808" y="142" font-size="17" fill="rgb(93,102,95)">Karte auf der nächsten Folie</text>
+        </g>
+        
+        
+        
+      </g>
+    </svg>

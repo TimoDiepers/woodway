@@ -1,0 +1,13 @@
+<svg viewBox="0 0 1424 470" aria-label="Rechenweg: Wetter und Prozessmodell ergeben den Strom je Tonne; mit dem Strommix rechnet die Ökobilanz daraus die Emissionen; daraus der Netto-Wirkungsgrad" xmlns="http://www.w3.org/2000/svg" width="1424" height="470">
+      <defs><marker id="ah-dr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        
+        
+        
+        <g>
+          <rect x="1120" y="64" width="300" height="96" rx="10" fill="none" stroke="rgb(61,85,45)" stroke-width="3"/>
+          <text x="1138" y="100" font-size="20" font-weight="bold" fill="rgb(61,85,45)">zum Vergleich: Baum</text>
+          <text x="1138" y="134" font-size="20" fill="rgb(61,85,45)">η = 1 − Albedo-Offset</text>
+        </g>
+      </g>
+    </svg>

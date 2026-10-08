@@ -1,0 +1,24 @@
+<svg viewBox="0 0 1424 470" aria-label="Rechenweg: Wetter und Prozessmodell ergeben den Strom je Tonne; mit dem Strommix rechnet die Ökobilanz daraus die Emissionen; daraus der Netto-Wirkungsgrad" xmlns="http://www.w3.org/2000/svg" width="1424" height="470">
+      <defs><marker id="ah-dr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        
+        <g>
+          <text x="0" y="304" font-family="Georgia" font-size="28" font-weight="bold" fill="rgb(30,83,109)">je Jahr</text>
+          <text x="0" y="332" font-size="18" fill="rgb(93,102,95)">2025 bis 2100</text>
+          <rect x="150" y="250" width="270" height="124" rx="10" fill="rgb(231,224,208)" stroke="rgb(214,204,182)" stroke-width="2"/>
+          <text x="168" y="286" font-size="23" font-weight="bold" fill="rgb(27,36,32)">Strommix</text>
+          <text x="168" y="316" font-size="18" fill="rgb(63,74,68)">je Region, Jahr für Jahr</text>
+          <text x="168" y="342" font-size="17" fill="rgb(93,102,95)">REMIND-EU, SSP2-NDC</text>
+          <path d="M424 312 H782" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dr)"/>
+          <text x="603" y="300" text-anchor="middle" font-size="17" fill="rgb(93,102,95)">Emissionen je kWh</text>
+          <path d="M925 178 V242" stroke="rgb(93,102,95)" stroke-width="3" fill="none" marker-end="url(#ah-dr)"/>
+          <rect x="790" y="250" width="270" height="124" rx="10" fill="rgb(231,224,208)" stroke="rgb(214,204,182)" stroke-width="2"/>
+          <text x="808" y="286" font-size="23" font-weight="bold" fill="rgb(27,36,32)">Ökobilanz</text>
+          <text x="808" y="314" font-size="18" fill="rgb(63,74,68)">Strom × Emissionen je kWh</text>
+          <text x="808" y="338" font-size="18" fill="rgb(63,74,68)">+ Anlage, Sorbens, Lager</text>
+          <text x="808" y="362" font-size="17" fill="rgb(93,102,95)">premise, ecoinvent 3.12</text>
+        </g>
+        
+        
+      </g>
+    </svg>

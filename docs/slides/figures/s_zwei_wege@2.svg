@@ -1,0 +1,12 @@
+<svg viewBox="0 0 1424 600" aria-label="Der Baum holt CO₂ seit Jahrmillionen von selbst aus der Luft; Ingenieure bauen dafür eine Maschine mit Gebläsen, Wärme, Strom und Speicher. Braucht es die?" xmlns="http://www.w3.org/2000/svg" width="1424" height="600">
+      <defs><marker id="ah-zw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="rgb(93,102,95)"/></marker></defs>
+      <g font-family="Arial">
+        <!-- the tree: there already, by itself -->
+        
+        
+        <!-- the machine: built, powered, complicated -->
+        
+        <!-- the question -->
+        <text x="712" y="574" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="46" fill="rgb(110,61,58)">Braucht es die Maschine überhaupt?</text>
+      </g>
+    </svg>
