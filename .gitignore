@@ -12,3 +12,13 @@ docs/slides/dissvortrag_backup.pptx
 
 # Rohdaten der Rasterschicht
 data/raw/
+
+# Zeitgestempelte Sicherungen vor Folien-Umbauten und Kopien der pptx
+docs/slides/workspace/dissvortrag_v2_vor_*.pptx
+docs/slides/* copy*.pptx
+docs/slides/*_backup_*.pptx
+
+# Laufzeit-Ausgaben von premise / brightway
+export/
+unlinked.log
+missing_classifications.csv
