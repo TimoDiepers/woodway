@@ -9,7 +9,8 @@ Nature 645, 124-132; data Zenodo 10.5281/zenodo.18343187 (CC-BY 4.0).
   not), 15 = outside. A 0.5 deg cell counts as near storage when a basin pixel lies within
   RADIUS_KM of its centre.
 
-Not included: basalt mineralisation (Iceland = 0), injection-rate limits per basin.
+Not included: basalt mineralisation (Iceland: only 7 Mt of sedimentary storage), injection-rate limits per basin.
+Countries without a grid cell (e.g. the Caspian Sea entry XCA, 14.9 Gt; Malta; Bahrain) drop out downstream.
 """
 
 from __future__ import annotations
@@ -42,8 +43,8 @@ def derive_table(xlsx: Path) -> dict:
         iso = row[0]
         if not (isinstance(iso, str) and len(iso) == 3 and iso.isupper()):
             continue  # skips the "Total" / "Final Total" rows and blank lines
-        out[iso] = {"region": str(row[2])} | {k: float(pd.to_numeric(row[c], errors="coerce") or 0.0)
-                                               for k, c in _LEVELS.items()}
+        out[iso] = {"region": str(row[2])} | {k: float(np.nan_to_num(pd.to_numeric(row[c], errors="coerce")))
+                                               for k, c in _LEVELS.items()}  # blank cell -> 0
     return out
 
 

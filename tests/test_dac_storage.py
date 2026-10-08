@@ -52,3 +52,17 @@ def test_iso3_grid_matches_known_places():
     assert _at(g, 51.0, 10.0) == "DEU"
     assert _at(g, 60.0, 90.0) == "RUS"
     assert _at(g, 0.0, -30.0) == ""
+
+
+def test_blank_cell_reads_as_zero(tmp_path):
+    import pandas as pd
+
+    from nbs.dac_storage import derive_table
+
+    rows = [[None] * 12] * 3 + [["AAA", "Testland", "R5ASIA", 1.0, 2.0, 3.0, None, 0.5, None, 0.0, 0.1, 0.1]]
+    f = tmp_path / "s.xlsx"
+    with pd.ExcelWriter(f) as w:
+        pd.DataFrame(rows).to_excel(w, sheet_name="S5", header=False, index=False)
+    t = derive_table(f)
+    assert t["AAA"]["technisch"] == 3.0
+    assert t["AAA"]["prudent"] == 0.0

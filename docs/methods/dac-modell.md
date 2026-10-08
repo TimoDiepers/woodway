@@ -122,27 +122,43 @@ $$\eta_{Baum}(Zelle, Pflanzjahr) = \frac{\Delta T_{CO_2} + \Delta T_{Albedo}}{\D
 
 Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_gidden.py`, `scripts/dac_optim_export.py`; Ergebnis `data/dac/optim.json`.
 
-- **Frage:** Wie viel DAC-Kapazität braucht es mindestens, wo und wann, damit die Lücke von Very Low zu 1,5 °C (nach Abzug der Bäume auf kühlenden Flächen, Folie 25) ab einem Zieljahr geschlossen ist? Hauptfall: Zieljahr 2100; der Overshoot davor bleibt.
+- **Frage:** Wie viel DAC-Kapazität braucht es mindestens, wo und wann, damit Very Low 2100 bei 1,5 °C liegt?
+  - Dafür muss DAC 2100 zusätzlich zu den Bäumen auf kühlenden Flächen 87 mK kühlen (Folie 25).
+  - Der Overshoot davor bleibt.
 - **Variablen:** Brutto-Entnahme x[Land, Jahr] in Gt/a, 2026–2100.
 - **Zielfunktion:**
   1. Kleinste Kapazität, also die größte Jahresentnahme weltweit.
   2. Bei dieser Kapazität die kleinste Gesamtmenge.
-  - Die erste Fassung (2026-10-08) suchte das früheste Zieljahr und minimierte nur die Gesamtmenge. Weil eine späte Tonne zum Zieljahr etwas mehr kühlt, ballte sie die Entnahme in wenigen Jahren: bis 96 Gt/a im Jahr 2081, danach null.
-- **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100). Gegenprobe mit vollem FaIR: 2099 kühlt der optimierte Pfad um 4,7 % stärker als im LP gerechnet. Die Linearisierung ist also leicht konservativ.
+- **Nebenbedingungen:**
+  - **Speicher:** Gidden et al. 2025, prudent limit je Land (Welt 1 460 Gt; Deutschland 1,3, Norwegen 6,9, UK 8,9, Russland 244, USA 141 Gt). Kein Transport über Grenzen. Länder ohne Gitterzelle (z. B. Kaspisches Meer, 14,9 Gt) fallen heraus.
+  - **Wachstum:** 8,8 Mt/a in 2030 (geplante Kapazität), danach ≤ +20 %/a (Wind-Analogie), beides Zurbriggen et al. 2026.
+  - **Anlagen laufen weiter:** Die Entnahme eines Landes sinkt nicht mehr, sobald dort gebaut ist. Ohne diese Bedingung legt das LP nicht eindeutig fest, welches Land in welchem Jahr entnimmt; die Regionen sprangen hin und her.
+- **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100).
+  - Gegenprobe mit vollem FaIR auf derselben Jahresachse (FaIR-Zeitgrenze j+1 = LP-Jahr j): 2098 kühlt der Pfad um 7,7 % stärker als im LP gerechnet. Die Linearisierung ist also konservativ.
+  - Eine frühere Fassung verglich die Achsen um ein Jahr versetzt und meldete 4,7 %.
 - **η je Land:** Median der besten 10 % der DAC-tauglichen Zellen mit einem Sedimentbecken innerhalb von 100 km (Gidden-Raster, bewertete und nicht bewertete Becken; 39 % der Gitterzellen). 148 Länder kommen in Frage.
-- **Speicher:** Gidden et al. 2025, prudent limit je Land (Welt 1 460 Gt; Deutschland 1,3, Norwegen 6,9, UK 8,9, Russland 244, USA 141 Gt). Kein Transport über Grenzen.
-- **Wachstum:** 8,8 Mt/a in 2030 (geplante Kapazität), danach ≤ +20 %/a (Wind-Analogie), beides Zurbriggen et al. 2026.
-- **Ergebnis Hauptfall:**
-  - Nötig sind **6,9 Gt/a**, erreicht 2067, und 271 Gt insgesamt.
-  - 2050 entnimmt DAC 0,34 Gt/a (Wachstumsgrenze) und kühlt um 0,5 mK, bei 309 mK Lücke. Der Overshoot bleibt bis in die 2090er; 2075 fehlen noch 181 mK.
-  - Die Entnahme liegt bei OECD/EU 159 Gt (USA 141, Norwegen 7, Australien 5) und Naher Osten/Afrika 113 Gt (Algerien 45, Libyen 43, Ägypten 17).
-  - Nordeuropa (NOR, SWE, FIN, FRA, DEU, GBR) bekommt 3 %, weil dort der Speicher fehlt.
-- **Kapazität nach Zieljahr:** 2085: 32 Gt/a (514 Gt); 2090: 17 Gt/a (409 Gt); 2095: 9,7 Gt/a (317 Gt); 2100: 6,9 Gt/a (271 Gt).
+- **Ergebnis Hauptfall (Strompfad SSP2-NDC):**
+  - Nötig sind **6,9 Gt/a**, voll ab 2067, insgesamt 272 Gt.
+  - **Reihenfolge:** Frankreich ab 2028, Sudan 2039, Libyen, Ägypten und Algerien 2041–2043. Ab 2062 kommen die USA, Spanien und Portugal dazu, ab 2067 Australien, Griechenland und Italien.
+  - **2050:** 0,34 Gt/a, davon Algerien 0,26.
+  - **2060:** 2,1 Gt/a (Algerien 0,9, Libyen 0,7, Ägypten 0,4).
+  - **Ab 2070:** USA 3,9, Libyen 1,0, Algerien 0,9, Ägypten 0,4, Australien 0,3 Gt/a.
+  - **Kumuliert:** USA 141, Algerien 45, Libyen 43, Ägypten 17, Australien 11 Gt.
+  - Der Netto-Anteil der genutzten Anlagen liegt in jedem Jahrzehnt bei 96–97 %. Gebaut wird dort, wo der Strom dann schon sauber ist.
+- **Kapazität nach Zieljahr:** 2085: 32 Gt/a; 2090: 17 Gt/a; 2095: 9,7 Gt/a; 2100: 6,9 Gt/a.
+- **Strompfade** (Netto-Anteil, Median über die Länder 2026 → 2040 → 2060; nötige Kapazität):
+
+  | Strompfad | Netto-Anteil | Kapazität |
+  |---|---|---|
+  | SSP2-NPi | 37 → 81 → 90 % | 7,1 Gt/a |
+  | SSP2-NDC | 43 → 92 → 94 % | 6,9 Gt/a |
+  | SSP2-PkBudg650 | 41 → 93 → 96 % | 6,9 Gt/a |
+
+  Der Strommix ändert die Menge kaum: Wegen der Wachstumsgrenze wird DAC erst groß, wenn der Strom ohnehin sauber ist.
 - **Sensitivitäten:**
   - 11 %/a (Ammoniak-Analogie): 2100 nicht erreichbar, es bleiben 50 von 87 mK.
   - Technisches Potenzial statt prudent limit: 6,9 Gt/a.
   - Median statt bestes Dezil: 6,9 Gt/a.
-  - Die Kapazität bestimmt das Klima, nicht die Wahl der Orte.
 - **Einordnung:** 6,9 Gt/a liegen über den vorsichtigen Schätzungen (3–4 Gt/a, Chiquier et al. 2025) und im Bereich der optimistischen Modelle. Mit rund 1,5 MWh/t braucht das etwa 10 000 TWh Strom, ein Drittel der heutigen Weltstromerzeugung.
 - **Nicht enthalten:** Kosten, Strom- und Wasserverfügbarkeit, Injektionsraten je Becken, Anlagenlebensdauer, Basalt-Mineralisierung.
 

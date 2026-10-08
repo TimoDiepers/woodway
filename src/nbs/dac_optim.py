@@ -34,7 +34,7 @@ GROWTH = 1.20            # wind-energy analogue, 20 %/a (Zurbriggen et al. 2026)
 N_Y = len(YEARS)
 
 
-def eta_by_country(quantil: float = 0.9, stufe: str = "prudent") -> tuple[list[str], NDArray]:
+def eta_by_country(quantil: float = 0.9, stufe: str = "prudent", pathway: str = "SSP2-NDC") -> tuple[list[str], NDArray]:
     """Countries with storage and at least one DAC-capable cell near a basin, and their net
     efficiency per year: the median of the cells at or above the *quantil* of eta in that year."""
     from nbs.dac import dac_possible, efficiency_grid
@@ -43,7 +43,7 @@ def eta_by_country(quantil: float = 0.9, stufe: str = "prudent") -> tuple[list[s
     store = storage_by_country(stufe)
     iso = iso3_grid()
     ok = dac_possible() & storage_mask()
-    grids = [efficiency_grid(int(y)) for y in YEARS]
+    grids = [efficiency_grid(int(y), pathway=pathway) for y in YEARS]
     countries, rows = [], []
     for c in sorted(k for k, v in store.items() if v > 0):
         cells = ok & (iso == c)
@@ -82,13 +82,15 @@ def gap_series() -> NDArray:
     return np.maximum(0.0, (np.array(d["need"]) - np.array(d["k"])) / 1000.0)
 def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArray, x_from: int | None,
                     growth: float, start_2030: float | None = START_2030_GT, objective: str = "min_total",
-                    years: NDArray | None = None) -> tuple[bool, NDArray | None]:
+                    years: NDArray | None = None, keep_running: bool = False) -> tuple[bool, NDArray | None]:
     """The LP on plain arrays. x is flattened country-major: x[c * n + y].
 
     objective "min_total": cooling >= gap for t >= x_from, minimise sum x.
     objective "min_peak": cooling >= gap for t >= x_from, minimise the largest yearly world removal, then at
     that peak (+1e-6 relative) minimise sum x.
-    objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum s (x_from ignored).
+    objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum of s[t] for t >= x_from
+    (all years if x_from is None).
+    keep_running: plants once built run on, x[c, t] >= x[c, t-1] (makes where/when unique enough to show).
     start_2030=None drops the 2026-2030 caps (unit tests); growth applies to every year after the
     first then.
     """
@@ -132,7 +134,14 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     if start_2030 is not None:                                    # world caps 2026-2030
         for y in np.where(years <= 2030)[0]:
             row = np.zeros(nv); row[y:nx:n] = 1.0
-            a.append(row[None, :]); b.append(np.array([START_2030_GT * (years[y] - 2025) / 5]))
+            a.append(row[None, :]); b.append(np.array([start_2030 * (years[y] - 2025) / 5]))
+    if keep_running:
+        kr = np.zeros((n_c * (n - 1), nv))
+        for c in range(n_c):
+            for t in range(1, n):
+                kr[c * (n - 1) + t - 1, c * n + t - 1] = 1.0
+                kr[c * (n - 1) + t - 1, c * n + t] = -1.0
+        a.append(kr); b.append(np.zeros(len(kr)))
     A, B = np.vstack(a), np.concatenate(b)
     if objective == "min_peak":
         # one more variable P >= sum_c x[c, t] for every t; minimise P first
@@ -143,43 +152,57 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
         A1 = np.vstack([np.hstack([A, np.zeros((A.shape[0], 1))]), world])
         B1 = np.r_[B, np.zeros(n)]
         res = linprog(np.r_[np.zeros(nv), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
-        if res.status != 0:
+        if res.status == 2:
             return False, None
+        if res.status != 0:
+            raise RuntimeError(f"LP stage 1: {res.message}")
         peak = res.x[-1] * (1 + 1e-6) + 1e-12
         A, B = np.vstack([A, world[:, :-1]]), np.r_[B, np.full(n, peak)]
-    c_obj = np.r_[np.zeros(nx), np.ones(n)] if slack else np.r_[np.ones(nx), np.zeros(nv - nx)]
+    c_obj = (np.r_[np.zeros(nx), (np.arange(n) >= (x_from or 0)).astype(float)] if slack
+             else np.r_[np.ones(nx), np.zeros(nv - nx)])
     res = linprog(c_obj, A_ub=A, b_ub=B, bounds=bounds, method="highs")
-    if res.status != 0:
+    if res.status == 2:
         return False, None
-    return True, res.x[:nx].reshape(n_c, n)
+    if res.status != 0:
+        raise RuntimeError(f"LP: {res.message}")
+    return True, np.maximum(res.x[:nx].reshape(n_c, n), 0.0)  # solver noise around the bound (~1e-8)
 
 
 TARGET_YEAR = 2100
 
 
-def _setup(stufe: str, quantil: float):
+PATHWAYS = ("SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650")  # electricity: current policies, pledges, 650 Gt budget
+
+
+def _setup(stufe: str, quantil: float, pathway: str):
     from nbs.dac_storage import storage_by_country
 
-    countries, eta = eta_by_country(quantil, stufe)
+    countries, eta = eta_by_country(quantil, stufe, pathway)
     store = storage_by_country(stufe)
     return countries, eta, np.array([store[c] for c in countries])
 
 
-def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9, ziel_jahr: int = TARGET_YEAR) -> dict:
-    """Least DAC capacity (then least total) that closes the gap from *ziel_jahr* on; if impossible,
-    the closest approach (least summed shortfall)."""
-    countries, eta, storage = _setup(stufe, quantil)
+def solve(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9, ziel_jahr: int = TARGET_YEAR,
+          pathway: str = "SSP2-NDC", keep_running: bool = True) -> dict:
+    """Least DAC capacity (then least total) that closes the gap from *ziel_jahr* on, plants running on once
+    built; if impossible, the closest approach (least summed shortfall from *ziel_jahr* on)."""
+    if not YEARS[0] <= ziel_jahr <= YEARS[-1]:
+        raise ValueError(f"ziel_jahr {ziel_jahr} outside {YEARS[0]}..{YEARS[-1]}")
+    countries, eta, storage = _setup(stufe, quantil, pathway)
     k, gap = removal_kernel_matrix(), gap_series()
-    ok, x = build_and_solve(eta, k, gap, storage, int(ziel_jahr - YEARS[0]), growth, objective="min_peak", years=YEARS)
+    i = int(ziel_jahr - YEARS[0])
+    ok, x = build_and_solve(eta, k, gap, storage, i, growth, objective="min_peak", years=YEARS, keep_running=keep_running)
     status = "geschlossen"
     if not ok:
-        ok, x = build_and_solve(eta, k, gap, storage, None, growth, objective="min_shortfall", years=YEARS)
+        ok, x = build_and_solve(eta, k, gap, storage, i, growth, objective="min_shortfall", years=YEARS,
+                                keep_running=keep_running)
         assert ok, "closest-approach LP must always be feasible (x = 0 is a solution)"
         status = "annaeherung"
     cooling = -np.einsum("yt,cy,cy->t", k, eta, x)
     return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(),
             "kuehlung_k": cooling.tolist(), "luecke_k": gap.tolist(), "ziel_jahr": int(ziel_jahr), "status": status,
-            "kapazitaet_gt": float(x.sum(axis=0).max()), "wachstum": growth, "stufe": stufe, "quantil": quantil}
+            "kapazitaet_gt": float(x.sum(axis=0).max()), "wachstum": growth, "stufe": stufe, "quantil": quantil,
+            "strompfad": pathway}
 
 
 def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROWTH) -> list[dict]:
@@ -189,4 +212,20 @@ def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROW
         r = solve(growth=growth, ziel_jahr=z)
         out.append({"ziel_jahr": int(z), "status": r["status"], "kapazitaet_gt": r["kapazitaet_gt"],
                     "summe_gt": float(np.sum(r["x"]))})
+    return out
+
+
+def fair_cooling(net_gt: NDArray) -> NDArray:
+    """Cooling [K] by a net removal path [Gt/a on YEARS] in the full FaIR model, on the LP's year axis.
+
+    FaIR reports temperature at timebounds 2026.0..2099.0; the kernel books a removal into the stock in the
+    year it happens, so LP year index j matches FaIR timebound j + 1. LP years 2099 and 2100 have no FaIR
+    value (NaN)."""
+    from nbs.fair_module import run_fair_baseline, run_fair_perturbed
+
+    base = run_fair_baseline()
+    n = len(base)
+    dt = run_fair_perturbed(-np.asarray(net_gt, dtype=float)[:n], np.zeros(n)) - base
+    out = np.full(N_Y, np.nan)
+    out[: n - 1] = -dt[1:]
     return out

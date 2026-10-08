@@ -22,7 +22,7 @@ def test_kernel_matches_existing_horizon_kernel():
 
 
 def test_kernel_size_is_tcre_like():
-    # 1 Gt removed in 2026: roughly -0.45 mK by 2100 (TCRE ~0.45 K / 1000 Gt)
+    # 1 Gt removed in 2026: about -0.34 mK by 2100 (TCRE-like, against a rising background)
     assert -1e-3 < removal_kernel_matrix()[0, -1] < -2e-4
 
 
@@ -168,7 +168,53 @@ def test_export_file_is_complete():
     d = json.loads((Path(__file__).resolve().parents[1] / "data" / "dac" / "optim.json").read_text())
     h = d["haupt"]
     assert len(h["region"]) == len(h["laender"])
-    assert len(h["fair_kuehlung_k"]) == 74
     assert np.isfinite(d["fair_abweichung_2100_rel"])
     assert set(d["sens"]) == {"wachstum_11", "technisch", "median"}
     assert [c["ziel_jahr"] for c in d["ziel_kurve"]] == [2085, 2090, 2095, 2100]
+    assert [p["strompfad"] for p in d["strompfade"]] == ["SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650"]
+    assert all(len(p["eta_median"]) == 75 for p in d["strompfade"])
+    assert 0.0 < d["fair_abweichung_2100_rel"] < 0.15
+    assert len(h["fair_kuehlung_k"]) == 75
+
+
+def test_mini_keep_running_never_shuts_down():
+    k, eta = _mini()
+    gap = np.zeros(10)
+    gap[-1] = 9e-3
+    ok, x = build_and_solve(eta[:1], k, gap, storage=np.array([50.0]), x_from=9, growth=10.0, start_2030=None,
+                            objective="min_peak", keep_running=True)
+    assert ok
+    assert np.all(np.diff(x[0]) >= -1e-9)
+
+
+def test_main_case_plants_keep_running(main_case):
+    x = np.array(main_case["x"])
+    assert np.all(np.diff(x, axis=1) >= -1e-7)
+
+
+def test_pathway_changes_eta():
+    from nbs.dac_optim import eta_by_country
+
+    c1, e1 = eta_by_country(pathway="SSP2-NDC")
+    c2, e2 = eta_by_country(pathway="SSP2-NPi")
+    assert c1 == c2
+    assert np.median(e2[:, 14]) < np.median(e1[:, 14])   # 2040: slower decarbonisation, lower net share
+
+
+def test_fair_cooling_is_aligned_with_kernel():
+    # a 1 Gt pulse in 2036 must give the same cooling on the LP year axis in both models
+    from nbs.dac_optim import fair_cooling
+
+    net = np.zeros(75)
+    net[10] = 1.0
+    f = fair_cooling(net)
+    k = -removal_kernel_matrix()[10]
+    assert f.shape == (75,)
+    assert f[30] == pytest.approx(k[30], rel=0.05)
+    assert abs(f[9]) < 1e-6 * abs(k[30])
+    assert np.all(np.isnan(f[-2:]))  # FaIR's study axis (timebounds 2026..2099) ends before LP years 2099/2100
+
+
+def test_target_year_out_of_range():
+    with pytest.raises(ValueError):
+        solve(ziel_jahr=2101)
