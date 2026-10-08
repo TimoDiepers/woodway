@@ -1,0 +1,1364 @@
+{
+ "AFG": {
+  "region": "R5ASIA",
+  "technisch": 10.12438068,
+  "prudent": 0.145484074,
+  "oelgas": 0.114947371184826
+ },
+ "BGD": {
+  "region": "R5ASIA",
+  "technisch": 86.86688898,
+  "prudent": 2.809580092,
+  "oelgas": 0.101852372288704
+ },
+ "BRN": {
+  "region": "R5ASIA",
+  "technisch": 6.202313574,
+  "prudent": 0.47914714399999997,
+  "oelgas": 0.397377213463187
+ },
+ "BTN": {
+  "region": "R5ASIA",
+  "technisch": 0.100628603,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CHN": {
+  "region": "R5ASIA",
+  "technisch": 355.91008691,
+  "prudent": 57.06098917,
+  "oelgas": 6.44197537750005
+ },
+ "FJI": {
+  "region": "R5ASIA",
+  "technisch": 0.13756516,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "FSM": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "HKG": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "IDN": {
+  "region": "R5ASIA",
+  "technisch": 283.52182629000004,
+  "prudent": 38.303045188,
+  "oelgas": 8.818744389223866
+ },
+ "IND": {
+  "region": "R5ASIA",
+  "technisch": 325.50072710999996,
+  "prudent": 10.653741557,
+  "oelgas": 1.65447772294282
+ },
+ "KHM": {
+  "region": "R5ASIA",
+  "technisch": 4.763701228,
+  "prudent": 1.9083867449999998,
+  "oelgas": 0.608784452080727
+ },
+ "KOR": {
+  "region": "R5ASIA",
+  "technisch": 20.016032629999998,
+  "prudent": 2.305115458,
+  "oelgas": 0.0
+ },
+ "LAO": {
+  "region": "R5ASIA",
+  "technisch": 1.649488097,
+  "prudent": 0.111482993,
+  "oelgas": 0.0
+ },
+ "LKA": {
+  "region": "R5ASIA",
+  "technisch": 63.146371085000006,
+  "prudent": 0.5441226029999999,
+  "oelgas": 0.0
+ },
+ "MAC": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MDV": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MMR": {
+  "region": "R5ASIA",
+  "technisch": 117.70004105999999,
+  "prudent": 7.1147191670000005,
+  "oelgas": 1.35851340740919
+ },
+ "MNG": {
+  "region": "R5ASIA",
+  "technisch": 3.231183151,
+  "prudent": 0.138487116,
+  "oelgas": 0.0
+ },
+ "MYS": {
+  "region": "R5ASIA",
+  "technisch": 59.377314338,
+  "prudent": 11.824961204,
+  "oelgas": 7.768968949909321
+ },
+ "NCL": {
+  "region": "R5ASIA",
+  "technisch": 0.101682954,
+  "prudent": 0.007014266,
+  "oelgas": 0.0
+ },
+ "NPL": {
+  "region": "R5ASIA",
+  "technisch": 4.896389105,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "PAK": {
+  "region": "R5ASIA",
+  "technisch": 71.16420289999999,
+  "prudent": 2.075719781,
+  "oelgas": 0.0
+ },
+ "PHL": {
+  "region": "R5ASIA",
+  "technisch": 30.703890374000004,
+  "prudent": 1.704452998,
+  "oelgas": 0.000353905234078999
+ },
+ "PNG": {
+  "region": "R5ASIA",
+  "technisch": 67.58343667,
+  "prudent": 5.611184428,
+  "oelgas": 3.07523443549871
+ },
+ "PRK": {
+  "region": "R5ASIA",
+  "technisch": 1.82972899,
+  "prudent": 0.019715175,
+  "oelgas": 0.0
+ },
+ "PYF": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SGP": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SLB": {
+  "region": "R5ASIA",
+  "technisch": 3.532266581,
+  "prudent": 0.054663509,
+  "oelgas": 0.0
+ },
+ "THA": {
+  "region": "R5ASIA",
+  "technisch": 33.97860523999999,
+  "prudent": 6.966468618,
+  "oelgas": 3.162931620143348
+ },
+ "TLS": {
+  "region": "R5ASIA",
+  "technisch": 10.604588312,
+  "prudent": 1.530281201,
+  "oelgas": 0.710191655904055
+ },
+ "TWN": {
+  "region": "R5ASIA",
+  "technisch": 22.7956066,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "VNM": {
+  "region": "R5ASIA",
+  "technisch": 45.880106837,
+  "prudent": 11.402393503,
+  "oelgas": 4.47423992399126
+ },
+ "VUT": {
+  "region": "R5ASIA",
+  "technisch": 2.7753476829999997,
+  "prudent": 0.00556308,
+  "oelgas": 0.0
+ },
+ "WSM": {
+  "region": "R5ASIA",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "ABW": {
+  "region": "R5LAM",
+  "technisch": 0.023531583,
+  "prudent": 1.22e-06,
+  "oelgas": 0.0
+ },
+ "ARG": {
+  "region": "R5LAM",
+  "technisch": 215.9645263,
+  "prudent": 36.23662588,
+  "oelgas": 7.803848145893417
+ },
+ "BHS": {
+  "region": "R5LAM",
+  "technisch": 78.56608680000001,
+  "prudent": 6.476096578,
+  "oelgas": 0.0
+ },
+ "BLZ": {
+  "region": "R5LAM",
+  "technisch": 2.814085648,
+  "prudent": 0.479662305,
+  "oelgas": 0.0
+ },
+ "BOL": {
+  "region": "R5LAM",
+  "technisch": 50.00815049,
+  "prudent": 5.783834328,
+  "oelgas": 2.47439099042094
+ },
+ "BRA": {
+  "region": "R5LAM",
+  "technisch": 443.2070311,
+  "prudent": 79.98602862,
+  "oelgas": 53.4168117683147
+ },
+ "BRB": {
+  "region": "R5LAM",
+  "technisch": 27.361729741,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CHL": {
+  "region": "R5LAM",
+  "technisch": 22.681738969999998,
+  "prudent": 2.2112095199999997,
+  "oelgas": 0.327981402166188
+ },
+ "COL": {
+  "region": "R5LAM",
+  "technisch": 56.909433320000005,
+  "prudent": 6.496253633,
+  "oelgas": 3.664860101416702
+ },
+ "CRI": {
+  "region": "R5LAM",
+  "technisch": 1.0526487549999999,
+  "prudent": 0.053474409,
+  "oelgas": 0.0
+ },
+ "CUB": {
+  "region": "R5LAM",
+  "technisch": 16.793767318,
+  "prudent": 0.920619404,
+  "oelgas": 0.094688430428505
+ },
+ "DOM": {
+  "region": "R5LAM",
+  "technisch": 5.66307746,
+  "prudent": 0.004935225,
+  "oelgas": 0.0
+ },
+ "ECU": {
+  "region": "R5LAM",
+  "technisch": 17.221947678,
+  "prudent": 0.515541426,
+  "oelgas": 0.147927540820093
+ },
+ "GLP": {
+  "region": "R5LAM",
+  "technisch": 0.046406808,
+  "prudent": 4.18e-07,
+  "oelgas": 0.0
+ },
+ "GRD": {
+  "region": "R5LAM",
+  "technisch": 3.456060602,
+  "prudent": 0.085252234,
+  "oelgas": 0.035331898601725
+ },
+ "GTM": {
+  "region": "R5LAM",
+  "technisch": 6.809946774,
+  "prudent": 0.716574018,
+  "oelgas": 0.0
+ },
+ "GUF": {
+  "region": "R5LAM",
+  "technisch": 0.106016105,
+  "prudent": 0.021054101,
+  "oelgas": 0.0
+ },
+ "GUY": {
+  "region": "R5LAM",
+  "technisch": 17.079274724,
+  "prudent": 1.640141965,
+  "oelgas": 0.0
+ },
+ "HND": {
+  "region": "R5LAM",
+  "technisch": 11.029849662,
+  "prudent": 2.592622941,
+  "oelgas": 0.0
+ },
+ "HTI": {
+  "region": "R5LAM",
+  "technisch": 2.101757831,
+  "prudent": 0.00266107511,
+  "oelgas": 0.0
+ },
+ "JAM": {
+  "region": "R5LAM",
+  "technisch": 5.790038475,
+  "prudent": 0.34889812,
+  "oelgas": 0.0
+ },
+ "MEX": {
+  "region": "R5LAM",
+  "technisch": 189.26474028,
+  "prudent": 24.58087493,
+  "oelgas": 11.97187952895182
+ },
+ "MTQ": {
+  "region": "R5LAM",
+  "technisch": 0.003059173,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "NIC": {
+  "region": "R5LAM",
+  "technisch": 20.128668159,
+  "prudent": 3.633658336,
+  "oelgas": 0.0
+ },
+ "PAN": {
+  "region": "R5LAM",
+  "technisch": 2.513718765,
+  "prudent": 0.134164529,
+  "oelgas": 0.008924383670092
+ },
+ "PER": {
+  "region": "R5LAM",
+  "technisch": 89.95683493300001,
+  "prudent": 5.6951576809999995,
+  "oelgas": 2.088628757395779
+ },
+ "PRY": {
+  "region": "R5LAM",
+  "technisch": 25.17545254,
+  "prudent": 6.518941845,
+  "oelgas": 5.13445191830396
+ },
+ "SLV": {
+  "region": "R5LAM",
+  "technisch": 3.722756276,
+  "prudent": 0.7661245360000001,
+  "oelgas": 0.0
+ },
+ "SUR": {
+  "region": "R5LAM",
+  "technisch": 28.486013297,
+  "prudent": 2.9714845997,
+  "oelgas": 0.618683516979218
+ },
+ "TTO": {
+  "region": "R5LAM",
+  "technisch": 24.916338903,
+  "prudent": 1.0526468226999999,
+  "oelgas": 0.888924443628639
+ },
+ "URY": {
+  "region": "R5LAM",
+  "technisch": 16.790216579,
+  "prudent": 1.649048757,
+  "oelgas": 0.0
+ },
+ "VEN": {
+  "region": "R5LAM",
+  "technisch": 71.85214271000001,
+  "prudent": 5.587137769,
+  "oelgas": 3.0208001281789603
+ },
+ "VIR": {
+  "region": "R5LAM",
+  "technisch": 0.023125402,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "AGO": {
+  "region": "R5MAF",
+  "technisch": 64.99089737,
+  "prudent": 10.456584856,
+  "oelgas": 0.885377109050751
+ },
+ "ARE": {
+  "region": "R5MAF",
+  "technisch": 28.91798334,
+  "prudent": 4.90296705,
+  "oelgas": 4.6403902680613
+ },
+ "BDI": {
+  "region": "R5MAF",
+  "technisch": 0.01178365,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "BEN": {
+  "region": "R5MAF",
+  "technisch": 2.075540626,
+  "prudent": 0.124979534,
+  "oelgas": 0.0
+ },
+ "BFA": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "BHR": {
+  "region": "R5MAF",
+  "technisch": 1.4505112770000002,
+  "prudent": 0.132742884,
+  "oelgas": 0.108272655401379
+ },
+ "BWA": {
+  "region": "R5MAF",
+  "technisch": 36.42499572,
+  "prudent": 3.97937709,
+  "oelgas": 0.0
+ },
+ "CAF": {
+  "region": "R5MAF",
+  "technisch": 3.119923757,
+  "prudent": 0.41429088,
+  "oelgas": 0.0
+ },
+ "CIV": {
+  "region": "R5MAF",
+  "technisch": 3.7648324879999997,
+  "prudent": 0.229208815,
+  "oelgas": 0.0
+ },
+ "CMR": {
+  "region": "R5MAF",
+  "technisch": 2.9510224149999997,
+  "prudent": 0.410295505,
+  "oelgas": 0.076061651110649
+ },
+ "COD": {
+  "region": "R5MAF",
+  "technisch": 135.81704428999998,
+  "prudent": 35.297473026,
+  "oelgas": 0.0331553244031969
+ },
+ "COG": {
+  "region": "R5MAF",
+  "technisch": 21.122777066,
+  "prudent": 1.753544168,
+  "oelgas": 0.265388315543533
+ },
+ "COM": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CPV": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "DJI": {
+  "region": "R5MAF",
+  "technisch": 0.457991808,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "DZA": {
+  "region": "R5MAF",
+  "technisch": 151.712628808,
+  "prudent": 44.893042248,
+  "oelgas": 11.2005747817456
+ },
+ "EGY": {
+  "region": "R5MAF",
+  "technisch": 127.90292711000001,
+  "prudent": 16.812533835,
+  "oelgas": 3.217301197350022
+ },
+ "ERI": {
+  "region": "R5MAF",
+  "technisch": 5.929806062,
+  "prudent": 1.1603532010000002,
+  "oelgas": 0.0
+ },
+ "ESH": {
+  "region": "R5MAF",
+  "technisch": 64.48587133000001,
+  "prudent": 5.472313644,
+  "oelgas": 0.0
+ },
+ "ETH": {
+  "region": "R5MAF",
+  "technisch": 31.56688183,
+  "prudent": 8.189339202,
+  "oelgas": 5.09161081165075
+ },
+ "GAB": {
+  "region": "R5MAF",
+  "technisch": 28.037049209,
+  "prudent": 2.148482047,
+  "oelgas": 0.001649233847274
+ },
+ "GHA": {
+  "region": "R5MAF",
+  "technisch": 9.127523175,
+  "prudent": 1.6077469149999999,
+  "oelgas": 0.0
+ },
+ "GIN": {
+  "region": "R5MAF",
+  "technisch": 5.497239652,
+  "prudent": 1.46491847,
+  "oelgas": 0.0
+ },
+ "GMB": {
+  "region": "R5MAF",
+  "technisch": 4.518003675,
+  "prudent": 0.292899836,
+  "oelgas": 0.0
+ },
+ "GNB": {
+  "region": "R5MAF",
+  "technisch": 10.291142344,
+  "prudent": 1.739219551,
+  "oelgas": 0.0
+ },
+ "GNQ": {
+  "region": "R5MAF",
+  "technisch": 6.773720767,
+  "prudent": 0.582129769,
+  "oelgas": 0.125226820993703
+ },
+ "IRN": {
+  "region": "R5MAF",
+  "technisch": 51.62682857,
+  "prudent": 4.446599878,
+  "oelgas": 2.8089427651720986
+ },
+ "IRQ": {
+  "region": "R5MAF",
+  "technisch": 83.064925821,
+  "prudent": 8.592343222,
+  "oelgas": 1.47226308889095
+ },
+ "ISR": {
+  "region": "R5MAF",
+  "technisch": 9.842868365000001,
+  "prudent": 0.016701504,
+  "oelgas": 0.0
+ },
+ "JOR": {
+  "region": "R5MAF",
+  "technisch": 3.724431344,
+  "prudent": 1.032602974,
+  "oelgas": 0.0
+ },
+ "KEN": {
+  "region": "R5MAF",
+  "technisch": 47.57959547,
+  "prudent": 7.620735295,
+  "oelgas": 4.22457647323608
+ },
+ "KWT": {
+  "region": "R5MAF",
+  "technisch": 7.115634635000001,
+  "prudent": 0.60290634,
+  "oelgas": 0.204962876625359
+ },
+ "LBN": {
+  "region": "R5MAF",
+  "technisch": 5.851583946,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "LBR": {
+  "region": "R5MAF",
+  "technisch": 2.89433855,
+  "prudent": 0.212493269,
+  "oelgas": 0.0
+ },
+ "LBY": {
+  "region": "R5MAF",
+  "technisch": 191.10974554,
+  "prudent": 42.900870748,
+  "oelgas": 9.20157660823315
+ },
+ "LSO": {
+  "region": "R5MAF",
+  "technisch": 0.551912002,
+  "prudent": 0.052529495,
+  "oelgas": 0.009303089231253
+ },
+ "MAR": {
+  "region": "R5MAF",
+  "technisch": 42.65374552,
+  "prudent": 4.2084363840000005,
+  "oelgas": 0.0
+ },
+ "MDG": {
+  "region": "R5MAF",
+  "technisch": 57.44732191,
+  "prudent": 10.085913471,
+  "oelgas": 0.0
+ },
+ "MLI": {
+  "region": "R5MAF",
+  "technisch": 68.09162911,
+  "prudent": 19.364305,
+  "oelgas": 0.0
+ },
+ "MOZ": {
+  "region": "R5MAF",
+  "technisch": 88.52263865,
+  "prudent": 10.042978527,
+  "oelgas": 0.49295130133396
+ },
+ "MRT": {
+  "region": "R5MAF",
+  "technisch": 89.83465161,
+  "prudent": 21.493156477000003,
+  "oelgas": 0.120784111320972
+ },
+ "MUS": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MWI": {
+  "region": "R5MAF",
+  "technisch": 0.847534738,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MYT": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "NAM": {
+  "region": "R5MAF",
+  "technisch": 60.96878517,
+  "prudent": 8.483636893,
+  "oelgas": 0.291144621209241
+ },
+ "NER": {
+  "region": "R5MAF",
+  "technisch": 49.72127137,
+  "prudent": 9.634264852,
+  "oelgas": 0.0
+ },
+ "NGA": {
+  "region": "R5MAF",
+  "technisch": 67.95567858,
+  "prudent": 6.140740172999999,
+  "oelgas": 2.0942039033397952
+ },
+ "OMN": {
+  "region": "R5MAF",
+  "technisch": 21.849069637,
+  "prudent": 5.27282278,
+  "oelgas": 3.476718019694081
+ },
+ "PSE": {
+  "region": "R5MAF",
+  "technisch": 0.8400859860000001,
+  "prudent": 0.020916255,
+  "oelgas": 0.0
+ },
+ "QAT": {
+  "region": "R5MAF",
+  "technisch": 9.208707023,
+  "prudent": 2.166027894,
+  "oelgas": 1.3884497949620709
+ },
+ "REU": {
+  "region": "R5MAF",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "RWA": {
+  "region": "R5MAF",
+  "technisch": 0.005048745,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SAU": {
+  "region": "R5MAF",
+  "technisch": 157.37233712,
+  "prudent": 34.861437757,
+  "oelgas": 6.765933533402858
+ },
+ "SDN": {
+  "region": "R5MAF",
+  "technisch": 25.636891301,
+  "prudent": 5.449394937999999,
+  "oelgas": 1.01632441859692
+ },
+ "SEN": {
+  "region": "R5MAF",
+  "technisch": 39.94569138,
+  "prudent": 3.071654412,
+  "oelgas": 0.0
+ },
+ "SLE": {
+  "region": "R5MAF",
+  "technisch": 3.1656539649999997,
+  "prudent": 0.505104655,
+  "oelgas": 0.0
+ },
+ "SOM": {
+  "region": "R5MAF",
+  "technisch": 127.57286864,
+  "prudent": 22.702655777,
+  "oelgas": 1.22133055329322
+ },
+ "SSD": {
+  "region": "R5MAF",
+  "technisch": 25.16315393,
+  "prudent": 6.397843925,
+  "oelgas": 1.73498959466815
+ },
+ "STP": {
+  "region": "R5MAF",
+  "technisch": 10.51051943,
+  "prudent": 0.077765791,
+  "oelgas": 0.0
+ },
+ "SWZ": {
+  "region": "R5MAF",
+  "technisch": 0.17380595,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SYR": {
+  "region": "R5MAF",
+  "technisch": 17.417768869,
+  "prudent": 1.629881341,
+  "oelgas": 0.163937345147133
+ },
+ "TCD": {
+  "region": "R5MAF",
+  "technisch": 36.82502441,
+  "prudent": 7.263218967,
+  "oelgas": 0.418109923601151
+ },
+ "TGO": {
+  "region": "R5MAF",
+  "technisch": 0.664125754,
+  "prudent": 0.0033627180000000002,
+  "oelgas": 0.0
+ },
+ "TUN": {
+  "region": "R5MAF",
+  "technisch": 44.65880788,
+  "prudent": 5.457600786,
+  "oelgas": 1.152202595956624
+ },
+ "TZA": {
+  "region": "R5MAF",
+  "technisch": 40.247293400000004,
+  "prudent": 3.065387758,
+  "oelgas": 1.552903061732641
+ },
+ "UGA": {
+  "region": "R5MAF",
+  "technisch": 0.175595915,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "YEM": {
+  "region": "R5MAF",
+  "technisch": 19.493051656,
+  "prudent": 3.2905538819999998,
+  "oelgas": 0.0
+ },
+ "ZAF": {
+  "region": "R5MAF",
+  "technisch": 80.66913886,
+  "prudent": 13.030283435000001,
+  "oelgas": 4.144537457032121
+ },
+ "ZMB": {
+  "region": "R5MAF",
+  "technisch": 10.54516966,
+  "prudent": 0.930227055,
+  "oelgas": 0.0
+ },
+ "ZWE": {
+  "region": "R5MAF",
+  "technisch": 1.431770585,
+  "prudent": 0.010548236,
+  "oelgas": 0.0
+ },
+ "ALB": {
+  "region": "R5OECD90+EU",
+  "technisch": 4.648679752,
+  "prudent": 0.330443473,
+  "oelgas": 0.0
+ },
+ "AUS": {
+  "region": "R5OECD90+EU",
+  "technisch": 730.2037311,
+  "prudent": 112.46362535,
+  "oelgas": 76.2632202238436
+ },
+ "AUT": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.518160171,
+  "prudent": 1.13e-05,
+  "oelgas": 0.0
+ },
+ "BEL": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.30982161799999997,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "BGR": {
+  "region": "R5OECD90+EU",
+  "technisch": 14.903598745,
+  "prudent": 0.573428078,
+  "oelgas": 0.0
+ },
+ "BIH": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.214789299,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CAN": {
+  "region": "R5OECD90+EU",
+  "technisch": 658.2049104,
+  "prudent": 69.89070351000001,
+  "oelgas": 52.137937510502404
+ },
+ "CHE": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.707509707,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CYP": {
+  "region": "R5OECD90+EU",
+  "technisch": 19.633646796,
+  "prudent": 0.023345825,
+  "oelgas": 0.0
+ },
+ "CZE": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.149244489,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "DEU": {
+  "region": "R5OECD90+EU",
+  "technisch": 26.837094835000002,
+  "prudent": 1.260648866,
+  "oelgas": 1.1500604009270319
+ },
+ "DNK": {
+  "region": "R5OECD90+EU",
+  "technisch": 176.98072914600002,
+  "prudent": 4.668667474,
+  "oelgas": 1.427857778381614
+ },
+ "ESP": {
+  "region": "R5OECD90+EU",
+  "technisch": 43.26098277,
+  "prudent": 1.879130104,
+  "oelgas": 0.0
+ },
+ "EST": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.9815818809999999,
+  "prudent": 0.003721311,
+  "oelgas": 0.0
+ },
+ "FIN": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.000831414,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "FRA": {
+  "region": "R5OECD90+EU",
+  "technisch": 89.10212618,
+  "prudent": 3.603337717,
+  "oelgas": 0.234077380606323
+ },
+ "GBR": {
+  "region": "R5OECD90+EU",
+  "technisch": 103.93745336,
+  "prudent": 8.901729742,
+  "oelgas": 7.1635354250320145
+ },
+ "GRC": {
+  "region": "R5OECD90+EU",
+  "technisch": 37.190781517000005,
+  "prudent": 1.600197353,
+  "oelgas": 0.0
+ },
+ "GUM": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.0,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "HRV": {
+  "region": "R5OECD90+EU",
+  "technisch": 9.446170329000001,
+  "prudent": 1.308291906,
+  "oelgas": 0.329678483918542
+ },
+ "HUN": {
+  "region": "R5OECD90+EU",
+  "technisch": 5.250583983,
+  "prudent": 0.021748263,
+  "oelgas": 0.00157291861251
+ },
+ "IRL": {
+  "region": "R5OECD90+EU",
+  "technisch": 26.271552938000003,
+  "prudent": 3.062954408,
+  "oelgas": 2.66087227201205
+ },
+ "ISL": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.942364737,
+  "prudent": 0.006926115,
+  "oelgas": 0.0
+ },
+ "ITA": {
+  "region": "R5OECD90+EU",
+  "technisch": 43.407770209999995,
+  "prudent": 1.9837426360000001,
+  "oelgas": 0.77147266920656
+ },
+ "JPN": {
+  "region": "R5OECD90+EU",
+  "technisch": 40.587566158,
+  "prudent": 3.023471129,
+  "oelgas": 0.319476792006753
+ },
+ "LTU": {
+  "region": "R5OECD90+EU",
+  "technisch": 3.185018264,
+  "prudent": 0.423918756,
+  "oelgas": 0.14919126033783
+ },
+ "LUX": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.027517425,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "LVA": {
+  "region": "R5OECD90+EU",
+  "technisch": 3.121606645,
+  "prudent": 0.398696896,
+  "oelgas": 0.0
+ },
+ "MKD": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.000980749,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MLT": {
+  "region": "R5OECD90+EU",
+  "technisch": 13.328612597,
+  "prudent": 0.584154234,
+  "oelgas": 0.060442067682743
+ },
+ "MNE": {
+  "region": "R5OECD90+EU",
+  "technisch": 1.9339556830000002,
+  "prudent": 0.174978239,
+  "oelgas": 0.0
+ },
+ "NLD": {
+  "region": "R5OECD90+EU",
+  "technisch": 14.544266192,
+  "prudent": 1.8310086879999998,
+  "oelgas": 1.78952695615589
+ },
+ "NOR": {
+  "region": "R5OECD90+EU",
+  "technisch": 185.54985147800002,
+  "prudent": 6.947402004,
+  "oelgas": 6.32623527327086
+ },
+ "NZL": {
+  "region": "R5OECD90+EU",
+  "technisch": 107.880001079,
+  "prudent": 4.8264716949999995,
+  "oelgas": 3.21578336087986
+ },
+ "POL": {
+  "region": "R5OECD90+EU",
+  "technisch": 39.879844946000006,
+  "prudent": 1.916154888,
+  "oelgas": 0.65851915627718
+ },
+ "PRI": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.134283495,
+  "prudent": 1.93e-07,
+  "oelgas": 0.0
+ },
+ "PRT": {
+  "region": "R5OECD90+EU",
+  "technisch": 10.984310479,
+  "prudent": 0.40063056999999996,
+  "oelgas": 0.0
+ },
+ "ROU": {
+  "region": "R5OECD90+EU",
+  "technisch": 16.763137752,
+  "prudent": 0.882199977,
+  "oelgas": 0.289609037339687
+ },
+ "SRB": {
+  "region": "R5OECD90+EU",
+  "technisch": 1.147583945,
+  "prudent": 0.005271383,
+  "oelgas": 0.0
+ },
+ "SVK": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.760499739,
+  "prudent": 6.7e-05,
+  "oelgas": 0.0
+ },
+ "SVN": {
+  "region": "R5OECD90+EU",
+  "technisch": 0.140254253,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SWE": {
+  "region": "R5OECD90+EU",
+  "technisch": 2.3030855270000004,
+  "prudent": 0.247208761,
+  "oelgas": 0.035243656951934
+ },
+ "TUR": {
+  "region": "R5OECD90+EU",
+  "technisch": 70.83097967,
+  "prudent": 1.187206419,
+  "oelgas": 0.0
+ },
+ "USA": {
+  "region": "R5OECD90+EU",
+  "technisch": 1022.9111211,
+  "prudent": 140.82564743,
+  "oelgas": 96.5416442166897
+ },
+ "ARM": {
+  "region": "R5REF",
+  "technisch": 0.020055625,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "AZE": {
+  "region": "R5REF",
+  "technisch": 13.50199544,
+  "prudent": 1.16e-05,
+  "oelgas": 1.1579879356e-05
+ },
+ "BLR": {
+  "region": "R5REF",
+  "technisch": 3.675036831,
+  "prudent": 0.552984457,
+  "oelgas": 0.0
+ },
+ "GEO": {
+  "region": "R5REF",
+  "technisch": 10.13991579,
+  "prudent": 0.07522401399999999,
+  "oelgas": 0.0
+ },
+ "KAZ": {
+  "region": "R5REF",
+  "technisch": 228.7270325,
+  "prudent": 32.22834602,
+  "oelgas": 4.48024138435721
+ },
+ "KGZ": {
+  "region": "R5REF",
+  "technisch": 1.146110695,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MDA": {
+  "region": "R5REF",
+  "technisch": 0.703384284,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "RUS": {
+  "region": "R5REF",
+  "technisch": 1821.5993583,
+  "prudent": 244.15848018,
+  "oelgas": 18.571450179209847
+ },
+ "TJK": {
+  "region": "R5REF",
+  "technisch": 6.630429478,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "TKM": {
+  "region": "R5REF",
+  "technisch": 71.39907571,
+  "prudent": 13.66039605,
+  "oelgas": 0.202866733074188
+ },
+ "UKR": {
+  "region": "R5REF",
+  "technisch": 64.33023426,
+  "prudent": 2.568633822,
+  "oelgas": 0.675572395324707
+ },
+ "UZB": {
+  "region": "R5REF",
+  "technisch": 25.70019358,
+  "prudent": 4.508575305,
+  "oelgas": 0.0
+ },
+ "AIA": {
+  "region": "nan",
+  "technisch": 7.77e-05,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "ATA": {
+  "region": "nan",
+  "technisch": 417.39189438,
+  "prudent": 0.021179987,
+  "oelgas": 0.0
+ },
+ "ATG": {
+  "region": "nan",
+  "technisch": 0.8974032439999999,
+  "prudent": 0.0713346666,
+  "oelgas": 0.0
+ },
+ "BES": {
+  "region": "nan",
+  "technisch": 0.039669182,
+  "prudent": 0.011444517,
+  "oelgas": 0.0
+ },
+ "BLM": {
+  "region": "nan",
+  "technisch": 0.00135675,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "CUW": {
+  "region": "nan",
+  "technisch": 0.060745144,
+  "prudent": 0.02021726,
+  "oelgas": 0.0
+ },
+ "DMA": {
+  "region": "nan",
+  "technisch": 1.360842257,
+  "prudent": 0.009044582,
+  "oelgas": 0.0
+ },
+ "FLK": {
+  "region": "nan",
+  "technisch": 0.015357405,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "FRO": {
+  "region": "nan",
+  "technisch": 0.034699384,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "GGY": {
+  "region": "nan",
+  "technisch": 0.001309077,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "GIB": {
+  "region": "nan",
+  "technisch": 0.014741715999999998,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "GRL": {
+  "region": "nan",
+  "technisch": 7.367474278,
+  "prudent": 0.021655269,
+  "oelgas": 0.0
+ },
+ "IMN": {
+  "region": "nan",
+  "technisch": 0.008579159,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "JEY": {
+  "region": "nan",
+  "technisch": 0.001852311,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "KNA": {
+  "region": "nan",
+  "technisch": 0.59842113,
+  "prudent": 0.003600858,
+  "oelgas": 0.0
+ },
+ "LCA": {
+  "region": "nan",
+  "technisch": 2.085679896,
+  "prudent": 0.012126513,
+  "oelgas": 0.0
+ },
+ "LIE": {
+  "region": "nan",
+  "technisch": 0.002830722,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "MCO": {
+  "region": "nan",
+  "technisch": 0.019006219999999997,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "NFK": {
+  "region": "nan",
+  "technisch": 0.000427557,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SGS": {
+  "region": "nan",
+  "technisch": 0.033778869,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SJM": {
+  "region": "nan",
+  "technisch": 2.345443323,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SMR": {
+  "region": "nan",
+  "technisch": 0.001050445,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "SPM": {
+  "region": "nan",
+  "technisch": 0.011591846,
+  "prudent": 0.005520118,
+  "oelgas": 0.0
+ },
+ "SXM": {
+  "region": "nan",
+  "technisch": 5.46e-08,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "TCA": {
+  "region": "nan",
+  "technisch": 0.149592508,
+  "prudent": 0.012234471,
+  "oelgas": 0.0
+ },
+ "UMI": {
+  "region": "nan",
+  "technisch": 0.000267941,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "VAT": {
+  "region": "nan",
+  "technisch": 5.85e-06,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "VCT": {
+  "region": "nan",
+  "technisch": 5.173458966,
+  "prudent": 0.040472599,
+  "oelgas": 0.0
+ },
+ "VGB": {
+  "region": "nan",
+  "technisch": 0.000353757,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "XAD": {
+  "region": "nan",
+  "technisch": 0.024800006,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "XCA": {
+  "region": "nan",
+  "technisch": 127.214339,
+  "prudent": 14.89015249,
+  "oelgas": 3.8882210641168
+ },
+ "XPI": {
+  "region": "nan",
+  "technisch": 0.000932289,
+  "prudent": 0.000204216,
+  "oelgas": 0.0
+ },
+ "XSP": {
+  "region": "nan",
+  "technisch": 4.7e-05,
+  "prudent": 0.0,
+  "oelgas": 0.0
+ },
+ "ZNC": {
+  "region": "nan",
+  "technisch": 0.327820961,
+  "prudent": 6.11e-07,
+  "oelgas": 0.0
+ }
+}
