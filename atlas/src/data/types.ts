@@ -29,4 +29,5 @@ export interface Atlas {
   meta: Meta;
   f: Record<string, Float32Array | Uint8Array>;
   buildByCell: Map<number, number>;  // flat cell index → index into meta.build.cells
+  cellsPerOwner: number[];           // cells per meta.build.owner id, counted once
 }

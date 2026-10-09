@@ -27,5 +27,7 @@ export async function loadAtlas(base = "data/", fetcher: typeof fetch = fetch): 
   }
   const buildByCell = new Map<number, number>();
   meta.build.cells.forEach(([i, j], k) => buildByCell.set(i * meta.grid.nlon + j, k));
-  return { meta, f, buildByCell };
+  const cellsPerOwner: number[] = [];
+  for (const o of meta.build.owner) cellsPerOwner[o] = (cellsPerOwner[o] ?? 0) + 1;
+  return { meta, f, buildByCell, cellsPerOwner };
 }
