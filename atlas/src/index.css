@@ -58,7 +58,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .font-serif {
+h1, h2, h3 {
   font-family: var(--serif);
   font-weight: 600;
   font-variation-settings: "opsz" 72;

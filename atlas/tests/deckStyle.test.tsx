@@ -23,4 +23,10 @@ describe("deck style", () => {
       expect(css).toContain(s);
     }
   });
+  it("sets the headline weight on headings only, so .font-serif utilities keep their weight", () => {
+    const css = readFileSync(resolve(__dirname, "../src/index.css"), "utf8");
+    const rule = css.match(/([^{}]*)\{[^}]*font-variation-settings: "opsz" 72[^}]*\}/);
+    expect(rule).not.toBeNull();
+    expect(rule![1]).not.toContain(".font-serif");
+  });
 });
