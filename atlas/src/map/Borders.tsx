@@ -4,7 +4,7 @@ import type { FeatureCollection } from "geojson";
 
 export default function Borders({ dark }: { dark: boolean }) {
   const [data, setData] = useState<FeatureCollection | null>(null);
-  useEffect(() => { fetch("borders.geojson").then((r) => r.json()).then(setData).catch(() => setData(null)); }, []);
+  useEffect(() => { fetch("borders.geojson").then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }).then(setData).catch(() => setData(null)); }, []);
   if (!data) return null;
   return (
     <Source id="borders" type="geojson" data={data}>

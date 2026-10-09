@@ -28,6 +28,12 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   const [loaded, setLoaded] = useState(false);
   const urlRef = useRef<string | null>(null);
   const pending = useRef(0);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+
+  useEffect(() => () => {
+    pending.current++;
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+  }, []);
 
   // Repaint on layer/year change: one paint per animation frame, the latest request wins.
   useEffect(() => {
@@ -37,7 +43,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       if (ticket !== pending.current) return;
       cellColors(atlas, layer, year, buffers.colors);
       mercatorImage(buffers.colors, buffers.img);
-      const ctx = canvas.getContext("2d")!;
+      const ctx = (ctxRef.current ??= canvas.getContext("2d"))!;
       ctx.putImageData(new ImageData(new Uint8ClampedArray(buffers.img.buffer), IMG_W, IMG_H), 0, 0);
       canvas.toBlob((blob) => {
         if (!blob || ticket !== pending.current) return;
@@ -67,7 +73,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       onClick={(e) => onCell(pick(e))}
       onMouseMove={onHover ? (e) => onHover(pick(e), e.point.x, e.point.y) : undefined}
       onMouseLeave={onHover ? () => onHover(null, 0, 0) : undefined}
-      style={{ position: "absolute", inset: 0 }}
+      style={{ position: "absolute", inset: 0, background: "rgb(var(--color-paper))" }}
       attributionControl={{ compact: true }}
     >
       <Source id="atlas" type="image" url={EMPTY} coordinates={IMAGE_COORDS}>
