@@ -15,13 +15,14 @@ export interface AtlasMapProps {
   onHover?(cell: number | null, x: number, y: number): void;
   projection?: "globe" | "mercator"; dark?: boolean;
   sites?: { name: string; lat: number; lon: number; color: string }[];
+  flyTo?: { lon: number; lat: number } | null;
   initialView?: { longitude: number; latitude: number; zoom: number };
 }
 
 const EMPTY = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, projection = "globe", dark = false,
-  sites = [], initialView = { longitude: 10, latitude: 25, zoom: 1.6 } }: AtlasMapProps) {
+  sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 } }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
   const canvas = useMemo(() => { const c = document.createElement("canvas"); c.width = IMG_W; c.height = IMG_H; return c; }, []);
   const buffers = useMemo(() => ({ colors: new Uint32Array(360 * 720), img: new Uint32Array(IMG_W * IMG_H) }), []);
@@ -34,6 +35,10 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
     pending.current++;
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
   }, []);
+
+  useEffect(() => {
+    if (flyTo) mapRef.current?.flyTo({ center: [flyTo.lon, flyTo.lat], zoom: 4, duration: 1200 });
+  }, [flyTo]);
 
   // Repaint on layer/year change: one paint per animation frame, the latest request wins.
   useEffect(() => {
