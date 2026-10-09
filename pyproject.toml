@@ -1,7 +1,7 @@
 [project]
 name = "nbs"
 version = "0.1.0"
-description = "Time-explicit framework for comparing forest-based climate interventions"
+description = "Time-explicit climate effect of afforestation and direct air capture, tree by tree and cell by cell"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,7 +13,6 @@ dependencies = [
     "SALib>=1.4",
     "pandas>=2.0",
     "netcdf4>=1.7.4",
-    "python-pptx>=1.0.2",
     "shapely>=2.1.2",
     "rasterio>=1.4.4",
     "openpyxl>=3.1.5",

@@ -1,4 +1,4 @@
-"""Data for the temperature slide's native chart (docs/slides/chart_data/tempsum.json).
+"""Data for the temperature slide's native chart (deck/chart_data/tempsum.json).
 
 The tree's temperature effect built up from single years: the answer to one year of forcing (Aachen, 2041),
 the same for every fifth year, their sum over all years, then the three sites. All with the temperature
@@ -16,7 +16,7 @@ from nbs.response import green_temperature
 from nbs.storyline_figures import run_site
 
 REPO = Path(__file__).resolve().parents[1]
-OUT = REPO / "docs/slides/chart_data/tempsum.json"
+OUT = REPO / "deck/chart_data/tempsum.json"
 ONE_YEAR, EVERY, SCALE = 2041, 5, 1e15
 
 

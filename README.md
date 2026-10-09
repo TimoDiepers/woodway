@@ -1,255 +1,101 @@
-# The Biophysics of Afforestation as CDR
+# Ingenieure auf dem Holzweg?
 
-A transparent, reproducible framework for quantifying the net climate effectiveness of afforestation as a carbon dioxide removal strategy, using progressive physical realism and the FaIR v2 simple climate model.
+Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 
-## The Problem
+The talk widens the system boundary step by step. It starts with one tree, which takes up carbon and absorbs extra sunlight because its canopy is darker than the land it replaces. Next comes the carbon cycle, where ocean and land hand back part of the removed CO₂. Then the Earth's energy balance turns forcing into temperature. Finally the view grows to every reforestable 0.5° cell, and then to DAC as the second removal route. Everything is computed year by year, so the result is a temperature path to 2100 rather than one number.
 
-Despite rapid decarbonisation, IPCC scenarios for limiting warming to 1.5–2°C require substantial net negative CO₂ emissions — a **CDR gap** that natural climate solutions, particularly afforestation, are frequently proposed to fill. But forests modify the Earth's energy balance through multiple pathways simultaneously:
+## The chain
 
-1. **Trees take time.** CO₂ stays in the atmosphere for decades before being absorbed. The integrated warming during this gap is a real climate cost.
-2. **Growth rates vary by latitude.** A tropical forest sequesters 3–4× faster than a boreal one.
-3. **Albedo works against you at high latitudes.** Dark forest canopy absorbs more solar radiation than the open land or snow-covered ground it replaces — in boreal regions, this warming can exceed the cooling from carbon uptake.
-4. **The sink shrinks.** Warming increases soil respiration and fire risk, reducing CDR effectiveness over time.
-5. **Soil carbon transitions take time.** Converting some land types to forest can initially release soil carbon, adding an early warming spike.
+One tree, two channels, one convolution:
 
-This framework quantifies each effect through a **progressive complexity framework** (Levels 0–6), revealing how the net climate effectiveness of afforestation departs from naive carbon-only accounting.
-
-## Progressive Complexity Levels
-
-| Level | Name | What's added | Key insight |
-|-------|------|-------------|-------------|
-| 0 | Carbon-only (static) | No dynamics | Assumes instant, permanent sequestration |
-| 1 | Trees Take Time | Carbon uptake with growth curve (tropical) | Temporal delay creates warming debt |
-| 2 | Location Matters | Latitude-dependent growth parameters | Tropical forests offset 3× faster than boreal |
-| 3 | The Albedo Effect | Surface albedo change | Boreal afforestation can cause net warming |
-| 4 | The Shrinking Sink | Q10 respiration + disturbance probability | CDR effectiveness degrades under warming |
-| 5 | Soil Carbon Dynamics | SOC dynamics during land-use transition | Early soil carbon release adds warming spike |
-| 6 | The Full Picture | All processes combined | Net climate effectiveness at full physical realism |
-
-## Key Metrics
-
-| Metric | Definition | Unit |
-|--------|-----------|------|
-| **Equivalence ratio** | Forest area needed to achieve genuine climate neutrality relative to naive carbon accounting | dimensionless |
-| **Warming debt** | Cumulative excess warming while waiting for CDR to take effect | K·yr |
-| **Break-even year (t\*)** | Year when the intervention becomes net cooling | year |
-| **ΔT(t)** | Time-dependent net temperature impact of the intervention | K |
-
-## Installation
-
-Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
-
-```bash
-uv sync
-```
-
-## Die Kette
-
-Ein Baum, zwei Kanäle, eine Faltung:
-
-    m(t)  →  ṁ_CO₂ = −(44/12)·ṁ  →  Δm_CO₂ = g_C ∗ ṁ_CO₂  →  φ_CO₂ = A_CO₂·Δm_CO₂
-          →  f(t)                                          →  φ_α = −Δα·q̇_kurz·τ·f·A_Baum/A_Erde
+    m(t)  →  ṁ_CO₂ = −(44/12)·ṁ  →  Δm_CO₂ = g_C ∗ ṁ_CO₂  →  φ_CO₂ = ε_CO₂·Δm_CO₂
+          →  f(t)                                          →  φ_α = τ_atm·ΔQ̇_Baum / A_Erde
                                                            →  ΔT = g_T ∗ (φ_CO₂ + φ_α)
 
-FaIR liefert g_C und g_T einmalig; alles danach ist Faltung. Evapotranspiration
-ist kein Term in φ — sie überquert die Bilanzgrenze am Oberrand der Atmosphäre
-nicht und steckt im Rückkopplungsparameter Λ.
+FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C and g_T. Area-wide numbers come from a direct FaIR run instead, with the removal as a negative emission and the albedo as a forcing, so filling sinks and the weaker effect per kg at higher CO₂ are part of the result. Evapotranspiration is not a term in φ: it does not cross the top of the atmosphere.
 
 ```python
 from nbs.pipeline import run_single_tree
 from nbs.metrics import t_star
 
-r = run_single_tree("picea_abies", lat_deg=60.0, scenario="ssp245")
+r = run_single_tree("mf_gemaessigt", lat_deg=50.8, scenario="ssp245")   # temperate mixed forest, Aachen
 print(t_star(r.delta_t, r.years))
 ```
 
-Der vorherige Stand — Komplexitätslevel 0–6, Äquivalenzverhältnis, Sobol —
-liegt unverändert unter `nbs.legacy`.
-
-## Die globale Schicht
-
-Dieselbe Kette, aber über das gesamte 0,5°-Gitter statt für einen Baum an
-einem Ort: eine echte Landmaske, Art-/Flächenzuordnung, globale Aggregation
-über alle bepflanzbaren Zellen, eine Korrekturkaskade auf Bastin et al.
-(2019) und eine Umkehrrechnung gegen 1,5 °C. Siehe
-`notebooks/03_potenzial_global.ipynb` für den vollständigen Durchlauf mit
-Abbildungen.
-
-| Modul | Liefert |
-|---|---|
-| `nbs.grid` | das gemeinsame 0,5°-Gitter (Breiten, Längen, Zellflächen) |
-| `nbs.datasources` | Registrierung, Prüfsumme und Status externer Rasterdaten |
-| `nbs.albedo_grid` | Δα, q̇ und ihr Produkt je Zelle, monatlich und im Jahresmittel |
-| `nbs.landscape` | Landmaske, Art-Zuordnung, bepflanzbare Fläche je Zelle |
-| `nbs.aggregate` | exakte Aufsummierung der Einzelbaum-Kette über das ganze Gitter |
-| `nbs.map_plots` | Karten- und Feldabbildungen für die Ergebnisfolien |
-| `nbs.potential` | die Bastin-Korrekturkaskade und die Umkehrrechnung |
-
-**Datengrundlage:** Die Albedo-Raster stammen von Duveiller, G., Hooker, J.,
-Cescatti, A. (2018), *Sci. Data* 5, 180014 — "Biophysical effects of
-vegetation cover change from satellite and models" (JRC-Datensatz v2.0,
-CC-BY-4.0, (c) European Union). Sie sind nicht Teil des Repositories (`data/`
-ist git-ignoriert) und müssen vor dem Ausführen der globalen Schicht geholt
-werden:
-
-```bash
-uv run python scripts/fetch_data.py duveiller_bph
-```
-
-Ohne diese Raster fällt jede betroffene Funktion sichtbar auf die
-Breitengrad-Ersatztabellen aus Plan 1 zurück (`product_provenance() ==
-"fallback"`, `land_mask_provenance() == "fallback_alles_land"`) statt eine
-plausibel aussehende, aber erfundene Karte zu zeichnen. Selbst mit den
-Rastern vorhanden ist die Art-/Flächenzuordnung innerhalb der Landmaske
-weiterhin ein Fallback auf fünf Breitenbänder (`nbs.landscape.provenance()
-== "fallback"`), da keine Landbedeckungs-/GEZ-Rasterquelle registriert ist —
-und ein erheblicher Teil des Albedo-Produkts ist nur zonal, nicht lokal
-gemessen. Jede Abbildung aus `nbs.map_plots` trägt diese Provenienzangaben
-in ihrer Fußzeile.
-
-## Quick Start
-
-The examples below exercise the previous framework, unchanged under `nbs.legacy` (see
-[Die Kette](#die-kette) above for the current single-tree chain and `nbs.pipeline`).
-
-### Progressive complexity analysis
-
-```python
-from nbs.legacy.credit_analysis import run_progressive_analysis, run_at_level
-
-# Run all 7 complexity levels for a single latitude
-results = run_progressive_analysis(lat=45, scenario="ssp245", pulse_gtco2=1.0, area_mha=1.0)
-
-for level, data in results.items():
-    print(f"Level {level}: equiv_ratio={data['equivalence_ratio_2100']:.2f}, "
-          f"warming_debt={data['warming_debt']:.4f} K·yr, t*={data['t_star']}")
-```
-
-### Run a single complexity level
-
-```python
-result = run_at_level(level=3, lat=60, scenario="ssp245", pulse_gtco2=1.0, area_mha=1.0)
-print(f"Equivalence ratio: {result['equivalence_ratio_2100']:.2f}")
-print(f"Warming debt: {result['warming_debt']:.4f} K·yr")
-print(f"Break-even year: {result['t_star']}")
-```
-
-### Generate figures
-
-```python
-from nbs.legacy.credit_analysis import run_progressive_analysis, run_at_level
-from nbs.legacy.credit_figures import (
-    plot_progressive_delta_t,
-    plot_equivalence_by_latitude,
-    plot_breakeven_by_level,
-    plot_warming_debt,
-    plot_credit_depreciation,
-    plot_credit_sobol,
-)
-
-# Fig 1: Progressive complexity at one latitude
-results_45 = run_progressive_analysis(lat=45)
-plot_progressive_delta_t(results_45, "results/figures", lat=45)
-
-# Figs 2–5: Cross-latitude and SSP analysis
-lat_results = {}
-for lat in [0, 15, 30, 45, 60]:
-    for scenario in ["ssp126", "ssp245", "ssp370"]:
-        for level in [1, 3, 6]:
-            r = run_at_level(level, lat, scenario=scenario)
-            lat_results[(level, lat, scenario)] = r
-
-plot_equivalence_by_latitude(lat_results, "results/figures")
-plot_breakeven_by_level(lat_results, "results/figures")
-plot_warming_debt(lat_results, "results/figures")
-plot_credit_depreciation(lat_results, "results/figures")
-```
-
-### Intervention comparison
-
-```python
-from nbs.legacy.scenario_runner import run_single_scenario, run_all_scenarios
-
-result = run_single_scenario(
-    intervention="tropical_reforestation",
-    lat=0, scenario="ssp245", area_mha=1.0,
-)
-print(f"Break-even year: {result['t_star']}")
-print(f"Peak cooling: {result['delta_t'].min() * 1000:.1f} mK")
-
-results = run_all_scenarios(area_mha=1.0)
-```
-
-## Configuration
-
-### Spatial scope
-
-| Dimension | Options |
-|-----------|---------|
-| Latitude bands | 0°, 15°, 30°, 45°, 60°N |
-| SSP scenarios | SSP1-2.6, SSP2-4.5, SSP3-7.0 |
-| Complexity levels | 0, 1, 2, 3, 4, 5, 6 |
-
-### Interventions
-
-| Intervention | Key | Valid latitudes |
-|---|---|---|
-| Tropical Reforestation | `tropical_reforestation` | 0–25°N |
-| Boreal Afforestation | `boreal_afforestation` | 45–90°N |
-| Avoided Deforestation | `avoided_deforestation` | 0–25°N |
-| BECCS | `beccs` | 0–60°N |
-
-### Sensitivity parameters
-
-| Parameter | Base | Range | Controls |
-|---|---|---|---|
-| `B_max_scale` | 1.0 | 0.7–1.3 | Maximum biomass (±30%) |
-| `Q10` | 2.0 | 1.5–2.5 | Soil respiration temperature sensitivity |
-| `eta_CCS` | 0.87 | 0.75–0.95 | CCS capture efficiency |
-| `p_disturb_scale` | 1.0 | 0.5–2.0 | Disturbance probability multiplier |
-| `mu` | 0.03 yr⁻¹ | 0.01–0.06 | SOC equilibration rate |
-| `albedo_scale` | 1.0 | 0.7–1.3 | Albedo forcing multiplier |
-
-## Project Structure
+## Layout
 
 ```
-src/nbs/
-  species.py    fünf Arten, je Biom eine
-  tree.py       Vorrat, Kronenschluss, Störungspfade — je Baum
-  forcing.py    φ_CO₂ und φ_α
-  response.py   Impulsantworten g_C, g_T; Faltung
-  pipeline.py   die vollständige Kette für einen Baum an einem Ort
-  metrics.py    t*, Risikoprämie, Quantilbänder
-  plots.py      Abbildungen für die Ergebnisfolien
-  constants.py  gemeinsame physikalische Konstanten
-  fair_module.py
-  grid.py           gemeinsames 0,5°-Gitter
-  datasources.py    externe Rasterquellen, Prüfsumme, Status
-  albedo_grid.py    Δα, q̇ und ihr Produkt je Rasterzelle (Duveiller et al. 2018)
-  landscape.py      Landmaske, Art-Zuordnung, bepflanzbare Fläche je Zelle
-  aggregate.py      Kette über das ganze Gitter aufsummiert
-  map_plots.py      Karten- und Feldabbildungen (globale Schicht)
-  potential.py      Bastin-Korrekturkaskade, Umkehrrechnung 1,5 °C
-  legacy/       vorheriger Stand, Tests laufen weiter
+src/nbs/            the model
+  tree.py, species.py, site_factor.py, forest_data.py   growth and forest type per cell
+  forcing.py, response.py, fair_module.py              forcing, impulse responses, FaIR
+  pipeline.py, metrics.py                              one tree at one place
+  grid.py, albedo_grid.py, landscape.py, aggregate.py  the 0.5° grid
+  potential.py, tree_paths.py, planting_time.py        area, planting paths over time
+  dac*.py                                              DAC energy, life cycle, storage, optimisation
+  *_figures.py, map_fields.py                          figures and map data for the deck
+  legacy/                                              the earlier level 0–6 framework, kept with its tests
+scripts/            fetch and prepare data, compute the deck's numbers and data
+deck/               the HTML talk (see below)
+data/               inputs (data/raw is not in git)
+docs/methods/       method notes: forest types, FaIR, DAC model, literature
+notebooks/          01 one tree, 03 the global layer
 tests/
-notebooks/
-  01_einzelbaum.ipynb        ein Baum, ein Ort
-  03_potenzial_global.ipynb  die globale Schicht: Kaskade, Karte, Umkehrrechnung
-  archiv/
 ```
 
-## Running Tests
+## Setup
+
+Python 3.11+ and [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv run pytest                    # fast tests only
-uv run pytest -m slow            # integration tests (slow, runs FaIR)
-uv run pytest -v --tb=short      # all tests, verbose
+uv sync
+uv run python scripts/fetch_data.py duveiller_bph   # albedo rasters (Duveiller et al. 2018, CC-BY-4.0)
 ```
 
-## Model Details
+The other raw inputs (Walker, Hasler, Cook-Patton, CRU, Gidden, CMIP7) go to `data/raw/`. `scripts/prepare_*.py`, `scripts/fetch_*.py` and the method notes say where each comes from. Without the rasters, the affected functions fall back to latitude tables visibly and say so through `provenance()`.
 
-- **Carbon dynamics**: Chapman-Richards growth model, exponential SOC equilibration, Q10 soil respiration, stochastic disturbance
-- **Albedo**: MODIS-derived values per intervention/latitude, 3-year linear transition
-- **Climate model**: FaIR v2.2 (Leach et al. 2021), AR6-calibrated EBM parameters
-- **Reference emission**: Single-year CO₂ pulse at 2025
-- **Time horizon**: 2025–2150
+The DAC life-cycle inputs (`data/dac/lca_vintages*.json`) come from premise databases in a separate Brightway environment (`scripts/build_premise_scenarios.py`, `scripts/dac_lca_precompute.py`). They are committed, so the model runs without Brightway.
+
+## The deck
+
+The talk is one HTML page. Its sources are in `deck/src`, and one build puts it together:
+
+```bash
+uv run python deck/build.py      # -> deck/dist/index.html (plus data/ and vendor/)
+cd deck/dist && python3 -m http.server 8765
+```
+
+```
+deck/
+  build.py            inlines src/ into one page, injects chart_data, copies assets, drops unused charts
+  src/index.html      page shell: head, icons, script order
+  src/css/deck.css    design tokens, layout, animation
+  src/js/deck.js      navigation, charts (ECharts), presenter view, slide menu
+  src/js/loader.js    loads chart data and ECharts in the background
+  src/js/dacfilm.js   the animated DAC map
+  src/slides/         one file per chapter, 07_backup.html after "Danke"
+  chart_data/         JSON the build injects (tempsum, zeitpfade, dacfilm) or the model caches
+  assets/data/        figure data: ec_charts.js, maps.js, cmip7.js
+  assets/vendor/      ECharts, KaTeX, fonts (everything runs offline)
+  export_charts.py    model figures -> assets/data (via mpl_to_echarts.py)
+```
+
+To change slide text or layout, edit `deck/src` and rebuild. If the model changes, refresh the data first and then rebuild:
+
+| Data | Command |
+|---|---|
+| figures, maps, CMIP7 series | `uv run python deck/export_charts.py` (or `--only k6,b8`) |
+| numbers quoted on slides | `uv run python scripts/export_slide_facts.py` → `deck/chart_data/fakten.json` |
+| temperature per tree | `uv run python scripts/build_tempsum_data.py` |
+| planting and DAC paths | `uv run python scripts/build_zeitpfade_data.py` |
+| DAC optimisation, DAC film | `scripts/dac_optim_export.py`, then `scripts/build_dacfilm_data.py` |
+
+Slide texts are typed in `deck/src/slides`, so check them against `fakten.json` after a model change. `tests/test_slide_numbers.py` recomputes the headline numbers.
+
+Keys in the deck: ← → to move, P for the presenter view, N for notes, R to replay the animation, M for the slide menu, B for the backup, F for fullscreen, and a number followed by Enter to jump to that slide. Pushes to `main` that touch `deck/` build and deploy it to GitHub Pages (`.github/workflows/pages.yml`).
+
+## Tests
+
+```bash
+uv run pytest -m "not slow"     # fast
+uv run pytest                   # everything, including FaIR-backed runs
+```

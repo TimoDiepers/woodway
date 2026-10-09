@@ -46,7 +46,7 @@ def test_slide_36_land_mask_is_quoted_as_an_area_share():
 import json
 from pathlib import Path
 
-FACTS = json.loads((Path(__file__).resolve().parents[1] / "docs/slides/chart_data/fakten.json").read_text())
+FACTS = json.loads((Path(__file__).resolve().parents[1] / "deck/chart_data/fakten.json").read_text())
 """What the deck prints (scripts/build_storyline_v2_deck.py reads only this)."""
 
 

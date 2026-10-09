@@ -139,7 +139,7 @@ def planting_choice() -> dict[str, dict[str, float]]:
     from nbs.potential import _masked_global_delta_t, cascade
 
     # four global FaIR runs take a while: cached next to the slide facts (delete to recompute)
-    cache = Path(__file__).resolve().parents[2] / "docs" / "slides" / "chart_data" / "pflanzwahl.json"
+    cache = Path(__file__).resolve().parents[2] / "deck" / "chart_data" / "pflanzwahl.json"
     if cache.exists():
         return json.loads(cache.read_text())
     plant = assign_species() != None  # noqa: E711
@@ -163,7 +163,7 @@ def _cached_json(name: str, compute):
     import json
     from pathlib import Path
 
-    cache = Path(__file__).resolve().parents[2] / "docs" / "slides" / "chart_data" / name
+    cache = Path(__file__).resolve().parents[2] / "deck" / "chart_data" / name
     if cache.exists():
         return json.loads(cache.read_text())
     out = compute()
@@ -175,7 +175,7 @@ def _cached_json(name: str, compute):
 def area_series() -> dict:
     """Global temperature change [K] year by year from planting (typical forest, 2025) on the cooling
     cells and on every reforestable cell, each with and without albedo -- the same four FaIR runs as
-    planting_choice, kept as time series (cached in docs/slides/chart_data/flaechen_zeitreihe.json)."""
+    planting_choice, kept as time series (cached in deck/chart_data/flaechen_zeitreihe.json)."""
 
     def compute():
         from nbs.constants import YEARS
@@ -197,7 +197,7 @@ def area_series() -> dict:
 def planting_delay() -> dict:
     """Cooling of the cooling cells in 2050 and 2100 by planting year, relative to planting in 2025.
     Per-tree runs (typical forest per cell, full model incl. warming-dependent disturbance) summed over
-    the trees of each cell; cached in docs/slides/chart_data/pflanzjahr_global.json."""
+    the trees of each cell; cached in deck/chart_data/pflanzjahr_global.json."""
 
     def compute():
         from nbs.constants import A_EARTH_M2, TAU_ATM, YEARS
@@ -285,7 +285,7 @@ def need_temperature_series() -> dict:
     """Cooling [K, positive] that the removal CMIP7 Very Low needs (novel + land) would bring, year by
     year from the start year: the removal as a negative CO2 flux through the same chain as the trees
     (impulse response g_C, logarithmic forcing against the SSP2-4.5 background, temperature response g_T).
-    Cached in docs/slides/chart_data/bedarf_temperatur.json."""
+    Cached in deck/chart_data/bedarf_temperatur.json."""
 
     def compute():
         from nbs.cmip7_figures import removal
@@ -386,7 +386,7 @@ def tree_scenarios() -> dict:
     """Trees on the same cells (cooling 0.42 Gha, all 0.83 Gha) in each CMIP7 marker world: the marker's own
     emissions drive FaIR (background warming, CO2, sinks) and its own removal 2024-2100 is the need. Net share
     in 2100 from two FaIR runs (with and without albedo) on top of the scenario; net CO2 = the cascade's carbon
-    x net share. Cached in docs/slides/chart_data/szenarien_cmip7_baeume.json."""
+    x net share. Cached in deck/chart_data/szenarien_cmip7_baeume.json."""
 
     def compute():
         from nbs.cmip7_figures import MARKERS, cumulative_removal
@@ -424,7 +424,7 @@ def removal_series() -> dict:
     year and ten years later: gross (stock change x 44/12) and net of albedo (gross x Delta_T full /
     Delta_T CO2 only, the net share of the talk, here time-resolved). Per-tree runs (typical forest per
     cell, full model) summed over the trees of each cell, as planting_delay. Cached in
-    docs/slides/chart_data/baeume_entnahme_zeitreihe.json."""
+    deck/chart_data/baeume_entnahme_zeitreihe.json."""
 
     def compute():
         from nbs.aggregate import _product_no_nan, co2_factor_grid

@@ -2,23 +2,24 @@
 __pycache__/
 *.pyc
 node_modules/
-docs/slides/andere_vortraege/
 
-# PowerPoint-Sperrdateien - nie committen, sie zerstoeren die Datei beim Oeffnen
-~$*.pptx
-# Zeitgestempelte Sicherungen vor Schreibzugriffen, je ~3 MB
-docs/slides/workspace/dissvortrag_pre_*.pptx
-docs/slides/dissvortrag_backup.pptx
+# the built deck (uv run python deck/build.py)
+deck/dist/
 
-# Rohdaten der Rasterschicht
+# notebook figures
+results/*
+!results/.gitkeep
+
+# raw data of the grid layer
 data/raw/
 
-# Zeitgestempelte Sicherungen vor Folien-Umbauten und Kopien der pptx
-docs/slides/workspace/dissvortrag_v2_vor_*.pptx
-docs/slides/* copy*.pptx
-docs/slides/*_backup_*.pptx
-
-# Laufzeit-Ausgaben von premise / brightway
+# runtime output of premise / brightway
 export/
 unlinked.log
 missing_classifications.csv
+
+# other talks, not part of this repo
+docs/slides/andere_vortraege/
+
+# leftover PowerPoint files (the talk is HTML only now)
+*.pptx

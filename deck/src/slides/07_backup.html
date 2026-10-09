@@ -1,0 +1,289 @@
+<!-- =====================================================
+     BACKUP — nach „Danke“; die Klasse backup trennt es vom Hauptteil
+     ===================================================== -->
+
+<!-- Einordnung -->
+<section class="slide backup" data-ch="dac" data-title="Methodischer Beitrag">
+  <header class="sh"><h2>Methodischer Beitrag</h2></header>
+  <div class="body">
+    <table style="margin-top:4px">
+      <thead><tr><th style="width:22%">Gebraucht</th><th style="width:28%">Baum</th><th style="width:26%">DAC</th><th style="width:24%">Erst damit sichtbar</th></tr></thead>
+      <tbody style="vertical-align:top">
+        <tr class="rise"><td style="font-weight:600; color:var(--fjord)">Systemgrenze bis zur Temperatur</td><td style="font-size:20px">Wachstum, Albedo, Ozean und Land, steigende CO₂-Konzentration, Störung</td><td style="font-size:20px">Strom, Anlage, Sorbens, Speicherung (Ökobilanz)</td><td style="font-size:20px">Netto-Anteil je Ort: Aachen 63 %, Joensuu 28 %<br>→ auf der Hälfte der Fläche wärmt der Baum</td></tr>
+        <tr class="rise" data-step="1"><td style="font-weight:600; color:var(--fjord)">Je Ort und je Jahr</td><td style="font-size:20px">0,5°-Zellen: Waldtyp, Kohlenstoff, gemessene Albedo mit Zeitverlauf</td><td style="font-size:20px">Wetter am Ort; Strommix je Region und Jahr (REMIND-EU über premise)</td><td style="font-size:20px">Rangfolgen statt eines Mittelwerts</td></tr>
+        <tr class="rise" data-step="2"><td style="font-weight:600; color:var(--fjord)">Ein kalibrierter Klima-Emulator, ein Horizont</td><td style="font-size:20px">FaIR: Entnahme als negative Emission, Albedo als Antrieb<br>→ Szenario SSP2-4,5, bewertet 2100</td><td style="font-size:20px">Entnahme je Jahr<br>→ netto nach eigenen Emissionen (GWP100)</td><td style="font-size:20px">Zeitverlauf statt einer Zahl<br>→ bis 2061 kühlt „überall pflanzen“ stärker, danach schwächer<br>→ Verzögerung wirkt vor allem um 2050</td></tr>
+      <tr class="rise" data-step="3"><td style="font-weight:600; color:var(--fjord)">Ausbau optimieren</td><td style="font-size:20px">—</td><td style="font-size:20px">Lineares Programm: Speicher je Land (Gidden 2025), Wachstum ≤ 20 %/a</td><td style="font-size:20px">nötige Kapazität je Zieljahr<br>→ Ort nach Speicher statt nach Strom</td></tr>
+      </tbody>
+    </table>
+    <p class="rise" data-step="4" style="margin-top:22px; font:400 18px/1.45 var(--sans); color:var(--ink-2)"><b style="color:var(--muted); letter-spacing:.08em; font-weight:600">NICHT IM MODELL</b> &nbsp; Kosten · Verdunstung und Wolken als eigene Klimawirkung · dynamische Schneedecke · Flüssig-DAC · Zusatzstrom statt Netzmittel · Injektionsraten je Becken · ein Klimamitglied statt Ensemble</p>
+    <div style="flex:1"></div>
+    <p class="takeaway" data-step="5" style="--d:0; font-size:22px">Neu: eine zeitaufgelöste Rechnung je Ort für Baum und DAC, mit kalibriertem Klima-Emulator und Ausbau-Optimierung.</p>
+  </div>
+  <aside class="notes">
+    <p class="q">Ausführlich: Die einzelnen Bausteine gibt es in der Literatur. Neu ist ihre Kombination: dieselbe zeitaufgelöste Rechnung je Ort für Aufforstung und DAC, mit einem kalibrierten Klima-Emulator statt fester Umrechnungsfaktoren.</p>
+    <p>Was hat es gebraucht, um diese Fragen zu beantworten? Drei Dinge. Erstens die Systemgrenze bis zur Temperatur: Erst mit Ozean, Land, vollerer Atmosphäre und Störung sieht man, wie viel die Albedo vom Nutzen des Kohlenstoffs frisst — in Aachen ein Drittel, in Joensuu zwei Drittel — und dass der Baum auf der Hälfte der Fläche wärmt. Am Baum allein gerechnet, wie in der naiven Rechnung, käme Aachen auf −157 statt −34 · 10⁻¹⁵ K (Backup „Was jede Erweiterung der Systemgrenze kostet“). Zweitens je Ort und je Jahr rechnen: Nur so entstehen Rangfolgen — wo zuerst, wo nicht — statt eines globalen Mittelwerts. Drittens ein echtes Klimamodell statt fester Faktoren: Wir lassen den Klima-Emulator FaIR laufen, der auf Messungen und auf die großen Klimamodelle kalibriert ist. Er rechnet selbst, dass sich die Senken füllen, dass jedes Kilogramm bei mehr CO₂ schwächer wirkt und wie träge die Erde reagiert. Erst damit lassen sich Tempo und Wirkung von Baum und Maschine im selben Horizont vergleichen; GWP100 und statische Bilanzen sehen nur Endzustände. Viertens die Optimierung: Erst mit Speicher- und Wachstumsgrenzen sieht man, wie viel DAC wann nötig ist und dass der Speicher, nicht der Strom, die Orte bestimmt.</p>
+    <p class="q">Falls Fragen kommen — Einordnung, ehrlich: Zeitaufgelöst rechnen auch andere — Kirschbaum et al. 2011 (ein Standort), Arora &amp; Montenegro 2011, Weber et al. 2024 und Liang et al. 2025 (Erdsystem- bzw. dynamische Modelle, ganze Szenarien). Statisch und je Ort rechnen Hasler et al. 2024 und Rohatyn et al. 2022. Das Tempo der Albedo stammt aus Williams et al. 2026. Unseres Wissens neu ist die Kombination: je Ort und Jahr, vom Baum bis zur Temperatur, mit Szenario-Hintergrund und Störung, und derselbe Rahmen für DAC. FaIR: Version 2.2, Parametersatz fair-calibrate 1.4.1, ein Mitglied nahe dem Ensemble-Median (ECS 2,9 K), nach einer vorab festgelegten Regel gewählt (docs/methods/klimamodell-fair.md). Grenzen: keine Kosten; Strom als Netzmittel der Region; Schneedecke statisch (boreal eher zu streng); Klimanormal 2011–2020 für DAC; DAC-Emissionen mit GWP100 statt durch FaIR. Vergleich mit anderen Studien: Backup „Einordnung: andere Studien“.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-title="Die Rechnung in der Literatur">
+  <header class="sh"><h2>Dieselbe Rechnung in der Literatur: Bastin et al. (2019)</h2></header>
+  <div class="body">
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:0 64px; align-items:start; margin-top:12px">
+      <div style="font-family:var(--sans); color:var(--moss); line-height:1">
+        <div class="rise" style="font-size:92px; font-weight:600; letter-spacing:-.02em"><span class="count" data-to="205" data-dec="0">205</span> GtC</div>
+        <div class="rise" style="font-size:20px; margin-top:10px; color:var(--muted)">Bastin et al. 2019 · auf 0,9 Gha</div>
+        <div class="rise" data-step="2" style="font-size:52px; font-weight:500; margin-top:44px; color:var(--clay)">→ 81 GtC</div>
+        <div class="rise" data-step="2" style="font-size:20px; margin-top:10px; color:var(--muted)">korrigiert binnen Monaten</div>
+      </div>
+      <div>
+        <p class="rise" style="--d:300">Bastin et al. 2019 in Science: 0,9 Gha zusätzliche Waldfläche, 205 GtC zusätzlicher Speicher.</p>
+        <p class="rise" data-step="1" style="margin-top:18px">Eines der meistdiskutierten Klimapapiere überhaupt — und die wissenschaftliche Grundlage der Kampagne „eine Billion Bäume“.</p>
+        <p class="rise" data-step="2" style="--d:300; margin-top:18px">Binnen Monaten korrigierte die Fachwelt den Wert auf rund 81 GtC. Weitere Kritik wurde als Kriterienkatalog formuliert.</p>
+      </div>
+    </div>
+    <div style="flex:1"></div>
+    <p class="takeaway" data-step="3" style="--d:0">Die Überschlagsrechnung ist publiziert, vielfach zitiert und politisch wirksam geworden. Wir korrigieren deshalb nicht ihr Ergebnis, sondern ihre Bilanzgrenze.</p>
+  </div>
+  <p class="src">Bastin et al. 2019, Science 365, 76 (Modellergebnis: aus Satelliten-Stichproben der Baumbedeckung hochgerechnet); Korrektur: Kommentare von Veldman et al. und Friedlingstein et al. 2019, Science 366.</p>
+  <aside class="notes">
+    
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="vergleich" data-title="Einordnung: andere Studien">
+  <header class="sh"><h2>Einordnung: andere Studien</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="v1b" data-label="Anteil des Kohlenstoffnutzens, der nach Albedo bleibt: Literatur und dieses Modell"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0; font-size:21px">Alle Studien sehen dasselbe: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende, aus drei Gründen: Die wiederbewaldbare Fläche liegt oft im Norden und im Trockenen; unser Kohlenstoff ist aus Messungen hochgerechnet, etwa halb so viel wie im Erdsystemmodell; und wir bewerten 2100 bei steigendem CO₂. Mit Haslers statischer Formel kämen wir auf 20 %.</p></div>
+  </div>
+  <p class="src">Literaturwerte: Riley 2025 (Auswertung bestehender Projekte); Weber 2024, Fahrenbach 2026 (Erdsystemmodelle); Hasler 2024, Rohatyn 2022 (statische Bilanzen aus Satelliten- und Kartendaten); Liang 2025 (dynamisches Vegetationsmodell). Dieses Modell: eigene Rechnung.</p>
+  <aside class="notes">
+    <p>Einheit: welcher Anteil des reinen Kohlenstoffnutzens nach der Albedo übrig bleibt. Gemeinsam haben alle: den Rückfluss von CO₂ aus Ozean und Land über eine Impulsantwort (Hasler: Joos-Mittel, Restanteil über 100 Jahre). Was dieses Modell zusätzlich abbildet: (1) den Zeitverlauf — Wachstum und Kronenschluss Jahr für Jahr, bewertet als Erwärmung in einem genannten Jahr; Hasler vergleicht maximalen Kohlenstoff mit maximaler Albedo und nennt den Zeitverlauf selbst als offene Lücke („ignores the time frame over which both unfold … additional work is urgently needed“); (2) einen Hintergrund, der sich ändert: SSP2-4,5 statt fester 400 ppm, mit einem Kohlenstoffkreislauf, dessen Senken nachlassen (FaIR); (3) Störungen, die mit der Erwärmung zunehmen (Hasler: keine). Liang et al. rechnen Klima und Feuer ebenfalls dynamisch und landen mit 30 % am nächsten. Fahrenbach et al. (CESM2, voll gekoppelt) enthalten zusätzlich die Kühlung durch Verdunstung in den Tropen, die unser Modell nicht hat — dort sind wir eher zu streng. Riley et al. werten bestehende Projekte aus, die schon dort liegen, wo Albedo wenig kostet. Woher die Abweichungen kommen: Hasler — vor allem die Fläche (auf Walkers Karte rechnet er selbst mit mehr Offset), dann der Horizont 2100 statt Endzustand. Fahrenbach — vor allem die Kohlenstoffmenge: CESM2 lässt etwa doppelt so viel wachsen (≈ 100 statt 51 t C/ha); mit dieser Menge kämen auch wir auf rund 65 %. Gegenprobe: Die ganze Entnahme als Zeitreihe in einen vollen FaIR-Lauf gegeben, liefert dasselbe wie unsere Rechnung (18 % gegen 17 % bis 2100). Eine Annahme mit Gewicht: Störungen lichten den Wald, der dann weniger Licht schluckt — das bringt bis 2100 rund 20 Prozentpunkte zurück. Warum wir strenger sind: 2100 ist der Baum längst gesättigt, der größte Teil seiner Entnahme liegt Jahrzehnte zurück, die Albedo wirkt dagegen voll; dazu die Fläche (Walker et al. 2022), boreal- und trockengebietslastig — für genau diese Karte findet Hasler auf 65 % der Fläche über 50 % Offset, wir mit seiner Formel 73 %. Grenze dieses Modells: Die Schneedecke ist statisch, boreal fällt die Albedo-Strafe späterer Jahrzehnte daher eher zu hoch aus. Methode: docs/methods/abgleich-hasler-waldtypen.md.</p>
+  </aside>
+</section>
+
+<!-- Grundlagen: Baum und Klima -->
+<section class="slide backup" data-ch="baeume" data-title="Gemeinsame Währung: Energie">
+  <header class="sh"><h2>Gemeinsame Währung: Energie</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="b10" data-label="Licht wärmt (oben), entnommenes CO₂ kühlt (unten), beide in Watt je Baum"></div>
+    <div class="foot">
+      <div class="eq tex rise" style="--d:1800">$$\dot Q_{\mathrm{CO_2}} = \varepsilon_{\mathrm{CO_2}}\,A_{\mathrm{Erde}}\,m_{\mathrm{CO_2}}$$</div>
+      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">Kilogramm CO₂ und Watt Licht lassen sich nur in einer gemeinsamen Währung vergleichen: Energie. Licht wärmt (oben), das bisher entnommene CO₂ kühlt (unten) — rund 0,9 W je kg. So gerechnet überwiegt das CO₂ an allen drei Orten vom ersten Jahr an; in Joensuu (FI) holt das Licht aber viel davon wieder auf, bei Marabá (BR) nur wenig. Offen bleiben zwei Fragen, die nicht der Baum beantwortet, sondern das Klimasystem: Wie lange fehlt das CO₂ der Luft? Und wie stark wirkt jedes Kilogramm?</p>
+    </div>
+  </div>
+  <p class="src">Eigene Rechnung. Naiv: alles entnommene CO₂ fehlt der Luft für immer; Wirkung je kg: Lehrbuchwert ε_CO₂ = 1,76·10⁻¹⁵ W m⁻² kg⁻¹ (IPCC AR6, aus Strahlungstransfer-Modellen) über A_Erde = 5,1·10¹⁴ m².</p>
+  <aside class="notes">
+    <p>Watt sind Watt. Die Albedo liefert sie direkt. Für das CO₂ fragen wir: Wie viel Wärmestrahlung hält ein Kilogramm in der Luft zurück? Lehrbuchwert mal Erdoberfläche: knapp ein Watt je Kilogramm. Damit sind beide Kurven in derselben Einheit. Diese Rechnung hat zwei stille Annahmen — dass das CO₂ in der Luft bleibt und dass jedes Kilogramm gleich wirkt. Beides hängt nicht vom Baum ab, sondern vom Rest des Klimasystems. Das ist das nächste Kapitel. (Die Albedo kommt dort noch mit dem Faktor τ_atm ≈ 0,8 für den Weg nach oben.)</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="klima" data-title="Strahlungsantrieb von CO₂: Kurven">
+  <header class="sh"><h2>Strahlungsantrieb von CO₂</h2></header>
+  <div class="body">
+    <div class="road"><span class="froad late"><span class="tex">$\cq{\varphi_{\mathrm{CO_2}}}(t) =$</span><span class="fw cur swaps"><span class="w">Stärke des Antriebs</span><span class="s tex">$\cq{\varepsilon_{\mathrm{CO_2}}}(t)$</span></span><span class="fx">×</span><span class="fw"><span class="w">CO₂-Änderung der Atmosphäre</span></span></span></div>
+    <div style="display:grid; grid-template-columns:minmax(0,1fr) 610px; gap:28px; flex:1; min-height:0; align-items:center"><div class="chart" data-slot-steps="0,1" data-chart="k6" data-label="Links Strahlungsantrieb des gesamten CO₂ über der Konzentration mit Tangenten 2026 und 2100; rechts Antrieb je kg CO₂ 2026 bis 2100" style="height:100%"></div><div class="rise" style="--d:900"><div class="eq tex" style="font-size:21px">$$\begin{aligned}\varphi(c) &= \pc{5{,}35}\,\tfrac{\mathrm{W}}{\mathrm{m^2}}\,\ln\frac{c}{\pc{c_0}}\\ \cq{\varepsilon_{\mathrm{CO_2}}}(t) &= \frac{\partial\varphi}{\partial m} = \frac{\pc{5{,}35}\,\mathrm{W/m^2}}{\pc{k}\,c(t)}\\ \cq{\varphi_{\mathrm{CO_2}}}(t) &= \cq{\varepsilon_{\mathrm{CO_2}}}(t)\,\cq{\Delta m_{\mathrm{CO_2}}}(t)\end{aligned}$$</div><dl class="legend sm tex rise" style="--d:1200"><dt>$\varphi(c)$</dt><dd>Antrieb des gesamten CO₂ gegenüber vorindustriell [W/m²]</dd><dt>$c,\ \pc{c_0}$</dt><dd>CO₂-Konzentration im Szenario [ppm]; vorindustriell 278 ppm</dd><dt>$m,\ \pc{k}$</dt><dd>CO₂-Masse der Atmosphäre, m = k · c; k = 7,82 · 10¹² kg je ppm</dd><dt>$\cq{\varepsilon_{\mathrm{CO_2}}}$</dt><dd>Strahlungseffizienz [W/m² je kg] — 1,64 → 1,31 · 10⁻¹⁵ (2026 → 2100)</dd><dt>$\cq{\Delta m_{\mathrm{CO_2}}}$</dt><dd>CO₂-Änderung der Atmosphäre durch den Baum (nächste Folien)</dd><dt>$\cq{\varphi_{\mathrm{CO_2}}}$</dt><dd>CO₂-Antrieb des Baums [W/m²], < 0: kühlt</dd></dl></div></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800; font-size:21px">Mehr CO₂ in der Atmosphäre, weniger Antrieb je kg: 1,64 → 1,31 · 10⁻¹⁵ W/m².</p></div>
+  </div>
+  <p class="src">Antrieb: Myhre et al. 1998 (aus Strahlungstransfer-Modellen), c₀ = 278 ppm; k = 7,82 · 10¹² kg CO₂ je ppm; CO₂-Konzentration im Szenario SSP2-4.5: Modellergebnis FaIR (Leach et al. 2021; Smith et al. 2024).</p>
+  <aside class="notes">
+    <p class="q">Ausführlich: CO₂ verringert die langwellige Abstrahlung der Erde; dieser Strahlungsantrieb wächst logarithmisch mit der Konzentration. Je mehr CO₂ bereits in der Atmosphäre ist, desto kleiner ist der Antrieb je zusätzlichem Kilogramm: im Szenario SSP2-4.5 1,64 · 10⁻¹⁵ W/m² im Jahr 2026, 1,31 · 10⁻¹⁵ W/m² im Jahr 2100. Mit der CO₂-Änderung aus der Impulsantwort ergibt das den Antrieb des Baums.</p>
+    <p>Oben der CO₂-Term von eben, unsere Basis für die nächsten Folien. Zuerst der erste Faktor, der Antrieb je Kilogramm ε_CO₂ — umrahmt.</p>
+    <p>Die erste Frage: Wie stark wärmt das CO₂, das in der Atmosphäre fehlt oder dazukommt? CO₂ absorbiert die Wärmestrahlung der Erde in bestimmten Wellenlängen. Mehr CO₂ heißt: Die Wärme wird aus größerer, kälterer Höhe abgestrahlt, also weniger davon — die Energiebilanz der Erde verschiebt sich. Diese Verschiebung in Watt je Quadratmeter Erdoberfläche heißt Strahlungsantrieb. Links: Für das gesamte CO₂ in der Luft wächst er logarithmisch mit der Konzentration — die Kurve wird flacher. Die Steigung ist der Antrieb je zusätzlichem Kilogramm; 2026 ist sie steiler als 2100, weil bis dahin mehr CO₂ in der Luft ist. Rechts diese Steigung über die Zeit: 1,64 heute, 1,31 im Jahr 2100, in 10⁻¹⁵ Watt je Quadratmeter und Kilogramm. Unten die drei Zeilen: Antrieb des gesamten CO₂, seine Ableitung je Kilogramm, und mal der CO₂-Änderung des Baums, die wir als Nächstes bestimmen — das ist der Antrieb, den der Baum über seinen Kohlenstoff erzeugt.</p>
+    <p class="q">Falls Fragen kommen — Myhre et al. (1998): ΔF = 5,35 · ln(c/c₀) W/m², aus Strahlungstransfer-Rechnungen; für kleine Änderungen linearisiert, ε_CO₂ = 5,35 / (k · c). FaIR selbst nutzt eine genauere, zustandsabhängige Formel (Meinshausen et al. 2020); entlang SSP2-4.5 weicht der Koeffizient um höchstens 2,5 % ab. Der Lehrbuchwert 1,76 · 10⁻¹⁵ W/m² je kg (IPCC AR6) entspricht etwa 389 ppm. Spektrum und Höhe der Abstrahlung: Backup „Warum CO₂ wärmt“.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="klima" data-title="Impulsantwort auf die CO₂-Aufnahme eines Baums">
+  <header class="sh"><h2>Impulsantwort auf die CO₂&#8209;Aufnahme eines Baums</h2></header>
+  <div class="body">
+    <div class="road"><span class="froad"><span class="tex">$\cq{\varphi_{\mathrm{CO_2}}}(t) =$</span><span class="fw done"><span class="tex">$\cq{\varepsilon_{\mathrm{CO_2}}}(t)$</span></span><span class="fx">×</span><span class="fw cur swaps"><span class="w">CO₂-Änderung der Atmosphäre</span><span class="s tex">$\cq{\Delta m_{\mathrm{CO_2}}}(t)$</span></span></span></div>
+    
+    <div style="display:grid; grid-template-columns:minmax(0,1fr) 610px; gap:28px; flex:1; min-height:0; align-items:center"><div class="chart" data-chart="k5" data-label="Je Baum: kumulierte CO₂-Aufnahme (Balken) und Abnahme des atmosphärischen CO₂ (Linien), Aachen (DE), Joensuu (FI), Marabá (BR)" style="height:100%"></div><div class="rise" style="--d:900"><div class="eq tex" style="font-size:23px">$$\begin{aligned}\bq{\dot m_{\mathrm{CO_2}}}(t') &= -\tfrac{44}{12}\,\bq{\dot m}(t')\\ \cq{\Delta m_{\mathrm{CO_2}}}(t) &= \sum_{t' \le t} \rq{g_C}(t-t')\, \bq{\dot m_{\mathrm{CO_2}}}(t')\end{aligned}$$</div><dl class="legend sm tex rise" style="--d:1200"><dt>$\bq{\dot m}$</dt><dd>Netto-Kohlenstoffaufnahme des Baums im Jahr t′ [kg C/a]</dd><dt>$\bq{\dot m_{\mathrm{CO_2}}}$</dt><dd>CO₂-Fluss in die Atmosphäre [kg CO₂/a]; Aufnahme negativ</dd><dt>$\rq{g_C}$</dt><dd>Impulsantwort der Vorfolie</dd><dt>$\cq{\Delta m_{\mathrm{CO_2}}}$</dt><dd>CO₂-Änderung der Atmosphäre [kg] (Linien: −Δm)</dd></dl></div></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800; font-size:22px">2100 fehlt der Atmosphäre nur gut die Hälfte der Aufnahme: Aachen 84 von 163 kg.</p></div>
+  </div>
+  <p class="src">Eigene Rechnung; Rückgabe an Ozean und Land: Modellergebnis, Impulsantwort als Mittel mehrerer Erdsystem- und Kohlenstoffkreislaufmodelle (Joos et al. 2013).</p>
+  <aside class="notes">
+    <p class="q">Ausführlich: Jede jährliche Aufnahme des Baums ist eine kleine Entnahme, die mit gC abklingt. Summiert über alle Jahre (Faltung) ist die Abnahme des atmosphärischen CO₂ 2100 gut halb so groß wie die aufgenommene Menge, in Aachen (DE) 84 von 163 kg. Um 2090 erreicht sie ihr Maximum: Danach nimmt der ausgewachsene Wald kaum noch auf, Ozean und Land geben weiter CO₂ ab — 2200 noch 68 von 177 kg.</p>
+    <p>Dieselbe Antwort, jetzt für den Baum. Der Baum entnimmt jedes Jahr ein bisschen; jede dieser kleinen Entnahmen klingt für sich nach der Kurve von eben ab. Die Balken zeigen, was der Baum bis dahin insgesamt aufgenommen hat, die Linien, um wie viel das CO₂ in der Atmosphäre dadurch abgenommen hat. Das ist die Formel unten: Aus dem Kohlenstoffzuwachs des Baums wird mit 44/12 ein CO₂-Fluss, negativ, weil er die Atmosphäre verlässt; jede Jahresaufnahme wird mit der Impulsantwort gewichtet, die bis heute vergangen ist, und alles summiert. 2100 ist das gut die Hälfte dessen, was der Baum aufgenommen hat. Ich zeige hier bewusst bis 2200, über unseren Bewertungshorizont hinaus: Um 2090 erreicht die Abnahme ihr Maximum. Danach wächst der Wald kaum noch, die Aufnahme geht gegen null, aber Ozean und Land geben weiter CO₂ zurück — die Linie sinkt, Richtung des dauerhaften Anteils von gut einem Fünftel.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="klima" data-title="Gesamter Strahlungsantrieb je Baum">
+  <header class="sh"><h2>Gesamter Strahlungsantrieb je Baum</h2></header>
+  <div class="body">
+    <div class="road" style="margin-bottom:10px"><span>Beide Terme zusammen</span><span class="tex" style="font-size:27px">$\htmlClass{fd}{\varphi(t) = \pc{\tau_{\mathrm{atm}}}}\;\;\htmlClass{hl hl-q}{\bq{\Delta\dot Q_{\mathrm{Baum}}}(t)}\;\;\htmlClass{fd}{/\,\pc{A_{\mathrm{Erde}}} + \cq{\varepsilon_{\mathrm{CO_2}}}(t)}\;\;\htmlClass{hl hl-m}{\cq{\Delta m_{\mathrm{CO_2}}}(t)}$</span></div>
+    <dl class="legend sm tex tdefs" style="grid-template-columns:auto 1fr auto 1fr; gap:4px 18px; margin:0 0 6px"><dt>$\varphi$</dt><dd>Strahlungsantrieb des Baums [W/m²]</dd><dt>$\cq{\varepsilon_{\mathrm{CO_2}}}$</dt><dd>Antrieb je kg CO₂ — Folie 18</dd><dt>$\pc{\tau_{\mathrm{atm}}}$</dt><dd>Anteil am Oberrand — 0,854</dd><dt class="loc">$\cq{\Delta m_{\mathrm{CO_2}}}$</dt><dd class="loc">CO₂-Änderung der Atmosphäre [kg], &lt; 0 — Folie 19</dd><dt class="loc">$\bq{\Delta\dot Q_{\mathrm{Baum}}}$</dt><dd class="loc">zusätzlich absorbierte Strahlung [W]</dd><dt>$\pc{A_{\mathrm{Erde}}}$</dt><dd>Erdoberfläche — 5,1 · 10¹⁴ m²</dd></dl>
+    <p class="rise locstep" data-step="1" style="--d:0; font:500 22px/1.35 var(--sans); color:var(--ink); margin:22px 0 0">Vom Ort abhängig: <span class="tex">$\bq{\Delta\dot Q_{\mathrm{Baum}}}$</span> und <span class="tex">$\cq{\Delta m_{\mathrm{CO_2}}}$</span> (Albedo, Wachstum; Kapitel Bäume) → <b>Netto-Antrieb an drei Orten:</b></p>
+    <div class="chart" data-step="1" data-slot-steps="0,0,0" data-chart="k10" data-label="Antrieb je Baum in Aachen (DE), Joensuu (FI) und Marabá (BR): CO₂ kühlt, Albedo wärmt, Summe"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="2" style="--d:0; font-size:21px">Mit φ wissen wir, wie groß der Antrieb ist → noch nicht, wie stark sich die Temperatur ändert.</p></div>
+  </div>
+  <p class="src">Eigene Rechnung: CO₂-Antrieb wie auf den Folien „Strahlungsantrieb von CO₂“ und „Impulsantwort“; Albedo-Antrieb aus der gemessenen Albedo-Änderung (Duveiller et al. 2018) und dem Kronenschluss (Williams et al. 2026), τ_atm = 0,854 (Lenton & Vaughan 2009); typischer Wald je Ort, gepflanzt 2026, SSP2-4.5.</p>
+  <aside class="notes">
+    <p>Oben die ganze Gleichung: der Albedo-Term ausgeschrieben, dazu der CO₂-Term aus ε und Δm. Darunter alle Größen noch einmal.</p>
+    <p>Klick: Vom Ort hängen zwei Größen ab, umrahmt: die zusätzlich absorbierte Strahlung und die CO₂-Änderung der Atmosphäre — Albedo und Wachstum aus dem Kapitel Bäume. Jetzt sehen wir, was an Netto-Antrieb herauskommt, an drei Orten zugleich.</p>
+    <p class="q">Ausführlich: Beide Antriebe in derselben Einheit, addiert: An allen drei Orten überwiegt der kühlende CO₂-Antrieb; in Joensuu (FI) gleicht der Albedo-Antrieb einen großen Teil aus, bei Marabá (BR) nur wenig. Der Albedo-Antrieb wächst mit dem Kronenschluss, der CO₂-Antrieb mit dem Vorrat, abgeschwächt durch die Impulsantwort und die steigende CO₂-Konzentration.</p>
+    <p>Oben: Beide Faktoren des CO₂-Terms sind bekannt, der Albedo-Term seit Beginn des Kapitels. Jetzt setzen wir die Gleichung zusammen.</p>
+    <p>Jetzt laufen beide Wege zusammen: der Albedo-Antrieb vom Anfang des Kapitels und der CO₂-Antrieb, den wir eben in zwei Schritten gebaut haben. Beide in Watt je Quadratmeter Erde, also lassen sie sich addieren. Grün kühlt der Kohlenstoff, orange wärmt die Albedo, schwarz die Summe. An allen drei Orten bleibt die Summe kühlend; in Joensuu holt die Albedo einen großen Teil auf.</p>
+    <p class="q">Falls Fragen kommen — τ_atm = 0,854: Anteil einer Reflexionsänderung an der Oberfläche, der am Oberrand der Atmosphäre ankommt (Wolken und Gase absorbieren einen Teil). A_Erde = 5,1 · 10¹⁴ m². Herleitung der Energiebilanz und der Verdunstung, die an dieser Grenze nicht als Antrieb zählt: Backup.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="klima" data-title="Die Erwärmung wirkt auf den Baum zurück">
+  <header class="sh"><h2>Die Erwärmung wirkt auf den Baum zurück</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="k13" data-label="Wirkung je Baum im Jahr 2100 nach Pflanzjahr, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div>
+    <div class="foot">
+      <div class="eq tex rise" style="--d:1800">$$p(t) = p_0\,e^{\gamma\,T(t)}$$</div>
+      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">Und die Erwärmung wirkt zurück: Je wärmer es wird, desto häufiger Feuer, Sturm und Käfer. Störungen kosten Kohlenstoff, lichten aber auch den Wald — dann schluckt er weniger Licht. Unterm Strich kühlt der Wald dadurch 2100 sogar etwas mehr. Ein später gepflanzter Baum kühlt bis 2100 deutlich weniger, ihm bleibt weniger Zeit: 2085 gepflanzt in Aachen (DE) nur noch 32 %.</p>
+    </div>
+  </div>
+  <p class="src">Eigene Rechnung, volles Modell mit FaIR (Leach et al. 2021), SSP2-4,5; Anstieg der Störung mit der Erwärmung aus Modellprojektionen für Europa (Grünig et al. 2026).</p>
+  <aside class="notes">
+    <p>Balken: Wirkung je Baum im Jahr 2100 nach Pflanzjahr. Enthalten sind höhere Störungsrate, vollere Atmosphäre und weniger verbleibende Zeit; getrennt zeigt sie die Leiter im Backup („Was jede Erweiterung der Systemgrenze kostet“).</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="klima" data-title="Was jede Erweiterung der Systemgrenze kostet">
+  <header class="sh"><h2>Was jede Erweiterung der Systemgrenze kostet</h2></header>
+  <div class="body">
+    <div class="chart" data-stops="auto" data-chart="k14" data-label="Temperaturwirkung je Baum 2100 nach jeder Erweiterung der Systemgrenze"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:1800; font-size:21px">Jede Erweiterung kostet Kühlung: in Aachen (DE) von 158 auf 35 (·10⁻¹⁵ K je Baum); den größten Schritt macht die Rückgabe durch Ozean und Land. In Joensuu (FI) bleiben von 108 nur 12, bei Marabá (BR) von 226 noch 65. Nur die Störung gibt etwas zurück: Sie lichtet den Wald, der dann weniger Licht schluckt. Eine Ökobilanz mit GWP100 sieht nur einen Teil davon: Sie mittelt die Rückgabe über 100 Jahre bei festem CO₂-Hintergrund — vollere Atmosphäre und Rückkopplung auf den Baum fehlen ihr.</p></div>
+  </div>
+  <p class="src">Eigene Rechnung, volles Modell mit dem Klima-Emulator FaIR (Leach et al. 2021; Smith et al. 2024), SSP2-4,5; jede Stufe schaltet einen Prozess dazu.</p>
+  <aside class="notes">
+    <p>Leiter: Temperaturwirkung je Baum in 2100 nach jeder Erweiterung der Systemgrenze, kumulativ (nbs.storyline_figures.ladder_delta_t). Aachen: -158 → -136 → -63 → -34 → -35; Joensuu: -108 → -79 → -29 → -9 → -12; Marabá: -226 → -211 → -106 → -65 → -65 (·10⁻¹⁵ K). Bewusst nicht das Jahr t*: In Joensuu liegen Kohlenstoff und Albedo nur rund 20 % auseinander, eine moderate Änderung kippt dort das Jahr von 2048 auf „nie“, obwohl sich die Temperaturwirkung nur von −13 auf +4 verschiebt. „Vollere Atmosphäre“ umfasst den Schritt vom Lehrbuchwert 1,76 (entspricht 389 ppm) auf den logarithmischen Antrieb mit SSP2-4,5-Hintergrund und den Wechsel von der Joos- auf die FaIR-Rückgabe.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="vergleich" data-title="Einfluss des Pflanzjahres">
+  <header class="sh"><h2>Einfluss des Pflanzjahres</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="w3" data-label="Kühlung 2050 und 2100 nach Pflanzjahr, gemessen an der Pflanzung 2026, kühlende Flächen"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800; font-size:22px">Für die Kühlung im Jahr 2100 ist es fast gleich, ob 2026 oder 2046 gepflanzt wird. Für das Maximum der Erwärmung um 2050 nicht: Eine Verzögerung um fünf Jahre verringert die Kühlung dort um knapp ein Viertel, um zehn Jahre um die Hälfte, um zwanzig Jahre fast vollständig. Für die Wirkung um 2050 ist der Pflanzzeitpunkt entscheidend.</p></div>
+  </div>
+  <p class="src">Eigene Rechnung, volles Modell: typischer Wald je Zelle auf den 0,39 Gha, in jedem Pflanzjahr dieselbe Fläche; Störung steigt mit der Erwärmung (Grünig et al. 2026); FaIR (Leach et al. 2021), SSP2-4,5; je Baum gerechnet und über die Bäume summiert. Höhepunkt der Erwärmung im niedrigsten Szenario: 2049 (Folie 2).</p>
+  <aside class="notes">
+    <p>Im Kapitel Klima haben wir gesehen: Ein später gepflanzter Baum kühlt bis 2100 weniger, weil ihm Zeit fehlt und die Welt, in die er wächst, wärmer ist. Hier dasselbe für alle Bäume auf der kühlenden Fläche. Hellgrün die Kühlung im Jahr 2100: Ob 2026 oder 2046 gepflanzt — fast gleich; der jüngere Wald bindet bis dahin noch kräftig, und seine Albedo ist noch nicht voll da. Dunkelgrün die Kühlung um 2050, wenn die Erwärmung im niedrigsten Szenario ihren Höhepunkt hat. Da zählt nur, was bis dahin gewachsen ist: fünf Jahre Warten kosten knapp ein Viertel, zehn Jahre die Hälfte. Wer die Spitze der Erwärmung drücken will, muss jetzt pflanzen.</p>
+    <p class="q">Falls Fragen kommen — Kühlung 2050 relativ zur Pflanzung 2026: 2031 77 %, 2036 51 %, 2041 25 %, 2046 6 %. Kühlung 2100: 101 % bis 101 % (der jüngere Wald hat 2100 weniger Albedo-Strafe und wächst noch). Je Baum gerechnet und aufsummiert (linear); absolut kühlt die Pflanzung 2026 so 2050 um 14,4 mK, fast wie im FaIR-Lauf mit der ganzen Fläche (13,8 mK). Die Störung steigt mit der Erwärmung, ein später gepflanzter Wald lebt in einer wärmeren Welt. Spätere Pflanzjahre als 2046 im Kapitel Klima je Baum.</p>
+  </aside>
+</section>
+
+<!-- Grundlagen: DAC -->
+<section class="slide backup" data-ch="dac" data-title="Sorbens-DAC: Prozess und Energiebedarf">
+  <header class="sh"><h2>Sorbens-DAC: Prozess und Energiebedarf</h2></header>
+  <div class="body">
+    <svg class="schema mo" data-export="s_dac_prozess" viewBox="0 0 1424 470" style="width:100%; flex:1; min-height:0" aria-label="Sorbens-DAC in drei Schritten und sein Energiebedarf je Tonne CO₂">
+      <defs><marker id="ah-dp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
+      <g font-family="IBM Plex Sans">
+        <!-- 1 Ansaugen -->
+        <g class="pop" style="--d:100">
+          <rect x="40" y="60" width="210" height="140" rx="10" fill="var(--paper-deep)" stroke="var(--fjord)" stroke-width="3"/>
+          <circle cx="90" cy="130" r="30" fill="var(--fjord)"/>
+          <path class="m-fan" d="M90 108 V152 M68 130 H112" stroke="var(--paper-deep)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="140" y="72" width="60" height="116" fill="#d8cfbb"/>
+          <path d="M150 72 V188 M160 72 V188 M170 72 V188 M180 72 V188 M190 72 V188" stroke="#b8ab8e" stroke-width="2"/>
+          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-0.00s" cx="146" cy="92" r="6"/><circle class="m-bob" style="--ph:-0.37s" cx="168" cy="120" r="6"/><circle class="m-bob" style="--ph:-0.74s" cx="152" cy="150" r="6"/><circle class="m-bob" style="--ph:-1.11s" cx="186" cy="104" r="6"/><circle class="m-bob" style="--ph:-1.48s" cx="176" cy="168" r="6"/></g>
+          <path class="m-flow" d="M2 110 H36 M2 150 H36" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
+          <path class="m-flow" d="M226 56 V22" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
+          <text x="240" y="24" font-size="19" fill="var(--muted)">CO₂-arme Abluft</text>
+          <circle cx="24" cy="272" r="20" fill="var(--fjord)"/><text x="24" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">1</text>
+          <text x="56" y="281" font-size="26" font-weight="600" fill="var(--ink)">Ansaugen</text>
+          <text x="4" y="326" font-size="20" fill="var(--ink-2)">Gebläse: Luft durch</text>
+          <text x="4" y="354" font-size="20" fill="var(--ink-2)">ein Sorbens (Amin)</text>
+          <text x="4" y="382" font-size="20" fill="var(--ink-2)">→ CO₂ bindet daran</text>
+          <rect x="4" y="408" width="90" height="38" rx="19" fill="var(--fjord-soft)"/><text x="49" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Strom</text>
+        </g>
+        <path class="m-flow pop" data-step="1" d="M262 130 H338" stroke="var(--co2)" stroke-width="4" fill="none" marker-end="url(#ah-dp)"/>
+        <!-- 2 Ablösen -->
+        <g class="pop" data-step="1">
+          <rect x="350" y="60" width="210" height="140" rx="10" fill="var(--paper-deep)" stroke="var(--fjord)" stroke-width="3"/>
+          <rect x="425" y="72" width="60" height="116" fill="#d8cfbb"/>
+          <path d="M435 72 V188 M445 72 V188 M455 72 V188 M465 72 V188 M475 72 V188" stroke="#b8ab8e" stroke-width="2"/>
+          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-1.85s" cx="392" cy="96" r="6"/><circle class="m-bob" style="--ph:-2.22s" cx="510" cy="88" r="6"/><circle class="m-bob" style="--ph:-2.59s" cx="398" cy="160" r="6"/><circle class="m-bob" style="--ph:-0.36s" cx="520" cy="150" r="6"/><circle class="m-bob" style="--ph:-0.73s" cx="500" cy="118" r="6"/></g>
+          <g stroke="var(--alb)" stroke-width="4" fill="none" stroke-linecap="round">
+            <path class="m-steam" d="M400 238 q8 -8 0 -16 q-8 -8 0 -16"/><path class="m-steam" d="M455 238 q8 -8 0 -16 q-8 -8 0 -16"/><path class="m-steam" d="M510 238 q8 -8 0 -16 q-8 -8 0 -16"/>
+          </g>
+          <circle cx="334" cy="272" r="20" fill="var(--fjord)"/><text x="334" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">2</text>
+          <text x="366" y="281" font-size="26" font-weight="600" fill="var(--ink)">Ablösen</text>
+          <text x="314" y="326" font-size="20" fill="var(--ink-2)">Vakuum, Dampf (100 °C)</text>
+          <text x="314" y="354" font-size="20" fill="var(--ink-2)">→ CO₂ löst sich ab</text>
+          <text x="314" y="382" font-size="20" fill="var(--ink-2)"></text>
+          <rect x="314" y="408" width="200" height="38" rx="19" fill="#efcfae"/><text x="414" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Wärme um 100 °C</text>
+        </g>
+        <path class="m-flow pop" data-step="2" d="M572 130 H648" stroke="var(--co2)" stroke-width="4" fill="none" marker-end="url(#ah-dp)"/>
+        <!-- 3 Speichern -->
+        <g class="pop" data-step="2">
+          <rect x="660" y="150" width="230" height="56" fill="#d9cfb9"/>
+          <path d="M660 168 H890 M660 188 H890" stroke="#c3b79c" stroke-width="2"/>
+          <line x1="660" y1="150" x2="890" y2="150" stroke="#8c7a58" stroke-width="3"/>
+          <rect x="664" y="84" width="104" height="56" rx="8" fill="var(--fjord)"/>
+          <text x="716" y="118" text-anchor="middle" font-size="17" fill="var(--paper)">Verdichter</text>
+          <path d="M768 112 H800 V198" stroke="#5d665f" stroke-width="10" fill="none"/>
+          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-1.10s" cx="790" cy="200" r="6"/><circle class="m-bob" style="--ph:-1.47s" cx="808" cy="196" r="6"/><circle class="m-bob" style="--ph:-1.84s" cx="800" cy="186" r="6"/></g>
+          <circle cx="644" cy="272" r="20" fill="var(--fjord)"/><text x="644" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">3</text>
+          <text x="676" y="281" font-size="26" font-weight="600" fill="var(--ink)">Speichern</text>
+          <text x="624" y="326" font-size="20" fill="var(--ink-2)">Verdichten, transportieren</text>
+          <text x="624" y="354" font-size="20" fill="var(--ink-2)">→ Einlagerung in tiefe</text>
+          <text x="624" y="382" font-size="20" fill="var(--ink-2)">Gesteinsschichten</text>
+          <rect x="624" y="408" width="90" height="38" rx="19" fill="var(--fjord-soft)"/><text x="669" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Strom</text>
+        </g>
+        <!-- Energie je Tonne -->
+        <g class="pop" data-step="3">
+          <line x1="940" y1="20" x2="940" y2="450" stroke="var(--paper-line)" stroke-width="2"/>
+          <text x="975" y="44" font-size="24" font-weight="600" fill="var(--ink)">Energie je Tonne CO₂</text>
+          <text x="975" y="100" font-size="20" fill="var(--muted)">Wärme direkt zugeführt</text>
+          <rect x="975" y="114" width="270" height="46" fill="var(--alb)"/><text x="989" y="145" font-size="20" fill="#fff">Wärme 1,5</text>
+          <rect x="1245" y="114" width="90" height="46" fill="var(--fjord)"/><text x="1290" y="145" text-anchor="middle" font-size="18" fill="#fff">Strom 0,5</text>
+          <text x="1345" y="145" font-size="20" fill="var(--ink)">MWh</text>
+          <path class="m-flow" d="M1110 166 V206" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
+          <text x="1124" y="194" font-size="19" fill="var(--muted)">Wärmepumpe</text>
+          <text x="975" y="236" font-size="20" fill="var(--muted)">mit Wärmepumpe: nur noch Strom</text>
+          <rect x="975" y="250" width="90" height="46" fill="var(--fjord)"/><text x="1020" y="281" text-anchor="middle" font-size="19" fill="#fff">0,5</text>
+          <rect x="1065" y="250" width="180" height="46" fill="var(--fjord-soft)"/><text x="1155" y="281" text-anchor="middle" font-size="19" fill="var(--ink)">für die Wärme ≈ 1</text>
+          <text x="1255" y="281" font-size="20" font-weight="600" fill="var(--ink)">≈ 1,5 MWh</text>
+          <text x="975" y="350" font-size="20" fill="var(--ink-2)">Je nach Klima 1,1 bis 1,9 MWh</text>
+          <text x="975" y="378" font-size="20" fill="var(--ink-2)">→ kalt: COP sinkt</text>
+          <text x="975" y="406" font-size="20" fill="var(--ink-2)">→ feucht: mehr Wärmebedarf</text>
+        </g>
+      </g>
+    </svg>
+    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:0">Kandidat für die Lücke: DAC, rund 1,5 MWh Strom je Tonne CO₂.</p></div>
+  </div>
+  <p class="src">Prozess: Sorbens-DAC mit dampfunterstützter Temperatur-Vakuum-Wechseladsorption (Sendi et al. 2022). Energie: premise-Datensatz Sorbens-DAC 100 kt/a (ecoinvent 3.12, Modellergebnis); Wärmepumpe und Wetterabhängigkeit nach Sendi et al. 2022.</p>
+  <aside class="notes">
+    <p class="q">Ausführlich: Für die Lücke kommt vor allem Direct Air Capture in Frage. Der Prozess ist energieintensiv. Mit Wärmepumpe wird der gesamte Bedarf elektrisch: rund 1,5 MWh je Tonne CO₂. Der Netto-Anteil hängt damit von der Emissionsintensität des Stroms ab, der Strombedarf vom lokalen Klima.</p>
+    <p>Die Lücke muss technische Entnahme schließen. Am weitesten entwickelt ist Direct Air Capture, hier das Sorbens-Verfahren. Wie funktioniert es? Erstens: Gebläse drücken Luft durch ein Sorbens, ein Material mit Aminen, an dem das CO₂ haften bleibt. Zweitens: Ist es voll, wird die Kammer geschlossen; Vakuum und Dampf um 100 °C lösen das CO₂ wieder ab. Drittens: Das CO₂ wird verdichtet und in tiefen Gesteinsschichten eingelagert. Das kostet vor allem Energie, rechts je Tonne: anderthalb Megawattstunden Wärme und eine halbe Strom. Mit einer Wärmepumpe wird aus der Wärme Strom — dann hängt alles am Strom. Und wie viel Strom, hängt am Wetter.</p>
+    <p class="q">Falls Fragen kommen — Energie aus dem premise-Datensatz (Sorbens-DAC, 100 kt/a, ecoinvent 3.12): 0,5 MWh Strom und 5,4 GJ Wärme je t. Wärmepumpe nach Sendi et al. 2022: 50 % des Carnot-Werts, Senke 120 °C, COP 1,5–2,0. Climeworks meldet für Hinwil 3,3 MWh Wärme und 0,7 MWh Strom je t, etwa doppelt so viel Wärme — das ist eine Sensitivität (Backup). Flüssig-DAC (Kalilauge, Hochtemperatur) ist nicht enthalten.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="vergleich" data-title="Was eine Maschine braucht">
+  <header class="sh"><h2>Was eine Maschine braucht</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="d1" data-label="Weltkarte: Strom je t CO₂ für Sorbens-DAC mit Wärmepumpe"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0; font-size:22px">Mit Wärmepumpe braucht eine Tonne CO₂ 1,1 bis 1,9 MWh Strom: am wenigsten im warmen, trockenen Klima, am meisten im feuchten oder kalten. Wo der kälteste Monat unter −15 °C liegt (20 % des Landes), ist Sorbens-DAC nicht vorgesehen.</p></div>
+  </div>
+  <p class="src">Energie je t: Modellergebnis premise (Sorbens-DAC, aus ecoinvent) mit Prozessmodell von Sendi et al. 2022 für Klima und Wärmepumpe (übernommen); Klima: Messdaten CRU TS 4.09 (Wetterstationen, auf 0,5° interpoliert), Mittel 2011–2020.</p>
+  <aside class="notes">
+    <p>Die Energie ist der Hebel. Ich nehme das Niveau aus der premise-Datenbank und lasse es mit dem Klima am Ort schwanken, so wie Sendi et al. es für denselben Prozess (Amin-Sorbens, Dampf-unterstützte Temperatur-Vakuum-Wechseladsorption) mit stündlichem Wetter weltweit gerechnet haben. Deren vier Klimaklassen treffe ich auf 0,01 MWh genau: Wärmebedarf +13 % je 10 Prozentpunkte Luftfeuchte, +9 % je 10 K; Wärmepumpe mit 50 % des Carnot-Werts (COP 1,5–2,0). Zum Vergleich: Climeworks meldet für Hinwil 3,3 MWh Wärme und 0,7 MWh Strom je t, also etwa doppelt so viel Wärme wie premise — das ist eine Sensitivität. Details: docs/methods/dac-modell.md.</p>
+  </aside>
+</section>
+
+<section class="slide backup" data-ch="dac" data-title="Netto-Entnahme von DAC">
+  <header class="sh"><h2>Netto-Entnahme von DAC, 2026 bis 2100</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="d5" data-label="Weltkarte: Anteil einer entnommenen Tonne, der nach den Emissionen von Strom und Anlage netto bleibt, Jahr für Jahr von 2026 bis 2100"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0; font-size:21px">Netto-Anteil im Median: 46 % (2026), 91 % (2040). Bäume: 58 %.</p></div>
+  </div>
+  <p class="src">Eigene Rechnung, Sorbens-DAC mit Wärmepumpe (Sendi et al. 2022; Klima CRU TS 4.09). Strommix je Region und Jahr: Modellergebnis REMIND-EU SSP2-NDC (heutige Zusagen) über premise, ecoinvent 3.12; GWP100. Mittel je 2°-Block; Median über das Land, auf dem DAC möglich ist.</p>
+  <aside class="notes">
+    <p class="q">Ausführlich: Mit dem Strom von 2026 bleiben im Median 46 % der entnommenen Tonne netto; auf 2 % des Landes, vor allem in Indien, emittiert DAC mehr, als es entnimmt. Mit der Energiewende steigt der Median auf 65 % (2030), 79 % (2035) und 91 % (2040). Zum Vergleich: Bäume auf den kühlenden Flächen kommen auf 58 %. Im hohen Norden (20 % des Landes) ist es für Sorbens-DAC zu kalt.</p>
+    <p>Jetzt dieselbe Frage wie beim Baum: Welcher Anteil der entnommenen Tonne bleibt netto? Die Karte zeigt, welcher Anteil einer entnommenen Tonne netto übrig bleibt, wenn man die Emissionen des Stroms und der Anlage abzieht. Türkis heißt: viel bleibt. Mit dem Strom von heute im Median knapp die Hälfte. In Joensuu mit finnischem Strom schon 86 %, in Aachen gut die Hälfte, bei Marabá knapp zwei Drittel. Mit Kohlestrom bleibt wenig: Krakau 17 %, Kinshasa 23 %, Peking 24 %; wo es orange wird, vor allem in Indien, emittiert die Maschine mehr, als sie entnimmt. Grau: Im hohen Norden ist es für dieses Verfahren zu kalt. Zum Vergleich mit dem Baum, derselbe Netto-Anteil: Aachen 63 %, Joensuu 28 %, Marabá 82 %, über alle kühlenden Flächen 58 %. Heute ist der Baum also im Mittel die sauberere Tonne, ab etwa 2030 die Maschine.</p>
+    <p>Jetzt lasse ich die Jahre laufen [Play]. Mit dem Strom wird die Maschine besser, ohne dass sie selbst sich ändert: Aachen erreicht um 2030 gut 80 %, Krakau um 2035, Peking und Kinshasa um 2040. Ab etwa 2040 bleiben fast überall über 90 %. Das ist die Reihenfolge für die Maschine: zuerst dort, wo der Strom sauber ist; nicht mit fossilem Strom; nicht im hohen Norden.</p>
+    <p class="q">Falls Fragen kommen — Annahme mit Gewicht: REMIND-EU SSP2-NDC dekarbonisiert schnell (Deutschland 0,42 → 0,09 kg CO₂e/kWh von 2020 bis 2030); mit langsamerer Energiewende verschieben sich die Jahre nach hinten. Gerechnet wird mit dem Netzmittel der Region, nicht mit zusätzlichem Ökostrom. Strom je Tonne 1,1–1,9 MWh; eine Gigatonne im Jahr bräuchte rund 1 500 TWh, etwa 5 % der heutigen Weltstromerzeugung. Mit den Climeworks-Energiewerten (doppelt so viel Wärme) wird es später (Methodendoku). Werte zwischen den Stützjahren der Ökobilanz (2020, 2030, 2040, 2050, 2075, 2100) linear interpoliert; die Karte gleitet zwischen den Jahren. Median 2050: 94 %. Ein Block zeigt das flächengewichtete Mittel seiner Zellen; die Anteile im Text sind aus den Zellen gerechnet.</p>
+      <p>Wo und wann sollte man also bauen, damit es für 1,5 °C reicht? Das rechnen wir jetzt.</p>
+</aside>
+</section>
+

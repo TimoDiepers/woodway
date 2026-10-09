@@ -28,7 +28,7 @@ from numpy.typing import NDArray
 from nbs.constants import YEARS
 
 ROOT = Path(__file__).resolve().parents[2]
-GAP_FILE = ROOT / "docs" / "slides" / "chart_data" / "luecke.json"
+GAP_FILE = ROOT / "deck" / "chart_data" / "luecke.json"
 START_2030_GT = 0.0088   # mean planned DAC capacity 2030 (Zurbriggen et al. 2026)
 GROWTH = 1.20            # wind-energy analogue, 20 %/a (Zurbriggen et al. 2026)
 N_Y = len(YEARS)

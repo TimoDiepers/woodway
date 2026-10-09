@@ -56,7 +56,7 @@ _STAND_AREA_M2 = 5.0  # 2000 trees/ha (nbs.forest_data.TREES_PER_HA)
 """None = each cell / site with its own typical forest (2026-10-05). The
 running example used to be one species, Norway spruce, everywhere."""
 
-# Deck surface and ink (docs/slides/dissvortrag.pptx).
+# Deck surface and ink (the HTML deck's paper and ink colours).
 C_SURFACE = "#f3eee6"
 C_INK = "#1a2320"
 C_INK_MUTED = "#5f6b66"

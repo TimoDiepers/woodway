@@ -1,0 +1,796 @@
+/* ===========================================================
+   THEME
+   Paper, ink and one colour per chapter. The process colours
+   (Photosynthese, Respiration, Zersetzung, Störung) and the
+   channel colours (CO₂ green, Albedo orange) match the figures.
+   =========================================================== */
+:root {
+  --paper: #f2ede2;
+  --paper-deep: #e7e0d0;
+  --paper-line: #d6ccb6;
+  --ink: #1b2420;
+  --ink-2: #3f4a44;
+  --muted: #5d665f;           /* 5.2:1 on paper */
+
+  --moss: #3d552d;            /* Bäume */
+  --moss-soft: #a9bc8f;
+  --clay: #6e3d3a;            /* Klima */
+  --clay-soft: #d2a597;
+  --olive: #5c5a24;           /* Potenziale */
+  --olive-soft: #c7c08a;
+  --fjord: #1e536d;           /* Vergleich */
+  --fjord-soft: #9dbfcf;
+
+  --ps: #2f7a45;  --re: #7e4a74;  --zs: #3d6698;  --st: #c0392b;
+  --par: #8a6a1e;
+  --co2: #2e7d4f; --alb: #c8641a;
+
+  --ch: var(--moss);          /* overwritten per chapter */
+  --ch-soft: var(--moss-soft);
+
+  --serif: 'Literata', Georgia, serif;
+  --sans: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* the page takes the colour of the current slide, so the slide runs out to the screen edge */
+html, body { height: 100%; overflow: hidden; background: var(--stage, #f2ede2); transition: background-color .35s var(--ease); }
+body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--moss-soft); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--ch); outline-offset: 3px; }
+
+/* ===========================================================
+   STAGE
+   Slides are authored on a fixed 1600×900 canvas and scaled to
+   the viewport, so every slide fits exactly and looks the same
+   on a laptop and on the projector. Nothing ever scrolls.
+   =========================================================== */
+.viewport { position: fixed; inset: 0; overflow: hidden; }
+.deck {
+  position: absolute; left: 50%; top: 50%; width: 1600px; height: 900px;
+  transform-origin: center center; transform: translate(-50%, -50%);
+  background: transparent;   /* the page behind it carries the slide colour */
+}
+.slide {
+  position: absolute; inset: 0; overflow: hidden;
+  padding: 64px 88px 56px;
+  display: flex; flex-direction: column;
+  visibility: hidden; opacity: 0;
+  transition: opacity .35s var(--ease), visibility 0s linear .35s;
+}
+.slide.active { visibility: visible; opacity: 1; transition: opacity .35s var(--ease); z-index: 2; }
+
+[data-ch="baeume"]    { --ch: var(--moss);  --ch-soft: var(--moss-soft); }
+[data-ch="klima"]     { --ch: var(--clay);  --ch-soft: var(--clay-soft); }
+[data-ch="potenzial"] { --ch: var(--olive); --ch-soft: var(--olive-soft); }
+[data-ch="vergleich"] { --ch: var(--fjord); --ch-soft: var(--fjord-soft); }
+
+/* ---------- header: title left, chapter path right ---------- */
+.sh { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; margin-bottom: 36px; }
+.sh h2 {
+  font-size: 50px; line-height: 1.08; font-weight: 600; letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 72; color: var(--ch); text-wrap: balance; max-width: 1180px;
+}
+.path { display: flex; gap: 14px; padding-top: 10px; flex: none; }
+.path svg { width: 30px; height: 30px; stroke: var(--paper-line); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.path svg.on { stroke: var(--ch); }
+
+/* ground line: every content slide stands on a thin strip of its chapter colour */
+/* the ground line sits at the bottom of the screen, not of the 16:9 box (see Deck.stage) */
+.ground { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--ground, transparent); z-index: 15; transition: background-color .35s var(--ease); }
+.embed .ground { height: 0; }
+.num {
+  position: absolute; left: 88px; bottom: 20px;
+  font: 500 14px/1 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.backup .num::before { content: "Backup · "; letter-spacing: .04em; }
+
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+p, li { font-size: 27px; line-height: 1.42; }
+.lead { font-size: 32px; line-height: 1.38; max-width: 1180px; text-wrap: pretty; }
+.small { font-size: 22px; line-height: 1.45; }
+em { font-style: italic; }
+strong { font-weight: 600; }
+
+/* ---------- "Kurz gesagt": the takeaway sentence ----------
+   Not a box: a hairline, a leaf, and the sentence in italic. */
+.takeaway {
+  position: relative; padding: 16px 26px 17px 64px; margin-top: 24px;
+  background: var(--ch); color: var(--paper); border-radius: 8px;
+  font-style: normal; font-weight: 500; font-size: 24px; line-height: 1.38;
+  font-variation-settings: "opsz" 24; text-wrap: pretty;
+  box-shadow: 0 10px 24px -16px rgba(30, 26, 18, .55);
+}
+.takeaway::before {
+  content: ""; position: absolute; left: 24px; top: 19px; width: 26px; height: 26px; background: var(--ch-soft);
+  -webkit-mask: var(--leaf) center / contain no-repeat; mask: var(--leaf) center / contain no-repeat;
+}
+.aside .takeaway, .col .takeaway { font-size: 21px; }
+:root { --leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3C9 3 4 8.5 4 15.5c0 1.6.3 3 .9 4.3C6 13.5 10 9.5 15 7.5 10.5 10.5 7.4 14.6 6.2 20.6 7.4 21.1 8.6 21.4 10 21.4 17 21.4 20 14 20 3Z'/%3E%3C/svg%3E"); }
+
+.src {
+  position: absolute; left: 150px; right: 88px; bottom: 18px;
+  font: 400 13px/1.35 var(--sans); color: var(--muted); text-wrap: pretty;
+}
+
+/* ---------- figure + side column ---------- */
+.split > *, .cols > *, .cols3 > * { min-width: 0; }
+.split { display: grid; grid-template-columns: 1fr 470px; gap: 56px; flex: 1; min-height: 0; }
+.split.wide { grid-template-columns: 1fr 400px; }
+.split.even { grid-template-columns: 1fr 1fr; }
+.fig { min-height: 0; display: flex; align-items: center; justify-content: center; }
+.fig img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block; }
+.aside { display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.aside h3, .col h3 {
+  font: 600 18px/1.3 var(--sans); color: var(--ch); margin-bottom: 10px; letter-spacing: .01em;
+}
+.aside ul, .col ul { list-style: none; }
+.aside li, .col li { font-size: 20px; line-height: 1.42; padding-left: 20px; position: relative; margin-bottom: 8px; color: var(--ink-2); }
+.aside li::before, .col li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--ch-soft); }
+.col li { font-size: 23px; }
+
+
+/* compact symbol legend under a formula in the foot (Klima) */
+.legend.sm { gap: 2px 14px; margin-top: 10px; }
+.legend.sm dt { font-size: 23px; }
+.legend.sm dd { font-size: 19px; line-height: 1.28; }
+
+/* signpost: the overall equation with the term in work boxed (Klima) */
+.road { display: flex; gap: 16px; align-items: center; margin: 0 0 12px; font: 500 19px/1.2 var(--sans); color: var(--muted); letter-spacing: .02em; }
+.road .tex { font-size: 25px; color: var(--ink); }
+
+/* symbol legends */
+.legend { display: grid; grid-template-columns: auto 1fr; gap: 6px 22px; align-items: baseline; }
+.legend dt { font-size: 24px; text-align: right; }
+.legend dd { font-family: var(--sans); font-size: 20px; color: var(--ink-2); line-height: 1.35; }
+.legend.row { display: flex; flex-wrap: wrap; gap: 6px 34px; }
+.legend.row > div { display: flex; gap: 10px; align-items: baseline; }
+
+/* equations */
+.eq { font-size: 34px; color: var(--ink); }
+.eq .katex-display { margin: .35em 0; }
+.eq.big { font-size: 44px; }
+.eq-step { display: grid; grid-template-columns: 330px 1fr; align-items: center; gap: 28px; }
+.eq-step .label { font: 500 18px/1.35 var(--sans); color: var(--ch); text-align: right; }
+.strike { display: flex; gap: 48px; justify-content: center; font: 500 20px/1 var(--sans); color: var(--st); margin: 6px 0 2px; }
+.strike span::before { content: "✕  "; }
+
+/* fragments: revealed with → like PowerPoint builds */
+.frag { transition: opacity .45s var(--ease), filter .45s var(--ease); }
+.frag:not(.shown) { opacity: 0; }
+.dimmable { transition: opacity .5s var(--ease); }
+.slide.dim .dimmable { opacity: .22; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 17px/1.3 var(--sans); color: var(--ch); padding: 10px 16px; border-bottom: 1.5px solid var(--ch); }
+td { font-size: 20px; padding: 11px 16px; border-bottom: 1px solid var(--paper-line); color: var(--ink); }
+td.flag { color: var(--muted); font-style: italic; }
+td.warn { color: var(--clay); font-weight: 500; }
+
+/* two-column comparison pages */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
+.cols .col { border-top: 1.5px solid var(--ch); padding-top: 18px; }
+.cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; }
+.cols3 .col { border-top: 1.5px solid var(--ch); padding-top: 18px; }
+.col h4 { font-size: 26px; font-weight: 600; color: var(--ch); margin-bottom: 10px; line-height: 1.25; }
+.col p { font-size: 22px; color: var(--ink-2); }
+.col dl dt { font: 600 19px/1.3 var(--sans); color: var(--ch); margin-top: 16px; }
+.col dl dt:first-child { margin-top: 0; }
+.col dl dd { font-size: 20px; line-height: 1.42; color: var(--ink-2); }
+
+/* diagram nodes (HTML boxes, SVG connectors) */
+.node {
+  font-family: var(--sans); background: #fbf8f1; border: 1.5px solid var(--paper-line);
+  border-radius: 6px; padding: 12px 16px; text-align: center; font-size: 19px; color: var(--ink); line-height: 1.3;
+}
+.node b { display: block; font-weight: 600; font-size: 19px; }
+.node small { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; }
+.node.co2 { border-color: var(--co2); background: #e5eee4; }
+.node.alb { border-color: var(--alb); background: #f7e6d4; }
+.node.solid { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.node.solid small { color: #c9d1ca; }
+.node.mine { border-color: var(--alb); background: #f7e6d4; font-weight: 600; }
+.edge-label { font: 500 15px/1 var(--sans); color: var(--muted); }
+
+/* ===========================================================
+   TITLE AND CHAPTER SLIDES
+   The one authored motion in the deck: the stand grows out of
+   the ground, back to front, when a chapter opens.
+   =========================================================== */
+.slide.title, .slide.chapter { padding: 0; }
+.slide.chapter { background: var(--ch); color: var(--paper); }
+.slide.chapter .ctext { position: absolute; left: 120px; top: 300px; max-width: 800px; }
+.slide.chapter h1 { font-size: 104px; font-weight: 600; letter-spacing: -0.02em; font-variation-settings: "opsz" 72; line-height: 1; }
+.slide.chapter p { margin-top: 28px; font-size: 30px; font-style: italic; color: color-mix(in srgb, var(--paper) 82%, var(--ch)); }
+.deco { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; pointer-events: none; }
+.deco .t { transform-box: fill-box; transform-origin: 50% 100%; }
+.slide.active .deco .t { animation: grow 1.4s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+.all .deco .t, .embed .deco .t { animation: none !important; opacity: 1 !important; transform: none !important; }
+@media (prefers-reduced-motion: reduce) { .slide.active .deco .t { animation: none; } }
+.stand { position: absolute; right: 0; bottom: 0; width: 1100px; height: 520px; }
+.stand .t { transform-box: fill-box; transform-origin: 50% 100%; }
+.slide.active .stand .t { animation: grow 1.4s var(--ease) both; }
+.slide.active .stand .t:nth-child(2) { animation-delay: .08s } .slide.active .stand .t:nth-child(3) { animation-delay: .16s }
+.slide.active .stand .t:nth-child(4) { animation-delay: .24s } .slide.active .stand .t:nth-child(5) { animation-delay: .32s }
+.slide.active .stand .t:nth-child(6) { animation-delay: .40s } .slide.active .stand .t:nth-child(7) { animation-delay: .48s }
+.slide.active .stand .t:nth-child(8) { animation-delay: .56s } .slide.active .stand .t:nth-child(9) { animation-delay: .64s }
+@keyframes grow { from { transform: scaleY(0); opacity: 0; } 40% { opacity: 1; } to { transform: scaleY(1); } }
+
+.slide.title .ctext { position: absolute; left: 120px; top: 230px; max-width: 860px; }
+.slide.title .q { font-size: 44px; font-style: italic; color: var(--clay); font-variation-settings: "opsz" 48; }
+.slide.title h1 { margin-top: 18px; font-size: 84px; line-height: 1.04; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; font-variation-settings: "opsz" 72; text-wrap: balance; }
+.slide.title .who { position: absolute; left: 120px; bottom: 72px; font: 400 20px/1.5 var(--sans); color: var(--ink-2); }
+.slide.title .who b { font-weight: 600; color: var(--ink); }
+
+/* ===========================================================
+   CHROME: progress, notes drawer, hint
+   =========================================================== */
+.progress { position: fixed; left: 0; top: 0; width: 100%; height: 3px; background: var(--moss); transform-origin: 0 50%; transform: scaleX(0); transition: transform .4s var(--ease); z-index: 20; }
+.notes { display: none; }
+.drawer {
+  position: fixed; left: 0; right: 0; bottom: 0; max-height: 42vh; overflow: auto; z-index: 30;
+  background: #1f2823; color: #e8e3d6; padding: 22px 32px 28px;
+  font: 400 17px/1.55 var(--sans); transform: translateY(100%); transition: transform .35s var(--ease);
+  scrollbar-color: #56625a #1f2823;
+}
+.drawer.open { transform: none; }
+.drawer h5 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin-bottom: 12px; }
+.drawer p { font-size: 17px; line-height: 1.55; margin-bottom: 10px; max-width: 110ch; }
+.drawer p.q { color: #b9c7b0; font-style: italic; }
+.hint {
+  position: fixed; right: 16px; bottom: 12px; z-index: 25; font: 400 12px/1 var(--sans); color: #6b705f;
+  opacity: .8; transition: opacity 1s;
+}
+.hint.gone { opacity: 0; }
+@media (max-width: 900px), (hover: none) { .hint { display: none; } }
+kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3px; padding: 2px 4px; }
+
+/* ===========================================================
+   EMBED (slide previews inside the presenter view)
+   =========================================================== */
+.embed body { background: var(--paper); }
+.embed .progress, .embed .hint, .embed .drawer { display: none; }
+.embed .deck { box-shadow: none; }
+.embed .viewport { pointer-events: none; }
+
+/* ===========================================================
+   PRESENTER VIEW
+   Dark, so the lectern screen does not light up the speaker.
+   =========================================================== */
+.presenter, .presenter body { background: #161b18; overflow: hidden; }
+.pv {
+  position: fixed; inset: 0; display: grid; gap: 18px; padding: 16px 20px 20px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+  font-family: var(--sans); color: #e8e3d6;
+}
+.pv-bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; font-size: 17px; }
+.pv-spacer { flex: 1; }
+#pv-count { font-weight: 600; font-variant-numeric: tabular-nums; }
+#pv-title { color: #9fb294; }
+#pv-timer { font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; letter-spacing: .02em; }
+#pv-timer.paused { color: #d9a441; }
+#pv-clock { font-size: 20px; color: #b9c2b5; font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+.pv button {
+  font: 500 14px/1 var(--sans); color: #e8e3d6; background: #26302a; border: 1px solid #3a463f;
+  border-radius: 6px; padding: 8px 12px; cursor: pointer;
+}
+.pv button:hover { background: #313d36; }
+.pv-main { min-height: 0; display: flex; flex-direction: column; }
+.pv-main iframe { max-height: 52vh; margin-bottom: 18px; }
+.pv-main iframe, .pv-next iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 4px; background: var(--paper); display: block; }
+.pv-main iframe { box-shadow: 0 0 0 2px #9fb294; }
+.pv-side { min-height: 0; display: flex; flex-direction: column; }
+.pv h5 { font: 600 12px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin: 0 0 10px; }
+.pv-next { position: relative; margin-bottom: 20px; opacity: .92; }
+#pv-end { position: absolute; inset: 0; display: grid; place-items: center; color: #9fb294; font-style: italic; border: 1px dashed #3a463f; border-radius: 4px; aspect-ratio: 16 / 9; }
+#pv-end[hidden] { display: none; }
+#pv-notes { flex: 1; min-height: 0; overflow: auto; padding-right: 8px; scrollbar-color: #56625a #161b18; }
+#pv-notes p { font-size: var(--pv-notes); line-height: 1.5; margin-bottom: .7em; }
+#pv-notes p.q { color: #b9c7b0; font-style: italic; font-size: calc(var(--pv-notes) * .82); }
+#pv-lost { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #5a2a26; color: #f3e6e2; padding: 12px 18px; border-radius: 6px; font-size: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide, .frag, .dimmable, .drawer, .progress { transition-duration: .01ms !important; }
+  .slide.active .stand .t { animation: none; }
+}
+@media print {
+  html, body { overflow: visible; background: none; }
+  .viewport { position: static; display: block; }
+  .deck { position: static; transform: none !important; box-shadow: none; width: auto; height: auto; background: none; }
+  .slide { position: relative; visibility: visible; opacity: 1; width: 1600px; height: 900px; page-break-after: always; background: var(--paper); }
+  .slide.chapter { background: var(--ch); }
+  .frag { opacity: 1 !important; }
+  .progress, .drawer, .hint { display: none; }
+  @page { size: 1600px 900px; margin: 0; }
+}
+
+/* ===========================================================
+   CHARTS AND ENTRANCES
+   Charts are the model's own matplotlib figures, redrawn with
+   ECharts (data/ec_charts.js) and animated on entry.
+   =========================================================== */
+.chart { flex: 1; min-height: 0; position: relative; }
+/* timeline under a map with one frame per year (MplChart.player) */
+.player { display: flex; align-items: center; gap: 16px; width: 640px; margin: 2px auto 0; font-family: var(--sans); }
+.player button { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--paper-line); background: var(--paper-deep);
+                 display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ch); }
+.player button:hover { background: color-mix(in srgb, var(--paper-deep) 80%, var(--ch)); }
+.player button svg { width: 18px; height: 18px; fill: currentColor; }
+.player .i-pause, .player.playing .i-play { display: none; }
+.player.playing .i-pause { display: inline; }
+.player .track { position: relative; flex: 1; padding-bottom: 18px; }
+.player input[type=range] { width: 100%; margin: 0; accent-color: var(--ch); cursor: pointer; }
+.player .ticks span { position: absolute; top: 24px; transform: translateX(-50%); font-size: 14px; color: var(--muted); }
+.player .yr { flex: none; width: 64px; font: 600 26px/1 var(--sans); color: var(--ch); font-variant-numeric: tabular-nums; }
+.chart > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.chart[data-ec] > div:first-child { position: absolute !important; inset: 0; }
+.chart text { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; }
+.chart text.serif { font-family: var(--serif); }
+
+.foot { display: grid; grid-template-columns: minmax(0, 1fr) 720px; gap: 40px; align-items: end; margin-top: 6px; }
+.foot .takeaway { margin-top: 0; font-size: 22px; }
+.foot .eq { font-size: 30px; }
+.foot .eq .katex-display { margin: 0; text-align: left; }
+.foot .eq .katex-display > .katex { text-align: left; }
+
+.col h4 .big-n { display: block; font: 600 54px/1 var(--sans); color: var(--ch-soft); margin-bottom: 8px; }
+
+/* entrances: everything marked waits for its slide, then arrives in order (--d in ms) */
+.rise, .slide:not(.chapter):not(.title) .takeaway { opacity: 0; position: relative; top: 14px; }
+.slide.active .rise, .slide.active:not(.chapter):not(.title) .takeaway {
+  animation: rise .75s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms);
+}
+/* moved with `top`, not a transform: Chrome draws transformed, animating text as a cached low-resolution
+   bitmap inside the scaled deck and sharpens it only when the animation ends */
+@keyframes rise { from { opacity: 0; top: 14px; } to { opacity: 1; top: 0; } }
+/* absolutely placed blocks keep their place and only fade */
+.slide.title .who.rise { top: auto; }
+.slide.active.title .who.rise { animation-name: fadein; }
+
+.pop { transform-box: fill-box; transform-origin: center; opacity: 0; }
+.slide.active .pop { animation: pop .6s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+@keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+.grow { transform-box: fill-box; transform-origin: 50% 100%; }
+.slide.active .grow { animation: grow 1.1s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+
+.draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.slide.active .draw { animation: draw calc(var(--dur, 700) * 1ms) var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+.wipe { clip-path: inset(0 0 0 0); }
+.slide.active .wipe { animation: wipe 1.4s var(--ease) both; }
+@keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* slide number typed on the keyboard (slideJumper) */
+
+/* ---------- slide overview (M) ---------- */
+#menu-fab { position: fixed; right: 16px; bottom: 16px; z-index: 65; width: 52px; height: 52px; border-radius: 50%;
+  border: 0; background: #1f2823; color: var(--paper); display: none; place-items: center; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.28); -webkit-tap-highlight-color: transparent; }
+#menu-fab svg { width: 22px; height: 22px; }
+@media (hover: none), (pointer: coarse) { #menu-fab { display: grid; } }
+body:has(#menu.open) #menu-fab { display: none; }
+.embed #menu-fab, .embed #menu { display: none !important; }
+#menu { position: fixed; inset: 0; z-index: 70; background: rgba(23, 30, 27, .94); color: #e8e3d6;
+  display: flex; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity .2s var(--ease), visibility 0s .2s;
+  font-family: var(--sans); }
+#menu.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease); }
+#menu .menu-head { display: flex; align-items: center; gap: 16px; padding: 18px 28px 14px; border-bottom: 1px solid #34413a; }
+#menu .menu-head h2 { font: 600 20px/1 var(--sans); margin: 0; color: #fff; }
+#menu .menu-head span { font-size: 13px; color: #9aa79f; }
+#menu .menu-head span kbd { border-color: #56625a; color: #cfd6cf; }
+#menu .menu-close { margin-left: auto; background: none; border: 0; color: #cfd6cf; font: 400 30px/1 var(--sans);
+  width: 44px; height: 44px; border-radius: 8px; cursor: pointer; }
+#menu .menu-close:hover { background: #2c3832; }
+#menu .menu-body { flex: 1; overflow-y: auto; padding: 8px 28px 40px; scrollbar-color: #56625a transparent; overscroll-behavior: contain; }
+#menu h3 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin: 22px 0 12px; }
+#menu .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 18px 16px; }
+#menu .card { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 7px; cursor: pointer; min-width: 0; }
+#menu .card .pv { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: var(--paper);
+  outline: 2px solid transparent; outline-offset: 2px; transition: outline-color .15s, transform .15s; }
+#menu .card { content-visibility: auto; contain-intrinsic-size: auto 160px; }
+#menu .card .pv b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 34px/1 var(--sans); color: #b9b19c; }
+#menu .tdeck { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0;
+  transform: scale(var(--k, .14)); pointer-events: none; }
+#menu .tdeck .slide { visibility: visible; opacity: 1; }
+#menu .tdeck, #menu .tdeck * { animation: none !important; transition: none !important; }
+#menu .card .pv .tdeck + b { display: none; }
+#menu .card .cap { display: flex; gap: 8px; font-size: 14px; line-height: 1.3; color: #d9d4c6; }
+#menu .card .cap i { font-style: normal; font-variant-numeric: tabular-nums; color: #9aa79f; min-width: 2.2ch; }
+#menu .card .cap span { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+#menu .card:hover .pv, #menu .card:focus-visible .pv { outline-color: #cfd6cf; }
+#menu .card.cur .pv { outline-color: var(--moss-soft); }
+#menu .card.cur .cap { color: #fff; }
+@media (max-width: 700px) {
+  #menu .menu-head { padding: 14px 16px 10px; }
+  #menu .menu-head span { display: none; }
+  #menu .menu-body { padding: 4px 16px 90px; }
+  #menu .menu-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px 12px; }
+  #menu .card .cap { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { #menu, #menu .card .pv { transition: none; } }
+
+#jump-badge { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 12px); z-index: 60; opacity: 0; pointer-events: none;
+  display: flex; align-items: baseline; gap: 12px; padding: 10px 16px; border-radius: 8px; background: #1f2823; color: #e8e3d6;
+  font: 400 17px/1.2 var(--sans); box-shadow: 0 10px 30px -10px rgba(0,0,0,.45); transition: opacity .2s var(--ease), transform .2s var(--ease); }
+#jump-badge.on { opacity: 1; transform: translate(-50%, 0); }
+#jump-badge b { font: 600 28px/1 var(--sans); font-variant-numeric: tabular-nums; color: #fff; }
+#jump-badge span { max-width: 52ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b9c7b0; }
+#jump-badge.bad span { color: #e8a49b; }
+#jump-badge kbd { color: #e8e3d6; border-color: #56625a; }
+
+/* clicks: [data-step="n"] waits for click n, then arrives with its own entrance */
+[data-step]:not(.shown) { opacity: 0 !important; pointer-events: none; }
+[data-step]:not(.shown), [data-step]:not(.shown) * { animation: none !important; }
+.slide.active [data-step].shown { animation: rise .6s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+.slide.active .pop[data-step].shown { animation-name: pop; }
+.slide.active .grow[data-step].shown { animation-name: grow; }
+.slide.active .katex [data-step].shown { animation: fadein .6s var(--ease) both; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.embed [data-step].shown, .all [data-step].shown { animation: none !important; opacity: 1; transform: none; top: 0; }
+
+/* slide 9: the local effects step back (last click on slide 9, or the whole of a data-tree="dim" slide) */
+.slide:has(.dimtrigger.shown) .dimmable { opacity: .22 !important; transition: opacity .8s var(--ease); }
+.dimtrigger { display: none; }
+.slide[data-tree="dim"] .dimmable { opacity: .22; }
+.slide[data-tree="dim"].active .dimmable { animation: dimdown 1s var(--ease) .3s both; }
+@keyframes dimdown { from { opacity: 1; } to { opacity: .22; } }
+
+
+/* previews in the presenter view and the "all" mode show the end state */
+.embed .rise, .embed .takeaway, .embed .pop, .embed .grow, .embed .draw, .embed .wipe, .embed .dimmable, .embed .stand .t,
+.all .rise, .all .takeaway, .all .pop, .all .grow, .all .draw, .all .wipe, .all .stand .t {
+  animation: none !important; opacity: 1; transform: none; top: 0; stroke-dashoffset: 0; clip-path: none;
+}
+.embed .slide[data-tree="dim"] .dimmable { opacity: .22; }
+@media (prefers-reduced-motion: reduce) {
+  .rise, .takeaway, .pop, .grow, .draw, .wipe { animation: none !important; opacity: 1 !important; transform: none !important; top: 0 !important; stroke-dashoffset: 0 !important; clip-path: none !important; }
+}
+@media print {
+  .rise, .takeaway, .pop, .grow, .draw, .wipe { animation: none !important; opacity: 1 !important; transform: none !important; top: 0 !important; stroke-dashoffset: 0 !important; clip-path: none !important; }
+}
+
+
+/* merged albedo slide: the reference case starts large and shrinks into its corner */
+.zoomref { transform: translate(0px, 6px) scale(2.05); transition: transform .9s var(--ease); }
+svg:has(.zoomnext.shown) .zoomref { transform: none; }
+/* merged forest-type slide: the uptake curves come in as a panel at the right */
+.sidepanel { position: absolute; top: 0; right: 0; bottom: 0; width: 470px; z-index: 3;
+  display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 22px;
+  background: var(--paper); border: 1px solid var(--paper-line); border-radius: 10px;
+  box-shadow: 0 18px 40px -22px rgba(30, 26, 18, .55);
+  opacity: 0; transform: translateX(48px); transition: opacity .45s var(--ease), transform .6s var(--ease); }
+.sidepanel.shown { opacity: 1; transform: none; }
+.sidepanel .ptitle { font: 600 21px/1.25 var(--sans); color: var(--ink); }
+.sidepanel .chart { flex: 1; min-height: 0; }
+
+/* forcing slide: the term being explained is framed, the albedo marks fade when CO2 comes */
+.fterm { display: inline-block; padding: 2px 10px 6px; border-radius: 10px; border: 2.5px solid transparent;
+  transition: border-color .4s, background .4s, opacity .4s; }
+.slide:has(.f-alb.shown) .fterm.alb { border-color: #d95f02; background: rgba(217, 95, 2, .07); }
+.slide:has(.f-co2.shown) .fterm.alb { border-color: transparent; background: none; opacity: .45; }
+.slide:has(.f-co2.shown) .fterm.co2 { border-color: #1b7837; background: rgba(27, 120, 55, .07); }
+.slide:has(.f-co2.shown) .fexp.alb { opacity: .4; }
+.fexp { transition: opacity .4s; }
+svg:has(.f-co2.shown) .albmark { opacity: .18; transition: opacity .5s; }
+/* last click: the two factors of the CO2 term framed, they come next */
+.fstack { display: grid; }
+.fstack > * { grid-area: 1 / 1; transition: opacity .5s; }
+.f-box { opacity: 0; }
+.f-box.shown { opacity: 1; }
+.fstack:has(.f-box.shown) .fplain { opacity: 0; }
+.fcheck { font: 700 30px/1 var(--sans); color: #d95f02; margin-left: 4px; opacity: 0; transition: opacity .4s; }
+.slide:has(.f-co2.shown) .fcheck { opacity: 1; }
+/* slide 18: the greenhouse drawing gives way to the charts */
+.ghwrap { position: relative; width: 860px; height: 547px; align-self: start; }
+.ghwrap > .chart { position: absolute; inset: 0; background: var(--paper); opacity: 0; transition: opacity .6s var(--ease); }
+.ghwrap > .chart.shown { opacity: 1; }
+.ghwrap > svg { transition: opacity .6s var(--ease); }
+.ghwrap:has(> .chart.shown) > svg { opacity: 0; }
+.f-box .fbox { border-color: #1b7837; border-width: 2.5px; border-radius: 6px; }
+
+/* slide 18: the drawing moves a little */
+svg.anim .flow { stroke-dasharray: 44 5; animation: ghflow 1.6s linear infinite; }
+svg.anim .flow[stroke-dasharray] { stroke-dasharray: 7 5; animation-duration: 1.1s; }
+@keyframes ghflow { to { stroke-dashoffset: -49; } }
+svg.anim .mol { transform-box: fill-box; transform-origin: center; animation: ghjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph); }
+@keyframes ghjig { from { transform: translate(-1.5px, -1px) rotate(-5deg); } to { transform: translate(1.5px, 1px) rotate(5deg); } }
+svg.anim .rays { transform-box: view-box; transform-origin: 46px 34px; animation: ghspin 24s linear infinite; }
+@keyframes ghspin { to { transform: rotate(360deg); } }
+svg.anim .flowc { stroke-dasharray: 16 6; animation: ghflowc 1.3s linear infinite; }
+@keyframes ghflowc { to { stroke-dashoffset: -22; } }
+/* step by step: only what the current step is about keeps moving */
+.slide:has(.f-alb.shown) svg.s17 .t-lw { animation-play-state: paused; }
+.slide:has(.f-co2.shown) svg.s17 :is(.t-sw, .rays) { animation-play-state: paused; }
+.slide:has(.f-co2.shown) svg.s17 .t-lw { animation-play-state: running; }
+.slide:has([data-step="1"].shown) svg.s18 :is(.flow, .mol, .rays) { animation-play-state: paused; }
+.slide:has([data-step="1"].shown):not(:has([data-step="2"].shown)) svg.s18 :is(.t-sw, .rays, [data-step="1"] .mol) { animation-play-state: running; }
+.slide:has([data-step="2"].shown):not(:has([data-step="3"].shown)) svg.s18 :is(.t-lw, .gh2 .flow, .gh2 .mol) { animation-play-state: running; }
+.slide:has([data-step="3"].shown) svg.s18 :is(.gh3 .flow, .gh3 .mol) { animation-play-state: running; }
+.slide:has([data-step="1"].shown) svg.s19 :is(.t-sw, .t-lw, .rays) { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { svg.anim .flow, svg.anim .flowc, svg.anim .mol, svg.anim .rays { animation: none; } }
+/* slide 18, step 3: the layered column in front, the single molecule of step 2 steps back */
+svg:has(.gh3.shown) .gh2 { opacity: .1; transition: opacity .5s; }
+svg:has(.gh3.shown) .gh2 text { opacity: 0; }
+/* signpost of the CO2 slides: a word formula; a word gives way to its symbol once the slide introduces it */
+.road:has(.froad) { height: 52px; margin-bottom: 12px; }
+.froad { display: inline-flex; align-items: center; gap: 12px; font: 500 23px/1.2 var(--sans); color: var(--ink); letter-spacing: 0; }
+.froad .tex { font-size: 26px; }
+.froad .fx { color: var(--muted); }
+.froad .fw { padding: 2px 10px 4px; border: 2.5px solid transparent; border-radius: 10px; color: #a49c8c; }
+.froad .fw.cur { border-color: #1b7837; background: rgba(27, 120, 55, .07); color: var(--ink); }
+.froad .fw.done { padding: 4px 0; }
+.froad .fw .s { display: none; }
+.froad .fw { transition: color .5s var(--ease), border-color .5s var(--ease); }
+/* slide 18: both factors plain at first; the first click frames the one of this slide and fades the other */
+.froad.late .fw, .froad.late .fw.cur { color: var(--ink); border-color: transparent; background: none; }
+.slide:has(.ghsteps > [data-step="1"].shown) .froad.late .fw.cur { border-color: #1b7837; background: rgba(27, 120, 55, .07); }
+.slide:has(.ghsteps > [data-step="1"].shown) .froad.late .fw:not(.cur) { color: #a49c8c; }
+.slide:has(.fswap.shown) .froad .fw.swaps .w { display: none; }
+.slide:has(.fswap.shown) .froad .fw.swaps .s { display: inline; animation: fadein .6s var(--ease) both; }
+.epsdef { border-left: 5px solid #1b7837; background: rgba(27, 120, 55, .07); border-radius: 6px; padding: 10px 14px; }
+.epsdef p { font: 400 20px/1.4 var(--sans); color: var(--ink); }
+/* slide 18: the steps of the greenhouse effect, numbered like the drawing */
+.ghs { position: relative; padding-left: 44px; font: 400 21px/1.4 var(--sans); color: var(--ink); }
+.ghs b { position: absolute; left: 0; top: 1px; width: 30px; height: 30px; border-radius: 50%; background: #b2182b; color: var(--paper);
+  font: 600 17px/30px var(--sans); text-align: center; }
+
+/* slide 19: the radiation of the base drawing steps back, the carbon cycle is in front */
+svg.cc > g > g:first-of-type > path[marker-end] { opacity: .2; }
+svg.cc > g > g:first-of-type > text:not(:nth-of-type(1)) { opacity: 0; }
+
+/* total forcing: the two place-dependent terms framed and marked on the first click */
+.tdefs .loc { transition: color .4s, font-weight .4s; }
+.slide:has(.locstep.shown) .tdefs dd.loc { color: var(--ink); font-weight: 600; }
+.slide:has(.locstep.shown) .tdefs :is(dt, dd):not(.loc) { opacity: .28; }
+.tdefs :is(dt, dd), .road .fd { transition: opacity .5s; }
+.slide:has(.locstep.shown) .road .fd { opacity: .28; }
+
+/* slide 21: the term under discussion framed in the formula (same highlight as elsewhere) */
+.slide:has(.ts1.shown):not(:has(.ts2.shown)) .hl-p::before { border-color: #1b2420; background: rgba(27, 36, 32, .06); }
+.slide:has(.ts2.shown):not(:has(.ts3.shown)) .hl-c::before { border-color: #8a6a1e; background: rgba(138, 106, 30, .08); }
+.slide:has(.ts3.shown):not(:has(.ts4.shown)) .hl-l::before { border-color: #6b5a1e; background: rgba(107, 90, 30, .08); }
+.slide:has(.ts4.shown) .hl-r::before { border-color: #b2182b; background: rgba(178, 24, 43, .07); }
+/* the radiation in this drawing stands still: here the topic is the energy balance, not the radiation */
+svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
+
+/* one highlight for formula terms everywhere (as on slide 17): a coloured, rounded frame with an even tint.
+   A layer behind the term's own box (accents like the dot over Q do not bend it); it takes no space,
+   so switching it on never moves the layout. */
+.hl { display: inline-block; position: relative; isolation: isolate; }
+.hl::before { content: ""; position: absolute; inset: -6px -9px; border-radius: 10px; border: 2.5px solid transparent;
+  z-index: -1; transition: border-color .4s, background-color .4s; }
+.hl.on.hl-t::before { border-color: #b2182b; background: rgba(178, 24, 43, .07); }
+.slide:has(.locstep.shown) .hl-q::before { border-color: #6b4a2b; background: rgba(107, 74, 43, .08); }
+.slide:has(.locstep.shown) .hl-m::before { border-color: #1b7837; background: rgba(27, 120, 55, .07); }
+
+/* ---- gentle motion in schema drawings (svg.mo) ---- */
+svg.mo .m-flow { stroke-dasharray: 22 6; animation: mflow 1.3s linear infinite; }
+@keyframes mflow { to { stroke-dashoffset: -28; } }
+svg.mo .m-flowd { animation: mflowd 2s linear infinite; }
+@keyframes mflowd { to { stroke-dashoffset: -24; } }
+svg.mo .m-rays { transform-box: fill-box; transform-origin: center; animation: mspin 28s linear infinite; }
+@keyframes mspin { to { transform: rotate(360deg); } }
+svg.mo .m-fan { transform-box: fill-box; transform-origin: center; animation: mspin 2.4s linear infinite; }
+svg.mo .m-steam { animation: msteam 1.8s ease-in-out infinite alternate; }
+@keyframes msteam { from { transform: translateY(2px); opacity: .55; } to { transform: translateY(-4px); opacity: 1; } }
+svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: msway 4.5s ease-in-out infinite alternate; }
+@keyframes msway { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
+svg.mo .m-mol { animation: mjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
+@keyframes mjig { from { transform: translate(-2px, -1px); } to { transform: translate(2px, 1px); } }
+svg.mo .m-bob { animation: mbob 1.7s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
+@keyframes mbob { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
+svg.mo .m-drift { animation: mdrift 2.4s ease-in-out infinite alternate; }
+@keyframes mdrift { from { transform: translateX(-4px); } to { transform: translateX(4px); } }
+svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: mpulse 2.2s ease-in-out infinite alternate; }
+@keyframes mpulse { from { transform: scale(.96); } to { transform: scale(1.04); } }
+@media (prefers-reduced-motion: reduce) { svg.mo :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation: none; } }
+.slide:has([data-step="1"].shown) svg.mo :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse):not([data-step] *) { animation-play-state: paused; }
+.slide:has([data-step="2"].shown) svg.mo [data-step="1"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="3"].shown) svg.mo [data-step="2"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="4"].shown) svg.mo [data-step="3"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="5"].shown) svg.mo [data-step="4"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="6"].shown) svg.mo [data-step="5"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="7"].shown) svg.mo [data-step="6"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="8"].shown) svg.mo [data-step="7"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="9"].shown) svg.mo [data-step="8"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+.slide:has([data-step="10"].shown) svg.mo [data-step="9"] :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation-play-state: paused; }
+
+/* availability map with the time curves as an overlay card */
+.overlay { position: absolute; top: 0; right: 0; bottom: 6px; width: 900px; z-index: 3; display: flex; flex-direction: column; gap: 6px;
+  padding: 18px 24px 18px; background: var(--paper); border: 1px solid var(--paper-line); border-radius: 12px;
+  box-shadow: 0 22px 46px -24px rgba(30, 26, 18, .6); opacity: 0; transform: translateY(24px);
+  transition: opacity .5s var(--ease), transform .6s var(--ease); }
+.overlay.shown { opacity: 1; transform: none; }
+.overlay .chart { flex: 1; min-height: 0; }
+.overlay .takeaway { margin-top: 4px; font-size: 21px; }
+.body:has(.overlay.shown) > .foot { opacity: 0; transition: opacity .3s; }
+
+[data-ch="dac"] { --ch: #9a6516; --ch-soft: #e8cb92; }
+/* the break: dark, centred, a path that ends in the forest */
+.slide.chapter.brk { background: #14181a; }
+.slide.chapter.brk .ctext { left: 0; right: 0; top: 250px; max-width: none; text-align: center; }
+.slide.chapter.brk h1 { font-size: 112px; color: #f2ede2; }
+.slide.chapter.brk h1 em { font-style: normal; color: #e0a83e; }
+.slide.chapter.brk .eng { opacity: 0; transform: translateX(380px); transition: transform 1.4s var(--ease), opacity .6s; }
+.slide.chapter.brk .eng.shown { opacity: 1; transform: none; }
+.slide.chapter.brk .eng .bubble { opacity: 0; transform: scale(.85); transform-box: fill-box; transform-origin: 90% 100%; transition: opacity .4s 1.3s, transform .5s 1.3s var(--ease); }
+.slide.chapter.brk .eng.shown .bubble { opacity: 1; transform: none; }
+/* slide 4: the tree over the empty left half of the removal chart */
+.natur { position: absolute; left: 0; top: 0; width: 57%; height: 100%; pointer-events: none; }
+
+/* ---------- DAC optimisation (slides 30-32) ---------- */
+.goal { display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: center; padding: 18px 28px; border-radius: 14px;
+        background: rgba(154, 101, 22, .09); border: 2px solid rgba(154, 101, 22, .35); }
+.goal .big { font: 600 78px/1 var(--sans); color: #9a6516; letter-spacing: -.01em; }
+.goal p { font: 400 27px/1.35 var(--sans); color: var(--ink); margin: 0; }
+.goal p small { display: block; font-size: 19px; color: var(--muted); margin-top: 4px; }
+.ask { font: 400 29px/1.3 var(--sans); color: var(--ink); margin: 44px 0 22px; }
+.ask b { color: #6b4410; font-weight: 600; }
+.inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.inp { border-top: 3px solid #9a6516; padding: 12px 4px 0; }
+.inp .v { font: 600 48px/1.05 var(--sans); color: var(--ink); }
+.inp .v small { font-size: 24px; font-weight: 500; }
+.inp h4 { font: 600 24px/1.25 var(--sans); color: #6b4410; margin: 10px 0 8px; }
+.inp p { font: 400 21px/1.4 var(--sans); color: var(--ink-2); margin: 0; }
+.inp .q { display: block; margin-top: 10px; font-size: 17px; color: var(--muted); }
+
+.play { display: grid; grid-template-columns: 1090px 1fr; grid-template-rows: auto 196px; gap: 6px 30px; flex: 1; min-height: 0; }
+.play .wmap { position: relative; width: 1090px; height: 430px; }
+.play .wmap img, .play .wmap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.play .wmap img { image-rendering: pixelated; opacity: .85; }
+.play .side { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.play .side .takeaway { padding: 12px 16px 13px 50px; }
+.play .side .takeaway::before { left: 16px; top: 14px; width: 22px; height: 22px; }
+.play .yr { font: 600 84px/1 var(--sans); color: var(--ink); font-variant-numeric: tabular-nums; }
+.play .ctr .n { font: 600 44px/1.05 var(--sans); color: #9a6516; font-variant-numeric: tabular-nums; }
+.play .ctr .n small { font-size: 24px; font-weight: 500; }
+.play .ctr .l { font: 400 18px/1.3 var(--sans); color: var(--muted); }
+.play .legend-eta { font: 400 17px/1.3 var(--sans); color: var(--muted); }
+.play .legend-eta i { display: inline-block; width: 120px; height: 12px; border-radius: 6px; vertical-align: middle; margin: 0 6px;
+                      background: linear-gradient(90deg, #c8602a, #e9dcae, #1f7a74); }
+.play .strip { grid-column: 1 / -1; position: relative; }
+.play .strip svg { width: 100%; height: 100%; overflow: visible; }
+
+.mix { display: grid; grid-template-columns: 1fr 560px; gap: 46px; flex: 1; min-height: 0; }
+.mix h5 { font: 600 21px/1.2 var(--sans); color: var(--ink); margin: 0 0 6px; }
+.mix h5 small { font-weight: 400; color: var(--muted); font-size: 17px; }
+.mix svg { width: 100%; overflow: visible; }
+
+.play { display: grid; grid-template-columns: 980px 1fr; grid-template-rows: 300px auto; gap: 4px 34px; flex: 1; min-height: 0; }
+.play .wmap { position: relative; width: 760px; height: 300px; }
+.play .wmap img, .play .wmap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.play .wmap img { image-rendering: pixelated; opacity: .85; }
+.play .side { display: flex; flex-direction: column; gap: 10px; padding-top: 0; }
+.play .yr { font: 600 64px/1 var(--sans); color: var(--ink); font-variant-numeric: tabular-nums; }
+.play .ctr .n { font: 600 42px/1.05 var(--sans); color: #9a6516; font-variant-numeric: tabular-nums; }
+.play .ctr .n small { font-size: 22px; font-weight: 500; }
+.play .ctr .l { font: 400 18px/1.3 var(--sans); color: var(--muted); }
+.play .side .takeaway { padding: 10px 14px 11px 46px; font-size: 19px; margin-top: 4px; }
+.play .side .takeaway::before { left: 16px; top: 14px; width: 22px; height: 22px; }
+.play .strips { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 12px; }
+.play .strips svg { width: 100%; height: auto; overflow: visible; display: block; }
+.mix2 { display: grid; grid-template-columns: 1fr 470px; gap: 56px; flex: 1; min-height: 0; align-items: start; }
+.mix2 h5 { font: 600 22px/1.25 var(--sans); color: var(--ink); margin: 0 0 8px; }
+.mix2 h5 small { font-weight: 400; color: var(--muted); font-size: 18px; }
+.mix2 svg { width: 100%; overflow: visible; }
+.mix2 .box { border-left: 4px solid #9a6516; padding: 6px 0 6px 20px; }
+.mix2 .box p { font: 400 21px/1.4 var(--sans); color: var(--ink-2); margin: 10px 0 0; }
+
+.mapnote { font: 400 19px/1.35 var(--sans); color: var(--muted); margin: 0; }
+.ptab { width: 100%; border-collapse: collapse; font: 400 18px/1.3 var(--sans); color: var(--ink-2); margin: 2px 0 6px; }
+.ptab th, .ptab td { padding: 2px 6px; text-align: right; border: 0; }
+.ptab th:first-child, .ptab td:first-child { text-align: left; }
+.ptab thead th { font-weight: 600; color: var(--muted); font-size: 17px; border-bottom: 1px solid var(--line, #d6ccb6); }
+.pnote { font: italic 400 18px/1.3 var(--serif); color: var(--ink-2); margin: 0 0 2px; }
+.outlook { border-left: 4px solid var(--ch); padding: 10px 0 10px 22px; margin-top: 18px; }
+.outlook h4 { font: 600 23px/1.3 var(--sans); color: var(--ch); margin: 0 0 6px; }
+.outlook p { font: 400 21px/1.45 var(--sans); color: var(--ink-2); margin: 0; }
+
+/* slide 20: the fifth point frames Delta T of the solution as the fourth did */
+.slide:has(.ts5.shown) .hl-r::before { border-color: #b2182b; background: rgba(178, 24, 43, .07); }
+
+/* y label over a chart: rotated, centred on its own point; the symbol as in the formulas */
+.axlab { position: absolute; transform: translate(-50%, -50%) rotate(-90deg); white-space: nowrap; pointer-events: none;
+         font: 400 19px/1 var(--sans); color: var(--muted); }
+.axlab .katex { font-size: 1.2em; }
+
+.opt2 { display: grid; grid-template-columns: 640px 1fr; gap: 40px; flex: 1; min-height: 0; }
+.opt2 > .chart { height: 100%; min-height: 0; }
+.opt2 .right { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.opt2 .bridge { font: 400 24px/1.4 var(--sans); color: var(--ink); margin: 6px 0 0; }
+.opt2 .bridge b { color: #6b4410; font-weight: 600; }
+.opt2 .chips { display: flex; align-items: center; gap: 12px; font: 600 19px/1 var(--sans); color: var(--ink); }
+.opt2 .chips span { padding: 10px 14px; border-radius: 10px; background: var(--paper-deep); border: 2px solid var(--paper-line); }
+.opt2 .chips span.hot { background: #9a6516; border-color: #9a6516; color: var(--paper); }
+.opt2 .chips i { font-style: normal; color: var(--muted); }
+.opt2 .inputs { grid-template-columns: 1fr 1fr; gap: 20px 24px; }
+.opt2 .inp .v { font-size: 40px; }
+
+.slide.dark { background: #14181a; color: #f2ede2; }
+.slide.dark .sh h2 { color: #f2ede2; }
+.slide.dark .src { color: #8d958f; }
+.film { position: relative; display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; margin-top: -18px; }
+.film .fmap { position: relative; flex: none; width: 1424px; height: 483px; overflow: hidden; }
+.film .fmap img { position: absolute; left: 0; top: -8px; width: 1424px; height: 562px; image-rendering: pixelated; }
+.film .fmap canvas { position: absolute; inset: 0; width: 1424px; height: 483px; }
+.film .hud { position: absolute; right: 0; top: 0; text-align: right; font-family: var(--sans); pointer-events: none; }
+.film .hud .goal { display: inline-block; font: 600 18px/1 var(--sans); letter-spacing: .04em; color: #14181a; background: #f0b04a;
+                   padding: 7px 12px; border-radius: 6px; transition: background .4s; }
+.film.late .hud .goal { background: #ff6a3d; }
+.film.max .hud .goal { background: #3fd0b0; }
+.film.max .hud .n { color: #6fe3c8; }
+.film .hud .yr { font: 600 76px/1 var(--sans); color: #f2ede2; font-variant-numeric: tabular-nums; margin-top: 10px; }
+.film .hud .n { font: 600 34px/1.15 var(--sans); color: #f0b04a; font-variant-numeric: tabular-nums; margin-top: 8px; }
+.film.late .hud .n { color: #ff8a5c; }
+.film .hud .n small { font-size: 19px; font-weight: 500; color: #b9c0bb; }
+.film .strip { flex: none; width: 1424px; height: 185px; display: block; overflow: visible; }
+.film .ftake { position: absolute; left: 0; top: 338px; width: 350px; }
+.film .ftake .takeaway { font-size: 20px; margin: 0; }
+
+/* DAC chapter: dark like its break slide */
+.slide.dark { --ink: #f2ede2; --ink-2: #d6dbd6; --muted: #9aa39d; --paper-deep: #20282b; --paper-line: #3a4447; --fjord-soft: #9cc3d6; }
+.slide.dark .inp h4, .slide.dark .bridge b { color: #e0a83e; }
+.slide.dark .inp .q { color: #8d958f; }
+.slide.dark .inp { border-top-color: #e0a83e; }
+/* the conclusion in daylight */
+.slide.finale { --ch: #4f7a3a; --ch-soft: #b5cf98; background: linear-gradient(180deg, #fbf1d3 0%, #f4eedd 46%, #f2ede2 100%); }
+.slide.finale > .sh, .slide.finale > .body { position: relative; z-index: 1; }
+.slide.finale .cols3 .col p { font-size: 22px; line-height: 1.42; }
+.slide.finale .outlook { margin-top: 26px; background: rgba(255, 255, 255, .45); border-radius: 0 10px 10px 0; }
+.slide.finale .outlook p { font-size: 20px; }
+/* the happy end: the sun comes up when the slide opens; on the last click a young tree grows, the engineer speaks, birds pass */
+/* from the dark DAC chapter into the day: the slide opens at night, the sun comes up, the night and the dark forest
+   fade, then the text */
+.slide.finale .sunrays { transform-box: fill-box; transform-origin: center; animation: sunspin 40s linear infinite; }
+@keyframes sunspin { to { transform: rotate(360deg); } }
+.slide.finale .sunrise { transform: translateY(300px); transition: transform 3.6s cubic-bezier(.25, .6, .25, 1) .2s; }
+.slide.finale .night { opacity: 1; transition: opacity 3.2s ease-in-out 1s; }
+.slide.finale .dawn { opacity: 0; }
+.slide.finale.active .dawn { animation: dawn 5s ease-in-out .4s both; }
+@keyframes dawn { 0% { opacity: 0; } 45% { opacity: .85; } 100% { opacity: 0; } }
+.slide.finale > .sh, .slide.finale > .body { opacity: 0; transition: opacity 1.1s ease 3.4s; }
+.slide.finale.active .sunrise, .embed .slide.finale .sunrise, .all .slide.finale .sunrise { transform: none; }
+.slide.finale.active .night, .embed .slide.finale .night, .all .slide.finale .night { opacity: 0; }
+.slide.finale.active > .sh, .slide.finale.active > .body, .embed .slide.finale > .sh, .embed .slide.finale > .body,
+.all .slide.finale > .sh, .all .slide.finale > .body { opacity: 1; }
+.slide.finale .sapling { transform-box: fill-box; transform-origin: 50% 100%; }
+.slide.active.finale .sapling.shown { animation: sprout 1.8s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes sprout { from { transform: scale(.05); } to { transform: scale(1); } }
+.slide.finale .say { transform-box: fill-box; transform-origin: 40% 100%; }
+.slide.active.finale .say.shown { animation: pop .5s cubic-bezier(.3, 1.5, .5, 1) 1.1s both; }
+.slide.finale .birds { opacity: 0; }
+.slide.active.finale .birds.shown { opacity: 1; animation: fly 9s linear .4s both; }
+@keyframes fly { from { transform: translate(-380px, 30px); } to { transform: translate(560px, -60px); } }
+.slide.finale .birds path { animation: flap .5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.45); } }
+
+.warten { display: grid; grid-template-columns: 1fr 500px; gap: 36px; flex: 1; min-height: 0; }
+.warten > .chart { height: 100%; min-height: 0; }
+.warten .side { display: flex; flex-direction: column; gap: 18px; align-self: center; }
+.warten .side p { font: 400 21px/1.4 var(--sans); color: var(--ink-2); margin: 0; }
+.warten .side p b { color: #f0b04a; font-weight: 600; }
+.warten .side .ort { border-left: 4px solid #3fd0b0; padding: 6px 0 6px 16px; }
+.warten .side .ort b { color: #6fe3c8; }
+/* chapter 3: the managed forest in two lines, beside its curve */
+.forstpos { position: absolute; left: 112px; top: 74px; width: 330px; pointer-events: none; }
+.forstbox { position: relative; display: grid; grid-template-columns: 92px 1fr; gap: 14px;
+            align-items: center; padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,.75); border: 1.5px solid #c9d8bf;
+            transition: opacity .5s; }
+.forstbox p { font: 400 17px/1.35 var(--sans); color: var(--ink-2); margin: 0; }
+.forstbox p b { color: #14532d; }
+.slide:has(.zs4.shown) .forstpos { opacity: 0; transition: opacity .5s; }
+/* search space of the optimisation */
+.such { display: grid; grid-template-columns: 860px 1fr; grid-template-rows: auto 1fr; gap: 18px 36px; flex: 1; min-height: 0; }
+.such .map { position: relative; width: 860px; height: 339px; border-radius: 10px; overflow: hidden; }
+.such .map img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.such .leg { display: flex; align-items: center; gap: 10px; font: 400 17px/1 var(--sans); color: #9aa39d; margin-top: 8px; }
+.such .leg i { display: inline-block; width: 180px; height: 12px; border-radius: 3px; background: linear-gradient(90deg, #c8602a, #e9dcae 50%, #1f7a74); }
+.such .size { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 26px; justify-content: start; margin-top: 18px; }
+.such .size b { font: 600 40px/1 var(--sans); color: #f2ede2; }
+.such .size span { font: 400 17px/1.2 var(--sans); color: #9aa39d; }
+.such .inputs { grid-column: 1 / -1; grid-template-columns: repeat(4, 1fr); }
+.such .inp .v { font-size: 36px; }

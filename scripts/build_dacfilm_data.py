@@ -1,4 +1,4 @@
-"""Data for the DAC result film (docs/slides/chart_data/dacfilm.json).
+"""Data for the DAC result film (deck/chart_data/dacfilm.json).
 
 One DAC path against the warming that remains after the trees (managed forest, timber bound; nbs.tree_paths):
 the least highest warming above 1.5 deg C, then at that peak the least DAC for 1.5 deg C by 2100, growth limit
@@ -25,7 +25,7 @@ from nbs.dac_storage import iso3_grid, storage_mask
 from nbs.grid import grid_lats, grid_lons
 
 REPO = Path(__file__).resolve().parents[1]
-OUT = REPO / "docs/slides/chart_data/dacfilm.json"
+OUT = REPO / "deck/chart_data/dacfilm.json"
 LAT_N, LAT_S = 84.0, -58.0
 LAND, BASIN = (40, 47, 50), (120, 98, 58)
 

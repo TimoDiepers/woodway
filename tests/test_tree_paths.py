@@ -21,7 +21,7 @@ def test_schedule_plants_the_whole_area_at_the_stated_rate():
 
 
 def test_planting_everything_in_the_start_year_reproduces_the_area_slide():
-    cached = json.loads((ROOT / "docs/slides/chart_data/flaechen_zeitreihe.json").read_text())
+    cached = json.loads((ROOT / "deck/chart_data/flaechen_zeitreihe.json").read_text())
     ref = np.array(cached["kuehlt"])[: len(delta_t("kuehlt", rate_gha=None))]
     assert np.allclose(delta_t("kuehlt", rate_gha=None), ref, rtol=1e-6, atol=1e-9)
 

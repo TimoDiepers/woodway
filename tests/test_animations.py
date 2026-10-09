@@ -83,7 +83,7 @@ def test_annual_mean_at_the_sites_matches_the_storyline_numbers():
     import json
     from pathlib import Path
 
-    facts = json.loads((Path(__file__).resolve().parents[1] / "docs/slides/chart_data/fakten.json").read_text())
+    facts = json.loads((Path(__file__).resolve().parents[1] / "deck/chart_data/fakten.json").read_text())
     watts, _ = albedo_watts_monthly()
     for s in SITES:
         expected = facts["baeume"]["orte"][s.name]["licht_w"]

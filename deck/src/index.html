@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f2ede2">
+<title>Ingenieure auf dem Holzweg?</title>
+<meta name="description" content="Dissertationsvortrag: was Aufforstung und Direct Air Capture zur Klimastabilisierung beitragen, entlang einer wachsenden Systemgrenze.">
+
+<!-- Everything is local (vendor/), so the deck runs without a network.
+     Literata is the deck's own face; IBM Plex Sans carries labels, diagrams and sources. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='18' width='4' height='12' fill='%233b3024'/%3E%3Ccircle cx='16' cy='13' r='11' fill='%236f8f55'/%3E%3C/svg%3E">
+<link rel="preload" href="vendor/fonts/Literata-normal-400-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+
+<style>
+<!-- include css/deck.css --></style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"></div>
+<div class="ground" aria-hidden="true"></div>
+
+<!-- Chapter icons (Lucide geometry). Cloned into each slide header by JS. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-baeume" viewBox="0 0 24 24"><path d="M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z"/><path d="M12 19v3"/></symbol>
+  <symbol id="i-klima" viewBox="0 0 24 24"><path d="M2 12h6.5L10 9"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h2"/><path d="M10 20l-1.25-2.5L6 18"/><path d="M10 4 8.75 6.5 6 6"/><path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol>
+  <symbol id="i-vergleich" viewBox="0 0 24 24"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"/><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"/><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"/><circle cx="12" cy="12" r="10"/></symbol><symbol id="i-dac" viewBox="0 0 24 24"><path d="M10.827 16.379a6.082 6.082 0 0 1-8.618-7.002l5.412 1.45a6.082 6.082 0 0 1 7.002-8.618l-1.45 5.412a6.082 6.082 0 0 1 8.618 7.002l-5.412-1.45a6.082 6.082 0 0 1-7.002 8.618l1.45-5.412Z"/><path d="M12 12v.01"/></symbol>
+</svg>
+
+<main class="viewport">
+<div class="deck" id="deck">
+
+<!-- =====================================================
+     EINLEITUNG
+     ===================================================== -->
+
+<!-- include slides/01_einleitung.html -->
+<!-- include slides/02_baeume.html -->
+<!-- include slides/03_klima.html -->
+<!-- include slides/04_potenzial.html -->
+<!-- include slides/05_dac.html -->
+<!-- include slides/06_schluss.html -->
+<!-- include slides/07_backup.html -->
+
+
+</div>
+</main>
+
+<div class="drawer" id="drawer" aria-live="polite"><h5>Sprechernotizen</h5><div id="drawer-body"></div></div>
+
+<button id="menu-fab" type="button" aria-label="Folienübersicht" aria-haspopup="dialog" aria-controls="menu">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
+</button>
+<div id="menu" role="dialog" aria-modal="true" aria-label="Folienübersicht">
+  <div class="menu-head"><h2>Folien</h2><span><kbd>M</kbd> oder <kbd>Esc</kbd> schließen · Pfeile wählen · <kbd>↵</kbd> springen</span>
+    <button class="menu-close" type="button" aria-label="Schließen">×</button></div>
+  <div class="menu-body"></div>
+</div>
+<div class="hint" id="hint"><kbd>←</kbd> <kbd>→</kbd> blättern · <kbd>P</kbd> Referentenansicht · <kbd>N</kbd> Notizen · <kbd>R</kbd> Animation neu · <kbd>B</kbd> Backup · <kbd>F</kbd> Vollbild · <kbd>M</kbd> Übersicht · Nummer + <kbd>↵</kbd> springen</div>
+
+<template id="tpl-trees"><svg xmlns="http://www.w3.org/2000/svg"><defs><marker id="ah-td" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker><marker id="ah-tdo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#d9822b"/></marker><marker id="ah-tdg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--co2)"/></marker><marker id="ah-tdb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--zs)"/></marker><g id="co2-td"><line x1="-18" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="3"/><line x1="8" y1="0" x2="18" y2="0" stroke="var(--ink)" stroke-width="3"/><circle cx="-22" cy="0" r="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#555"/><circle cx="22" cy="0" r="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></defs><g font-family="IBM Plex Sans"><g class="grow"><rect x="60" y="470" width="560" height="30" fill="#d9cfb9"/><path d="M60 485 H620" stroke="#c3b79c" stroke-width="2"/><line x1="60" y1="470" x2="620" y2="470" stroke="#8c7a58" stroke-width="3" stroke-linecap="round"/><g class="m-sway"><rect x="318" y="260" width="24" height="210" fill="#3b3024"/><circle cx="330" cy="200" r="96" fill="#6f8f55"/><circle cx="275" cy="270" r="66" fill="#7f9c64"/><circle cx="388" cy="274" r="62" fill="#5f7f48"/></g></g><text x="700" y="46" font-size="16" letter-spacing="1.5" fill="var(--muted)">WIRKT GLOBAL</text><g class="pop" data-step="1" style="--d:0"><g class="m-rays" stroke="#d9a441" stroke-width="4" stroke-linecap="round"><line x1="144.0" y1="80.0" x2="156.0" y2="80.0"/><line x1="76.0" y1="80.0" x2="64.0" y2="80.0"/><line x1="110.0" y1="114.0" x2="110.0" y2="126.0"/><line x1="110.0" y1="46.0" x2="110.0" y2="34.0"/><line x1="134.0" y1="104.0" x2="142.5" y2="112.5"/><line x1="86.0" y1="104.0" x2="77.5" y2="112.5"/><line x1="134.0" y1="56.0" x2="142.5" y2="47.5"/><line x1="86.0" y1="56.0" x2="77.5" y2="47.5"/></g><circle cx="110" cy="80" r="26" fill="#e8b84f"/><path class="m-flow" d="M140 108 L262 186" stroke="#d9822b" stroke-width="4" fill="none" marker-end="url(#ah-tdo)"/><path class="m-flowd" d="M276 186 L330 92" stroke="#d9822b" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round" fill="none" marker-end="url(#ah-tdo)"/><circle cx="709" cy="87" r="9" fill="#d9822b"/><text x="730" y="96" font-size="26" font-weight="600" fill="var(--ink)">Reflexion von Sonnenstrahlung</text><text x="730" y="126" font-size="19" fill="var(--ink-2)">Das Laub ist dunkler als der Boden darunter.</text></g><g class="pop" data-step="2" style="--d:0"><g class="m-mol" style="--ph:-0.00s"><use href="#co2-td" x="560" y="96"/></g><path class="m-flow" d="M530 116 C 500 140 470 160 436 176" stroke="var(--co2)" stroke-width="4" fill="none" marker-end="url(#ah-tdg)"/><circle cx="709" cy="177" r="9" fill="var(--co2)"/><text x="730" y="186" font-size="26" font-weight="600" fill="var(--ink)">Aufnahme von Kohlenstoff</text><text x="730" y="216" font-size="19" fill="var(--ink-2)">CO₂ aus der Atmosphäre wird zu Biomasse.</text></g><g class="dimmable pop" data-step="3" style="--d:0"><text x="700" y="286" font-size="16" letter-spacing="1.5" fill="var(--muted)">WIRKT VOR ALLEM VOR ORT</text><path class="m-flow" d="M450 262 C 480 246 510 248 532 262" stroke="var(--zs)" stroke-width="3.5" fill="none" marker-end="url(#ah-tdb)"/><path d="M556 262 c-9 13-13 22-13 28a13 13 0 0 0 26 0c0-6-4-15-13-28z" fill="none" stroke="var(--zs)" stroke-width="3"/><circle cx="709" cy="327" r="9" fill="var(--zs)"/><text x="730" y="336" font-size="24" font-weight="600" fill="var(--ink)">Verdunstung</text><text x="730" y="366" font-size="19" fill="var(--ink-2)">kühlt die Luft am Ort</text></g><g class="dimmable pop" data-step="4" style="--d:0"><g class="m-drift"><g transform="translate(70 270) scale(2.4)" fill="none" stroke="#7f7f7f" stroke-width="1.5" stroke-linecap="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></g></g><circle cx="1069" cy="327" r="9" fill="#7f7f7f"/><text x="1090" y="336" font-size="24" font-weight="600" fill="var(--ink)">Windschutz</text><text x="1090" y="366" font-size="19" fill="var(--ink-2)">bremst den Wind</text></g><g class="dimmable pop" data-step="5" style="--d:0"><g class="m-bob"><g transform="translate(200 352) scale(2.2)" fill="none" stroke="#654320" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></g></g><circle cx="709" cy="417" r="9" fill="#654320"/><text x="730" y="426" font-size="24" font-weight="600" fill="var(--ink)">Lebensraum</text><text x="730" y="456" font-size="19" fill="var(--ink-2)">für Vögel, Insekten, Pilze</text></g><g class="dimmable pop" data-step="6" style="--d:0"><path d="M352 466 L560 466" stroke="#7a7466" stroke-width="10" stroke-linecap="round" opacity=".45"/><g class="m-flowd" stroke="#7a7466" stroke-width="2.5" stroke-dasharray="7 6" stroke-linecap="round" opacity=".8"><line x1="392" y1="352" x2="422" y2="419"/><line x1="424" y1="352" x2="454" y2="419"/><line x1="456" y1="352" x2="486" y2="419"/></g><circle cx="1069" cy="417" r="9" fill="#7a7466"/><text x="1090" y="426" font-size="24" font-weight="600" fill="var(--ink)">Schatten</text><text x="1090" y="456" font-size="19" fill="var(--ink-2)">kühlt den Boden darunter</text></g><text class="dimmable pop" data-step="6" style="--d:400" x="700" y="520" font-size="21" font-style="italic" fill="var(--muted)">… und vieles mehr</text></g></svg></template>
+
+<!-- chart data and ECharts load in the background; the first slide does not wait for them -->
+<script><!-- include js/loader.js --></script>
+<script>
+<!-- include js/deck.js --></script>
+<script id="deck-snap">window.__SNAP = document.documentElement.cloneNode(true);</script>
+<script><!-- include js/dacfilm.js --></script>
+</body>
+</html>

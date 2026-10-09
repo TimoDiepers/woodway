@@ -1,4 +1,4 @@
-"""Data for chapters 3 and 4 told along time (docs/slides/chart_data/zeitpfade.json).
+"""Data for chapters 3 and 4 told along time (deck/chart_data/zeitpfade.json).
 
 Chapter 3: three planting paths at the Bonn Challenge rate (every reforestable cell, the cooling cells, the
 cooling cells as managed forest with the timber bound; the timber released as the dashed comparison), each one
@@ -20,7 +20,7 @@ from nbs.tree_paths import delta_t, forcing
 from nbs.vergleich_figures import overshoot_series
 
 REPO = Path(__file__).resolve().parents[1]
-OUT = REPO / "docs/slides/chart_data/zeitpfade.json"
+OUT = REPO / "deck/chart_data/zeitpfade.json"
 
 
 def _mk(a) -> list[float]:

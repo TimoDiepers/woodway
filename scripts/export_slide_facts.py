@@ -1,9 +1,9 @@
-"""Compute every model number the storyline-v2 slide texts quote.
+"""Compute every model number the slide texts quote.
 
-Writes ``docs/slides/chart_data/fakten.json``. ``scripts/build_storyline_v2_deck.py``
-reads it and formats the texts from it, so a model change (FaIR calibration,
-site factor, albedo source) cannot leave a stale number in a text box. Charts
-have their own CSVs (``scripts/export_chart_data.py``).
+Writes ``deck/chart_data/fakten.json``. The slide texts in deck/src are typed
+by hand; compare them against this file after a model change (FaIR
+calibration, site factor, albedo source), and tests/test_slide_numbers.py
+checks the headline numbers.
 
     .venv/bin/python scripts/export_slide_facts.py
 """
@@ -31,7 +31,7 @@ from nbs.species import REFERENCE_SITES, get_species
 from nbs.storyline_figures import ladder_delta_t, ladder_t_star, run_site
 from nbs.tree import disturbance_probability
 
-OUT = Path(__file__).resolve().parent.parent / "docs" / "slides" / "chart_data" / "fakten.json"
+OUT = Path(__file__).resolve().parent.parent / "deck" / "chart_data" / "fakten.json"
 ICE_FREE_LAND_GHA = 13.0  # rounded literature value, as on the slide
 
 
