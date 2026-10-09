@@ -1248,6 +1248,8 @@ class Deck {
     this.progress = document.querySelector('.progress');
     this.i = 0; this.step = 0; this.showAll = location.search.includes('all');
     this.embed = location.search.includes('embed') || !!window.__EMBED;   // slide preview inside the presenter view
+    this.host = location.search.includes('host');      // inside the React deck: it supplies the chrome
+    if (this.host) document.documentElement.classList.add('host');
     this.still = this.embed || this.showAll;
     if (this.showAll) document.documentElement.classList.add('all');
     this.peer = null;                                 // the presenter window, once it has spoken
@@ -1268,7 +1270,10 @@ class Deck {
     if (d.cmd === 'next') this.next(); else if (d.cmd === 'prev') this.prev();
     else if (d.cmd === 'first') this.go(0, 0); else if (d.cmd === 'last') this.go(this.mainEnd - 1, 0);
     else if (d.cmd === 'replay') this.go(this.i, this.step);
-    else if (d.cmd === 'goto' && Number.isInteger(d.n)) this.go(d.n, 0);
+    else if (d.cmd === 'goto' && Number.isInteger(d.n)) {
+      const n = Math.max(0, Math.min(this.slides.length - 1, d.n));
+      this.go(n, d.step === 'end' ? this.steps(this.slides[n]) : Number.isInteger(d.step) ? d.step : 0);
+    }
     else if (d.cmd === 'hello') this.sync();
   }
   sync() {
@@ -1334,6 +1339,7 @@ class Deck {
     if (!this.embed) history.replaceState(null, '', `#${n + 1}`);
     const notes = s.querySelector('.notes');
     this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
+    this.sync();
   }
   dataReady() {
     // charts exist now: recount the clicks and draw the current slide in its present state

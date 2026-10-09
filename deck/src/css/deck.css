@@ -794,3 +794,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .such .size span { font: 400 17px/1.2 var(--sans); color: #9aa39d; }
 .such .inputs { grid-column: 1 / -1; grid-template-columns: repeat(4, 1fr); }
 .such .inp .v { font-size: 36px; }
+
+/* inside the React deck (?host): the shell draws menu, hint and progress */
+.host #menu-fab, .host .hint, .host .progress { display: none !important; }
