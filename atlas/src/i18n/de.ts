@@ -8,6 +8,7 @@ export const de: Record<keyof typeof en, string> = {
   "lang.switch": "English",
   "theme.label": "Darstellung",
   "group.trees": "Bäume",
+  "layer.label": "Ebene",
   "group.dac": "Direct Air Capture",
   "layer.forestType": "Typischer Waldtyp",
   "layer.area": "Wiederbewaldbare Fläche",

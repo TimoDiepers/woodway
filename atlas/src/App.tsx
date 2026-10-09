@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { loadAtlas, LoadError } from "@/data/load";
 import type { Atlas } from "@/data/types";
-import { layerById } from "@/model/layers";
+import { layerById, type LayerId } from "@/model/layers";
 import { useAtlas } from "@/store";
 import { useT } from "@/i18n/useT";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import AtlasMap from "@/map/AtlasMap";
 import { Header } from "@/ui/Header";
 import { LayerPicker } from "@/ui/LayerPicker";
+import { SourceLine } from "@/ui/deck/SourceLine";
 import { Legend } from "@/ui/Legend";
 import { TimeSlider } from "@/ui/TimeSlider";
 import { HoverReadout } from "@/ui/HoverReadout";
@@ -34,6 +35,7 @@ export default function App() {
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
   if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
   const layer = layerById(s.layer);
+  const pick = (id: LayerId) => { s.setLayer(id); if (!layerById(id).timed) s.setPlaying(false); };
   const ch = layer.group === "dac" ? "dac" : "baeume";
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -45,7 +47,7 @@ export default function App() {
         <div className="pointer-events-auto mt-2"><SiteButtons atlas={atlas} onPick={(c, site) => { s.setCell(c); setFlyTo({ lon: site.lon, lat: site.lat }); }} /></div>
       </div>
       <aside className="panel absolute left-4 top-32 max-h-[calc(100%-14rem)] w-60 overflow-auto p-3 max-md:hidden">
-        <LayerPicker value={s.layer} onChange={s.setLayer} />
+        <LayerPicker value={s.layer} onChange={pick} />
       </aside>
       {wide && s.cell !== null && (
         <aside className="panel absolute right-4 top-32 bottom-4 w-96 overflow-auto p-4">
@@ -53,7 +55,7 @@ export default function App() {
         </aside>
       )}
       <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-3 max-md:bottom-[calc(35dvh+0.5rem)] md:right-auto md:w-[28rem]" style={wide ? { paddingBottom: "env(safe-area-inset-bottom)" } : undefined}>
-        <div className="panel p-3"><Legend atlas={atlas} layer={layer} /></div>
+        <div className="panel p-3"><Legend atlas={atlas} layer={layer} compact={!wide} /></div>
         {layer.timed && (
           <div className="panel p-3" data-ch={ch}>
             <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
@@ -64,7 +66,7 @@ export default function App() {
         <MobileSheet title={t("app.title")}>
           {s.cell !== null
             ? <CellPanel atlas={atlas} cell={s.cell} year={s.year} onClose={() => s.setCell(null)} />
-            : <LayerPicker value={s.layer} onChange={s.setLayer} />}
+            : <><LayerPicker value={s.layer} onChange={pick} /><div className="mt-4"><SourceLine>{t(layer.source)}</SourceLine></div></>}
         </MobileSheet>
       )}
     </div>

@@ -4,7 +4,7 @@ import { useNum, useT, type Key } from "@/i18n/useT";
 import { useAtlas } from "@/store";
 import { SourceLine } from "@/ui/deck/SourceLine";
 
-export function Legend({ atlas, layer }: { atlas: Atlas; layer: Layer }) {
+export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer: Layer; compact?: boolean }) {
   const t = useT(), num = useNum();
   const lang = useAtlas((s) => s.lang);
   const sc = scaleOf(atlas, layer);
@@ -13,10 +13,10 @@ export function Legend({ atlas, layer }: { atlas: Atlas; layer: Layer }) {
   const reason = layer.group === "dac" ? (layer.id === "dacBuild" ? "reason.noDac" : "reason.tooCold") : "reason.noTrees";
   const greyColor = reason === "reason.tooCold" ? atlas.meta.colors.tooCold : atlas.meta.colors.land;
   return (
-    <figure className="flex flex-col gap-1.5 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
-      <figcaption className="ch-text font-serif text-base font-semibold leading-tight">{t(layer.label)}</figcaption>
+    <figure className={compact ? "flex flex-col gap-1 text-[11px]" : "flex flex-col gap-1.5 text-xs"} aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
+      <figcaption className={compact ? "ch-text font-serif text-sm font-semibold leading-tight" : "ch-text font-serif text-base font-semibold leading-tight"}>{t(layer.label)}</figcaption>
       {layer.kind === "cat" ? (
-        <ul className="flex flex-col gap-0.5">
+        <ul className={compact ? "flex flex-wrap gap-x-3 gap-y-0.5" : "flex flex-col gap-0.5"}>
           {atlas.meta.categories.waldtyp.map((c) => (
             <li key={c.key} className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-sm" style={{ background: c.color }} />
@@ -25,20 +25,23 @@ export function Legend({ atlas, layer }: { atlas: Atlas; layer: Layer }) {
           ))}
         </ul>
       ) : sc ? (
-        <div>
+        <div className={compact ? "flex items-center gap-3" : undefined}>
+          <div className={compact ? "min-w-0 flex-1" : undefined}>
           <div className="h-2.5 w-56 max-w-full rounded-sm" style={{ background: `linear-gradient(to right, ${sc.stops.join(",")})` }} />
           <div className="mt-0.5 flex w-56 max-w-full justify-between tabular-nums text-inkMuted">
             <span>{fmt(sc.domain[0])}</span>
             {sc.mid !== undefined && <span>{fmt(sc.mid)}</span>}
             <span>{fmt(sc.domain[1])}</span>
           </div>
-          <p className="text-inkMuted">{unit}{layer.id === "deltaT" && ` · ${t("legend.cools")} ← → ${t("legend.warms")}`}</p>
+          {!compact && <p className="text-inkMuted">{unit}{layer.id === "deltaT" && ` · ${t("legend.cools")} ← → ${t("legend.warms")}`}</p>}
+          </div>
+          {compact && <p className="shrink-0 text-inkMuted">{unit}</p>}
         </div>
       ) : null}
-      <p className="flex items-center gap-2 text-inkMuted">
+      <p className={compact ? "flex items-center gap-1.5 text-inkMuted" : "flex items-center gap-2 text-inkMuted"}>
         <span className="h-3 w-3 rounded-sm border border-[var(--paper-line)]" style={{ background: greyColor }} />{t(reason as Key)}
       </p>
-      <div lang={lang} className="max-w-xs"><SourceLine>{t(layer.source)}</SourceLine></div>
+      {!compact && <div lang={lang} className="max-w-xs"><SourceLine>{t(layer.source)}</SourceLine></div>}
     </figure>
   );
 }

@@ -32,3 +32,18 @@ describe("App", () => {
     expect(screen.getByRole("slider")).toBeInTheDocument();
   });
 });
+
+describe("layer list keyboard", () => {
+  it("arrow keys move the selection and focus, only the checked option is a tab stop", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    const cur = screen.getByRole("radio", { name: "Temperature effect of one tree" });
+    expect(cur).toHaveAttribute("tabindex", "0");
+    expect(screen.getByRole("radio", { name: "Sunlight at the ground" })).toHaveAttribute("tabindex", "-1");
+    cur.focus();
+    await userEvent.keyboard("{ArrowDown}");
+    const next = screen.getByRole("radio", { name: "Net share after albedo" });
+    expect(next).toHaveAttribute("aria-checked", "true");
+    expect(next).toHaveFocus();
+  });
+});

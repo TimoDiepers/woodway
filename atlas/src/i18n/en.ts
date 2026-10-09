@@ -6,6 +6,7 @@ export const en = {
   "lang.switch": "Deutsch",
   "theme.label": "Theme",
   "group.trees": "Trees",
+  "layer.label": "Layer",
   "group.dac": "Direct air capture",
   "layer.forestType": "Typical forest type",
   "layer.area": "Reforestable area",

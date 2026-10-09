@@ -13,7 +13,7 @@ export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max =
     if (!playing) return;
     let last = performance.now(), acc = yearRef.current >= max ? min : yearRef.current, raf = 0;
     const tick = (now: number) => {
-      acc += ((now - last) / 1000) * YEARS_PER_SECOND; last = now;
+      acc += (Math.min(now - last, 100) / 1000) * YEARS_PER_SECOND; last = now;
       if (acc >= max) { onYear(max); onPlaying(false); return; }
       onYear(acc); raf = requestAnimationFrame(tick);
     };
@@ -26,7 +26,7 @@ export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max =
         className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ch)] text-[var(--paper)]">
         {playing ? <Pause size={16} /> : <Play size={16} />}
       </button>
-      <input type="range" role="slider" aria-label={t("slider.year")} min={min} max={max} step={1} value={Math.round(year)}
+      <input type="range" aria-label={t("slider.year")} min={min} max={max} step={1} value={Math.round(year)}
         onChange={(e) => { onPlaying(false); onYear(+e.target.value); }}
         className="w-full" style={{ accentColor: "var(--ch)" }} />
       <output className="ch-text w-12 text-right font-serif text-lg font-semibold tabular-nums">{Math.round(year)}</output>
