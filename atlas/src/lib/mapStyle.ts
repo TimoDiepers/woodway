@@ -13,7 +13,7 @@ export const paperBasemap: StyleSpecification = {
     {
       id: "bg",
       type: "background",
-      paint: { "background-color": "#f2ede2" },
+      paint: { "background-color": "#e7e0d0" },
     },
   ],
   // Soft warm atmosphere instead of the globe cutting straight into the page
@@ -60,7 +60,7 @@ export const paperBasemapDark: StyleSpecification = {
     {
       id: "bg",
       type: "background",
-      paint: { "background-color": "#14181a" },
+      paint: { "background-color": "#20282b" },
     },
   ],
   sky: {

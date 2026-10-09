@@ -200,3 +200,13 @@ body::after {
     animation-duration: 120ms !important;
   }
 }
+
+/* Chapter-coloured text: the chapter colour on paper, its soft tone on the deck's dark slides. */
+.ch-text { color: var(--ch); }
+.dark .ch-text { color: var(--ch-soft); }
+.panel {
+  background: rgb(var(--color-panel) / 0.96);
+  border: 1px solid var(--paper-line);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px -18px rgba(30, 26, 18, .45);
+}

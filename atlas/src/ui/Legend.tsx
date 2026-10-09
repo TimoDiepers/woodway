@@ -1,0 +1,44 @@
+import type { Atlas } from "@/data/types";
+import { scaleOf, type Layer } from "@/model/layers";
+import { useNum, useT, type Key } from "@/i18n/useT";
+import { useAtlas } from "@/store";
+import { SourceLine } from "@/ui/deck/SourceLine";
+
+export function Legend({ atlas, layer }: { atlas: Atlas; layer: Layer }) {
+  const t = useT(), num = useNum();
+  const lang = useAtlas((s) => s.lang);
+  const sc = scaleOf(atlas, layer);
+  const fmt = (v: number) => num(v, Number.isInteger(v) ? 0 : 1);
+  const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
+  const reason = layer.group === "dac" ? (layer.id === "dacBuild" ? "reason.noDac" : "reason.tooCold") : "reason.noTrees";
+  const greyColor = reason === "reason.tooCold" ? atlas.meta.colors.tooCold : atlas.meta.colors.land;
+  return (
+    <figure className="flex flex-col gap-1.5 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
+      <figcaption className="ch-text font-serif text-base font-semibold leading-tight">{t(layer.label)}</figcaption>
+      {layer.kind === "cat" ? (
+        <ul className="flex flex-col gap-0.5">
+          {atlas.meta.categories.waldtyp.map((c) => (
+            <li key={c.key} className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-sm" style={{ background: c.color }} />
+              {t(`type.${c.key}` as Key)}
+            </li>
+          ))}
+        </ul>
+      ) : sc ? (
+        <div>
+          <div className="h-2.5 w-56 max-w-full rounded-sm" style={{ background: `linear-gradient(to right, ${sc.stops.join(",")})` }} />
+          <div className="mt-0.5 flex w-56 max-w-full justify-between tabular-nums text-inkMuted">
+            <span>{fmt(sc.domain[0])}</span>
+            {sc.mid !== undefined && <span>{fmt(sc.mid)}</span>}
+            <span>{fmt(sc.domain[1])}</span>
+          </div>
+          <p className="text-inkMuted">{unit}{layer.id === "deltaT" && ` · ${t("legend.cools")} ← → ${t("legend.warms")}`}</p>
+        </div>
+      ) : null}
+      <p className="flex items-center gap-2 text-inkMuted">
+        <span className="h-3 w-3 rounded-sm border border-[var(--paper-line)]" style={{ background: greyColor }} />{t(reason as Key)}
+      </p>
+      <div lang={lang} className="max-w-xs"><SourceLine>{t(layer.source)}</SourceLine></div>
+    </figure>
+  );
+}

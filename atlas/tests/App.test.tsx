@@ -1,0 +1,34 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+vi.mock("@/map/AtlasMap", () => ({ default: () => <div data-testid="map" /> }));
+const DIR = path.resolve(__dirname, "../public/data/");
+globalThis.fetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
+
+import App from "@/App";
+
+describe("App", () => {
+  it("shows the map, the layer list and the legend", async () => {
+    render(<App />);
+    expect(await screen.findByTestId("map")).toBeInTheDocument();
+    expect(screen.getAllByText("Temperature effect of one tree").length).toBeGreaterThan(0);
+    expect(screen.getByText(/FaIR/)).toBeInTheDocument();
+  });
+  it("language switch relabels the legend", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    await userEvent.click(screen.getByRole("button", { name: "Deutsch" }));
+    expect(screen.getAllByText("Temperaturwirkung eines Baums").length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole("button", { name: "English" }));
+  });
+  it("picking a layer without time hides the slider", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    await userEvent.click(screen.getByRole("radio", { name: "Sunlight at the ground" }));
+    expect(screen.queryByRole("slider")).toBeNull();
+    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+  });
+});
