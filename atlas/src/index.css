@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme palette as CSS vars, not static hex in tailwind.config — lets every
+   existing bg-paper/text-ink/etc. class stay untouched while .dark on <html>
+   (tailwind's darkMode: "class") swaps the values underneath. Stored as raw
+   "r g b" channels (not #hex) because tailwind.config wraps them in
+   rgb(var(...) / <alpha-value>) so opacity modifiers like bg-panel/90 —
+   used all over for the panel/card backgrounds — keep working; a hex string
+   there can't be composited with an alpha value at build time. */
+:root {
+  --color-paper: 242 237 226; /* #f2ede2, the deck's paper */
+  --color-panel: 253 251 243; /* #FDFBF3 */
+  --color-panel-border: 163 138 85; /* #A38A55 */
+  --color-ink: 36 31 25; /* #241F19 */
+  --color-ink-muted: 110 98 74; /* #6E624A */
+  --color-accent: 53 64 107; /* #35406B — Woad Indigo */
+}
+
+.dark {
+  --color-paper: 26 24 23; /* #1A1817 */
+  --color-panel: 43 41 37; /* #2B2925 */
+  --color-panel-border: 115 107 93; /* #736B5D */
+  --color-ink: 237 227 204; /* #EDE3CC */
+  --color-ink-muted: 159 153 135; /* #9F9987 */
+  --color-accent: 155 169 218; /* #9BA9DA — Woad Indigo, night */
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* Browser-drawn surfaces the design would otherwise cede to defaults: the
+   selection highlight, the text caret, and scrollbars all ship in a system
+   blue/grey that belongs to no theme and reads as a hole in the paper. Both
+   scrollbar properties are inherited, so setting them on :root themes the
+   detail panel's and search list's scrollers too. Selection is the accent at
+   22% rather than a solid fill so ink stays fully legible through it. */
+:root {
+  caret-color: rgb(var(--color-accent));
+  accent-color: rgb(var(--color-accent));
+  scrollbar-color: rgb(var(--color-panel-border)) transparent;
+  scrollbar-width: thin;
+}
+
+::selection {
+  background-color: rgb(var(--color-accent) / 0.22);
+  color: rgb(var(--color-ink));
+}
+
+body {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+/* Vaul's Drawer (mobile OverlayPanel) is used with modal={false} so the map
+   and its controls stay clickable while the sheet is open — but vaul's own
+   Root never actually forwards its `modal` prop down to the Radix Dialog
+   primitive it's built on, so Radix's dialog machinery always applies ITS
+   OWN modal behavior regardless: setting body.style.pointerEvents = "none"
+   while any dialog is open, to block interaction with everything outside
+   it. Vaul has a one-time requestAnimationFrame workaround that resets it
+   back to "auto" right after open, but that's a single delayed patch, not
+   a guarantee against Radix re-applying it — confirmed directly: body
+   still had inline pointer-events:none long after open, which is why nothing
+   outside the sheet (the map, the top controls) was clickable at all.
+   !important is what actually wins here: an !important stylesheet rule
+   overrides even later plain (non-!important) inline styles, so this holds
+   regardless of when/how often Radix reasserts it. */
+body {
+  pointer-events: auto !important;
+}
+
+/* A snapped sheet sizes its content column to the visible height of the
+   current snap point, so content shorter than the viewport still overflows
+   and scrolls there instead of every swipe dragging the sheet upward (see
+   drawer.tsx). Vaul only reports a new active snap point on release, though,
+   so during an upward drag that column would stay at the low height and
+   trail a growing band of bare panel beneath it. While the drag is live the
+   column takes the whole viewport instead and simply fills whatever is
+   revealed; on release it settles back to the new snap's height. */
+[data-vaul-drawer].vaul-dragging [data-drawer-snap-column] {
+  height: calc(100dvh - 0.875rem);
+}
+
+/* Fine paper-fiber grain, laid over the whole app so the map itself reads as printed on paper. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Trajectory chart dots (OverlayPanel) pop in on a per-dot delay staggered
+   by index, so they cascade left-to-right right as recharts mounts them
+   instead of all appearing at once — see TRAJECTORY_B_BEGIN_MS and
+   TRAJECTORY_LINE_DURATION_MS. */
+@keyframes trajectory-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The "Best here" reign band's own labels (OverlayPanel), staggered the same
+   way and for the same reason as the trajectory dots above: each one arrives
+   right as the band's own left-to-right reveal sweeps past its segment,
+   rather than everything appearing at once — see REIGN_SWEEP_MS. A fade and
+   a small rise, not a pop: these are lines of type sitting under a bar, not
+   points on a curve, so the scale-in the dots use would read as the wrong
+   kind of object arriving. */
+@keyframes reign-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A reign whose winner is a different KIND than the one before it — a tree
+   handing off to the machine, or back — gets this instead of the plain
+   fade above: a bigger displacement, held longer, so it reads as the more
+   consequential handover it actually is. Still no overshoot — this app's
+   motion never bounces, the terrain included — the emphasis comes from
+   scale and duration, not from a different easing family. */
+@keyframes reign-handover-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion.
+
+   Fewer and gentler, not off. Everything that carries information by moving
+   is either dropped or shortened; everything that carries information by
+   changing — a control lighting up, a value updating, a panel appearing — is
+   left alone, because removing that would take feedback away rather than
+   motion. The largest pieces of motion in the app are handled in JS rather
+   than here, since none of them are CSS-media-query-triggered animations:
+   the map's re-answering (HexLayer, via useReducedMotion), and the region
+   sheet's "Best here" reign band and trajectory chart, both of which check
+   prefersReducedMotion() directly before ever setting the clip-path
+   transition or the animationName/animationDelay above that would otherwise
+   drive them — so under the preference those keyframes are simply never
+   attached, rather than attached and then neutralized here. MapLibre honours
+   the preference for its own camera flights internally.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /* Popovers, the select menu and the tool sheets are built on
+     tailwindcss-animate, which composes its enter/exit keyframes out of
+     these variables. Zeroing the spatial ones leaves the opacity fade — the
+     panel still announces itself, it just stops flying in from a direction. */
+  [data-state="open"],
+  [data-state="closed"] {
+    --tw-enter-scale: 1;
+    --tw-exit-scale: 1;
+    --tw-enter-rotate: 0;
+    --tw-exit-rotate: 0;
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+  }
+
+  /* A sheet cannot stop travelling — sliding up from the edge is what makes
+     it a sheet, and it is still draggable by hand — so it is shortened to
+     roughly a fade's worth of time instead. Vaul's own JS timings are
+     unchanged; the sheet simply arrives early and waits. */
+  [data-vaul-drawer],
+  [data-vaul-overlay] {
+    transition-duration: 120ms !important;
+    animation-duration: 120ms !important;
+  }
+}

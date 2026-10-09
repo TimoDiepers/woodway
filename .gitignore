@@ -23,3 +23,6 @@ docs/slides/andere_vortraege/
 
 # leftover PowerPoint files (the talk is HTML only now)
 *.pptx
+atlas/node_modules/
+atlas/dist/
+atlas/tsconfig.tsbuildinfo
