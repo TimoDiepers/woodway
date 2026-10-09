@@ -50,6 +50,8 @@ export const en = {
   "panel.noForest": "No reforestable land in this cell",
   "panel.area": "{area} km² reforestable · {trees} million trees",
   "panel.coolsFrom": "Cools the climate from {year} on",
+  "panel.coolsUntil": "Cools the climate until {year}, then warms: the albedo outweighs the CO₂",
+  "panel.stockSeries": "carbon",
   "panel.neverCools": "Does not cool the climate by 2100",
   "panel.stock": "Carbon in one tree [kg C]",
   "panel.forcing": "Radiative forcing of one tree [10⁻¹⁵ W/m²]",

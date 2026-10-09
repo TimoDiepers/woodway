@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import { CellPanel } from "@/ui/CellPanel";
-import { coolsFrom } from "@/model/model";
+import { coolsFrom, coolsUntil, deltaT } from "@/model/model";
 
 const DIR = path.resolve(__dirname, "../public/data/");
 const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
@@ -25,5 +25,12 @@ describe("CellPanel", () => {
     while (!(at.f.land[cell] && !at.f.type[cell])) cell++;
     render(<CellPanel atlas={at} cell={cell} year={2050} onClose={() => {}} />);
     expect(screen.getByText("No reforestable land in this cell")).toBeInTheDocument();
+  });
+  it("a tree that cools and then warms says until when", async () => {
+    const at = await loadAtlas("data/", diskFetch);
+    let cell = 0;
+    while (!(at.f.type[cell] && deltaT(at, cell, 2100) >= 0 && coolsUntil(at, cell) !== null)) cell++;
+    render(<CellPanel atlas={at} cell={cell} year={2050} onClose={() => {}} />);
+    expect(screen.getByText(`Cools the climate until ${coolsUntil(at, cell)}, then warms: the albedo outweighs the CO₂`)).toBeInTheDocument();
   });
 });

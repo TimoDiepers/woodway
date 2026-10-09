@@ -7,8 +7,8 @@ export function SiteButtons({ atlas, onPick }: { atlas: Atlas; onPick(cell: numb
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
       <span className="text-inkMuted">{t("sites.label")}</span>
-      {atlas.meta.sites.map((s) => (
-        <button key={s.name} onClick={() => onPick(cellAt(s.lon, s.lat)!, s)}
+      {atlas.meta.sites.flatMap((s) => { const cell = cellAt(s.lon, s.lat); return cell === null ? [] : [{ s, cell }]; }).map(({ s, cell }) => (
+        <button key={s.name} onClick={() => onPick(cell, s)}
           className="rounded-full border border-panelBorder bg-paper/80 px-2 py-0.5 hover:bg-ink/5">
           <span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: s.color }} />{s.name}
         </button>

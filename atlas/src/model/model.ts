@@ -48,8 +48,20 @@ export function dacBuildMt(at: Atlas, cell: number, year: number): number {
   return (1000 * b.capacityGt[owner][t]) / at.cellsPerOwner[owner];
 }
 
+/** First year from which the tree cools for good (ΔT < 0 through 2100); null if it does not cool in 2100. */
 export function coolsFrom(at: Atlas, cell: number): number | null {
-  for (const y of at.meta.years) if (deltaT(at, cell, y) < 0) return y;
+  const ys = at.meta.years;
+  if (!(deltaT(at, cell, ys.at(-1)!) < 0)) return null;
+  let from = ys.at(-1)!;
+  for (let k = ys.length - 1; k >= 0 && deltaT(at, cell, ys[k]) < 0; k--) from = ys[k];
+  return from;
+}
+
+/** For a tree that cools at some point but warms again by 2100: the last year with ΔT < 0. */
+export function coolsUntil(at: Atlas, cell: number): number | null {
+  const ys = at.meta.years;
+  if (!typeKey(at, cell) || deltaT(at, cell, ys.at(-1)!) < 0) return null;
+  for (let k = ys.length - 1; k >= 0; k--) if (deltaT(at, cell, ys[k]) < 0) return ys[k];
   return null;
 }
 

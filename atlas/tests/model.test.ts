@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import type { Atlas } from "@/data/types";
-import { deltaT, netShare, dacNet, dacBuildMt, coolsFrom, cellSeries, yearIndex } from "@/model/model";
+import { deltaT, netShare, dacNet, dacBuildMt, coolsFrom, coolsUntil, cellSeries, yearIndex } from "@/model/model";
 
 const DIR = path.resolve(__dirname, "../public/data/");
 const diskFetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(url))))) as unknown as typeof fetch;
@@ -44,6 +44,22 @@ describe("model", () => {
     expect(s.dt.at(-1)).toBeCloseTo(deltaT(at, c, 2100), 25);
     const y = coolsFrom(at, c);
     if (y !== null) expect(deltaT(at, c, y)).toBeLessThan(0);
+  });
+  it("a tree cools only if it still cools in 2100; cool-then-warm cells report the last cool year", () => {
+    let cool = -1, flip = -1;
+    for (let c = 0; c < at.f.type.length && (cool < 0 || flip < 0); c++) {
+      if (!at.f.type[c]) continue;
+      if (cool < 0 && deltaT(at, c, 2100) < 0) cool = c;
+      if (flip < 0 && deltaT(at, c, 2100) >= 0 && at.meta.years.some((y) => deltaT(at, c, y) < 0)) flip = c;
+    }
+    expect(cool).toBeGreaterThanOrEqual(0);
+    expect(flip).toBeGreaterThanOrEqual(0);
+    expect(coolsFrom(at, cool)).not.toBeNull();
+    expect(coolsUntil(at, cool)).toBeNull();
+    expect(coolsFrom(at, flip)).toBeNull();
+    const u = coolsUntil(at, flip)!;
+    expect(deltaT(at, flip, u)).toBeLessThan(0);
+    expect(deltaT(at, flip, u + 1)).toBeGreaterThanOrEqual(0);
   });
   it("DAC build-out appears where the optimisation puts it", () => {
     const [i, j] = at.meta.build.cells[0];

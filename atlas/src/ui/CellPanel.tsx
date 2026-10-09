@@ -1,7 +1,8 @@
+import { useMemo } from "react";
 import { X } from "lucide-react";
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Atlas } from "@/data/types";
-import { cellSeries, coolsFrom, dacBuildMt, dacNet, typeKey } from "@/model/model";
+import { cellSeries, coolsFrom, coolsUntil, dacBuildMt, dacNet, typeKey } from "@/model/model";
 import { cellCenter } from "@/map/lookup";
 import { useNum, useT, type Key } from "@/i18n/useT";
 import { Kicker } from "@/ui/deck/Kicker";
@@ -10,7 +11,8 @@ import { Takeaway } from "@/ui/deck/Takeaway";
 const TICK = { fontSize: 11, fill: "var(--muted)", fontFamily: "var(--sans)" };
 
 function Chart({ title, years, series, year }: { title: string; years: number[]; series: { key: string; color: string; values: number[] }[]; year: number }) {
-  const data = years.map((y, k) => Object.fromEntries([["year", y], ...series.map((s) => [s.key, s.values[k]])]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const data = useMemo(() => years.map((y, k) => Object.fromEntries([["year", y], ...series.map((s) => [s.key, s.values[k]])])), [years, series[0].values]);
   return (
     <section className="mt-3">
       <h3 className="text-xs font-medium text-inkMuted">{title}</h3>
@@ -40,8 +42,12 @@ export function CellPanel({ atlas, cell, year, onClose }: { atlas: Atlas; cell: 
   const t = useT(), num = useNum();
   const { lat, lon } = cellCenter(cell);
   const key = typeKey(atlas, cell);
-  const s = cellSeries(atlas, cell);
+  const s = useMemo(() => {
+    const r = cellSeries(atlas, cell);
+    return r && { ...r, phiCo2: r.phiCo2.map((v) => v * 1e15), phiAlb: r.phiAlb.map((v) => v * 1e15), dt: r.dt.map((v) => v * 1e15) };
+  }, [atlas, cell]);
   const cool = key ? coolsFrom(atlas, cell) : null;
+  const until = key ? coolsUntil(atlas, cell) : null;
   const eta = dacNet(atlas, cell, year);
   const build = dacBuildMt(atlas, cell, year);
   const [group, zone] = key ? key.split("_") : ["", ""];
@@ -54,12 +60,14 @@ export function CellPanel({ atlas, cell, year, onClose }: { atlas: Atlas; cell: 
           <>
             <h2 className="mt-1 font-serif text-lg font-semibold text-[var(--ch)]">{t("panel.forest", { type: t(`type.${group}` as Key), zone: t(`zone.${zone}` as Key) })}</h2>
             <p className="text-inkMuted">{t("panel.area", { area: num(atlas.f.area[cell] / 1e6), trees: num(atlas.f.trees[cell] / 1e6, 1) })}</p>
-            <Takeaway ch="baeume">{cool ? t("panel.coolsFrom", { year: cool }) : t("panel.neverCools")}</Takeaway>
-            <Chart title={t("panel.stock")} years={s.years} year={year} series={[{ key: "m", color: "var(--co2)", values: s.m }]} />
+            <div style={until ? ({ "--ch": "var(--alb)", "--ch-soft": "#ecc19a" } as React.CSSProperties) : undefined}>
+              <Takeaway ch={until ? undefined : "baeume"}>{cool ? t("panel.coolsFrom", { year: cool }) : until ? t("panel.coolsUntil", { year: until }) : t("panel.neverCools")}</Takeaway>
+            </div>
+            <Chart title={t("panel.stock")} years={s.years} year={year} series={[{ key: t("panel.stockSeries"), color: "var(--co2)", values: s.m }]} />
             <Chart title={t("panel.forcing")} years={s.years} year={year} series={[
-              { key: t("panel.forcingCo2"), color: "var(--co2)", values: s.phiCo2.map((v) => v * 1e15) },
-              { key: t("panel.forcingAlb"), color: "var(--alb)", values: s.phiAlb.map((v) => v * 1e15) }]} />
-            <Chart title={t("panel.temperature")} years={s.years} year={year} series={[{ key: "ΔT", color: "#14532d", values: s.dt.map((v) => v * 1e15) }]} />
+              { key: t("panel.forcingCo2"), color: "var(--co2)", values: s.phiCo2 },
+              { key: t("panel.forcingAlb"), color: "var(--alb)", values: s.phiAlb }]} />
+            <Chart title={t("panel.temperature")} years={s.years} year={year} series={[{ key: "ΔT", color: "#14532d", values: s.dt }]} />
           </>
         ) : (
           <p className="mt-2">{t("panel.noForest")}</p>

@@ -52,6 +52,8 @@ export const de: Record<keyof typeof en, string> = {
   "panel.noForest": "In dieser Zelle ist kein Land wiederbewaldbar",
   "panel.area": "{area} km² wiederbewaldbar · {trees} Mio. Bäume",
   "panel.coolsFrom": "Kühlt das Klima ab {year}",
+  "panel.coolsUntil": "Kühlt das Klima bis {year}, danach wärmt er: die Albedo überwiegt das CO₂",
+  "panel.stockSeries": "Kohlenstoff",
   "panel.neverCools": "Kühlt das Klima bis 2100 nicht",
   "panel.stock": "Kohlenstoff in einem Baum [kg C]",
   "panel.forcing": "Strahlungsantrieb eines Baums [10⁻¹⁵ W/m²]",
