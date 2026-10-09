@@ -15,7 +15,15 @@ describe("GlobalStrip", () => {
     expect(screen.getByText("with the trees")).toBeInTheDocument();
     expect(screen.getByText("with trees and DAC")).toBeInTheDocument();
     const k = at.meta.global.years.indexOf(2080);
-    const gt = at.meta.global.dacCapacityGt[k].toFixed(1);
+    const v = at.meta.global.dacCapacityGt[k];
+    const gt = v.toFixed(v < 1 ? 2 : 1);
     expect(screen.getByText(`DAC capacity ${gt} Gt/a`)).toBeInTheDocument();
+  });
+  it("shows two decimals below 1 Gt/a instead of 0.0", async () => {
+    const at = await loadAtlas("data/", diskFetch);
+    render(<GlobalStrip atlas={at} year={2030} />);
+    const v = at.meta.global.dacCapacityGt[4];
+    expect(v).toBeLessThan(1);
+    expect(screen.getByText(`DAC capacity ${v.toFixed(2)} Gt/a`)).toBeInTheDocument();
   });
 });

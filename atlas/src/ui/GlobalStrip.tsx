@@ -18,7 +18,7 @@ export function GlobalStrip({ atlas, year }: { atlas: Atlas; year: number }) {
     <section className="text-xs" aria-label={t("strip.title")} data-ch="vergleich">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="ch-text font-serif text-sm font-semibold leading-tight">{t("strip.title")}</h2>
-        <span className="shrink-0 tabular-nums text-inkMuted">{t("strip.capacity", { gt: num(g.dacCapacityGt[k], 1) })}</span>
+        <span className="shrink-0 tabular-nums text-inkMuted">{t("strip.capacity", { gt: num(g.dacCapacityGt[k], g.dacCapacityGt[k] < 1 ? 2 : 1) })}</span>
       </div>
       <div className="mt-1 h-24">
         <ResponsiveContainer width="100%" height="100%">
