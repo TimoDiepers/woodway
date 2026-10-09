@@ -27,11 +27,16 @@ from nbs.constants import YEARS
 from nbs.species import get_species
 
 
-def test_both_sites_lie_on_reforestable_cells_with_a_typical_forest():
+# typical forest per site: mixed forest in Aachen and Joensuu, tropical evergreen broadleaf in Marabá
+TYPICAL_FOREST = {"Aachen": "mf_gemaessigt", "Joensuu": "mf_boreal", "Marabá": "ebf_tropisch"}
+
+
+def test_all_sites_lie_on_reforestable_cells_with_their_typical_forest():
     mask = species_range_mask()
+    assert {s.name for s in SITES} == set(TYPICAL_FOREST)
     for s in SITES:
         assert mask[site_cell(s)], f"{s.name}: keine wiederbewaldbare Zelle mit Waldtyp"
-        assert site_key(s).startswith("mf_"), f"{s.name}: typischer Wald ist {site_key(s)}"
+        assert site_key(s) == TYPICAL_FOREST[s.name], f"{s.name}: typischer Wald ist {site_key(s)}"
 
 
 def test_cumulative_uptake_is_on_the_study_axis_and_ends_positive():
