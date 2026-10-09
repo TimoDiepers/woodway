@@ -1199,9 +1199,38 @@ def co2_forcing_figure(out_path: str) -> str:
     return _save(fig, out_path)
 
 
-def irf_side_figure(out_path: str) -> str:
-    """K3 as a side panel next to the carbon-cycle drawing (narrower, same content)."""
-    return irf_figure(out_path, figsize=(4.6, 3.1), left=0.2, ylabel="CO$_2$ in der Atmosphäre")
+def irf_side_figure(out_path: str, horizon: int = 150) -> str:
+    """K3 as a side panel next to the carbon-cycle drawing: only the removal of 1 kg CO2 by the tree. The
+    air lacks the green part; the brown part between -1 kg and the curve is what land and ocean give back."""
+    _setup()
+    g = green_carbon_preindustrial(horizon + 1)
+    t = np.arange(horizon + 1)
+    c_rm, c_back = "#2e7d4f", "#8c6d5a"
+    fig, ax = plt.subplots(figsize=(4.6, 3.1), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.17, top=0.95)
+    _clean_axes(ax)
+    ax.axhline(0, color=C_INK_MUTED, linewidth=1.0)
+    ax.axhline(-1, color=c_rm, linewidth=1.1, linestyle=(0, (2, 3)), alpha=0.8)
+    ax.fill_between(t, 0, -g, color=c_rm, alpha=0.14, linewidth=0)
+    ax.fill_between(t, -g, -1, color=c_back, alpha=0.16, linewidth=0)
+    ax.plot(t, -g, color=c_rm, linewidth=3.0)
+    for yr in (20, 50, 100):
+        ax.plot(yr, -g[yr], "o", ms=7, color=c_rm, mec="white", mew=1.5, zorder=5)
+        ax.annotate(f"{100 * g[yr]:.0f} %", (yr, -g[yr]), xytext=(4, -10), textcoords="offset points", ha="left", va="top",
+                    fontsize=12, color=C_INK)
+    from nbs.response import _JOOS_A0 as a0
+    ax.axhline(-a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
+    ax.text(horizon, -a0 + 0.04, f"→ {100 * a0:.0f} % dauerhaft", ha="right", va="bottom", fontsize=12, color=c_rm)
+    ax.text(3, -0.06, "Entnahme von 1 kg CO$_2$", fontsize=12.5, color=c_rm, fontweight="bold", va="top")
+    ax.text(horizon - 2, -0.93, "von Land und Ozean zurückgegeben", ha="right", va="bottom", fontsize=12, color=c_back,
+            fontweight="bold")
+    ax.set_xlim(0, horizon)
+    ax.set_ylim(-1.12, 0.1)
+    ax.set_yticks([-1, -0.5, 0])
+    ax.set_yticklabels(["−1 kg", "−0,5 kg", "0"])
+    ax.set_xlabel("Jahre nach der Entnahme")
+    # y label on the slide as a formula overlay (Delta m_CO2), in the colour of the formula
+    return _save(fig, out_path)
 
 
 def step_response_figure(out_path: str) -> str:
@@ -1236,15 +1265,27 @@ def step_response_figure(out_path: str) -> str:
     return _save(fig, out_path)
 
 
-def tree_temperature_figure(out_path: str) -> str:
-    """Slide 21, after the example: the temperature effect of one tree at the three sites (its forcing of
-    slide 20 put into FaIR)."""
+def _tree_temperature_frame():
+    """Axes shared by the one-year example and the tree result on the temperature slide: same size, same
+    limits, so the deck can swap the curves in the same frame."""
     _setup()
     fig, ax = plt.subplots(figsize=(7.3, 4.6), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.13, right=0.8, bottom=0.12, top=0.9)
     _clean_axes(ax)
-    scale = 1e15
     ax.axhline(0, color=C_INK_MUTED, linewidth=0.9)
+    lo = min(float(np.min(run_site(s).delta_t)) for s in SITES) * 1e15
+    ax.set_xlim(YEARS[0], YEARS[-1])
+    ax.set_xticks([T_START, 2050, 2075, 2100])
+    ax.set_ylim(lo * 1.06, -lo * 0.05)
+    ax.set_ylabel("ΔT je Baum [10$^{-15}$ K]")
+    return fig, ax
+
+
+def tree_temperature_figure(out_path: str) -> str:
+    """Slide 21, after the example: the temperature effect of one tree at the three sites (its forcing of
+    slide 20 put into FaIR)."""
+    fig, ax = _tree_temperature_frame()
+    scale = 1e15
     for s in SITES:
         r = run_site(s)
         ax.plot(YEARS, r.delta_t * scale, color=s.color, linewidth=3.2)
@@ -1258,9 +1299,6 @@ def tree_temperature_figure(out_path: str) -> str:
                     ha="left", va="top")
             ax.annotate("", (YEARS[i] + 0.5, r.delta_t[i] * scale - 0.8), xytext=(x0, y0 - 1.2), textcoords="data",
                         arrowprops=dict(arrowstyle="-|>", color=s.color, lw=1.6, shrinkA=0, shrinkB=2))
-    ax.set_xlim(YEARS[0], YEARS[-1])
-    ax.set_xticks([T_START, 2050, 2075, 2100])
-    ax.set_ylabel("ΔT je Baum [10$^{-15}$ K]")
     ax.set_title("Je Baum: sein Antrieb φ(t) → ΔT(t)", loc="left", fontsize=13, color=C_INK)
     ax.text(2028, ax.get_ylim()[0] * 0.92, "unter null: kühlt", fontsize=12, color=C_INK_MUTED)
     return _save(fig, out_path)
@@ -1287,7 +1325,7 @@ def co2_efficiency_figure(out_path: str) -> str:
     ax.set_xlim(YEARS[0], YEARS[-1])
     ax.set_xticks([T_START, 2050, 2075, 2100])
     ax.set_ylim(0, 2.0)
-    ax.set_ylabel("Antrieb je kg CO$_2$ [10$^{-15}$ W/m$^2$]")
+    # y label on the slide as a formula overlay (epsilon_CO2), in the colour of the formula
     ax.set_title("Mehr CO$_2$ im Hintergrund, weniger Wirkung je kg (SSP2-4.5)", loc="left", fontsize=13, color=C_INK)
     return _save(fig, out_path)
 

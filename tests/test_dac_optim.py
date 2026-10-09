@@ -258,3 +258,28 @@ def test_slow_growth_co2_target_approaches():
     r = solve(growth=1.11, ziel="co2")
     assert r["status"] == "annaeherung"
     assert r["netto_gt"] < r["co2_ziel_gt"]
+
+
+def test_max_case_builds_at_the_growth_limit_until_the_storage_binds():
+    from nbs.dac_optim import growth_limit, solve_max
+
+    r = solve_max()
+    x, eta = np.array(r["x"]), np.array(r["eta"])
+    tot, lim = x.sum(axis=0), growth_limit()
+    assert np.all(tot <= lim * (1 + 1e-6) + 1e-9)                 # never faster than the growth limit
+    assert x.sum() <= r["speicher_gt"] * (1 + 1e-6)                # never more than the storage
+    i60 = 2060 - 2026
+    assert np.allclose(tot[: i60 + 1], lim[: i60 + 1], rtol=1e-4, atol=1e-6)  # as early as possible: at the limit
+    assert r["netto_gt"] > 0.9 * r["speicher_gt"]                  # the storage is nearly full by 2100
+
+
+def test_min_peak_never_raises_the_peak_and_more_growth_lowers_it():
+    from nbs.dac_optim import solve_min_peak
+    from nbs.vergleich_figures import overshoot_series
+
+    gap = np.array(overshoot_series()["noetig_k"])
+    slow, free = solve_min_peak(gap), solve_min_peak(gap, growth=1e6, limit_start=False)
+    rest = np.maximum(0.0, gap - np.array(slow["kuehlung_k"]))
+    assert abs(rest.max() - slow["spitze_k"]) < 1e-6                 # the reported peak is the path's peak
+    assert slow["spitze_k"] <= gap.max() + 1e-9
+    assert free["spitze_k"] < slow["spitze_k"] - 0.05                 # without a growth limit far lower
