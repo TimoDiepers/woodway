@@ -4,7 +4,7 @@ name: Deck auf GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["deck/**", ".github/workflows/pages.yml"]
+    paths: ["deck/**", "atlas/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: python deck/build.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: atlas/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: atlas
+      - run: cp -R atlas/dist deck/dist/atlas
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -2,6 +2,8 @@
 
 **Talk:** https://timodiepers.github.io/dissvortrag/
 
+**Atlas:** https://timodiepers.github.io/dissvortrag/atlas/
+
 Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 
 The talk widens the system boundary step by step. It starts with one tree, which takes up carbon and absorbs extra sunlight because its canopy is darker than the land it replaces. Next comes the carbon cycle, where ocean and land hand back part of the removed CO₂. Then the Earth's energy balance turns forcing into temperature. Finally the view grows to every reforestable 0.5° cell, and then to DAC as the second removal route. Everything is computed year by year, so the result is a temperature path to 2100 rather than one number.
@@ -38,6 +40,7 @@ src/nbs/            the model
   legacy/                                              the earlier level 0–6 framework, kept with its tests
 scripts/            fetch and prepare data, compute the deck's numbers and data
 deck/               the HTML talk (see below)
+atlas/              the interactive map of all results (see atlas/README.md)
 data/               inputs (data/raw is not in git)
 docs/methods/       method notes: forest types, FaIR, DAC model, literature
 notebooks/          01 one tree, 03 the global layer
