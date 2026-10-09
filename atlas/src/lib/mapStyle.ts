@@ -13,16 +13,16 @@ export const paperBasemap: StyleSpecification = {
     {
       id: "bg",
       type: "background",
-      paint: { "background-color": "#EDE3CC" },
+      paint: { "background-color": "#f2ede2" },
     },
   ],
   // Soft warm atmosphere instead of the globe cutting straight into the page
   // — a golden haze at the limb (dawn/dusk terminator, not sci-fi blue), and
   // the sky itself is the exact paper color so it blends outward seamlessly.
   sky: {
-    "sky-color": "#EDE3CC",
-    "horizon-color": "#E8B15C",
-    "fog-color": "#E8B15C",
+    "sky-color": "#f2ede2",
+    "horizon-color": "#d6ccb6",
+    "fog-color": "#d6ccb6",
     "sky-horizon-blend": 0.6,
     // Kept low on purpose: at our working pitch (55°) and zoom (~3.4), most
     // of the visible terrain reads as "near horizon" to the fog model, so
@@ -43,7 +43,7 @@ export const paperBasemap: StyleSpecification = {
   },
   light: {
     anchor: "viewport",
-    color: "#fff3de",
+    color: "#f2ede2",
     intensity: 0.15,
     position: [1.15, 210, 30],
   },
@@ -61,13 +61,13 @@ export const paperBasemapDark: StyleSpecification = {
     {
       id: "bg",
       type: "background",
-      paint: { "background-color": "#1a1817" },
+      paint: { "background-color": "#14181a" },
     },
   ],
   sky: {
-    "sky-color": "#1a1817",
-    "horizon-color": "#373027",
-    "fog-color": "#373027",
+    "sky-color": "#14181a",
+    "horizon-color": "#3a4447",
+    "fog-color": "#3a4447",
     "sky-horizon-blend": 0.6,
     "horizon-fog-blend": 0.12,
     "fog-ground-blend": 0.1,
@@ -84,7 +84,7 @@ export const paperBasemapDark: StyleSpecification = {
   },
   light: {
     anchor: "viewport",
-    color: "#cfd9e6",
+    color: "#e7e0d0",
     intensity: 0.1,
     position: [1.15, 210, 30],
   },
