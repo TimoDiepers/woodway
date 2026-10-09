@@ -14,6 +14,7 @@ import { TimeSlider } from "@/ui/TimeSlider";
 import { HoverReadout } from "@/ui/HoverReadout";
 import { CellPanel } from "@/ui/CellPanel";
 import { SiteButtons } from "@/ui/SiteButtons";
+import { GlobalStrip } from "@/ui/GlobalStrip";
 import { MobileSheet } from "@/ui/MobileSheet";
 
 export default function App() {
@@ -35,7 +36,7 @@ export default function App() {
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
   if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
   const layer = layerById(s.layer);
-  const pick = (id: LayerId) => { s.setLayer(id); if (!layerById(id).timed) s.setPlaying(false); };
+  const pick = (id: LayerId) => s.setLayer(id);
   const ch = layer.group === "dac" ? "dac" : "baeume";
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -46,7 +47,7 @@ export default function App() {
         <Header />
         <div className="pointer-events-auto mt-2"><SiteButtons atlas={atlas} onPick={(c, site) => { s.setCell(c); setFlyTo({ lon: site.lon, lat: site.lat }); }} /></div>
       </div>
-      <aside className="panel absolute left-4 top-32 max-h-[calc(100%-14rem)] w-60 overflow-auto p-3 max-md:hidden">
+      <aside className="panel absolute left-4 top-32 max-h-[calc(100%-9rem)] w-60 overflow-auto p-3 max-md:hidden">
         <LayerPicker value={s.layer} onChange={pick} />
       </aside>
       {wide && s.cell !== null && (
@@ -54,19 +55,18 @@ export default function App() {
           <CellPanel atlas={atlas} cell={s.cell} year={s.year} onClose={() => s.setCell(null)} />
         </aside>
       )}
-      <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-3 max-md:bottom-[calc(35dvh+0.5rem)] md:right-auto md:w-[28rem]" style={wide ? { paddingBottom: "env(safe-area-inset-bottom)" } : undefined}>
+      <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-3 max-md:bottom-[calc(35dvh+0.5rem)] md:left-[17.5rem] md:right-auto md:w-[28rem]" style={wide ? { paddingBottom: "env(safe-area-inset-bottom)" } : undefined}>
         <div className="panel p-3"><Legend atlas={atlas} layer={layer} compact={!wide} /></div>
-        {layer.timed && (
-          <div className="panel p-3" data-ch={ch}>
-            <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
-          </div>
-        )}
+        <div className="panel p-3" data-ch={ch}>
+          <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
+        </div>
+        {wide && <div className="panel p-3"><GlobalStrip atlas={atlas} year={s.year} /></div>}
       </div>
       {!wide && (
         <MobileSheet title={t("app.title")}>
           {s.cell !== null
             ? <CellPanel atlas={atlas} cell={s.cell} year={s.year} onClose={() => s.setCell(null)} />
-            : <><LayerPicker value={s.layer} onChange={pick} /><div className="mt-4"><SourceLine>{t(layer.source)}</SourceLine></div></>}
+            : <><LayerPicker value={s.layer} onChange={pick} /><div className="mt-4"><SourceLine>{t(layer.source)}</SourceLine></div><div className="mt-4 border-t border-[var(--paper-line)] pt-3"><GlobalStrip atlas={atlas} year={s.year} /></div></>}
         </MobileSheet>
       )}
     </div>

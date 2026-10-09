@@ -23,13 +23,13 @@ describe("App", () => {
     expect(screen.getAllByText("Temperaturwirkung eines Baums").length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "English" }));
   });
-  it("picking a layer without time hides the slider", async () => {
+  it("static layers keep the slider for the global strip", async () => {
     render(<App />);
     await screen.findByTestId("map");
     await userEvent.click(screen.getByRole("radio", { name: "Sunlight at the ground" }));
-    expect(screen.queryByRole("slider")).toBeNull();
-    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
     expect(screen.getByRole("slider")).toBeInTheDocument();
+    expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
   });
 });
 
