@@ -418,6 +418,20 @@ import patch_dac_optim
 page = patch_dac_optim.patch(page)
 import patch_comments5
 page = patch_comments5.patch(page)
+import patch_tempstep
+page = patch_tempstep.patch(page)
+import patch_tempsum
+page = patch_tempsum.patch(page)
+import patch_entnahme
+page = patch_entnahme.patch(page)
+import patch_axlab
+page = patch_axlab.patch(page)
+import patch_dac_kompakt
+page = patch_dac_kompakt.patch(page)
+import patch_finale
+page = patch_finale.patch(page)
+import patch_zeitpfade
+page = patch_zeitpfade.patch(page)
 import patch_menu
 page = patch_menu.patch(page)
 import patch_fastload
