@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import type { LayerId } from "@/model/layers";
 
-export type LayerId = string;
+export type { LayerId } from "@/model/layers";
 export type Theme = "light" | "dark" | "system";
 
 function stored<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
