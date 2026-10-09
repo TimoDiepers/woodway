@@ -1,3 +1,4 @@
+@import "./styles/tokens.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,21 +11,21 @@
    used all over for the panel/card backgrounds — keep working; a hex string
    there can't be composited with an alpha value at build time. */
 :root {
-  --color-paper: 242 237 226; /* #f2ede2, the deck's paper */
-  --color-panel: 253 251 243; /* #FDFBF3 */
-  --color-panel-border: 163 138 85; /* #A38A55 */
-  --color-ink: 36 31 25; /* #241F19 */
-  --color-ink-muted: 110 98 74; /* #6E624A */
-  --color-accent: 53 64 107; /* #35406B — Woad Indigo */
+  --color-paper: 242 237 226; /* --paper #f2ede2 */
+  --color-panel: 231 224 208; /* --paper-deep #e7e0d0 */
+  --color-panel-border: 214 204 182; /* --paper-line #d6ccb6 */
+  --color-ink: 27 36 32; /* --ink #1b2420 */
+  --color-ink-muted: 93 102 95; /* --muted #5d665f */
+  --color-accent: 61 85 45; /* --moss #3d552d */
 }
 
 .dark {
-  --color-paper: 26 24 23; /* #1A1817 */
-  --color-panel: 43 41 37; /* #2B2925 */
-  --color-panel-border: 115 107 93; /* #736B5D */
-  --color-ink: 237 227 204; /* #EDE3CC */
-  --color-ink-muted: 159 153 135; /* #9F9987 */
-  --color-accent: 155 169 218; /* #9BA9DA — Woad Indigo, night */
+  --color-paper: 20 24 26; /* #14181a, the deck's dark slide */
+  --color-panel: 32 40 43; /* --paper-deep, dark */
+  --color-panel-border: 58 68 71; /* --paper-line, dark */
+  --color-ink: 242 237 226; /* #f2ede2 */
+  --color-ink-muted: 154 163 157; /* #9aa39d */
+  --color-accent: 169 188 143; /* --moss-soft #a9bc8f */
 }
 
 html, body, #root {
@@ -46,12 +47,21 @@ html, body, #root {
 }
 
 ::selection {
-  background-color: rgb(var(--color-accent) / 0.22);
-  color: rgb(var(--color-ink));
+  background: var(--moss-soft);
+  color: var(--ink);
 }
 
 body {
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: var(--sans);
+  background: rgb(var(--color-paper));
+  color: rgb(var(--color-ink));
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
 }
 
 /* Vaul's Drawer (mobile OverlayPanel) is used with modal={false} so the map

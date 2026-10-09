@@ -1,0 +1,46 @@
+/* The deck's tokens (deck/src/css/deck.css, THEME block). Keep identical. */
+:root {
+  --paper: #f2ede2;
+  --paper-deep: #e7e0d0;
+  --paper-line: #d6ccb6;
+  --ink: #1b2420;
+  --ink-2: #3f4a44;
+  --muted: #5d665f;
+
+  --moss: #3d552d;
+  --moss-soft: #a9bc8f;
+  --clay: #6e3d3a;
+  --clay-soft: #d2a597;
+  --olive: #5c5a24;
+  --olive-soft: #c7c08a;
+  --fjord: #1e536d;
+  --fjord-soft: #9dbfcf;
+  --dac: #9a6516;
+  --dac-soft: #e8cb92;
+
+  --co2: #2e7d4f;
+  --alb: #c8641a;
+
+  --ch: var(--moss);
+  --ch-soft: var(--moss-soft);
+
+  --serif: 'Literata', Georgia, serif;
+  --sans: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3C9 3 4 8.5 4 15.5c0 1.6.3 3 .9 4.3C6 13.5 10 9.5 15 7.5 10.5 10.5 7.4 14.6 6.2 20.6 7.4 21.1 8.6 21.4 10 21.4 17 21.4 20 14 20 3Z'/%3E%3C/svg%3E");
+}
+
+[data-ch="baeume"]    { --ch: var(--moss);   --ch-soft: var(--moss-soft); }
+[data-ch="klima"]     { --ch: var(--clay);   --ch-soft: var(--clay-soft); }
+[data-ch="vergleich"] { --ch: var(--fjord);  --ch-soft: var(--fjord-soft); }
+[data-ch="dac"]       { --ch: var(--dac);    --ch-soft: var(--dac-soft); }
+
+/* the deck's dark slides */
+.dark {
+  background: #14181a;
+  --ink: #f2ede2;
+  --ink-2: #d6dbd6;
+  --muted: #9aa39d;
+  --paper-deep: #20282b;
+  --paper-line: #3a4447;
+}

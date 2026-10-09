@@ -1,0 +1,22 @@
+/* Mirrors .takeaway / .src of deck/src/css/deck.css; the app size is the default, size="slide" the deck's 24px. */
+.takeaway {
+  position: relative; padding: 11px 18px 12px 46px; margin-top: 16px;
+  background: var(--ch); color: var(--paper); border-radius: 8px;
+  font-family: var(--serif); font-style: normal; font-weight: 500; font-size: 15px; line-height: 1.38;
+  font-variation-settings: "opsz" 24; text-wrap: pretty;
+  box-shadow: 0 10px 24px -16px rgba(30, 26, 18, .55);
+}
+.takeaway::before {
+  content: ""; position: absolute; left: 15px; top: 12px; width: 20px; height: 20px; background: var(--ch-soft);
+  -webkit-mask: var(--leaf) center / contain no-repeat; mask: var(--leaf) center / contain no-repeat;
+}
+.takeaway.slide { padding: 16px 26px 17px 64px; margin-top: 24px; font-size: 24px; }
+.takeaway.slide::before { left: 24px; top: 19px; width: 26px; height: 26px; }
+
+.src {
+  font: 400 12px/1.35 var(--sans); color: var(--muted); text-wrap: pretty;
+}
+
+.kicker {
+  font: 500 11px/1.2 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
