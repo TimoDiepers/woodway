@@ -58,6 +58,13 @@ export default function App() {
   useEffect(() => {
     loadAtlas().then(setAtlas).catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
   }, []);
+  // Escape closes a cell's details (unless a tool panel or the dropdown has it first)
+  useEffect(() => {
+    if (s.cell === null) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector('[role="dialog"]')) s.setCell(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [s.cell]);
   // the first opened cell retires the first-visit hint
   useEffect(() => { if (s.cell !== null && !s.hintSeen) s.markHintSeen(); }, [s.cell, s.hintSeen]);
 
@@ -126,7 +133,7 @@ export default function App() {
         </div>
         {open ? (
           // the details carry the dock on top, so the year stays in reach while reading a cell
-          <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false}
+          <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
             peek={<Dock layer={layer} onLayer={pickLayer} bare />}>
             <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} dense />
           </CompactSheet>

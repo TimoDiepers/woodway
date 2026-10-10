@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -57,6 +57,22 @@ describe("App on a phone", () => {
     await userEvent.click(within(sheet).getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
     expect(map.props.cell).toBeNull();
+  });
+
+  it("the detail panel closes by dragging it down, and with Escape", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    tap(AACHEN());
+    const sheet = screen.getByRole("region", { name: "Cell details" });
+    const handle = within(sheet).getByRole("button", { name: "Show more" });
+    fireEvent.pointerDown(handle, { clientY: 400, pointerId: 1 });
+    fireEvent.pointerMove(handle.parentElement!, { clientY: 700, pointerId: 1 });
+    fireEvent.pointerUp(handle.parentElement!, { clientY: 700, pointerId: 1 });
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
+    expect(useAtlas.getState().cell).toBeNull();
+    tap(AACHEN());
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
   });
 
   it("a tap on the ocean closes the detail panel", async () => {

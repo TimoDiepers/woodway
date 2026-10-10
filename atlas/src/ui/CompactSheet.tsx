@@ -7,10 +7,12 @@ import { useT } from "@/i18n/useT";
  * Three resting heights: the peek (legend and year, in reach of the thumb), half (a tapped cell), almost full.
  * Drag the handle or the peek; tap the handle or use the arrow keys on it to step.
  */
-export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, onTopHeight, inertAtPeek = true }:
+export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, onTopHeight, inertAtPeek = true, onDismiss }:
   { title: string; peek: ReactNode; children: ReactNode; snaps: number[]; snap: number; onSnap(i: number): void; vh: number; onTopHeight?(px: number): void;
     /** false when the lowest step already shows content worth reading (a cell's details at half height) */
-    inertAtPeek?: boolean }) {
+    inertAtPeek?: boolean;
+    /** given: the sheet can be dragged down past its lowest height to close it */
+    onDismiss?(): void }) {
   const t = useT();
   const [drag, setDrag] = useState<number | null>(null);   // live height in px while dragging
   const start = useRef<{ y: number; h: number; moved: boolean; handle: boolean } | null>(null);
@@ -42,7 +44,7 @@ export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, o
     const dy = s.y - e.clientY;
     if (!s.moved && Math.abs(dy) < 6) return;
     s.moved = true;
-    setDrag(Math.max(snaps[0] * vh, Math.min(snaps[snaps.length - 1] * vh, s.h + dy)));
+    setDrag(Math.max(onDismiss ? 0 : snaps[0] * vh, Math.min(snaps[snaps.length - 1] * vh, s.h + dy)));
   };
   const up = () => {
     const s = start.current;
@@ -54,6 +56,8 @@ export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, o
       return;
     }
     const h = drag ?? s.h, v = h - s.h;
+    // pulled well below the lowest height (a third of it, or 120 px): let go of it
+    if (onDismiss && h < snaps[0] * vh - Math.min(120, (snaps[0] * vh) / 3)) { setDrag(null); onDismiss(); return; }
     // nearest resting height, with a nudge in the direction of a decisive flick
     let best = 0;
     snaps.forEach((f, i) => { if (Math.abs(f * vh - h) < Math.abs(snaps[best] * vh - h)) best = i; });
@@ -78,7 +82,7 @@ export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, o
           aria-expanded={snap > 0} onKeyDown={key}
           // Enter/Space (a click without a pointer, detail 0); pointer taps are handled on release above
           onClick={(e) => { if (e.detail === 0) step(); }}
-          className="group mx-auto flex h-7 w-full items-center justify-center focus-visible:outline-none">
+          className={"group mx-auto flex w-full items-center justify-center focus-visible:outline-none " + (onDismiss ? "h-9" : "h-7")}>
           <span className="h-1.5 w-10 rounded-full bg-[var(--paper-line)] group-focus-visible:w-14 group-focus-visible:bg-[var(--ch)]" aria-hidden />
         </button>
         <div className="px-4 pb-2.5">{peek}</div>

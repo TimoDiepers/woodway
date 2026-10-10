@@ -36,4 +36,25 @@ describe("CompactSheet", () => {
     setup(0);
     expect(screen.getByText("more").parentElement).toHaveAttribute("inert");
   });
+
+  it("with onDismiss, a drag down from the lowest height closes the sheet", () => {
+    const onSnap = vi.fn(), onDismiss = vi.fn();
+    render(<CompactSheet title="Cell" peek={<p>peek</p>} snaps={[0.55, 0.94]} snap={0} onSnap={onSnap} vh={800} onDismiss={onDismiss}><p>more</p></CompactSheet>);
+    const handle = screen.getByRole("button", { name: "Show more" });
+    fireEvent.pointerDown(handle, { clientY: 400, pointerId: 1 });
+    fireEvent.pointerMove(handle.parentElement!, { clientY: 560, pointerId: 1 });   // 160 px down: from 440 to 280 px
+    fireEvent.pointerUp(handle.parentElement!, { clientY: 560, pointerId: 1 });
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(onSnap).not.toHaveBeenCalled();
+  });
+  it("with onDismiss, a short nudge down springs back instead of closing", () => {
+    const onSnap = vi.fn(), onDismiss = vi.fn();
+    render(<CompactSheet title="Cell" peek={<p>peek</p>} snaps={[0.55, 0.94]} snap={0} onSnap={onSnap} vh={800} onDismiss={onDismiss}><p>more</p></CompactSheet>);
+    const handle = screen.getByRole("button", { name: "Show more" });
+    fireEvent.pointerDown(handle, { clientY: 400, pointerId: 1 });
+    fireEvent.pointerMove(handle.parentElement!, { clientY: 425, pointerId: 1 });
+    fireEvent.pointerUp(handle.parentElement!, { clientY: 425, pointerId: 1 });
+    expect(onDismiss).not.toHaveBeenCalled();
+    expect(onSnap).toHaveBeenCalledWith(0);
+  });
 });
