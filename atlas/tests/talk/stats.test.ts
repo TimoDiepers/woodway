@@ -18,8 +18,9 @@ describe("talk stats", () => {
     expect(Math.abs(netShareArea(at, 2100, true) - 0.569)).toBeLessThan(0.005);
     expect(Math.abs(netShareArea(at, 2100, false) - 0.117)).toBeLessThan(0.005);
   });
-  it("DAC median net share 2026 is 46 %", () => {
-    expect(medianDacNet(at, 2026)).toBeCloseTo(0.4647, 3);
+  it("DAC median net share over the land area: 46 % in 2026, 91 % in 2040 (as the deck says)", () => {
+    expect(Math.round(100 * medianDacNet(at, 2026))).toBe(46);
+    expect(Math.round(100 * medianDacNet(at, 2040))).toBe(91);
   });
   it("DAC capacity follows the global path", () => {
     const k = at.meta.global.years.indexOf(2100);

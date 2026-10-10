@@ -24,7 +24,7 @@ export const BUILD_SCALE: Scale = { stops: ["#d6ecea", "#7cc2bc", "#2f9c98", "#0
 
 // nbs.constants.A_EARTH_M2, as in nbs.grid.cell_area_m2
 const R2 = 5.1006e14 / (4 * Math.PI);
-const ROW_AREA = Array.from({ length: 360 }, (_, i) => {
+export const ROW_AREA = Array.from({ length: 360 }, (_, i) => {
   const a = ((90 - 0.5 * i) * Math.PI) / 180, b = ((90 - 0.5 * (i + 1)) * Math.PI) / 180;
   return (2 * Math.PI * R2 * Math.abs(Math.sin(a) - Math.sin(b))) / 720;
 });

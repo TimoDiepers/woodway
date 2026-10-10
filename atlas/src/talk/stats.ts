@@ -1,4 +1,5 @@
 import type { Atlas } from "@/data/types";
+import { ROW_AREA } from "@/model/layers";
 import { dacNet, deltaT, typeKey, yearIndex } from "@/model/model";
 
 const N = (at: Atlas) => at.f.type.length;
@@ -31,17 +32,22 @@ export function netShareArea(at: Atlas, year: number, onlyCooling: boolean): num
   return co2 ? net / co2 : NaN;
 }
 
-/** Median of the DAC net share over the cells where DAC is possible. */
+/** Median of the DAC net share over the land area where DAC is possible: each cell counts with its area. */
 export function medianDacNet(at: Atlas, year: number): number {
-  const v: number[] = [];
+  const v: { s: number; w: number }[] = [];
+  let total = 0;
   for (let c = 0; c < N(at); c++) {
     if (!at.f.dacOk[c]) continue;
     const s = dacNet(at, c, year);
-    if (Number.isFinite(s)) v.push(s);
+    if (!Number.isFinite(s)) continue;
+    const w = ROW_AREA[Math.floor(c / 720)];
+    v.push({ s, w });
+    total += w;
   }
-  v.sort((a, b) => a - b);
-  const m = v.length >> 1;
-  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+  v.sort((a, b) => a.s - b.s);
+  let acc = 0;
+  for (const x of v) { acc += x.w; if (acc >= total / 2) return x.s; }
+  return NaN;
 }
 
 export function dacCapacityGt(at: Atlas, year: number): number {
