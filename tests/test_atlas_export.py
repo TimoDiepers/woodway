@@ -216,3 +216,13 @@ def test_build_table_and_global_paths_equal_the_deck_data():
         assert g["paths"][k] == z["pfade"][k]
     for k in ("alle", "kuehlt"):
         assert g["areasGha"][k] == z["flaechen_gha"][k]
+
+
+def test_global_strip_rule_numbers_come_from_the_model():
+    from nbs.dac_optim import GROWTH
+    from nbs.tree_paths import BONN_RATE_GHA
+
+    g, _ = _load()
+    g = g["global"]
+    assert g["bonnRateMha"] == pytest.approx(BONN_RATE_GHA * 1000)
+    assert g["dacGrowthPct"] == pytest.approx((GROWTH - 1) * 100)

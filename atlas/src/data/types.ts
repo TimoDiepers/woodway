@@ -9,7 +9,8 @@ export interface Meta {
   dacYears: number[];
   build: {years: number[]; countries: string[]; cells: [number, number][]; owner: number[]; capacityGt: number[][]};
   global: {years: number[]; need: number[]; afterTrees: number[]; afterDac: number[]; dacCapacityGt: number[];
-           paths: Record<"alle" | "kuehlt" | "forst", number[]>; areasGha: Record<"alle" | "kuehlt", number>};
+           paths: Record<"alle" | "kuehlt" | "forst", number[]>; areasGha: Record<"alle" | "kuehlt", number>;
+           bonnRateMha: number; dacGrowthPct: number};
   sites: {name: string; lat: number; lon: number; color: string}[];
   scales: Record<string, Scale>;
   categories: {waldtyp: {key: string; label: string; color: string}[]};

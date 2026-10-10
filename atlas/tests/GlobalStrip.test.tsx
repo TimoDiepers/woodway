@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import { GlobalStrip } from "@/ui/GlobalStrip";
+import { useAtlas } from "@/store";
 
 const DIR = path.resolve(__dirname, "../public/data/");
 const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
@@ -25,5 +26,16 @@ describe("GlobalStrip", () => {
     const v = at.meta.global.dacCapacityGt[4];
     expect(v).toBeLessThan(1);
     expect(screen.getByText(`DAC capacity ${v.toFixed(2)} Gt/a`)).toBeInTheDocument();
+  });
+  it("names the rules behind the curves, with the model's numbers", async () => {
+    const at = await loadAtlas("data/", diskFetch);
+    const g = at.meta.global;
+    render(<GlobalStrip atlas={at} year={2080} />);
+    const area = g.areasGha.kuehlt.toFixed(2), rate = g.bonnRateMha.toFixed(1), growth = g.dacGrowthPct.toFixed(0);
+    expect(area).toBe("0.39");
+    expect(screen.getByText(`With the trees: managed forest on the ${area} Gha that cool, planted at the Bonn Challenge pace (${rate} Mha/a), timber kept; DAC: least peak warming, +${growth} %/a.`)).toBeInTheDocument();
+    act(() => useAtlas.getState().setLang("de"));
+    expect(screen.getByText(/^Mit den Bäumen: bewirtschafteter Wald auf den 0,39 Gha, die kühlen, .*\(17,5 Mha\/a\).*\+20 %\/a\.$/)).toBeInTheDocument();
+    act(() => useAtlas.getState().setLang("en"));
   });
 });

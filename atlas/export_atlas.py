@@ -22,6 +22,7 @@ from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_alpha_q_prod
 from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS
 from nbs.dac import dac_possible, efficiency_grid, energy_grid, lca_vintages
 from nbs.dac_climate import climate_grid
+from nbs.dac_optim import GROWTH
 from nbs.forest_data import reforestable_area_m2
 from nbs.landscape import assign_species
 from nbs.map_fields import CATEGORIES, LAND, SCALES, TOO_COLD, UNMEASURED
@@ -29,6 +30,7 @@ from nbs.pipeline import run_single_tree
 from nbs import albedo_grid
 from nbs.response import convolve_response, green_temperature
 from nbs.species import SPECIES, get_species, reference_site
+from nbs.tree_paths import BONN_RATE_GHA
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "atlas" / "public" / "data"
@@ -90,7 +92,9 @@ def global_paths() -> dict:
     return {"years": z["jahre"], "need": z["noetig"], "afterTrees": z["baeume_rest"],
             "afterDac": film["paths"]["opt"]["dac"], "dacCapacityGt": film["paths"]["opt"]["tot"],
             "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst")},
-            "areasGha": {k: z["flaechen_gha"][k] for k in ("alle", "kuehlt")}}
+            "areasGha": {k: z["flaechen_gha"][k] for k in ("alle", "kuehlt")},
+            # the rules behind the two curves, for the strip's source line
+            "bonnRateMha": round(BONN_RATE_GHA * 1000, 3), "dacGrowthPct": round((GROWTH - 1) * 100, 3)}
 
 
 def main() -> None:

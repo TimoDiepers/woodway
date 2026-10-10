@@ -1,6 +1,7 @@
 import { Area, ComposedChart, Line, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import type { Atlas } from "@/data/types";
 import { useNum, useT } from "@/i18n/useT";
+import { SourceLine } from "@/ui/deck/SourceLine";
 
 const TICK = { fontSize: 11, fill: "var(--muted)", fontFamily: "var(--sans)" };
 const CURVES = [
@@ -37,6 +38,7 @@ export function GlobalStrip({ atlas, year }: { atlas: Atlas; year: number }) {
           <li key={c.key}><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: c.color }} />{t(c.key)}</li>
         ))}
       </ul>
+      <div className="mt-1"><SourceLine>{t("strip.source", { area: num(g.areasGha.kuehlt, 2), rate: num(g.bonnRateMha, 1), growth: num(g.dacGrowthPct) })}</SourceLine></div>
     </section>
   );
 }

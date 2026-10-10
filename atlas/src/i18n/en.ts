@@ -71,5 +71,6 @@ export const en = {
   "strip.afterDac": "with trees and DAC",
   "strip.capacity": "DAC capacity {gt} Gt/a",
   "strip.unit": "mK",
+  "strip.source": "With the trees: managed forest on the {area} Gha that cool, planted at the Bonn Challenge pace ({rate} Mha/a), timber kept; DAC: least peak warming, +{growth} %/a.",
   "hover.value": "{value} {unit}",
 } as const;
