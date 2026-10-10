@@ -777,21 +777,33 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
 .slide.ende .more h2 { margin: 0 0 22px; font-size: 48px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
-.mgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+.mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 .mcard { margin: 0; padding: 6px 8px; border-radius: 14px; background: rgba(255, 255, 255, .55); border: 1px solid #e0d8c3; }
-.mcard .mi { display: block; width: 100%; height: 136px; }
+.mcard .mi, .mmore .mi { display: block; width: 100%; height: 146px; }
+.mmore { padding: 6px 8px; }
 .mcard.pop-in { opacity: 0; }
-.slide.active .mcard.pop-in { animation: pop .6s var(--ease) calc(var(--d, 0) * 1ms) both; }
-.embed .mcard.pop-in, .all .mcard.pop-in { opacity: 1; }
+.mmore.pop-in { opacity: 0; }
+.slide.active :is(.mcard, .mmore).pop-in { animation: pop .6s var(--ease) calc(var(--d, 0) * 1ms) both; }
+.embed :is(.mcard, .mmore).pop-in, .all :is(.mcard, .mmore).pop-in { opacity: 1; }
+/* Woodway once more, beside the sun, level with the thanks */
+.ende-qr-pos { position: absolute; right: 30px; top: 440px; }
+.ende-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; }
+.ende-qr span { font: 600 30px/1 var(--serif); color: var(--ch); }
+.ende-qr img { width: 150px; height: 150px; padding: 9px; background: #fff; border-radius: 10px; border: 1px solid var(--paper-line); }
 .slide.ende .thanks { margin-top: 38px; opacity: 0; transition: opacity .8s var(--ease); }
 .slide.ende .thanks.shown { opacity: 1; }
 .slide.ende .thanks h1 { margin: 0; font-size: 70px; line-height: 1.05; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; }
 .slide.ende .call { margin: 16px 0 0; font: 500 30px/1.3 var(--serif); color: var(--ch); }
 .slide.ende .call i { font-weight: 400; color: var(--ink-2); }
 .slide.ende .who { margin-top: 16px; font: 400 18px/1.45 var(--sans); color: var(--ink-2); }
+.mi-dots circle { transform-origin: 50% 50%; opacity: 0; }
+.slide.active .mi-dots circle { animation: pop .5s var(--ease) calc(var(--t) + .3s + var(--i) * .3s) both, mi-bob 1.4s ease-in-out calc(var(--t) + 1.4s + var(--i) * .2s) infinite alternate; }
+.mi-dots circle:nth-child(1) { --i: 0; } .mi-dots circle:nth-child(2) { --i: 1; } .mi-dots circle:nth-child(3) { --i: 2; }
+@keyframes mi-bob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.embed .mi-dots circle, .all .mi-dots circle { opacity: 1; }
 /* the pictures come alive with their tile (delays follow the tile's --d) */
 .mi * { transform-box: fill-box; }
-.mcard .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
+.mcard .mi, .mmore .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
 .slide.active .mi-bird { animation: mi-land 2.2s cubic-bezier(.2, .7, .3, 1) var(--t) both; }
 @keyframes mi-land { from { transform: translate(-190px, -30px); opacity: 0; } 15% { opacity: 1; } to { transform: none; } }
 .mi-wing { transform-origin: 90% 90%; }
@@ -835,12 +847,10 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.active .mi-arrow-h { animation: fadein .3s ease calc(var(--t) + .45s) both; }
 .slide.active .mi-roof { animation: draw .9s var(--ease) calc(var(--t) + 1.5s) both; }
 .slide.active .mi-c { animation: pop .6s var(--ease) calc(var(--t) + 2.5s) both; }
-.mi-apples circle, .mi-bloom g { transform-origin: 50% 50%; opacity: 0; }
-.slide.active :is(.mi-apples circle, .mi-bloom g) { animation: pop .5s var(--ease) calc(var(--t) + .3s + var(--i) * .2s) both; }
+.mi-apples circle { transform-origin: 50% 50%; opacity: 0; }
+.slide.active :is(.mi-apples circle) { animation: pop .5s var(--ease) calc(var(--t) + .3s + var(--i) * .2s) both; }
 .slide.active .mi-fall { animation: mi-fall 4.5s cubic-bezier(.5, 0, .8, .6) calc(var(--t) + 1.4s) infinite; }
 @keyframes mi-fall { 0%, 30% { transform: translateY(0); opacity: 1; } 52% { transform: translateY(45px); } 58% { transform: translateY(38px); } 64%, 88% { transform: translateY(45px); opacity: 1; } 100% { transform: translateY(45px); opacity: 0; } }
-.slide.active .mi-bee { animation: mi-bee 5s ease-in-out var(--t) infinite; }
-@keyframes mi-bee { 0% { transform: translate(0, 0); } 25% { transform: translate(-60px, -26px); } 50% { transform: translate(-96px, 6px); } 75% { transform: translate(-40px, 22px); } 100% { transform: translate(0, 0); } }
 .mi-dust circle, .mi-fresh circle { opacity: 0; }
 .slide.active .mi-dust circle { animation: mi-dust 3s ease-in calc(var(--t) + var(--k)) infinite; }
 @keyframes mi-dust { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: .8; } 100% { transform: translateX(90px); opacity: 0; } }
@@ -856,18 +866,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.active .mi-waves path { animation: mi-wave 1.8s ease-out calc(var(--t) + var(--k)) infinite; }
 @keyframes mi-wave { from { transform: translateX(0); opacity: .9; } to { transform: translateX(50px); opacity: 0; } }
 .slide.active .mi-car { animation: mbob .25s ease-in-out infinite alternate; }
-.mi-flame { transform-origin: 50% 100%; }
-.slide.active .mi-flame { animation: mi-flick .35s ease-in-out infinite alternate; }
-@keyframes mi-flick { from { transform: scale(1, 1); } to { transform: scale(.94, 1.08); } }
-.mi-spark circle { opacity: 0; }
-.slide.active .mi-spark circle { animation: mi-spark 1.5s ease-out calc(var(--t) + var(--k)) infinite; }
-@keyframes mi-spark { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-60px); opacity: 0; } }
-.mi-page { transform-box: view-box; transform-origin: 130px 105px; }
-.slide.active .mi-page { animation: mi-page 3.2s ease-in-out calc(var(--t) + .6s) infinite; }
-@keyframes mi-page { 0%, 35% { transform: scaleX(1); } 70%, 100% { transform: scaleX(-1); } }
-.mi-leaf { transform-origin: 0 100%; }
-.slide.active .mi-leaf { animation: pop .6s var(--ease) calc(var(--t) + .4s) both; }
-.embed .mi :is(.mi-apples circle, .mi-bloom g, .mi-dust circle, .mi-fresh circle, .mi-waves path, .mi-spark circle), .all .mi :is(.mi-apples circle, .mi-bloom g, .mi-dust circle, .mi-fresh circle, .mi-waves path, .mi-spark circle) { opacity: 1; }
+.embed .mi :is(.mi-apples circle, .mi-dust circle, .mi-fresh circle, .mi-waves path), .all .mi :is(.mi-apples circle, .mi-dust circle, .mi-fresh circle, .mi-waves path) { opacity: 1; }
 .embed .mi :is(.mi-arrow-h, .mi-c), .all .mi :is(.mi-arrow-h, .mi-c) { opacity: 1; }
 .embed .mi :is(.mi-roof, .mi-arrow), .all .mi :is(.mi-roof, .mi-arrow) { stroke-dashoffset: 0; }
 .embed .mi *, .all .mi * { animation: none !important; opacity: initial; stroke-dashoffset: 0; }
