@@ -769,8 +769,13 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .film .hud .n { font: 600 34px/1.15 var(--sans); color: #f0b04a; font-variant-numeric: tabular-nums; margin-top: 8px; }
 .film.late .hud .n { color: #ff8a5c; }
 .film .hud .n small { font-size: 19px; font-weight: 500; color: #b9c0bb; }
+.film .hud .leg { display: grid; grid-template-columns: auto auto; justify-content: end; gap: 4px 0; margin-top: 18px; font: 400 18px/1.2 var(--sans); color: #b9c0bb; }
+.film .hud .leg > span:first-child { grid-column: 1 / -1; }
+.film .hud .leg i { grid-column: 1 / -1; width: 220px; height: 12px; border-radius: 3px; justify-self: end; }
+.film .hud .leg > span:nth-of-type(2) { text-align: left; }
+.film .hud .leg > span:nth-of-type(3) { text-align: right; }
 .film .strip { flex: none; width: 1424px; height: 185px; display: block; overflow: visible; }
-.film .ftake { position: absolute; left: 0; top: 338px; width: 350px; }
+.film .ftake { position: absolute; left: 0; top: 352px; width: 440px; }
 .film .ftake .takeaway { font-size: 20px; margin: 0; }
 
 /* DAC chapter: dark like its break slide */
@@ -920,13 +925,21 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.finale .birds path { animation: flap .5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 50%; }
 @keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.45); } }
 
-.warten { display: grid; grid-template-columns: 1fr 500px; gap: 36px; flex: 1; min-height: 0; }
+.warten { display: grid; grid-template-columns: 1fr 660px; gap: 40px; flex: 1; min-height: 0; }
 .warten > .chart { height: 100%; min-height: 0; }
-.warten .side { display: flex; flex-direction: column; gap: 18px; align-self: center; }
-.warten .side p { font: 400 21px/1.4 var(--sans); color: var(--ink-2); margin: 0; }
-.warten .side p b { color: #f0b04a; font-weight: 600; }
-.warten .side .ort { border-left: 4px solid #3fd0b0; padding: 6px 0 6px 16px; }
-.warten .side .ort b { color: #6fe3c8; }
+.warten .side { display: flex; flex-direction: column; gap: 22px; align-self: center; }
+/* variants table: one row per click, the chart's lines keyed in the first column */
+.vt { display: flex; flex-direction: column; font: 400 20px/1.3 var(--sans); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.vt .r { display: grid; grid-template-columns: 1fr 112px 200px; gap: 16px; align-items: baseline; padding: 11px 4px; border-bottom: 1px solid #2c3437; }
+.vt .r > span:not(:first-child) { text-align: right; }
+.vt .head { font: 600 16px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 0; border-bottom-color: #4a524d; }
+.vt .main { color: #f2ede2; font-weight: 600; }
+.vt .hi b { color: #6fe3c8; font-weight: 600; }
+.vt .ln { display: inline-block; width: 26px; height: 0; border-top: 3px solid; vertical-align: middle; margin: -3px 12px 0 0; }
+.vt .ln.base { border-top: 3px dashed #7fbf8c; }
+.vt .ln.g20 { border-color: #f0b04a; }
+.vt .ln.frei { border-color: #3fd0b0; }
+.vt .ln.none { border-color: transparent; }
 /* chapter 3: the managed forest in two lines, beside its curve */
 .forstpos { position: absolute; left: 112px; top: 74px; width: 330px; pointer-events: none; }
 .forstbox { position: relative; display: grid; grid-template-columns: 92px 1fr; gap: 14px;
@@ -935,17 +948,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .forstbox p { font: 400 17px/1.35 var(--sans); color: var(--ink-2); margin: 0; }
 .forstbox p b { color: #14532d; }
 .slide:has(.zs4.shown) .forstpos { opacity: 0; transition: opacity .5s; }
-/* search space of the optimisation */
-.such { display: grid; grid-template-columns: 860px 1fr; grid-template-rows: auto 1fr; gap: 18px 36px; flex: 1; min-height: 0; }
-.such .map { position: relative; width: 860px; height: 339px; border-radius: 10px; overflow: hidden; }
-.such .map img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.such .leg { display: flex; align-items: center; gap: 10px; font: 400 17px/1 var(--sans); color: #9aa39d; margin-top: 8px; }
-.such .leg i { display: inline-block; width: 180px; height: 12px; border-radius: 3px; background: linear-gradient(90deg, #c8602a, #e9dcae 50%, #1f7a74); }
-.such .size { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 26px; justify-content: start; margin-top: 18px; }
-.such .size b { font: 600 40px/1 var(--sans); color: #f2ede2; }
-.such .size span { font: 400 17px/1.2 var(--sans); color: #9aa39d; }
-.such .inputs { grid-column: 1 / -1; grid-template-columns: repeat(4, 1fr); }
-.such .inp .v { font-size: 36px; }
 
 /* inside the React deck (?host): the shell draws menu, hint and progress */
 .host #menu-fab, .host .hint, .host .progress { display: none !important; }

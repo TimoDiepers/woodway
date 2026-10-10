@@ -12,15 +12,11 @@ window.DACFILM = @@DACFILM@@;
   cv.width = W * S; cv.height = H * S;
   const g = cv.getContext('2d'); g.scale(S, S);
   const XY = D.cells.map(([lo, la]) => [(lo + 180) / 360 * W, (82 - la) / 122 * H]);
-  const sprite = (rgb) => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
-    const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, `rgba(${rgb},.5)`); gr.addColorStop(.18, `rgba(${rgb},.32)`); gr.addColorStop(.5, `rgba(${rgb},.08)`); gr.addColorStop(1, `rgba(${rgb},0)`);
-    x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; };
-  const mk = (key, rgb, col, light) => { const p = Object.assign({}, D.paths[key]);
+  const mk = (key, col, light) => { const p = Object.assign({}, D.paths[key]);
     p.cell = D.cells.map((_, i) => p.cc[D.owner[i]].map(v => v / D.n[D.owner[i]]));
-    p.cmax = Math.max(...p.cell.map(c => Math.max(...c))); p.sp = sprite(rgb); p.col = col; p.light = light; return p; };
-  const P = { a: mk('opt', '255,190,90', '#f0b04a', '#f0b04a') };
-  const PH = [{ p: P.a, ym: 7.6, tmin: 0, chip: 'Hochlauf +20 %/a', cls: '' }, { p: P.a, ym: 7.6, tmin: 0, chip: 'Hochlauf +20 %/a', cls: '' }];
+    p.col = col; p.light = light; return p; };
+  const P = { a: mk('opt', '#f0b04a', '#f0b04a') };
+  const PH = [{ p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }, { p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }];
   const lerp = (arr, t) => { const i = Math.min(arr.length - 2, Math.floor(t)), f = t - i; return arr[i] + f * (arr[i + 1] - arr[i]); };
   const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/\./g, '\u202f');
 
@@ -49,8 +45,14 @@ window.DACFILM = @@DACFILM@@;
   const lVL = tl('Very Low', '#e0645a'), lTr = tl('+ Bäume (Forst)', '#6cc28a'), lDac = tl('', '#ff5a4f');
   const ip = P.a.dac.indexOf(Math.max(...P.a.dac));
   const over = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#ffd2c8' }, F));
-  over.textContent = `Overshoot: +${fmt(P.a.dac[ip] / 1000, 2)} K (${Y0 + ip})`;
+  // at the peak DAC is still tiny: that is why it cannot lower it
+  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip], 0)} mK, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
   const below = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#6fe3c8', 'text-anchor': 'end' }, F));
+  // capacity: the year the growth limit first allows 1 Gt/a, and the year the final capacity is reached
+  const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= P.a.peak - 0.01);
+  const dot1 = el('circle', { r: 6, fill: '#f0b04a', stroke: '#14181a', 'stroke-width': 2 });
+  const lab1 = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#f0b04a', 'text-anchor': 'end' }, F));
+  lab1.textContent = `1 Gt/a erst ${Y0 + i1}`;
   const curA = el('line', { stroke: '#f2ede2', 'stroke-width': 2, y1: T, y2: SH - B }), curB = el('line', { stroke: '#f2ede2', 'stroke-width': 2, y1: T, y2: SH - B });
 
   function strip(ph, upto, ymax, tmin) {
@@ -67,7 +69,9 @@ window.DACFILM = @@DACFILM@@;
     D.lim.forEach((v, i) => { if (v <= ymax * 1.02) { d += `${d ? 'L' : 'M'}${XA(Y0 + i).toFixed(1)},${Y(v).toFixed(1)} `; lx = XA(Y0 + i); ly = Y(v); } });
     lim.setAttribute('d', d); lab2.setAttribute('x', lx - 10); lab2.setAttribute('y', ly + 4);
     lab.setAttribute('x', XA(2100) + 10); lab.setAttribute('y', Y(lerp(p.tot, f)) - 6); lab.setAttribute('fill', p.light);
-    lab.textContent = upto >= NY - 1 ? `${fmt(p.peak, 1)} Gt/a` : '';
+    lab.textContent = upto >= NY - 1 ? `${fmt(p.peak, 1)} Gt/a ab ${Y0 + iMax}` : '';
+    dot1.setAttribute('cx', XA(Y0 + i1)); dot1.setAttribute('cy', Y(1)); lab1.setAttribute('x', XA(Y0 + i1) - 12); lab1.setAttribute('y', Y(1) - 12);
+    dot1.style.opacity = lab1.style.opacity = upto >= i1 ? 1 : 0;
     // warming: Very Low and trees are known, the DAC line runs with the film; below zero only for "everything"
     zero.setAttribute('y1', YT(0)); zero.setAttribute('y2', YT(0)); zlab.setAttribute('y', YT(0) + 6);
     vlP.setAttribute('d', full(D.vl, XB, YT)); trP.setAttribute('d', full(D.tree, XB, YT));
@@ -79,20 +83,36 @@ window.DACFILM = @@DACFILM@@;
     const end = p.dac[NY - 1];
     lDac.textContent = end < -5 ? `+ DAC: −${fmt(-end / 1000, 2)} K` : '+ DAC'; lDac.setAttribute('fill', p === P.c ? '#6fe3c8' : '#ff5a4f');
     lDac.setAttribute('y', YT(Math.min(0, end)) + (end < -5 ? 4 : 6)); lDac.style.opacity = upto >= NY - 1 ? 1 : 0;
-    const low = tmin < -50; over.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); over.setAttribute('y', low ? YT(0) + 24 : YT(120)); over.style.opacity = upto > ip + 6 ? 1 : 0;
-    below.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); below.setAttribute('y', low ? YT(0) + 48 : YT(120) + 24); below.setAttribute('text-anchor', 'start');
+    const low = tmin < -50; over.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); over.setAttribute('y', low ? YT(0) + 24 : YT(70)); over.style.opacity = upto > ip + 6 ? 1 : 0;
+    below.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); below.setAttribute('y', low ? YT(0) + 48 : YT(70) + 24); below.setAttribute('text-anchor', 'start');
     below.textContent = p.below ? `1,5 °C ab ${p.below}` : ''; below.setAttribute('fill', p.light); below.style.opacity = p.below && upto > p.below - Y0 ? 1 : 0;
     for (const [c, X] of [[curA, XA], [curB, XB]]) { const xc = X(Y0 + f); c.setAttribute('x1', xc); c.setAttribute('x2', xc); c.style.opacity = upto > 0 && upto < NY - 1 ? 1 : 0; }
   }
+  // hexagons as on the deck's other world maps: a pixel lattice the size of a 2° block, each hex the block under
+  // its centre, coloured by the capacity in that block (sum of its cells), dim amber to full
+  const PX = W / 360, R = Math.sqrt((2 * PX) ** 2 / 2.598), HW = Math.sqrt(3) * R;
+  const blockOf = (x, y) => Math.floor(x / (2 * PX)) + ':' + Math.floor(y / (2 * PX));
+  const members = new Map();
+  XY.forEach(([x, y], i) => { const k = blockOf(x, y); if (!members.has(k)) members.set(k, []); members.get(k).push(i); });
+  const HEX = [];
+  for (let j = 0, py = 0; py <= H + R; j++, py = j * 1.5 * R)
+    for (let px = j % 2 ? HW / 2 : 0; px <= W + HW; px += HW) { const m = members.get(blockOf(px, py)); if (m) HEX.push({ x: px, y: py, m }); }
+  const corner = Array.from({ length: 6 }, (_, k) => [Math.cos(Math.PI / 180 * (60 * k - 90)), Math.sin(Math.PI / 180 * (60 * k - 90))]);
+  // multi-hue ramp, dark red over orange and amber to pale yellow: neighbouring capacities stay apart on the dark map
+  const STOPS = [[122, 38, 52], [205, 78, 45], [240, 176, 74], [255, 240, 190]];
+  const ramp = (f) => { const x = Math.max(0, Math.min(1, f)) * (STOPS.length - 1), i = Math.min(STOPS.length - 2, Math.floor(x)), u = x - i;
+    return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * u)).join(',')})`; };
+  for (const q of Object.values(P)) q.bmax = Math.max(...HEX.map(h => h.m.reduce((n, i) => n + q.cell[i][NY - 1], 0)));   // plants run on: the last year is the largest
+  const leg = document.createElement('div'); leg.className = 'leg';
+  leg.innerHTML = `<span>Kapazität je 2°-Block</span><i style="background:linear-gradient(90deg,${[0, .25, .5, .75, 1].map(f => ramp(Math.sqrt(f))).join(',')})"></i><span>0</span><span>${fmt(P.a.bmax, 1)} Gt/a</span>`;
+  sec.querySelector('.hud').append(leg);
   function map(p, t) {
     g.clearRect(0, 0, W, H);
-    g.globalCompositeOperation = 'lighter';
-    p.cell.forEach((c, i) => {
-      const v = lerp(c, t); if (v <= 1e-6) return;
-      const r = 2.5 + 9 * Math.sqrt(v / p.cmax), [x, y] = XY[i];
-      g.drawImage(p.sp, x - 2.4 * r, y - 2.4 * r, 4.8 * r, 4.8 * r);
-    });
-    g.globalCompositeOperation = 'source-over';
+    for (const h of HEX) {
+      const v = h.m.reduce((q, i) => q + lerp(p.cell[i], t), 0); if (v <= 1e-6) continue;
+      g.beginPath(); corner.forEach(([u, w], k) => g[k ? 'lineTo' : 'moveTo'](h.x + (R + .45) * u, h.y + (R + .45) * w)); g.closePath();
+      g.fillStyle = ramp(Math.sqrt(v / p.bmax)); g.fill();
+    }
   }
   function frame(ph, year, ymax, tmin) {
     const t = Math.max(0, Math.min(NY - 1, year - Y0)), p = ph.p;

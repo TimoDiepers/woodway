@@ -427,29 +427,29 @@ const EC_ZEIT = {
   }
 };
 
-/* how fast DAC must grow: warming above 1.5 deg C after trees and DAC, for growth limits and without limit */
+/* variants of the optimisation: trees alone, DAC at the 20 %/a growth limit, DAC without a growth limit */
 const EC_TEMPO = {
-  steps: 3,
+  steps: 2,
   option(k) {
     const D = window.ZEIT, T = D.tempo, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const peak = (ys, color, text, pos) => { const i = ys.indexOf(Math.max(...ys));
+      return { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color, borderColor: '#14181a', borderWidth: 2 },
+        label: { show: true, position: pos, distance: 10, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, formatter: text },
+        data: [{ coord: [D.jahre[i], ys[i]] }] }; };
     const L = (id, ys, color, name, extra) => Object.assign({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5,
       lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: 1600 }, extra || {});
-    const kap = c => `${ecNum(c.kap, 1)} Gt/a`;
     const series = [
       L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
-      L('g20', T.g20.rest, '#f0b04a', `+20 %/a: ${kap(T.g20)}`)];
-    if (k >= 1) {
-      series.push(L('g30', T.g30.rest, '#fbe3a6', `+30 %/a: ${kap(T.g30)}`, { lineStyle: { color: '#fbe3a6', width: 2.2 } }));
-      series.push(L('g10', T.g10.rest, '#b88a52', '+10 %/a: reicht nicht', { lineStyle: { color: '#b88a52', width: 2.6, type: [2, 5] } }));
-    }
-    if (k >= 2) series.push(L('frei', T.frei.rest, '#3fd0b0', `ohne Grenze: ${kap(T.frei)} ab 2026`, { lineStyle: { color: '#3fd0b0', width: 3.4 } }));
-    if (k >= 3) series.push(L('voll', T.vollgas.rest, '#ec7fb4', `Vollgas +20 %/a: ${kap(T.vollgas)}`, { lineStyle: { color: '#ec7fb4', width: 2.8, type: [8, 5] } }));
+      L('g20', T.g20.rest, '#f0b04a', 'Wachstum ≤ 20 %/a',
+        { markPoint: peak(T.g20.rest, '#f0b04a', `Spitze ${ecNum(Math.max(...T.g20.rest), 0)} mK`, 'top') })];
+    if (k >= 2) series.push(L('frei', T.frei.rest, '#3fd0b0', 'ohne Wachstumsgrenze',
+      { lineStyle: { color: '#3fd0b0', width: 3.4 }, markPoint: peak(T.frei.rest, '#3fd0b0', `${ecNum(Math.max(...T.frei.rest), 0)} mK`, 'top') }));
     return {
       animationDurationUpdate: 900,
-      title: { text: 'Erwärmung über 1,5 °C nach Bäumen und DAC [mK]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      grid: { left: 70, right: 300, top: 46, bottom: 40 },
-      legend: { orient: 'vertical', right: 0, top: 90, itemGap: 14, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
-                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 }, data: series.map(s => s.name) },
+      title: { text: 'Erwärmung über 1,5 °C [mK]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      grid: { left: 70, right: 24, top: 64, bottom: 40 },
+      legend: { orient: 'vertical', right: 24, top: 60, itemGap: 12, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
+                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 19 }, data: series.map(s => s.name) },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
       yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },

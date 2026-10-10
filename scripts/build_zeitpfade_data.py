@@ -50,7 +50,8 @@ def main() -> None:
                       "ab": next((int(YEARS[i]) for i in range(20, len(YEARS)) if over[i:].max() <= 0.5), None)}
         print(key, cases[key]["status"], cases[key]["kap"], max(cases[key]["rest"]), flush=True)
     naive = solve_naive(gap)
-    ort = {"optimiert": cases["g20"]["kap"], "nach_speicher": round(naive["kapazitaet_gt"], 2)}
+    ort = {"optimiert": cases["g20"]["kap"], "nach_speicher": round(naive["kapazitaet_gt"], 2),
+           "spitze_nach_speicher": round(1000 * float((gap - np.array(naive["kuehlung_k"])).max()), 1)}
     print("ort", ort)
     out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths,
            "flaechen_gha": areas, "tempo": cases, "ort": ort}
