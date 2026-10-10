@@ -1,0 +1,8 @@
+.talk-stage { position: fixed; inset: 0; overflow: hidden; background: var(--stage, var(--paper)); }
+.talk-deck { position: absolute; left: 50%; top: 50%; width: 1600px; height: 900px; transform-origin: center; }
+.talk-deck iframe { position: absolute; inset: 0; width: 1600px; height: 900px; border: 0; background: transparent; }
+.rslide { position: absolute; inset: 0; padding: 64px 88px 56px; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); }
+.rslide .sh { display: flex; justify-content: space-between; gap: 48px; margin-bottom: 28px; }
+.rslide .sh h2 { font: 600 50px/1.08 var(--serif); letter-spacing: -0.015em; font-variation-settings: "opsz" 72; color: var(--ch); max-width: 1180px; }
+.rslide .num { position: absolute; left: 88px; bottom: 20px; font: 500 14px/1 var(--sans); color: var(--muted); }
+.talk-ground { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--ch, transparent); }
