@@ -68,7 +68,7 @@ export const en = {
   "panel.dacTooCold": "Too cold for sorbent DAC",
   "sites.label": "Examples",
   "search.label": "Search a place",
-  "search.placeholder": "Search a place, press Enter",
+  "search.placeholder": "Search a place (Enter)",
   "search.none": "No matches.",
   "search.error": "Search unavailable.",
   "search.credit": "Search: Nominatim, © OpenStreetMap contributors",

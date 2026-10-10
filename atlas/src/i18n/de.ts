@@ -70,7 +70,7 @@ export const de: Record<keyof typeof en, string> = {
   "panel.dacTooCold": "Zu kalt für Sorbens-DAC",
   "sites.label": "Beispiele",
   "search.label": "Ort suchen",
-  "search.placeholder": "Ort suchen, Enter drücken",
+  "search.placeholder": "Ort suchen (Enter)",
   "search.none": "Keine Treffer.",
   "search.error": "Suche nicht verfügbar.",
   "search.credit": "Suche: Nominatim, © OpenStreetMap-Mitwirkende",

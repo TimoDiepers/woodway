@@ -53,7 +53,7 @@ export function PlaceSearch({ onPick, fetcher = (...a) => fetch(...a) }: { onPic
         <input ref={inputRef} type="search" value={query} onChange={(e) => setQuery(e.target.value)}
           aria-label={t("search.label")} placeholder={t("search.placeholder")} enterKeyHint="search"
           autoCorrect="off" autoCapitalize="off" spellCheck={false}
-          className="min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-inkMuted focus:outline-none md:text-sm" />
+          className="min-w-0 flex-1 bg-transparent text-base [&::-webkit-search-cancel-button]:appearance-none text-ink placeholder:text-inkMuted focus:outline-none md:text-sm" />
       </form>
       {state === "error" && <p className="mt-1 px-1 text-xs text-inkMuted">{t("search.error")}</p>}
       {results && results.length === 0 && <p className="mt-1 px-1 text-xs text-inkMuted">{t("search.none")}</p>}
