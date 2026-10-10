@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -17,47 +17,57 @@ import { useAtlas } from "@/store";
 import { cellAt } from "@/map/lookup";
 
 const insets = () => map.props.insets as { top: number; bottom: number; right?: number };
+const tap = (c: number | null) => act(() => (map.props.onCell as (c: number | null) => void)(c));
+const AACHEN = () => cellAt(6.08, 50.78)!;
 
 describe("App on a phone", () => {
   beforeAll(() => { window.innerWidth = 390; window.innerHeight = 844; });
   afterAll(() => { window.innerWidth = 1024; window.innerHeight = 768; });
+  beforeEach(() => { localStorage.clear(); act(() => useAtlas.getState().resetHints()); });
   afterEach(() => act(() => useAtlas.getState().setCell(null)));
 
-  it("has a compact bar with round controls and keeps legend and year in the sheet's peek", async () => {
+  it("floats one dock at the bottom with the layer dropdown and the year, the legend top left, the tools on the right", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    expect(screen.getByRole("button", { name: "Deutsch" })).toHaveTextContent("DE");
-    expect(screen.queryByText("The talk's model, cell by cell · 2026–2100")).toBeNull();   // no subtitle on a phone
-    expect(screen.getByRole("slider")).toBeInTheDocument();
-    expect(screen.getAllByText("Temperature effect of one tree").length).toBeGreaterThan(0);
-    // the camera centres in the free part of the screen: below the bar, above the peek
-    expect(insets().top).toBeGreaterThan(0);
-    expect(insets().bottom).toBeGreaterThanOrEqual(120);
+    const dock = screen.getByRole("group", { name: "Map settings" });
+    expect(within(dock).getByRole("combobox", { name: "Layer" })).toBeInTheDocument();
+    expect(within(dock).getByRole("slider")).toBeInTheDocument();
+    const plate = screen.getByRole("banner");
+    expect(within(plate).getByRole("figure", { name: "Temperature effect of one tree" })).toBeInTheDocument();
+    const tools = screen.getByRole("toolbar", { name: "Map tools" });
+    for (const name of ["Search a place", "Back to the whole world", "Overview", "How to read this map", "Deutsch", "Flat map"])
+      expect(within(tools).getByRole("button", { name })).toBeInTheDocument();
+    expect(insets().right).toBeGreaterThan(0);          // the globe centres left of the tool column
+    expect(insets().bottom).toBeGreaterThan(0);         // … and above the dock
   });
 
-  it("a tapped cell opens its panel, lifts the sheet and brings the cell into view without zooming", async () => {
+  it("no detail panel until a cell is tapped; then it opens, keeps the year at hand, and closes again", async () => {
     render(<App />);
     await screen.findByTestId("map");
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
     const before = insets().bottom;
-    const aachen = cellAt(6.08, 50.78)!;
-    act(() => (map.props.onCell as (c: number) => void)(aachen));
-    expect(await screen.findByText(/Cools the climate|Does not cool|Cools the climate until/)).toBeInTheDocument();
+    tap(AACHEN());
+    const sheet = screen.getByRole("region", { name: "Cell details" });
+    expect(within(sheet).getByText(/Cools the climate|Does not cool|Cools the climate until/)).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toBeInTheDocument();
     expect(insets().bottom).toBeGreaterThan(before);
     const jump = map.props.flyTo as { lon: number; lat: number; zoom?: number };
     expect(jump.zoom).toBeUndefined();
-    expect(Math.abs(jump.lat - 50.78)).toBeLessThan(0.5);
+    expect(map.props.cell).toBe(AACHEN());               // the map fades the other cells
+    await userEvent.click(within(sheet).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
+    expect(map.props.cell).toBeNull();
   });
 
-  it("closing the cell drops the sheet back to its peek", async () => {
+  it("a tap on the ocean closes the detail panel", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    const peek = insets().bottom;
-    act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
-    act(() => (map.props.onCell as (c: number | null) => void)(null));
-    expect(insets().bottom).toBe(peek);
+    tap(AACHEN());
+    tap(null);
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
   });
 
-  it("search is a button in the top bar, not a field in the sheet", async () => {
+  it("search opens from the tool column and jumps to the place", async () => {
     render(<App />);
     await screen.findByTestId("map");
     expect(screen.queryByRole("searchbox")).toBeNull();
@@ -68,10 +78,47 @@ describe("App on a phone", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Berlin, Deutschland" }));
     expect(useAtlas.getState().cell).toBe(cellAt(13.3888599, 52.5170365));
     expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365, zoom: 4 });
-    expect(screen.queryByRole("searchbox")).toBeNull();   // closed again
+    expect(screen.queryByRole("searchbox")).toBeNull();
   });
 
-  it("on a phone a static layer's peek has no slider either", async () => {
+  it("recenter flies back to the whole world and closes the cell", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    tap(AACHEN());
+    await userEvent.click(screen.getByRole("button", { name: "Back to the whole world" }));
+    expect(map.props.flyTo).toMatchObject({ lon: 10, lat: 25 });
+    expect(useAtlas.getState().cell).toBeNull();
+  });
+
+  it("the overview holds the worldwide result and the example places", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(screen.queryByText("Warming above 1.5 °C, worldwide")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
+    const panel = await screen.findByRole("dialog", { name: "Overview" });
+    expect(within(panel).getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
+    await userEvent.click(within(panel).getByRole("button", { name: /Aachen/ }));
+    expect(screen.queryByRole("dialog", { name: "Overview" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Cell details" })).toBeInTheDocument();
+  });
+
+  it("a first-visit hint says what to do, retires after the first cell and comes back from the help panel", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(screen.getByText("Tap a cell to read its century.")).toBeInTheDocument();
+    tap(AACHEN());
+    tap(null);
+    expect(screen.queryByText("Tap a cell to read its century.")).toBeNull();
+    expect(localStorage.getItem("atlas-hints")).toBe("seen");
+    await userEvent.click(screen.getByRole("button", { name: "How to read this map" }));
+    const help = await screen.findByRole("dialog", { name: "How to read this map" });
+    expect(within(help).getByText("The colours")).toBeInTheDocument();
+    expect(within(help).getByText("Grey cells")).toBeInTheDocument();
+    await userEvent.click(within(help).getByRole("button", { name: "Show the first-visit hint again" }));
+    expect(screen.getByText("Tap a cell to read its century.")).toBeInTheDocument();
+  });
+
+  it("a static layer's dock has no slider", async () => {
     render(<App />);
     await screen.findByTestId("map");
     act(() => useAtlas.getState().setLayer("sun"));

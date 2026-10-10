@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Atlas } from "@/data/types";
 import type { Layer } from "@/model/layers";
 import { paperBasemap, paperBasemapDark } from "@/lib/mapStyle";
-import { cellColors, paintHexView, IMAGE_COORDS } from "./paint";
+import { cellColors, focusColors, paintHexView, IMAGE_COORDS } from "./paint";
 import { clampBounds } from "./hex";
 import { cellAt, cellCenter } from "./lookup";
 import Borders from "./Borders";
@@ -55,9 +55,11 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   // where the canvas sits; a theme switch re-adds the source from these props and the canvas as it is
   const [coords, setCoords] = useState<Coords>(IMAGE_COORDS);
   const pending = useRef(0);
-  const latest = useRef({ atlas, layer, year, dark });
-  latest.current = { atlas, layer, year, dark };
+  const latest = useRef({ atlas, layer, year, dark, cell });
+  latest.current = { atlas, layer, year, dark, cell };
   const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; dark: boolean; colors: Uint32Array } | null>(null);
+  // the colours with the other cells faded around a selected one, kept while view and selection stay
+  const focused = useRef<{ src: object; cell: number | null; colors: Uint32Array } | null>(null);
 
   useEffect(() => () => { pending.current++; }, []);
 
@@ -89,13 +91,16 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       const map = mapRef.current?.getMap();
       if (ticket !== pending.current || !map) return;
       const t0 = performance.now();
-      const { atlas, layer, year, dark } = latest.current;
+      const { atlas, layer, year, dark, cell } = latest.current;
       let cc = colours.current;
       if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year || cc.dark !== dark)
         cc = colours.current = { atlas, layer, year, dark, colors: cellColors(atlas, layer, year, cc?.colors, dark) };
+      // keyed on the colour record, not its array: cellColors refills the same array for a new year
+      let fc = focused.current;
+      if (!fc || fc.src !== cc || fc.cell !== cell) fc = focused.current = { src: cc, cell, colors: focusColors(cc.colors, cell) };
       const v = viewImage(map);
       canvas.width = v.w; canvas.height = v.h;
-      paintHexView(canvas.getContext("2d", { willReadFrequently: true })!, v.w, v.h, v.b, atlas, layer, year, cc.colors);
+      paintHexView(canvas.getContext("2d", { willReadFrequently: true })!, v.w, v.h, v.b, atlas, layer, year, fc.colors);
       performance.measure?.("atlas:paint", { start: t0 });   // read by the headless check
       const src = map.getSource("atlas") as CanvasSource | undefined;
       if (src?.play) {
@@ -107,7 +112,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
     });
   }, [canvas]);
 
-  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, dark, projection, loaded, repaint]);
+  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, dark, projection, cell, loaded, repaint]);
 
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180

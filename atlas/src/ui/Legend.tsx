@@ -16,7 +16,7 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
   const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
   const inlineUnit = unit.length > 0 && unit.length <= 4;   // a short unit ("%") sits with the ticks
   const greys = (
-    <ul className={compact ? "flex flex-wrap justify-end gap-x-2.5 gap-y-0.5 text-[11px] text-inkMuted" : "flex flex-col gap-0.5 text-inkMuted"}>
+    <ul className={compact ? "flex flex-wrap gap-x-2.5 gap-y-0.5 text-[11px] text-inkMuted" : "flex flex-col gap-0.5 text-inkMuted"}>
       {layer.greys.map((r) => (
         <li key={r} className={compact ? "flex items-center gap-1" : "flex items-center gap-2"}>
           <span className={compact ? "h-2.5 w-2.5 shrink-0 rounded-sm border border-[var(--paper-line)]" : "h-3 w-3 shrink-0 rounded-sm border border-[var(--paper-line)]"} style={{ background: reasonColor(atlas, r, dark) }} />{t(r)}
@@ -35,15 +35,10 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
     </ul>
   );
   if (compact) {
-    // the phone's peek: name and greys on one line, the ramp, ticks with the unit — nothing wraps into a fourth line
+    // the phone's plate: the layer's name in full, the ramp with its ticks and unit, then what the greys mean
     return (
       <figure className="flex flex-col gap-1 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
-        <div className="flex items-baseline gap-2">
-          {caption
-            ? <figcaption className="ch-text min-w-0 flex-1 truncate font-serif text-[13px] font-semibold leading-tight">{t(layer.label)}</figcaption>
-            : <span className="flex-1" />}
-          {greys}
-        </div>
+        {caption && <figcaption className="ch-text line-clamp-2 font-serif text-[13px] font-semibold leading-tight">{t(layer.label)}</figcaption>}
         {cats}
         {layer.kind !== "cat" && sc && (
           <div>
@@ -58,6 +53,7 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
             </div>
           </div>
         )}
+        {layer.greys.length > 0 && greys}
       </figure>
     );
   }

@@ -7,8 +7,10 @@ import { useT } from "@/i18n/useT";
  * Three resting heights: the peek (legend and year, in reach of the thumb), half (a tapped cell), almost full.
  * Drag the handle or the peek; tap the handle or use the arrow keys on it to step.
  */
-export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, onTopHeight }:
-  { title: string; peek: ReactNode; children: ReactNode; snaps: number[]; snap: number; onSnap(i: number): void; vh: number; onTopHeight?(px: number): void }) {
+export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, onTopHeight, inertAtPeek = true }:
+  { title: string; peek: ReactNode; children: ReactNode; snaps: number[]; snap: number; onSnap(i: number): void; vh: number; onTopHeight?(px: number): void;
+    /** false when the lowest step already shows content worth reading (a cell's details at half height) */
+    inertAtPeek?: boolean }) {
   const t = useT();
   const [drag, setDrag] = useState<number | null>(null);   // live height in px while dragging
   const start = useRef<{ y: number; h: number; moved: boolean; handle: boolean } | null>(null);
@@ -84,7 +86,7 @@ export function CompactSheet({ title, peek, children, snaps, snap, onSnap, vh, o
       <div className="min-h-0 overflow-y-auto overscroll-contain border-t border-[var(--paper-line)] px-4 pt-4"
         style={{ flex: `0 0 ${Math.max(0, rest - topH)}px`, paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         // below the fold at the peek: out of the tab order and the reading order (React 18 sets `inert` only as a string)
-        {...(snap === 0 && drag === null ? { inert: "" } : {})}>
+        {...(inertAtPeek && snap === 0 && drag === null ? { inert: "" } : {})}>
         {children}
       </div>
     </section>

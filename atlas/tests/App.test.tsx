@@ -62,6 +62,21 @@ describe("App", () => {
   });
 });
 
+describe("desktop layout", () => {
+  it("the same pieces as on a phone: legend plate, tool row, one dock; details only after a click", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(screen.getByRole("toolbar", { name: "Map tools" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Map settings" })).toBeInTheDocument();
+    expect(screen.getByText("Click a cell to read its century.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Cell details" })).toBeNull();
+    act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
+    expect(screen.getByRole("region", { name: "Cell details" })).toBeInTheDocument();
+    expect(map.props.cell).toBe(cellAt(6.08, 50.78));
+    act(() => useAtlas.getState().setCell(null));
+  });
+});
+
 describe("projection", () => {
   it("toggles between globe and flat map, passes it to the map and remembers it", async () => {
     render(<App />);
@@ -83,7 +98,8 @@ describe("place search", () => {
   it("picking a result selects its cell and flies there", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await userEvent.type(screen.getByRole("searchbox", { name: "Search a place" }), "Berlin{Enter}");
+    await userEvent.click(screen.getByRole("button", { name: "Search a place" }));
+    await userEvent.type(await screen.findByRole("searchbox", { name: "Search a place" }), "Berlin{Enter}");
     await userEvent.click(await screen.findByRole("button", { name: "Berlin, Deutschland" }));
     expect(useAtlas.getState().cell).toBe(cellAt(13.3888599, 52.5170365));
     expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365, zoom: 4 });

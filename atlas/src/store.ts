@@ -32,6 +32,10 @@ interface AtlasState {
   setCell: (c: number | null) => void;
   playing: boolean;
   setPlaying: (p: boolean) => void;
+  /** the first-visit line under the title; retired once a cell has been opened, back via the help panel */
+  hintSeen: boolean;
+  markHintSeen: () => void;
+  resetHints: () => void;
 }
 
 export const useAtlas = create<AtlasState>((set) => ({
@@ -49,4 +53,7 @@ export const useAtlas = create<AtlasState>((set) => ({
   setCell: (cell) => set({ cell }),
   playing: false,
   setPlaying: (playing) => set({ playing }),
+  hintSeen: stored("atlas-hints", ["seen", "new"] as const, "new") === "seen",
+  markHintSeen: () => { save("atlas-hints", "seen"); set({ hintSeen: true }); },
+  resetHints: () => { save("atlas-hints", "new"); set({ hintSeen: false }); },
 }));
