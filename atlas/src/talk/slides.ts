@@ -1,7 +1,7 @@
 import type { Atlas } from "@/data/types";
 import type { LayerId } from "@/model/layers";
 import type { AtlasSlideId } from "./sequence";
-import { coolingShare, dacCapacityGt, medianDacNet, medianNetShare } from "./stats";
+import { coolingShare, dacCapacityGt, medianDacNet, netShareArea } from "./stats";
 
 export interface AtlasSlideDef {
   id: AtlasSlideId; title: string; ch?: "vergleich" | "dac"; layer: LayerId;
@@ -17,7 +17,7 @@ const MODEL_SRC = "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, FaI
 
 const jedeZelle: AtlasSlideDef = {
   id: "jedeZelle", title: "Jede Zelle, jedes Jahr", ch: "vergleich", layer: "deltaT", years: [2030, 2050, 2100], sitesFrom: 3,
-  takeaway: (at, step) => { const y = yearAt(jedeZelle, step); return `${pct(coolingShare(at, y))} der wiederbewaldbaren Fläche: dort kühlt ein Baum im Jahr ${y}.`; },
+  takeaway: (at, step) => { const y = yearAt(jedeZelle, step); return y < 2050 ? `${y}: Auf ${pct(coolingShare(at, y))} der Fläche kühlt ein junger Baum schon — die Albedo holt erst später auf.` : `${pct(coolingShare(at, y))} der wiederbewaldbaren Fläche: dort kühlt ein Baum im Jahr ${y}.`; },
   source: MODEL_SRC,
   notes: [
     "Dieselbe Rechnung wie für Aachen, jetzt für jede Zelle der Karte: Waldtyp, Wachstum und Albedo des Ortes bestimmen, ob ein Baum kühlt oder wärmt.",
@@ -26,7 +26,10 @@ const jedeZelle: AtlasSlideDef = {
 };
 const albedo: AtlasSlideDef = {
   id: "albedo", title: "Wo die Albedo den Kohlenstoff auffrisst", ch: "vergleich", layer: "netShare", years: [2100],
-  takeaway: (at) => `Im Mittel bleiben ${pct(medianNetShare(at, 2100))} der CO₂-Wirkung nach Abzug der Albedo.`,
+  takeaway: (at) => {
+    const g = at.meta.global.areasGha, gha = (x: number) => x.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `Wo Bäume kühlen (${gha(g.kuehlt)} Gha), bleiben ${pct(netShareArea(at, 2100, true))} ihrer CO₂-Wirkung; über alle ${gha(g.alle)} Gha wiederbewaldbarer Fläche nur ${pct(netShareArea(at, 2100, false))}.`;
+  },
   source: `${MODEL_SRC} Albedo: Duveiller et al. 2018.`,
   notes: ["Anteil der CO₂-Wirkung, der nach dem Albedo-Effekt übrig bleibt: nahe 100 % in den Tropen, deutlich weniger oder negativ dort, wo ein Wald den Boden dunkler macht."],
 };

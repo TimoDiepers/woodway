@@ -1,5 +1,5 @@
 import type { Atlas } from "@/data/types";
-import { dacNet, deltaT, netShare } from "@/model/model";
+import { dacNet, deltaT, typeKey, yearIndex } from "@/model/model";
 
 const N = (at: Atlas) => at.f.type.length;
 
@@ -15,24 +15,20 @@ export function coolingShare(at: Atlas, year: number): number {
   return all ? cool / all : NaN;
 }
 
-/** Median of the values, each weighted (cumulative weight reaches half the total). */
-function weightedMedian(vals: number[], w: number[]): number {
-  const idx = vals.map((_, i) => i).sort((i, j) => vals[i] - vals[j]);
-  const half = w.reduce((s, x) => s + x, 0) / 2;
-  let acc = 0;
-  for (const i of idx) { acc += w[i]; if (acc >= half) return vals[i]; }
-  return NaN;
-}
-
-/** Area-weighted median of the net share (CO₂ effect after the albedo) over forest cells. */
-export function medianNetShare(at: Atlas, year: number): number {
-  const v: number[] = [], w: number[] = [];
+/** The talk's area-level net share: Σ(area·ΔT) / Σ(area·ΔT_CO₂) over forest cells (only those that cool in that year if asked). */
+export function netShareArea(at: Atlas, year: number, onlyCooling: boolean): number {
+  let net = 0, co2 = 0;
+  const k = yearIndex(at, year);
   for (let c = 0; c < N(at); c++) {
-    if (!at.f.type[c]) continue;
-    const s = netShare(at, c, year);
-    if (Number.isFinite(s)) { v.push(s); w.push(at.f.area[c]); }
+    const key = typeKey(at, c);
+    if (!key) continue;
+    const d = deltaT(at, c, year);
+    if (!Number.isFinite(d) || (onlyCooling && !(d < 0))) continue;
+    const a = at.f.area[c];
+    net += a * d;
+    co2 += a * at.f.a[c] * at.meta.curves[key].dtCo2[k];
   }
-  return weightedMedian(v, w);
+  return co2 ? net / co2 : NaN;
 }
 
 /** Median of the DAC net share over the cells where DAC is possible. */

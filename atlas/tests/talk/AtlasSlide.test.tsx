@@ -25,6 +25,10 @@ describe("AtlasSlide", () => {
     const { container } = render(<AtlasSlide def={SLIDES.jedeZelle} atlas={at} step={2} />);
     expect(container.querySelector(".takeaway")!.textContent).toContain("2100");
   });
+  it("albedo slide gives both area-level shares", () => {
+    const { container } = render(<AtlasSlide def={SLIDES.albedo} atlas={at} step={0} />);
+    expect(container.querySelector(".takeaway")!.textContent).toMatch(/Wo Bäume kühlen \(0,39 Gha\), bleiben 57 % ihrer CO₂-Wirkung; über alle 0,83 Gha wiederbewaldbarer Fläche nur 12 %\./);
+  });
   it("counts clicks: years plus the sites click", () => {
     expect(atlasSteps("jedeZelle")).toBe(3);
     expect(atlasSteps("albedo")).toBe(0);
