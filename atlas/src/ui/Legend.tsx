@@ -2,13 +2,16 @@ import type { Atlas } from "@/data/types";
 import { reasonColor, scaleOf, type Layer } from "@/model/layers";
 import { useNum, useT, type Key } from "@/i18n/useT";
 import { useAtlas } from "@/store";
+import { useDark } from "@/lib/useDark";
+import { themedScale } from "@/color/scale";
 import { SourceLine } from "@/ui/deck/SourceLine";
 
 /** `caption={false}`: the layer's name is shown elsewhere (the phone's dropdown right above). */
 export function Legend({ atlas, layer, compact = false, caption = true }: { atlas: Atlas; layer: Layer; compact?: boolean; caption?: boolean }) {
   const t = useT(), num = useNum();
   const lang = useAtlas((s) => s.lang);
-  const sc = scaleOf(atlas, layer);
+  const dark = useDark();
+  const base = scaleOf(atlas, layer), sc = base && themedScale(base, dark);
   const fmt = (v: number) => num(v, Number.isInteger(v) ? 0 : 1).replace(/^-/, "\u2212");
   const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
   const inlineUnit = unit.length > 0 && unit.length <= 4;   // a short unit ("%") sits with the ticks
@@ -16,7 +19,7 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
     <ul className={compact ? "flex flex-wrap justify-end gap-x-2.5 gap-y-0.5 text-[11px] text-inkMuted" : "flex flex-col gap-0.5 text-inkMuted"}>
       {layer.greys.map((r) => (
         <li key={r} className={compact ? "flex items-center gap-1" : "flex items-center gap-2"}>
-          <span className={compact ? "h-2.5 w-2.5 shrink-0 rounded-sm border border-[var(--paper-line)]" : "h-3 w-3 shrink-0 rounded-sm border border-[var(--paper-line)]"} style={{ background: reasonColor(atlas, r) }} />{t(r)}
+          <span className={compact ? "h-2.5 w-2.5 shrink-0 rounded-sm border border-[var(--paper-line)]" : "h-3 w-3 shrink-0 rounded-sm border border-[var(--paper-line)]"} style={{ background: reasonColor(atlas, r, dark) }} />{t(r)}
         </li>
       ))}
     </ul>

@@ -55,9 +55,9 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   // where the canvas sits; a theme switch re-adds the source from these props and the canvas as it is
   const [coords, setCoords] = useState<Coords>(IMAGE_COORDS);
   const pending = useRef(0);
-  const latest = useRef({ atlas, layer, year });
-  latest.current = { atlas, layer, year };
-  const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; colors: Uint32Array } | null>(null);
+  const latest = useRef({ atlas, layer, year, dark });
+  latest.current = { atlas, layer, year, dark };
+  const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; dark: boolean; colors: Uint32Array } | null>(null);
 
   useEffect(() => () => { pending.current++; }, []);
 
@@ -89,10 +89,10 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       const map = mapRef.current?.getMap();
       if (ticket !== pending.current || !map) return;
       const t0 = performance.now();
-      const { atlas, layer, year } = latest.current;
+      const { atlas, layer, year, dark } = latest.current;
       let cc = colours.current;
-      if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year)
-        cc = colours.current = { atlas, layer, year, colors: cellColors(atlas, layer, year, cc?.colors) };
+      if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year || cc.dark !== dark)
+        cc = colours.current = { atlas, layer, year, dark, colors: cellColors(atlas, layer, year, cc?.colors, dark) };
       const v = viewImage(map);
       canvas.width = v.w; canvas.height = v.h;
       paintHexView(canvas.getContext("2d", { willReadFrequently: true })!, v.w, v.h, v.b, atlas, layer, year, cc.colors);
@@ -107,7 +107,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
     });
   }, [canvas]);
 
-  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, projection, loaded, repaint]);
+  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, dark, projection, loaded, repaint]);
 
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180

@@ -1,7 +1,7 @@
 import type { Atlas } from "@/data/types";
 import type { Layer } from "@/model/layers";
 import { reasonColor, scaleOf } from "@/model/layers";
-import { hexToRgba, scaleColor, type RGBA } from "@/color/scale";
+import { hexToRgba, scaleColor, themedScale, type RGBA } from "@/color/scale";
 import { LAT_MAX } from "./lookup";
 import { clampBounds, hexCentres, mercY, HEX_R_DEG, HEX_R_M, HEX_ROW_M, type Bounds } from "./hex";
 
@@ -11,10 +11,10 @@ export const IMAGE_COORDS: [[number, number], [number, number], [number, number]
 
 const pack = ([r, g, b, a]: RGBA) => ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
 
-export function cellColors(at: Atlas, layer: Layer, year: number, out: Uint32Array = new Uint32Array(360 * 720)): Uint32Array {
-  const sc = scaleOf(at, layer);
-  const land = pack(hexToRgba(at.meta.colors.land));
-  const grey = new Map(layer.greys.map((r) => [r, pack(hexToRgba(reasonColor(at, r)))]));
+export function cellColors(at: Atlas, layer: Layer, year: number, out: Uint32Array = new Uint32Array(360 * 720), dark = false): Uint32Array {
+  const base = scaleOf(at, layer), sc = base && themedScale(base, dark);
+  const land = pack(hexToRgba(reasonColor(at, null, dark)));
+  const grey = new Map(layer.greys.map((r) => [r, pack(hexToRgba(reasonColor(at, r, dark)))]));
   const cats = at.meta.categories.waldtyp.map((c) => pack(hexToRgba(c.color)));
   for (let c = 0; c < out.length; c++) {
     if (!at.f.land[c]) { out[c] = 0; continue; }

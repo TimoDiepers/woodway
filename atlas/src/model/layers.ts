@@ -16,10 +16,14 @@ export interface Layer {
 }
 
 /** The grey a reason is drawn in: the deck's colours from meta.json. */
-export function reasonColor(at: Atlas, reason: Key | null): string {
-  if (reason === "reason.tooCold") return at.meta.colors.tooCold;
-  if (reason === "reason.unmeasured") return at.meta.colors.unmeasured;
-  return at.meta.colors.land;
+/** The greys on a dark page: land a step above the dark sea (#20282b), "not measured" and "too cold" a step above that. */
+export const DARK_GREYS = { land: "#2e373a", unmeasured: "#3a4447", tooCold: "#46504f" } as const;
+
+export function reasonColor(at: Atlas, reason: Key | null, dark = false): string {
+  const c = dark ? DARK_GREYS : at.meta.colors;
+  if (reason === "reason.tooCold") return c.tooCold;
+  if (reason === "reason.unmeasured") return c.unmeasured;
+  return c.land;
 }
 
 export const BUILD_SCALE: Scale = { stops: ["#d6ecea", "#7cc2bc", "#2f9c98", "#0d4f57"], domain: [0, 60], unit: "Mt/a" };

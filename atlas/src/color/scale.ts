@@ -28,3 +28,20 @@ export function scaleColor(sc: Scale, v: number): RGBA {
   const p = stops[k], q = stops[k + 1];
   return [0, 1, 2].map((c) => Math.round(p[c] + (q[c] - p[c]) * f)).concat(255) as RGBA;
 }
+
+/** The neutral middle of a diverging scale on a dark page: near zero reads as "little", like the dark ground. */
+const DARK_NEUTRAL = "#4b5553";
+const darkCache = new WeakMap<Scale, Scale>();
+
+/** The scale for the current theme: on dark pages a diverging scale's light middle stop becomes dark neutral. */
+export function themedScale(sc: Scale, dark: boolean): Scale {
+  if (!dark || sc.mid === undefined) return sc;
+  let d = darkCache.get(sc);
+  if (!d) {
+    const stops = [...sc.stops];
+    stops[Math.floor(stops.length / 2)] = DARK_NEUTRAL;
+    d = { ...sc, stops };
+    darkCache.set(sc, d);
+  }
+  return d;
+}
