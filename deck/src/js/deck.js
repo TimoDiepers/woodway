@@ -1087,7 +1087,7 @@ class SlideMenu {
     this.built = true;
   }
   loadThumbs() {
-    if (this.maker) return;
+    if (this.maker || deckLean) return;   // cards keep their numbers and titles
     const f = this.maker = document.createElement('iframe');
     f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
     f.style.cssText = 'position:fixed;left:-20000px;top:0;width:1600px;height:900px;border:0;pointer-events:none';
@@ -1223,6 +1223,10 @@ function slideJumper(count, titleOf, jump) {
 }
 
 
+/* phones and tablets: no second deck copy for the overview's previews and no live woodway — together they
+   exceed what iOS grants a tab, and Safari kills the page ("a problem repeatedly occurred") */
+const deckLean = matchMedia('(hover: none), (pointer: coarse)').matches;
+
 /* ---------- images: current slide first, the rest in the background ---------- */
 const deckMedia = {
   load(s) {
@@ -1232,7 +1236,7 @@ const deckMedia = {
   around(slides, n) {
     for (const k of [n, n + 1, n - 1, n + 2]) this.load(slides[k]);
     // live iframes (woodway): only on this slide and the next, and only in the projector window
-    if (!document.documentElement.classList.contains('embed'))
+    if (!document.documentElement.classList.contains('embed') && !deckLean)
       for (const k of [n, n + 1]) for (const f of slides[k]?.querySelectorAll('iframe[data-live-src]') ?? []) {
         f.addEventListener('load', () => f.classList.add('on'), { once: true });
         f.src = f.dataset.liveSrc; f.removeAttribute('data-live-src');
