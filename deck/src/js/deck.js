@@ -1261,6 +1261,7 @@ class Deck {
     if (!this.embed) { this.bind(); this.menu = new SlideMenu(this); }
     const h = parseInt(location.hash.slice(1), 10);
     this.go(Number.isFinite(h) ? h - 1 : 0, 0);
+    this.booted = true;
     setTimeout(() => document.getElementById('hint').classList.add('gone'), 5000);
   }
   onMessage(e) {
@@ -1328,6 +1329,8 @@ class Deck {
   }
   go(n, step) {
     n = Math.max(0, Math.min(this.slides.length - 1, n));
+    if (this.booted && window.__deckDataNow) window.__deckDataNow();   // the speaker moves on: load the charts now
+    if (window.__ensureCharts) { window.__ensureCharts(this.slides[n]); delete this.slides[n]._steps; }
     deckMedia.around(this.slides, n);
     const s = this.slides[n], again = n === this.i && s.classList.contains('active');
     if (again && !this.still) { s.classList.remove('active'); void s.offsetWidth; }   // restart CSS entrances
@@ -1366,7 +1369,7 @@ class Deck {
     }
     this.sync();
   }
-  next() { if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); } else if (this.i < this.slides.length - 1) this.go(this.i + 1, 0); }
+  next() { if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); } else if (this.i < this.slides.length - 1) this.go(this.i + 1, 0); }
   prev() { if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
   bind() {
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
@@ -1422,8 +1425,21 @@ addEventListener('DOMContentLoaded', () => {
   if (window.katex) renderTex(deckEl);
   window.deck = new Deck();
   window.DECK_DATA.then(() => {
-    for (const h of deckEl.querySelectorAll('.chart')) h._chart = h.dataset.ec ? new EChart(h) : new MplChart(h);
-    window.deck.dataReady();
+    // Charts are built in slices, the current slide and its neighbours first: building all of them at once is
+    // another long block on the main thread. A slide that is opened before its turn builds its own (Deck.go).
+    const d = window.deck, build = h => { if (!h._chart) h._chart = h.dataset.ec ? new EChart(h) : new MplChart(h); };
+    const all = [...deckEl.querySelectorAll('.chart')];
+    const near = h => Math.abs(d.slides.indexOf(h.closest('.slide')) - d.i) <= 1;
+    window.__ensureCharts = s => { for (const h of s.querySelectorAll('.chart')) build(h); };
+    all.filter(near).forEach(build);
+    d.dataReady();
+    const rest = all.filter(h => !h._chart);
+    (function slice() {
+      const t0 = performance.now();
+      while (rest.length && performance.now() - t0 < 12) build(rest.shift());
+      if (rest.length) setTimeout(slice, 0);
+      else for (const s of d.slides) delete s._steps;   // click counts include every chart now
+    })();
   });
 });
 

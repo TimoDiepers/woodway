@@ -7,6 +7,8 @@ import { follow, next, prev, type Cmd, type DeckState, type Pos } from "./naviga
 import { MAIN_END, SEQUENCE } from "./sequence";
 import { SLIDES, atlasSteps } from "./slides";
 import AtlasSlide from "./AtlasSlide";
+import TalkOverview from "./TalkOverview";
+import { LayoutGrid } from "lucide-react";
 import type { Atlas } from "@/data/types";
 
 
@@ -24,20 +26,32 @@ function fitScale() { return Math.min(window.innerWidth / 1600, window.innerHeig
 export default function TalkApp() {
   const [pos, setPos] = useState<Pos>({ k: 0, step: 0 });
   const [notesOpen, setNotesOpen] = useState(false);
+  const [overview, setOverview] = useState(false);
   const [missing, setMissing] = useState(false);
   const [scale, setScale] = useState(fitScale);
   const [atlas, setAtlas] = useState<Atlas | null>(null);
   const [atlasFailed, setAtlasFailed] = useState(false);
   // Key handlers read the latest deck state and position from refs: a reply and the next key can arrive before React re-renders.
   const posRef = useRef(pos);
+  const overviewRef = useRef(false);
+  overviewRef.current = overview;
   const deckRef = useRef<DeckState | null>(null);
   const frame = useRef<DeckFrameHandle>(null);
   const gate = useRef(new CmdGate());
 
-  useEffect(() => {
-    useAtlas.getState().setLang("de");
+  useEffect(() => { useAtlas.getState().setLang("de"); }, []);
+  // The atlas data is only needed on the live-map slides: load it after the opening slide has played its entrance
+  // (or as soon as one of those slides is near), so it does not compete with the deck's own start.
+  const atlasWanted = useRef(false);
+  const wantAtlas = useCallback(() => {
+    if (atlasWanted.current) return;
+    atlasWanted.current = true;
     loadAtlas("data/").then(setAtlas).catch(() => setAtlasFailed(true));
   }, []);
+  useEffect(() => { const t = setTimeout(wantAtlas, 2500); return () => clearTimeout(t); }, [wantAtlas]);
+  useEffect(() => {
+    if (SEQUENCE.slice(pos.k, pos.k + 3).some((s) => s.kind === "atlas")) wantAtlas();
+  }, [pos.k, wantAtlas]);
 
   useEffect(() => {
     const onResize = () => setScale(fitScale());
@@ -75,6 +89,8 @@ export default function TalkApp() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "m" || e.key === "M") { e.preventDefault(); setOverview((o) => !o); return; }
+      if (overviewRef.current) return;   // the overview has the keys while it is open
       const el = e.target as HTMLElement | null;   // typing in the atlas search must not turn pages
       if (el && (el.isContentEditable || isTextField(el))) return;
       if (el?.tagName === "BUTTON" && (e.key === " " || e.key === "Enter")) return;   // those press the button
@@ -111,6 +127,10 @@ export default function TalkApp() {
       {missing && <p role="alert" className="talk-missing">Das HTML-Deck fehlt: erst python deck/build.py ausführen.</p>}
       {def && <div className="talk-ground" data-ch={def.ch ?? "baeume"} />}
       <div className="talk-progress" style={{ transform: `scaleX(${Math.min(1, pos.k / (MAIN_END - 1))})` }} />
+      <button type="button" className="ov-fab" aria-label="Folienübersicht" aria-haspopup="dialog"
+        onClick={(e) => { e.stopPropagation(); setOverview(true); }}><LayoutGrid size={22} aria-hidden /></button>
+      <TalkOverview open={overview} current={pos.k} onClose={() => setOverview(false)}
+        onJump={(k) => { setOverview(false); if (SEQUENCE[k]?.kind === "atlas") wantAtlas(); go(k); }} />
       <div className={"talk-drawer" + (notesOpen ? " open" : "")} aria-live="polite" onClick={(e) => e.stopPropagation()}>
         <h5>Sprechernotizen</h5>
         {notes ? notes.map((n, i) => <p key={i}>{n}</p>) : <p className="q">{item.kind === "atlas" ? "Keine Notizen." : "Notizen dieser Folie stehen im HTML-Deck."}</p>}
