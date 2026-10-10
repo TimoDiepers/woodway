@@ -37,6 +37,9 @@ describe("App on a phone", () => {
     const tools = screen.getByRole("toolbar", { name: "Map tools" });
     for (const name of ["Search a place", "Back to the whole world", "Overview", "How to read this map", "Deutsch", "Flat map"])
       expect(within(tools).getByRole("button", { name })).toBeInTheDocument();
+    const slides = within(tools).getByRole("link", { name: "Slides of the talk" });
+    expect(slides).toHaveAttribute("target", "_blank");
+    expect(slides.getAttribute("href")).toMatch(/slides\/$|\/deck\/index\.html$/);
     expect(insets().right).toBeGreaterThan(0);          // the globe centres left of the tool column
     expect(insets().bottom).toBeGreaterThan(0);         // … and above the dock
   });

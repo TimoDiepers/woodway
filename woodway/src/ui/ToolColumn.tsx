@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { BarChart2, Compass, Globe, HelpCircle, Map as MapIcon, Moon, Search, Sun } from "lucide-react";
+import { BarChart2, Compass, Globe, HelpCircle, Map as MapIcon, Moon, Presentation, Search, Sun } from "lucide-react";
 import type { Atlas } from "@/data/types";
 import type { Layer } from "@/model/layers";
 import { useAtlas } from "@/store";
@@ -13,6 +13,11 @@ import { GlobalStrip } from "@/ui/GlobalStrip";
 import { SourceLine } from "@/ui/deck/SourceLine";
 
 type PanelId = "search" | "overview" | "help";
+
+/** The talk's slides: published next to woodway under slides/; in development the dev server serves the built deck. */
+const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
+/** inside the deck's own last slide, a link back to the deck would only open it a second time */
+const EMBEDDED = typeof window !== "undefined" && window.parent !== window;
 
 /**
  * The map's tools in one card: a column against the right edge on a phone, a row top right on a desktop.
@@ -66,6 +71,11 @@ export function ToolColumn({ atlas, layer, year, compact, onPlace, onRecenter, o
           <SourceLine>{t(layer.source)}</SourceLine>
         </div>
       ), true)}
+      {!EMBEDDED && (
+        <a href={SLIDES_URL} target="_blank" rel="noopener" aria-label={t("tools.slides")} title={compact ? undefined : t("tools.slides")} className={btn}>
+          <Presentation size={18} aria-hidden />
+        </a>
+      )}
       {panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, t("help.sub"), <HelpContent touch={touch} />, true)}
     </div>
   );

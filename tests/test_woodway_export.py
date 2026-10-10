@@ -1,4 +1,4 @@
-"""The atlas export reproduces the model it was cut from."""
+"""The woodway export reproduces the model it was cut from."""
 import gzip
 import json
 from pathlib import Path
@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "atlas" / "public" / "data"
+DATA = ROOT / "woodway" / "public" / "data"
 
 
 def _load():

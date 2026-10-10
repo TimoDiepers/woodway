@@ -1,8 +1,10 @@
 # Ingenieure auf dem Holzweg?
 
-**Talk:** https://timodiepers.github.io/dissvortrag/
+**Woodway** (every result of the model, cell by cell): https://woodway.tidi.dev/
 
-**Atlas:** https://timodiepers.github.io/dissvortrag/atlas/ (also live on the talk's last slide)
+**Slides:** https://woodway.tidi.dev/slides/ (woodway is also live on the talk's last slide)
+
+Until the domain is set up, the same site is at https://timodiepers.github.io/dissvortrag/ and https://timodiepers.github.io/dissvortrag/slides/.
 
 Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 
@@ -62,7 +64,7 @@ The DAC life-cycle inputs (`data/dac/lca_vintages*.json`) come from premise data
 
 ## The deck
 
-The talk is one HTML page, live at https://timodiepers.github.io/dissvortrag/. Its sources are in `deck/src`, and one build puts it together:
+The talk is one HTML page, live at https://woodway.tidi.dev/slides/. Its sources are in `deck/src`, and one build puts it together:
 
 ```bash
 uv run python deck/build.py      # -> deck/dist/index.html (plus data/ and vendor/)

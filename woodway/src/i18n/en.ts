@@ -1,5 +1,5 @@
 export const en = {
-  "app.title": "Atlas",
+  "app.title": "Woodway",
   "app.subtitle": "The talk's model, cell by cell · 2026–2100",
   "app.loading": "Loading the model's data…",
   "app.loadError": "Could not load {file}. Reload the page to try again.",
@@ -103,7 +103,7 @@ export const en = {
   "help.reset": "Show the first-visit hint again",
   "help.resetNote": "Brings back the line under the title, for a fresh pair of eyes.",
   "help.question.t": "The question",
-  "help.question": "A planted tree takes CO₂ out of the air, and its canopy is darker than the open land it replaces, so it also absorbs more sunlight. Which of the two wins decides whether the tree cools or warms the climate. This atlas answers that for every half-degree cell of the world's land, and sets direct air capture (DAC) beside it.",
+  "help.question": "A planted tree takes CO₂ out of the air, and its canopy is darker than the open land it replaces, so it also absorbs more sunlight. Which of the two wins decides whether the tree cools or warms the climate. Woodway answers that for every half-degree cell of the world's land, and sets direct air capture (DAC) beside it.",
   "help.map.t": "The map",
   "help.map": "Each hexagon is one 0.5° cell, the same grid as the maps in the talk. {verb} a cell to see its whole century: carbon, radiative forcing and temperature effect of one tree, and what a DAC plant would do there.",
   "help.layers.t": "The layers",
@@ -128,4 +128,5 @@ export const en = {
   "panel.here": "here",
   "panel.conditions": "Conditions here",
   "panel.conditionsHint": "Pick a row to show it on the map",
+  "tools.slides": "Slides of the talk",
 } as const;

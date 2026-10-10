@@ -136,7 +136,7 @@ export default function TalkApp() {
         {def && (atlas
           ? <SlideBoundary key={def.title} title={def.title}><AtlasSlide def={def} atlas={atlas} step={pos.step} /></SlideBoundary>
           : <section className="rslide" data-ch={def.ch}><header className="sh"><h2>{def.title}</h2></header>
-              <p role={atlasFailed ? "alert" : undefined}>{atlasFailed ? "Die Atlas-Daten fehlen: erst atlas/export_atlas.py ausführen." : "Atlas wird geladen …"}</p></section>)}
+              <p role={atlasFailed ? "alert" : undefined}>{atlasFailed ? "Die Atlas-Daten fehlen: erst woodway/export_woodway.py ausführen." : "Atlas wird geladen …"}</p></section>)}
       </div>
       {missing && <p role="alert" className="talk-missing">Das HTML-Deck fehlt: erst python deck/build.py ausführen.</p>}
       {def && <div className="talk-ground" data-ch={def.ch ?? "baeume"} />}

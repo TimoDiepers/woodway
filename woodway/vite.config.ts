@@ -19,12 +19,13 @@ const serveDeck = {
   },
 };
 
-// base "./" so the built app works under /dissvortrag/atlas/ on Pages and from any folder.
+// base "./" so the built app works at the site root (woodway.tidi.dev), under /dissvortrag/ on github.io, or from any folder.
 export default defineConfig({
   base: "./",
   plugins: [react(), serveDeck],
   server: { fs: { allow: [path.resolve(__dirname, "../deck"), __dirname] } },
-  build: { rollupOptions: { input: { main: path.resolve(__dirname, "index.html"), talk: path.resolve(__dirname, "talk.html") } } },
+  // the React talk (talk.html) is no longer published: the slides are the HTML deck under /slides/
+  build: { rollupOptions: { input: { main: path.resolve(__dirname, "index.html") } } },
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   test: { globals: true, environment: "jsdom", setupFiles: ["./tests/setup.ts"], css: true },
 });

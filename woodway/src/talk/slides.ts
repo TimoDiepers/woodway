@@ -51,7 +51,7 @@ const dacAusbau: AtlasSlideDef = {
 const atlas: AtlasSlideDef = {
   id: "atlas", title: "Atlas", layer: "deltaT", years: [2100], free: true,
   takeaway: () => "Jede Zelle anklicken: Waldtyp, Wachstum, Antrieb, Temperatur und DAC an diesem Ort.",
-  source: "Alle Daten: atlas/export_atlas.py.",
+  source: "Alle Daten: woodway/export_woodway.py.",
   notes: ["Freier Teil: Ebene, Jahr und Ort frei wählen; Fragen aus dem Publikum direkt an der Karte beantworten."],
 };
 

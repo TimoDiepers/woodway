@@ -1,14 +1,14 @@
-"""Regenerate atlas/public/borders.geojson from the deck's Natural Earth land boundary lines.
+"""Regenerate woodway/public/borders.geojson from the deck's Natural Earth land boundary lines.
 
 Any segment with |dlon| > 180 (antimeridian jump) is split so no line spans the map.
-Run: uv run python atlas/scripts/borders.py
+Run: uv run python woodway/scripts/borders.py
 """
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "data/borders/ne_110m_admin_0_boundary_lines_land.geojson"
-OUT = ROOT / "atlas/public/borders.geojson"
+OUT = ROOT / "woodway/public/borders.geojson"
 
 
 def split(line):

@@ -1231,7 +1231,7 @@ const deckMedia = {
   },
   around(slides, n) {
     for (const k of [n, n + 1, n - 1, n + 2]) this.load(slides[k]);
-    // live iframes (the atlas): only on this slide and the next, and only in the projector window
+    // live iframes (woodway): only on this slide and the next, and only in the projector window
     if (!document.documentElement.classList.contains('embed'))
       for (const k of [n, n + 1]) for (const f of slides[k]?.querySelectorAll('iframe[data-live-src]') ?? []) {
         f.addEventListener('load', () => f.classList.add('on'), { once: true });
@@ -1277,8 +1277,8 @@ class Deck {
   }
   onMessage(e) {
     const d = e.data;
-    // the embedded atlas hands back the paging keys once a click has put focus into it
-    if (d && d.src === 'atlas-key' && !this.embed) { if (d.dir === 'next') this.next(); else if (d.dir === 'prev') this.prev(); return; }
+    // embedded woodway hands back the paging keys once a click has put focus into it
+    if (d && d.src === 'woodway-key' && !this.embed) { if (d.dir === 'next') this.next(); else if (d.dir === 'prev') this.prev(); return; }
     if (!d || d.src !== 'dv') return;
     if (this.embed) { if ('goto' in d) this.go(d.goto, d.step); return; }
     this.peer = e.source;

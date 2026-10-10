@@ -1,10 +1,10 @@
-# Builds the HTML deck (deck/build.py, standard library only) and deploys deck/dist to GitHub Pages.
-name: Deck auf GitHub Pages
+# Builds woodway (the site root) and the HTML deck (under slides/) and deploys both to GitHub Pages.
+name: Woodway und Folien auf GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths: ["deck/**", "atlas/**", ".github/workflows/pages.yml"]
+    paths: ["deck/**", "woodway/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -32,21 +32,18 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: atlas/package-lock.json
+          cache-dependency-path: woodway/package-lock.json
       - run: npm ci
-        working-directory: atlas
-      # stills of every slide for the talk's slide overview; without them the cards show their numbers
-      - run: node scripts/thumbs.mjs
-        working-directory: atlas
-        continue-on-error: true
+        working-directory: woodway
       - run: npx vitest run   # a renamed anchor slide of the deck fails here, before anything is deployed
-        working-directory: atlas
+        working-directory: woodway
       - run: npm run build
-        working-directory: atlas
-      - run: cp -R atlas/dist deck/dist/atlas
+        working-directory: woodway
+      # woodway at the root, the slides under slides/
+      - run: mkdir site && cp -R woodway/dist/. site/ && cp -R deck/dist site/slides
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: deck/dist
+          path: site
       - id: deployment
         uses: actions/deploy-pages@v4

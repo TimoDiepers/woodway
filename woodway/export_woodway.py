@@ -1,4 +1,4 @@
-"""Data for the atlas (atlas/public/data): every per-place result of the model on the 0.5 deg grid.
+"""Data for woodway (woodway/public/data): every per-place result of the model on the 0.5 deg grid.
 
 Writes meta.json (grid, curves, palettes, global paths, reference values) and fields.bin (360x720
 fields, float32 or uint8, offsets in meta.json), plus fields.bin.gz (gzip -9, mtime 0, so the same data
@@ -7,7 +7,7 @@ gives the same bytes), which the browser fetches and inflates; fields.bin stays 
          product scale the two unit curves linearly)
   DAC:   net share interpolated linearly between the LCA base years (nbs.dac._interp does the same).
 
-    uv run python atlas/export_atlas.py
+    uv run python woodway/export_woodway.py
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ from nbs.species import SPECIES, get_species, reference_site
 from nbs.tree_paths import BONN_RATE_GHA
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "atlas" / "public" / "data"
+OUT = ROOT / "woodway" / "public" / "data"
 CHART_DATA = ROOT / "deck" / "chart_data"
 
 
@@ -124,7 +124,7 @@ def main() -> None:
     f.add("darker", -100.0 * _by_type(albedo_grid.delta_alpha_grid), "f4")
     f.add("light", -typical_alpha_q_product() * _STAND_AREA_M2, "f4")
     # albedo of the cell's typical forest measured locally; elsewhere sun/darker are NaN and light is
-    # gap-filled -- the deck (b8/b8a) shows measured cells only, so does the atlas
+    # gap-filled -- the deck (b8/b8a) shows measured cells only, so does woodway
     f.add("measured", typical_measured_mask().astype(np.uint8), "u1")
     f.add("a", a, "f4")
     f.add("b", b, "f4")

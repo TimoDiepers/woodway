@@ -802,27 +802,29 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 /* inside the React deck (?host): the shell draws menu, hint and progress */
 .host #menu-fab, .host .hint, .host .progress { display: none !important; }
 
-/* ---------- the last slide: the live atlas ---------- */
-.atlas-live { display: grid; grid-template-columns: 1fr 372px; gap: 48px; flex: 1; min-height: 0; }
-.atlas-frame {
+/* ---------- the last slide: woodway, live ---------- */
+.woodway-live { display: grid; grid-template-columns: 1fr 372px; gap: 48px; flex: 1; min-height: 0; }
+.woodway-frame {
   position: relative; margin: 0; min-height: 0; border-radius: 10px; overflow: hidden;
   background: #e7e0d0; border: 1px solid var(--paper-line); box-shadow: 0 14px 30px -22px rgba(30, 26, 18, .55);
 }
-.atlas-frame img, .atlas-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; object-position: center; }
-/* drawn at 80 % and scaled up: the atlas's own labels come out a quarter larger, legible across a room */
-.atlas-frame iframe { width: 80%; height: 80%; transform: scale(1.25); transform-origin: 0 0; opacity: 0; transition: opacity .5s var(--ease); }
-.atlas-frame iframe.on { opacity: 1; }
-.atlas-side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-.atlas-side .lead { font-size: 28px; }
-.atlas-qr {
+.woodway-frame img, .woodway-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; object-position: center; }
+/* drawn at 80 % and scaled up: woodway's own labels come out a quarter larger, legible across a room */
+.woodway-frame iframe { width: 80%; height: 80%; transform: scale(1.25); transform-origin: 0 0; opacity: 0; transition: opacity .5s var(--ease); }
+.woodway-frame iframe.on { opacity: 1; }
+.woodway-side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.woodway-side .lead { font-size: 28px; }
+.woodway-qr {
   margin-top: auto; display: flex; align-items: center; gap: 18px; color: var(--ink); text-decoration: none;
   font: 500 17px/1.35 var(--sans);
 }
-.atlas-qr img { width: 150px; height: 150px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
-.atlas-pointer { display: grid; grid-template-columns: 1fr auto; gap: 72px; align-items: center; }
-.atlas-pointer .small { margin-top: 18px; color: var(--muted); }
-.atlas-pointer .atlas-qr { margin-top: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
-.atlas-pointer .atlas-qr img { width: 220px; height: 220px; }
+.woodway-qr img { width: 150px; height: 150px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
+.woodway-pointer { display: grid; grid-template-columns: 1fr auto; gap: 72px; align-items: center; }
+.woodway-pointer .small { margin-top: 18px; color: var(--muted); }
+.woodway-pointer .woodway-qr { margin-top: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
+.woodway-pointer .woodway-qr img { width: 220px; height: 220px; }
 /* a one-line key under a formula: what each symbol stands for */
 .eqdef { margin: 6px 0 0; font: 400 18px/1.4 var(--sans); color: var(--muted); max-width: 760px; }
 .eqdef .katex { font-size: 1em; color: var(--ink); }
+/* a quiet aside inside a heading: Woodway, "auf dem Holzweg" in English, is not Brightway */
+.sh h2 .wink { margin: 0 .1em 0 .35em; font: italic 400 22px/1 var(--serif, inherit); letter-spacing: 0; color: var(--muted); vertical-align: .35em; }

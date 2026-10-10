@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import type { Cmd, DeckState } from "./navigation";
 
-export const DECK_URL = import.meta.env.DEV ? "/deck/index.html?host" : "../index.html?host";
+export const DECK_URL = import.meta.env.DEV ? "/deck/index.html?host" : "slides/index.html?host";
 
 export interface DeckFrameHandle { send: (cmd: NonNullable<Cmd>) => void }
 interface Props { onState: (s: DeckState) => void; onMissing: () => void; onReload?: () => void }

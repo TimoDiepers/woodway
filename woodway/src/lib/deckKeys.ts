@@ -1,5 +1,5 @@
 /**
- * The atlas embedded in the deck's last slide: once a click has put focus into it, the deck no longer hears
+ * Woodway embedded in the deck's last slide: once a click has put focus into it, the deck no longer hears
  * the keys. These are the ones it pages on. A clicker's page keys always page; arrows only where no control
  * needs them (the year slider, a text field, an open dropdown).
  */
@@ -20,7 +20,7 @@ export function forwardDeckKeys(): () => void {
     const dir = deckKeyDir(e);
     if (!dir) return;
     e.preventDefault();
-    window.parent.postMessage({ src: "atlas-key", dir }, "*");
+    window.parent.postMessage({ src: "woodway-key", dir }, "*");
   };
   window.addEventListener("keydown", onKey);
   return () => window.removeEventListener("keydown", onKey);

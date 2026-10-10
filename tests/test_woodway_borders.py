@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-BORDERS = Path(__file__).resolve().parents[1] / "atlas/public/borders.geojson"
+BORDERS = Path(__file__).resolve().parents[1] / "woodway/public/borders.geojson"
 
 
 def test_no_antimeridian_jumps():

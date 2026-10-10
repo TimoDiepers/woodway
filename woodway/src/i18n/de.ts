@@ -1,7 +1,7 @@
 import type { en } from "./en";
 
 export const de: Record<keyof typeof en, string> = {
-  "app.title": "Atlas",
+  "app.title": "Woodway",
   "app.subtitle": "Das Modell des Vortrags, Zelle für Zelle · 2026–2100",
   "app.loading": "Lade die Daten des Modells…",
   "app.loadError": "{file} konnte nicht geladen werden. Seite neu laden, um es erneut zu versuchen.",
@@ -105,7 +105,7 @@ export const de: Record<keyof typeof en, string> = {
   "help.reset": "Den Hinweis für den ersten Besuch wieder zeigen",
   "help.resetNote": "Holt die Zeile unter dem Titel zurück, für ein neues Publikum.",
   "help.question.t": "Die Frage",
-  "help.question": "Ein gepflanzter Baum holt CO₂ aus der Luft, und sein Kronendach ist dunkler als das offene Land, das er ersetzt: Er schluckt also auch mehr Sonnenlicht. Welcher der beiden Effekte gewinnt, entscheidet, ob der Baum das Klima kühlt oder wärmt. Dieser Atlas beantwortet das für jede Halbgrad-Zelle der Landfläche und stellt Direct Air Capture (DAC) daneben.",
+  "help.question": "Ein gepflanzter Baum holt CO₂ aus der Luft, und sein Kronendach ist dunkler als das offene Land, das er ersetzt: Er schluckt also auch mehr Sonnenlicht. Welcher der beiden Effekte gewinnt, entscheidet, ob der Baum das Klima kühlt oder wärmt. Woodway beantwortet das für jede Halbgrad-Zelle der Landfläche und stellt Direct Air Capture (DAC) daneben.",
   "help.map.t": "Die Karte",
   "help.map": "Jedes Sechseck ist eine 0,5°-Zelle, dasselbe Raster wie in den Karten des Vortrags. {verb} eine Zelle an, um ihr ganzes Jahrhundert zu sehen: Kohlenstoff, Strahlungsantrieb und Temperaturwirkung eines Baums und was eine DAC-Anlage dort leisten würde.",
   "help.layers.t": "Die Ebenen",
@@ -130,4 +130,5 @@ export const de: Record<keyof typeof en, string> = {
   "panel.here": "hier",
   "panel.conditions": "Bedingungen hier",
   "panel.conditionsHint": "Zeile wählen, um sie auf der Karte zu zeigen",
+  "tools.slides": "Folien des Vortrags",
 };
