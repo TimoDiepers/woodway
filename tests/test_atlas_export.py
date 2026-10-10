@@ -46,6 +46,8 @@ def test_gzipped_fields_are_the_raw_fields_and_reproducible():
     gz = (DATA / "fields.bin.gz").read_bytes()
     assert gzip.decompress(gz) == (DATA / "fields.bin").read_bytes()
     assert gz[4:8] == b"\0\0\0\0"  # mtime 0: the same data gives the same bytes
+    # the loader tells inflated from gzipped bytes by the gzip magic; the raw file must never start with it
+    assert (DATA / "fields.bin").read_bytes()[:2] != b"\x1f\x8b"
 
 
 def test_unmeasured_colour_and_three_reference_sites():
