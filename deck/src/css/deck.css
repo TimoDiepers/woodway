@@ -762,27 +762,84 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.finale.active > .sh, .slide.finale.active > .body, .embed .slide.finale > .sh, .embed .slide.finale > .body,
 .all .slide.finale > .sh, .all .slide.finale > .body { opacity: 1; }
 /* under the summary: where the rest of the results live */
-.woodway-hint { display: grid; grid-template-columns: 196px 1fr 112px; gap: 24px; align-items: center; width: 900px; margin-top: 20px;
-  padding: 12px 14px 12px 12px; border-radius: 12px; background: rgba(255, 255, 255, .55); border: 1px solid #d8d0bb;
-  color: var(--ink-2); text-decoration: none; font: 400 19px/1.38 var(--sans); }
-.woodway-hint .wpv { width: 196px; height: 112px; object-fit: cover; border-radius: 8px; border: 1px solid var(--paper-line); background: #e7e0d0; }
+.woodway-hint { display: grid; grid-template-columns: 270px 1fr 184px; gap: 26px; align-items: center; width: 900px; margin-top: 30px;
+  padding: 14px 16px 14px 14px; border-radius: 14px; background: rgba(255, 255, 255, .58); border: 1px solid #d8d0bb;
+  color: var(--ink-2); text-decoration: none; font: 400 20px/1.42 var(--sans); }
+.woodway-hint .wpv { width: 270px; height: 184px; object-fit: cover; border-radius: 9px; border: 1px solid var(--paper-line); background: #e7e0d0; }
 .woodway-hint .txt { min-width: 0; }
-.woodway-hint b { display: block; font: 600 25px/1.2 var(--serif); color: var(--ch); margin-bottom: 4px; white-space: nowrap; }
-.woodway-hint b .wink { font: italic 400 19px/1 var(--serif); color: var(--muted); margin-left: .2em; }
-.woodway-hint em { display: inline; margin-left: .3em; font-style: normal; font-weight: 600; color: var(--ink); }
-.woodway-hint .qr { width: 112px; height: 112px; padding: 6px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
-/* the last slide: the summary's day scene stands still (no second sunrise); the call, then on the click thanks,
-   a young tree and birds */
+.woodway-hint b { display: block; font: 600 30px/1.2 var(--serif); color: var(--ch); margin-bottom: 8px; white-space: nowrap; }
+.woodway-hint b .wink { font: italic 400 21px/1 var(--serif); color: var(--muted); margin-left: .2em; }
+.woodway-hint em { display: block; margin-top: 10px; font: 600 23px/1.2 var(--sans); font-style: normal; color: var(--ink); }
+.woodway-hint .qr { width: 184px; height: 184px; padding: 9px; background: #fff; border-radius: 10px; border: 1px solid var(--paper-line); }
+/* the last slide: the summary's day scene stands still (no second sunrise); first what trees are besides climate
+   technology, then on the click thanks, a young tree and birds */
 .slide.ende .sunrise { transform: none; transition: none; }
-.slide.ende > .body { opacity: 1; transition: none; padding-top: 120px; }
+.slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
-.slide.ende h1 { font-size: 76px; line-height: 1.08; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; margin: 0; }
-.slide.ende .call { margin-top: 30px; font: 500 34px/1.3 var(--serif, inherit); color: var(--ch); }
-.slide.ende .call2 { margin-top: 10px; font: 400 26px/1.35 var(--serif); color: var(--ink-2); }
-.slide.ende .thanks { margin-top: 38px; opacity: 0; transition: opacity .8s var(--ease) 1.4s; }
+.slide.ende .more { transition: opacity .6s var(--ease); }
+.slide.ende:has(.thanks.shown) .more { opacity: 0; }
+.slide.ende .more h2 { margin: 0 0 34px; font-size: 54px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+.mcard { margin: 0; padding: 16px 18px 18px; border-radius: 14px; background: rgba(255, 255, 255, .55); border: 1px solid #e0d8c3; }
+.mcard .mi { display: block; width: 100%; height: 216px; }
+.mcard figcaption { margin-top: 10px; font: 400 19px/1.38 var(--sans); color: var(--ink-2); }
+.mcard figcaption b { display: block; margin-bottom: 4px; font: 600 26px/1.2 var(--serif); color: var(--ch); }
+.slide.ende .thanks { position: absolute; left: 0; top: 110px; opacity: 0; transition: opacity .8s var(--ease) .5s; }
 .slide.ende .thanks.shown { opacity: 1; }
-.slide.ende .danke { margin: 0; font: italic 500 46px/1.2 var(--serif, inherit); color: var(--clay); }
-.slide.ende .who { margin-top: 12px; font: 400 20px/1.5 var(--sans); color: var(--ink-2); }
+.slide.ende .thanks h1 { margin: 0; font-size: 92px; line-height: 1.05; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; }
+.slide.ende .call { margin: 34px 0 0; font: 500 40px/1.25 var(--serif); color: var(--ch); }
+.slide.ende .call2 { margin: 8px 0 0; font: italic 400 30px/1.3 var(--serif); color: var(--ink-2); }
+.slide.ende .who { margin-top: 40px; font: 400 20px/1.5 var(--sans); color: var(--ink-2); }
+/* the four pictures come alive with their card (delays follow the card's --d) */
+.mi * { transform-box: fill-box; }
+.mcard .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
+.slide.active .mi-bird { animation: mi-land 2.2s cubic-bezier(.2, .7, .3, 1) var(--t) both; }
+@keyframes mi-land { from { transform: translate(-190px, -30px); opacity: 0; } 15% { opacity: 1; } to { transform: none; } }
+.mi-wing { transform-origin: 90% 90%; }
+.slide.active .mi-wing { animation: mi-flap .22s ease-in-out var(--t) 10 alternate; }
+@keyframes mi-flap { to { transform: rotate(-38deg) scaleY(.5); } }
+.slide.active .mi-bfly { animation: mi-flutter 6s ease-in-out var(--t) infinite alternate; }
+@keyframes mi-flutter { 0% { transform: translate(0, 0); } 30% { transform: translate(18px, -16px); } 65% { transform: translate(-6px, -26px); } 100% { transform: translate(24px, -6px); } }
+.mi-bwing { transform-origin: 50% 50%; }
+.slide.active .mi-bwing { animation: mi-wflap .3s ease-in-out infinite alternate; }
+@keyframes mi-wflap { to { transform: scaleX(.35); } }
+.mi-shroom { transform-origin: 50% 100%; }
+.slide.active .mi-shroom { animation: grow .9s var(--ease) calc(var(--t) + .8s) both; }
+.mi-merc { transform-origin: 50% 100%; fill: #c8602a; }
+.mi-bulb { fill: #c8602a; }
+.slide.active .mi-merc { animation: mi-cool 2.6s ease-in-out calc(var(--t) + .6s) both; }
+.slide.active .mi-bulb { animation: mi-coolc 2.6s ease-in-out calc(var(--t) + .6s) both; }
+@keyframes mi-cool { from { transform: scaleY(1); fill: #c8602a; } to { transform: scaleY(.42); fill: #4f8fb0; } }
+@keyframes mi-coolc { from { fill: #c8602a; } to { fill: #4f8fb0; } }
+.mi-vapor path { opacity: 0; }
+.slide.active .mi-vapor path { animation: mi-rise 2.4s ease-out calc(var(--t) + var(--k, 0s)) infinite; }
+.mi-vapor path:nth-child(2) { --k: .8s; } .mi-vapor path:nth-child(3) { --k: 1.6s; }
+@keyframes mi-rise { from { transform: translateY(14px); opacity: 0; } 30% { opacity: .9; } to { transform: translateY(-10px); opacity: 0; } }
+.mi-shade { transform-origin: 50% 50%; }
+.slide.active .mi-shade { animation: mi-shade 1.6s var(--ease) calc(var(--t) + .3s) both; }
+@keyframes mi-shade { from { transform: scaleX(.2); opacity: 0; } }
+.mi-roots path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.slide.active .mi-roots path { animation: draw 1.8s var(--ease) calc(var(--t) + .4s) both; }
+.mi-water { transform-origin: 50% 50%; opacity: .55; }
+.slide.active .mi-water { animation: mi-shade 2.4s var(--ease) calc(var(--t) + 1.2s) both; }
+.mi-rain path { opacity: 0; }
+.slide.active .mi-rain path { animation: mi-drop 1.5s linear calc(var(--t) + var(--k, 0s)) infinite; }
+.mi-rain path:nth-child(2) { --k: .5s; } .mi-rain path:nth-child(3) { --k: .25s; } .mi-rain path:nth-child(4) { --k: .9s; } .mi-rain path:nth-child(5) { --k: 1.1s; }
+@keyframes mi-drop { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } to { transform: translateY(80px); opacity: 0; } }
+.mi-b { transform-origin: 50% 100%; } .mi-h { transform-origin: 0 50%; }
+.slide.active .mi-b { animation: grow .7s var(--ease) calc(var(--t) + .5s + var(--i) * .25s) both; }
+.slide.active .mi-h { animation: mi-span .6s var(--ease) calc(var(--t) + .5s + var(--i) * .25s) both; }
+@keyframes mi-span { from { transform: scaleX(0); } }
+.mi-roof, .mi-arrow { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.slide.active .mi-arrow { animation: draw .5s var(--ease) var(--t) both; }
+.mi-arrow-h, .mi-c { opacity: 0; }
+.slide.active .mi-arrow-h { animation: fadein .3s ease calc(var(--t) + .45s) both; }
+.slide.active .mi-roof { animation: draw .9s var(--ease) calc(var(--t) + 1.5s) both; }
+.slide.active .mi-c { animation: pop .6s var(--ease) calc(var(--t) + 2.5s) both; }
+.embed .mi *, .all .mi * { animation: none !important; opacity: initial; stroke-dashoffset: 0; }
+.embed .mi-merc, .all .mi-merc { transform: scaleY(.42); fill: #4f8fb0; } .embed .mi-bulb, .all .mi-bulb { fill: #4f8fb0; }
+.embed .mi-vapor path, .all .mi-vapor path, .embed .mi-rain path, .all .mi-rain path { opacity: .8; }
+@media (prefers-reduced-motion: reduce) { .mi * { animation-iteration-count: 1 !important; } }
 .slide.finale .sapling { transform-box: fill-box; transform-origin: 50% 100%; }
 .slide.active.finale .sapling.shown { animation: sprout 1.8s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes sprout { from { transform: scale(.05); } to { transform: scale(1); } }
