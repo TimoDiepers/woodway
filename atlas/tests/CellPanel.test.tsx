@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import { CellPanel } from "@/ui/CellPanel";
-import { coolsFrom, coolsUntil, deltaT } from "@/model/model";
+import { coolsFrom, coolsUntil, dacBuildMt, deltaT } from "@/model/model";
 import { useAtlas } from "@/store";
 
 // jsdom has no layout: give the charts a fixed size so recharts draws its lines.
@@ -54,5 +54,14 @@ describe("CellPanel", () => {
     expect(drawn(container)).toBe(4);
     act(() => useAtlas.getState().setLang("en"));
     expect(drawn(container)).toBe(4);
+  });
+  it("states the DAC build-out as the country's capacity spread over its best cells", async () => {
+    const at = await loadAtlas("data/", diskFetch);
+    const [i, j] = at.meta.build.cells[0];
+    const cell = i * 720 + j;
+    const mt = dacBuildMt(at, cell, 2080);
+    expect(mt).toBeGreaterThan(0);
+    render(<CellPanel atlas={at} cell={cell} year={2080} onClose={() => {}} />);
+    expect(screen.getByText(`${mt.toFixed(1)} Mt CO₂/a capacity here in 2080 (the country's capacity spread over its best cells)`)).toBeInTheDocument();
   });
 });
