@@ -788,17 +788,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.ende .call { margin: 16px 0 0; font: 500 32px/1.25 var(--serif); color: var(--ch); }
 .slide.ende .call2 { margin: 4px 0 0; font: italic 400 25px/1.3 var(--serif); color: var(--ink-2); }
 .slide.ende .who { margin-top: 18px; font: 400 18px/1.45 var(--sans); color: var(--ink-2); }
-/* the young tree grows beside the thanks; then the birds leave its crown, one after another, and fly off to the right,
-   below the cards */
-.slide.ende .mound { opacity: 0; transition: opacity .6s var(--ease); }
-.slide.ende .mound.shown { opacity: 1; }
-.slide.active.finale.ende .sapling.shown { animation-delay: .3s; }
-.slide.finale.ende .birds, .slide.active.finale.ende .birds.shown { opacity: 1; animation: none; }
-.slide.ende .bd { opacity: 0; transform-box: view-box; }
-.slide.active.ende .birds.shown .bd { animation: leave 7s cubic-bezier(.35, 0, .6, 1) calc(2s + var(--k, 0s)) both; }
-.slide.ende .bd:nth-child(2) { --k: .5s; } .slide.ende .bd:nth-child(3) { --k: 1.1s; }
-@keyframes leave { 0% { opacity: 0; transform: translate(0, 16px); } 6% { opacity: 1; } 35% { transform: translate(260px, -70px); } 100% { opacity: 1; transform: translate(1000px, -90px); } }
-.embed .slide.ende .bd, .all .slide.ende .bd { opacity: 1; }
 /* the four pictures come alive with their card (delays follow the card's --d) */
 .mi * { transform-box: fill-box; }
 .mcard .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
