@@ -442,9 +442,9 @@ body:has(#menu.open) #menu-fab { display: none; }
 @keyframes td-in { 0% { transform: none; opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(.4); opacity: 0; } }
 .td-light circle { opacity: 0; }
 .slide.active .td-in { animation: td-ray 2.4s linear var(--k) infinite; }
-@keyframes td-ray { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(116px, 72px); opacity: 0; } }
+@keyframes td-ray { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(102px, 66px); opacity: 0; } }
 .slide.active .td-out { animation: td-back 2.4s linear var(--k) infinite; }
-@keyframes td-back { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(40px, -120px); opacity: 0; } }
+@keyframes td-back { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-40px, -138px); opacity: 0; } }
 .td-vapor path, .td-dust circle { opacity: 0; }
 .slide.active .td-vapor path { animation: td-rise 2.4s ease-out var(--k) infinite; }
 @keyframes td-rise { from { transform: translateY(16px); opacity: 0; } 30% { opacity: .9; } to { transform: translateY(-26px); opacity: 0; } }
