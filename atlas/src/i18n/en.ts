@@ -25,6 +25,7 @@ export const en = {
   "reason.noTrees": "no room for trees",
   "reason.tooCold": "too cold for sorbent DAC",
   "reason.noDac": "no DAC built here",
+  "reason.unmeasured": "reforestable, not measured locally",
   "legend.cools": "cools",
   "legend.warms": "warms",
   "src.forestType": "Forest type: Hasler et al. 2024; reforestable area: Walker et al. 2022.",

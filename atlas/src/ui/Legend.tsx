@@ -1,5 +1,5 @@
 import type { Atlas } from "@/data/types";
-import { scaleOf, type Layer } from "@/model/layers";
+import { reasonColor, scaleOf, type Layer } from "@/model/layers";
 import { useNum, useT, type Key } from "@/i18n/useT";
 import { useAtlas } from "@/store";
 import { SourceLine } from "@/ui/deck/SourceLine";
@@ -10,8 +10,6 @@ export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer:
   const sc = scaleOf(atlas, layer);
   const fmt = (v: number) => num(v, Number.isInteger(v) ? 0 : 1);
   const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
-  const reason = layer.group === "dac" ? (layer.id === "dacBuild" ? "reason.noDac" : "reason.tooCold") : "reason.noTrees";
-  const greyColor = reason === "reason.tooCold" ? atlas.meta.colors.tooCold : atlas.meta.colors.land;
   return (
     <figure className={compact ? "flex flex-col gap-1 text-[11px]" : "flex flex-col gap-1.5 text-xs"} aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
       <figcaption className={compact ? "ch-text font-serif text-sm font-semibold leading-tight" : "ch-text font-serif text-base font-semibold leading-tight"}>{t(layer.label)}</figcaption>
@@ -38,9 +36,13 @@ export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer:
           {compact && <p className="shrink-0 text-inkMuted">{unit}</p>}
         </div>
       ) : null}
-      <p className={compact ? "flex items-center gap-1.5 text-inkMuted" : "flex items-center gap-2 text-inkMuted"}>
-        <span className="h-3 w-3 rounded-sm border border-[var(--paper-line)]" style={{ background: greyColor }} />{t(reason as Key)}
-      </p>
+      <ul className={compact ? "flex flex-wrap gap-x-3 gap-y-0.5 text-inkMuted" : "flex flex-col gap-0.5 text-inkMuted"}>
+        {layer.greys.map((r) => (
+          <li key={r} className={compact ? "flex items-center gap-1.5" : "flex items-center gap-2"}>
+            <span className="h-3 w-3 shrink-0 rounded-sm border border-[var(--paper-line)]" style={{ background: reasonColor(atlas, r) }} />{t(r)}
+          </li>
+        ))}
+      </ul>
       {!compact && <div lang={lang} className="max-w-xs"><SourceLine>{t(layer.source)}</SourceLine></div>}
     </figure>
   );

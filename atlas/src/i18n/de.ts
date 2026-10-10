@@ -27,6 +27,7 @@ export const de: Record<keyof typeof en, string> = {
   "reason.noTrees": "kein Platz für Bäume",
   "reason.tooCold": "zu kalt für Sorbens-DAC",
   "reason.noDac": "hier wird kein DAC gebaut",
+  "reason.unmeasured": "wiederbewaldbar, nicht lokal gemessen",
   "legend.cools": "kühlt",
   "legend.warms": "wärmt",
   "src.forestType": "Waldtyp: Hasler et al. 2024; wiederbewaldbare Fläche: Walker et al. 2022.",

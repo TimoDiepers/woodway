@@ -31,6 +31,17 @@ describe("App", () => {
     expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
   });
+  it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    await userEvent.click(screen.getByRole("radio", { name: "Sunlight at the ground" }));
+    expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
+    expect(screen.getByText("no room for trees")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: "DAC build-out" }));
+    expect(screen.getByText("no DAC built here")).toBeInTheDocument();
+    expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
+  });
 });
 
 describe("layer list keyboard", () => {

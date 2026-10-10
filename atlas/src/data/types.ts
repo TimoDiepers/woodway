@@ -13,7 +13,7 @@ export interface Meta {
   sites: {name: string; lat: number; lon: number; color: string}[];
   scales: Record<string, Scale>;
   categories: {waldtyp: {key: string; label: string; color: string}[]};
-  colors: {land: string; tooCold: string};
+  colors: {land: string; tooCold: string; unmeasured: string};
   reference: {i: number; j: number; dt2050: number; dt2100: number; net2100: number; dac2026: number; dac2045: number}[];
 }
 
