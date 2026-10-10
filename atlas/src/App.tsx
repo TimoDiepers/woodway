@@ -48,6 +48,8 @@ export default function App() {
     loadAtlas().then(setAtlas).catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
   }, []);
 
+  // a layer that does not change over time has no year to play
+  useEffect(() => { if (atlas && !layerById(s.layer).timed && s.playing) s.setPlaying(false); }, [atlas, s.layer, s.playing]);
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
   if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
   const layer = layerById(s.layer);
@@ -100,7 +102,7 @@ export default function App() {
       <div className="flex flex-col gap-2" data-ch={ch}>
         <LayerPicker value={s.layer} onChange={pickLayer} />
         <Legend atlas={atlas} layer={layer} compact caption={false} />
-        <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
+        {layer.timed && <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />}
       </div>
     );
     const section = (title: string, body: ReactNode) => (
@@ -164,11 +166,13 @@ export default function App() {
       {s.cell === null && (
         <div className="panel absolute bottom-4 right-4 w-[26rem] p-3"><GlobalStrip atlas={atlas} year={s.year} /></div>
       )}
-      <div className="absolute bottom-4 left-4 w-[22rem]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="panel px-3 py-2" data-ch={ch}>
-          <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
+      {layer.timed && (
+        <div className="absolute bottom-4 left-4 w-[22rem]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <div className="panel px-3 py-2" data-ch={ch}>
+            <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

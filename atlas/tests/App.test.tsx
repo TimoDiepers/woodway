@@ -36,12 +36,17 @@ describe("App", () => {
     expect(screen.getAllByText("Temperaturwirkung eines Baums").length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "English" }));
   });
-  it("static layers keep the slider for the global strip", async () => {
+  it("layers that do not change over time have no year slider; timed ones do", async () => {
     render(<App />);
     await screen.findByTestId("map");
+    expect(screen.getByRole("slider")).toBeInTheDocument();             // ΔT per tree: timed
+    act(() => useAtlas.getState().setPlaying(true));
     await pickLayer("Solar radiation at the ground");
-    expect(screen.getByRole("slider")).toBeInTheDocument();
+    expect(screen.queryByRole("slider")).toBeNull();
+    expect(useAtlas.getState().playing).toBe(false);                     // nothing left to play
     expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
+    await pickLayer("DAC net share");
+    expect(screen.getByRole("slider")).toBeInTheDocument();
     await pickLayer("Temperature effect of one tree");
   });
   it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {

@@ -70,4 +70,13 @@ describe("App on a phone", () => {
     expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365, zoom: 4 });
     expect(screen.queryByRole("searchbox")).toBeNull();   // closed again
   });
+
+  it("on a phone a static layer's peek has no slider either", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    act(() => useAtlas.getState().setLayer("sun"));
+    expect(screen.queryByRole("slider")).toBeNull();
+    act(() => useAtlas.getState().setLayer("deltaT"));
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+  });
 });
