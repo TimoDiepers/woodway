@@ -10,7 +10,7 @@ import { Legend } from "@/ui/Legend";
 import { TimeSlider } from "@/ui/TimeSlider";
 import { SourceLine } from "@/ui/deck/SourceLine";
 import { Takeaway } from "@/ui/deck/Takeaway";
-import type { AtlasSlideDef } from "./slides";
+import { talkLayer, type AtlasSlideDef } from "./slides";
 
 const ANIM_MS = 1200;
 const VIEW = { longitude: 10, latitude: 20, zoom: 1.15 };
@@ -49,7 +49,7 @@ function SlideBody({ def, atlas, step }: { def: AtlasSlideDef; atlas: Atlas; ste
   const target = def.years[Math.max(0, Math.min(def.years.length - 1, step))];
   const animated = useAnimatedYear(target);
   const free = !!def.free;
-  const layer = layerById(free ? store.layer : def.layer);
+  const layer = free ? layerById(store.layer) : talkLayer(def, atlas);
   const year = free ? store.year : animated;
   const sites = useMemo(() => (def.sitesFrom !== undefined && step >= def.sitesFrom ? atlas.meta.sites : []), [def.sitesFrom, step, atlas]);
   const stop = (e: { stopPropagation(): void }) => e.stopPropagation();

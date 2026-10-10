@@ -1,6 +1,6 @@
 import type { Atlas } from "@/data/types";
 import { ROW_AREA } from "@/model/layers";
-import { dacNet, deltaT, typeKey, yearIndex } from "@/model/model";
+import { dacBuildMt, dacNet, deltaT } from "@/model/model";
 
 const N = (at: Atlas) => at.f.type.length;
 
@@ -14,22 +14,6 @@ export function coolingShare(at: Atlas, year: number): number {
     if (deltaT(at, c, year) < 0) cool += a;
   }
   return all ? cool / all : NaN;
-}
-
-/** The talk's area-level net share: Σ(area·ΔT) / Σ(area·ΔT_CO₂) over forest cells (only those that cool in that year if asked). */
-export function netShareArea(at: Atlas, year: number, onlyCooling: boolean): number {
-  let net = 0, co2 = 0;
-  const k = yearIndex(at, year);
-  for (let c = 0; c < N(at); c++) {
-    const key = typeKey(at, c);
-    if (!key) continue;
-    const d = deltaT(at, c, year);
-    if (!Number.isFinite(d) || (onlyCooling && !(d < 0))) continue;
-    const a = at.f.area[c];
-    net += a * d;
-    co2 += a * at.f.a[c] * at.meta.curves[key].dtCo2[k];
-  }
-  return co2 ? net / co2 : NaN;
 }
 
 /** Median of the DAC net share over the land area where DAC is possible: each cell counts with its area. */
@@ -54,4 +38,12 @@ export function dacCapacityGt(at: Atlas, year: number): number {
   const g = at.meta.global;
   const k = g.years.indexOf(year);
   return g.dacCapacityGt[k >= 0 ? k : Math.max(0, Math.min(g.years.length - 1, Math.round(year) - g.years[0]))];
+}
+
+/** 95th percentile of the capacity (Mt/a) of the cells that are built in that year: the top of the talk's build-out scale. */
+export function buildP95(at: Atlas, year: number): number {
+  const v: number[] = [];
+  for (const c of at.buildByCell.keys()) { const m = dacBuildMt(at, c, year); if (m > 0) v.push(m); }
+  v.sort((a, b) => a - b);
+  return v.length ? v[Math.min(v.length - 1, Math.floor(0.95 * v.length))] : NaN;
 }

@@ -7,6 +7,8 @@ export type LayerId = "forestType" | "area" | "sun" | "darker" | "light" | "delt
 export interface Layer {
   id: LayerId; group: "trees" | "dac"; label: Key; source: Key; timed: boolean;
   kind: "num" | "cat"; scale?: string; unit?: Key | string;
+  /** A scale computed from the data, instead of the named one (the talk fits the build-out scale to the built cells). */
+  scaleFn?: (at: Atlas) => Scale;
   value(at: Atlas, cell: number, year: number): number;
   reason(at: Atlas, cell: number): Key | null;
   /** The reasons this layer can give for a grey cell, in legend order. */
@@ -60,4 +62,4 @@ export const LAYERS: Layer[] = [
 ];
 
 export const layerById = (id: LayerId): Layer => LAYERS.find((l) => l.id === id)!;
-export const scaleOf = (at: Atlas, l: Layer): Scale | undefined => (l.scale === "__build" ? BUILD_SCALE : l.scale ? at.meta.scales[l.scale] : undefined);
+export const scaleOf = (at: Atlas, l: Layer): Scale | undefined => (l.scaleFn ? l.scaleFn(at) : l.scale === "__build" ? BUILD_SCALE : l.scale ? at.meta.scales[l.scale] : undefined);
