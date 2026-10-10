@@ -20,7 +20,7 @@ window.DACFILM = @@DACFILM@@;
     p.cell = D.cells.map((_, i) => p.cc[D.owner[i]].map(v => v / D.n[D.owner[i]]));
     p.cmax = Math.max(...p.cell.map(c => Math.max(...c))); p.sp = sprite(rgb); p.col = col; p.light = light; return p; };
   const P = { a: mk('opt', '255,190,90', '#f0b04a', '#f0b04a') };
-  const PH = [{ p: P.a, ym: 7.6, tmin: 0, chip: 'HOCHLAUF +20 %/A', cls: '' }, { p: P.a, ym: 7.6, tmin: 0, chip: 'HOCHLAUF +20 %/A', cls: '' }];
+  const PH = [{ p: P.a, ym: 7.6, tmin: 0, chip: 'Hochlauf +20 %/a', cls: '' }, { p: P.a, ym: 7.6, tmin: 0, chip: 'Hochlauf +20 %/a', cls: '' }];
   const lerp = (arr, t) => { const i = Math.min(arr.length - 2, Math.floor(t)), f = t - i; return arr[i] + f * (arr[i + 1] - arr[i]); };
   const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/\./g, '\u202f');
 

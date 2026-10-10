@@ -414,7 +414,7 @@ const EC_ZEIT = {
     }
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
-      title: { text: 'Kühlung Jahr für Jahr, gepflanzt im Bonn-Tempo (17,5 Mha/a)', left: 74, top: 0,
+      title: { text: 'Kühlung Jahr für Jahr, gepflanzt im Tempo der Bonn Challenge (17,5 Mha/a)', left: 74, top: 0,
                textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
       grid: { left: 74, right: 330, top: 50, bottom: 46 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
@@ -435,14 +435,14 @@ const EC_TEMPO = {
       lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: 1600 }, extra || {});
     const kap = c => `${ecNum(c.kap, 1)} Gt/a`;
     const series = [
-      L('base', D.baeume_rest, '#e0645a', 'nur Bäume', { lineStyle: { color: '#e0645a', width: 2.4, type: [8, 6] } }),
+      L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
       L('g20', T.g20.rest, '#f0b04a', `+20 %/a: ${kap(T.g20)}`)];
     if (k >= 1) {
-      series.push(L('g30', T.g30.rest, '#ffd27a', `+30 %/a: ${kap(T.g30)}`, { lineStyle: { color: '#ffd27a', width: 2.6 } }));
-      series.push(L('g10', T.g10.rest, '#c8602a', '+10 %/a: reicht nicht', { lineStyle: { color: '#c8602a', width: 2.6 } }));
+      series.push(L('g30', T.g30.rest, '#fbe3a6', `+30 %/a: ${kap(T.g30)}`, { lineStyle: { color: '#fbe3a6', width: 2.2 } }));
+      series.push(L('g10', T.g10.rest, '#b88a52', '+10 %/a: reicht nicht', { lineStyle: { color: '#b88a52', width: 2.6, type: [2, 5] } }));
     }
     if (k >= 2) series.push(L('frei', T.frei.rest, '#3fd0b0', `ohne Grenze: ${kap(T.frei)} ab 2026`, { lineStyle: { color: '#3fd0b0', width: 3.4 } }));
-    if (k >= 3) series.push(L('voll', T.vollgas.rest, '#ff6a3d', `Vollgas +20 %/a: ${kap(T.vollgas)}`, { lineStyle: { color: '#ff6a3d', width: 2.8, type: [8, 5] } }));
+    if (k >= 3) series.push(L('voll', T.vollgas.rest, '#ec7fb4', `Vollgas +20 %/a: ${kap(T.vollgas)}`, { lineStyle: { color: '#ec7fb4', width: 2.8, type: [8, 5] } }));
     return {
       animationDurationUpdate: 900,
       title: { text: 'Erwärmung über 1,5 °C nach Bäumen und DAC [mK]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },

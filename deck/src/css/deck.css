@@ -823,3 +823,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .atlas-pointer .small { margin-top: 18px; color: var(--muted); }
 .atlas-pointer .atlas-qr { margin-top: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
 .atlas-pointer .atlas-qr img { width: 220px; height: 220px; }
+/* a one-line key under a formula: what each symbol stands for */
+.eqdef { margin: 6px 0 0; font: 400 18px/1.4 var(--sans); color: var(--muted); max-width: 760px; }
+.eqdef .katex { font-size: 1em; color: var(--ink); }
