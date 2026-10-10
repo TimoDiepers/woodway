@@ -4,8 +4,6 @@
 
 **Slides:** https://woodway.tidi.dev/slides/ (woodway is also live on the talk's last slide)
 
-Until the domain is set up, the same site is at https://timodiepers.github.io/dissvortrag/ and https://timodiepers.github.io/dissvortrag/slides/.
-
 Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 
 The talk widens the system boundary step by step. It starts with one tree, which takes up carbon and absorbs extra sunlight because its canopy is darker than the land it replaces. Next comes the carbon cycle, where ocean and land hand back part of the removed CO₂. Then the Earth's energy balance turns forcing into temperature. Finally the view grows to every reforestable 0.5° cell, and then to DAC as the second removal route. Everything is computed year by year, so the result is a temperature path to 2100 rather than one number.
