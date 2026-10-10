@@ -85,6 +85,8 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   font: 500 14px/1 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums;
 }
 .backup .num::before { content: "Backup · "; letter-spacing: .04em; }
+/* the source line starts after the number, which is longer on backup slides */
+.backup .src { left: 196px; }
 
 .body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 p, li { font-size: 27px; line-height: 1.42; }
@@ -313,7 +315,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
    =========================================================== */
 .chart { flex: 1; min-height: 0; position: relative; }
 /* timeline under a map with one frame per year (MplChart.player) */
-.player { display: flex; align-items: center; gap: 16px; width: 640px; margin: 2px auto 0; font-family: var(--sans); }
+.player { display: flex; align-items: center; gap: 16px; width: 640px; margin: 6px auto 0; font-family: var(--sans); }
 .player button { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--paper-line); background: var(--paper-deep);
                  display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ch); }
 .player button:hover { background: color-mix(in srgb, var(--paper-deep) 80%, var(--ch)); }
@@ -442,7 +444,9 @@ body:has(#menu.open) #menu-fab { display: none; }
 
 /* previews in the presenter view and the "all" mode show the end state */
 .embed .rise, .embed .takeaway, .embed .pop, .embed .grow, .embed .draw, .embed .wipe, .embed .dimmable, .embed .stand .t,
-.all .rise, .all .takeaway, .all .pop, .all .grow, .all .draw, .all .wipe, .all .stand .t {
+.all .rise, .all .takeaway, .all .pop, .all .grow, .all .draw, .all .wipe, .all .stand .t,
+/* as specific as the rule that holds the takeaway back until its slide is active, or that one wins */
+.embed .slide:not(.chapter):not(.title) .takeaway, .all .slide:not(.chapter):not(.title) .takeaway {
   animation: none !important; opacity: 1; transform: none; top: 0; stroke-dashoffset: 0; clip-path: none;
 }
 .embed .slide[data-tree="dim"] .dimmable { opacity: .22; }
@@ -815,3 +819,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
   font: 500 17px/1.35 var(--sans);
 }
 .atlas-qr img { width: 150px; height: 150px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
+.atlas-pointer { display: grid; grid-template-columns: 1fr auto; gap: 72px; align-items: center; }
+.atlas-pointer .small { margin-top: 18px; color: var(--muted); }
+.atlas-pointer .atlas-qr { margin-top: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
+.atlas-pointer .atlas-qr img { width: 220px; height: 220px; }

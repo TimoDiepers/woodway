@@ -55,10 +55,11 @@
   <header class="sh"><h2>Einordnung: andere Studien</h2></header>
   <div class="body">
     <div class="chart" data-chart="v1b" data-label="Anteil des Kohlenstoffnutzens, der nach Albedo bleibt: Literatur und dieses Modell"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0; font-size:21px">Alle Studien sehen dasselbe: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende, aus drei Gründen: Die wiederbewaldbare Fläche liegt oft im Norden und im Trockenen; unser Kohlenstoff ist aus Messungen hochgerechnet, etwa halb so viel wie im Erdsystemmodell; und wir bewerten 2100 bei steigendem CO₂. Mit Haslers statischer Formel kämen wir auf 20 %.</p></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0; font-size:21px">Alle Studien sehen es: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende; mit Haslers statischer Formel kämen wir auf 20 %.</p></div>
   </div>
   <p class="src">Literaturwerte: Riley 2025 (Auswertung bestehender Projekte); Weber 2024, Fahrenbach 2026 (Erdsystemmodelle); Hasler 2024, Rohatyn 2022 (statische Bilanzen aus Satelliten- und Kartendaten); Liang 2025 (dynamisches Vegetationsmodell). Dieses Modell: eigene Rechnung.</p>
   <aside class="notes">
+    <p class="q">Ausführlich: Alle Studien sehen dasselbe: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende, aus drei Gründen: Die wiederbewaldbare Fläche liegt oft im Norden und im Trockenen; unser Kohlenstoff ist aus Messungen hochgerechnet, etwa halb so viel wie im Erdsystemmodell; und wir bewerten 2100 bei steigendem CO₂. Mit Haslers statischer Formel kämen wir auf 20 %.</p>
     <p>Einheit: welcher Anteil des reinen Kohlenstoffnutzens nach der Albedo übrig bleibt. Gemeinsam haben alle: den Rückfluss von CO₂ aus Ozean und Land über eine Impulsantwort (Hasler: Joos-Mittel, Restanteil über 100 Jahre). Was dieses Modell zusätzlich abbildet: (1) den Zeitverlauf — Wachstum und Kronenschluss Jahr für Jahr, bewertet als Erwärmung in einem genannten Jahr; Hasler vergleicht maximalen Kohlenstoff mit maximaler Albedo und nennt den Zeitverlauf selbst als offene Lücke („ignores the time frame over which both unfold … additional work is urgently needed“); (2) einen Hintergrund, der sich ändert: SSP2-4,5 statt fester 400 ppm, mit einem Kohlenstoffkreislauf, dessen Senken nachlassen (FaIR); (3) Störungen, die mit der Erwärmung zunehmen (Hasler: keine). Liang et al. rechnen Klima und Feuer ebenfalls dynamisch und landen mit 30 % am nächsten. Fahrenbach et al. (CESM2, voll gekoppelt) enthalten zusätzlich die Kühlung durch Verdunstung in den Tropen, die unser Modell nicht hat — dort sind wir eher zu streng. Riley et al. werten bestehende Projekte aus, die schon dort liegen, wo Albedo wenig kostet. Woher die Abweichungen kommen: Hasler — vor allem die Fläche (auf Walkers Karte rechnet er selbst mit mehr Offset), dann der Horizont 2100 statt Endzustand. Fahrenbach — vor allem die Kohlenstoffmenge: CESM2 lässt etwa doppelt so viel wachsen (≈ 100 statt 51 t C/ha); mit dieser Menge kämen auch wir auf rund 65 %. Gegenprobe: Die ganze Entnahme als Zeitreihe in einen vollen FaIR-Lauf gegeben, liefert dasselbe wie unsere Rechnung (18 % gegen 17 % bis 2100). Eine Annahme mit Gewicht: Störungen lichten den Wald, der dann weniger Licht schluckt — das bringt bis 2100 rund 20 Prozentpunkte zurück. Warum wir strenger sind: 2100 ist der Baum längst gesättigt, der größte Teil seiner Entnahme liegt Jahrzehnte zurück, die Albedo wirkt dagegen voll; dazu die Fläche (Walker et al. 2022), boreal- und trockengebietslastig — für genau diese Karte findet Hasler auf 65 % der Fläche über 50 % Offset, wir mit seiner Formel 73 %. Grenze dieses Modells: Die Schneedecke ist statisch, boreal fällt die Albedo-Strafe späterer Jahrzehnte daher eher zu hoch aus. Methode: docs/methods/abgleich-hasler-waldtypen.md.</p>
   </aside>
 </section>
@@ -70,11 +71,12 @@
     <div class="chart" data-chart="b10" data-label="Licht wärmt (oben), entnommenes CO₂ kühlt (unten), beide in Watt je Baum"></div>
     <div class="foot">
       <div class="eq tex rise" style="--d:1800">$$\dot Q_{\mathrm{CO_2}} = \varepsilon_{\mathrm{CO_2}}\,A_{\mathrm{Erde}}\,m_{\mathrm{CO_2}}$$</div>
-      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">Kilogramm CO₂ und Watt Licht lassen sich nur in einer gemeinsamen Währung vergleichen: Energie. Licht wärmt (oben), das bisher entnommene CO₂ kühlt (unten) — rund 0,9 W je kg. So gerechnet überwiegt das CO₂ an allen drei Orten vom ersten Jahr an; in Joensuu (FI) holt das Licht aber viel davon wieder auf, bei Marabá (BR) nur wenig. Offen bleiben zwei Fragen, die nicht der Baum beantwortet, sondern das Klimasystem: Wie lange fehlt das CO₂ der Luft? Und wie stark wirkt jedes Kilogramm?</p>
+      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">In einer Währung, Energie, überwiegt das CO₂ an allen drei Orten vom ersten Jahr an: rund 0,9 W je kg. In Joensuu (FI) holt das Licht viel davon wieder auf, bei Marabá (BR) wenig.</p>
     </div>
   </div>
   <p class="src">Eigene Rechnung. Naiv: alles entnommene CO₂ fehlt der Luft für immer; Wirkung je kg: Lehrbuchwert ε_CO₂ = 1,76·10⁻¹⁵ W m⁻² kg⁻¹ (IPCC AR6, aus Strahlungstransfer-Modellen) über A_Erde = 5,1·10¹⁴ m².</p>
   <aside class="notes">
+    <p class="q">Ausführlich: Kilogramm CO₂ und Watt Licht lassen sich nur in einer gemeinsamen Währung vergleichen: Energie. Licht wärmt (oben), das bisher entnommene CO₂ kühlt (unten) — rund 0,9 W je kg. So gerechnet überwiegt das CO₂ an allen drei Orten vom ersten Jahr an; in Joensuu (FI) holt das Licht aber viel davon wieder auf, bei Marabá (BR) nur wenig. Offen bleiben zwei Fragen, die nicht der Baum beantwortet, sondern das Klimasystem: Wie lange fehlt das CO₂ der Luft? Und wie stark wirkt jedes Kilogramm?</p>
     <p>Watt sind Watt. Die Albedo liefert sie direkt. Für das CO₂ fragen wir: Wie viel Wärmestrahlung hält ein Kilogramm in der Luft zurück? Lehrbuchwert mal Erdoberfläche: knapp ein Watt je Kilogramm. Damit sind beide Kurven in derselben Einheit. Diese Rechnung hat zwei stille Annahmen — dass das CO₂ in der Luft bleibt und dass jedes Kilogramm gleich wirkt. Beides hängt nicht vom Baum ab, sondern vom Rest des Klimasystems. Das ist das nächste Kapitel. (Die Albedo kommt dort noch mit dem Faktor τ_atm ≈ 0,8 für den Weg nach oben.)</p>
   </aside>
 </section>
@@ -136,11 +138,12 @@
     <div class="chart" data-chart="k13" data-label="Wirkung je Baum im Jahr 2100 nach Pflanzjahr, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div>
     <div class="foot">
       <div class="eq tex rise" style="--d:1800">$$p(t) = p_0\,e^{\gamma\,T(t)}$$</div>
-      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">Und die Erwärmung wirkt zurück: Je wärmer es wird, desto häufiger Feuer, Sturm und Käfer. Störungen kosten Kohlenstoff, lichten aber auch den Wald — dann schluckt er weniger Licht. Unterm Strich kühlt der Wald dadurch 2100 sogar etwas mehr. Ein später gepflanzter Baum kühlt bis 2100 deutlich weniger, ihm bleibt weniger Zeit: 2085 gepflanzt in Aachen (DE) nur noch 32 %.</p>
+      <p class="takeaway" data-step="1" style="--d:0; font-size:21px">Mehr Störung kostet Kohlenstoff, lichtet aber den Wald: 2100 kühlt er dadurch sogar etwas mehr. Später gepflanzt bleibt weniger Zeit: 2085 in Aachen (DE) nur noch 32 %.</p>
     </div>
   </div>
   <p class="src">Eigene Rechnung, volles Modell mit FaIR (Leach et al. 2021), SSP2-4,5; Anstieg der Störung mit der Erwärmung aus Modellprojektionen für Europa (Grünig et al. 2026).</p>
   <aside class="notes">
+    <p class="q">Ausführlich: Und die Erwärmung wirkt zurück: Je wärmer es wird, desto häufiger Feuer, Sturm und Käfer. Störungen kosten Kohlenstoff, lichten aber auch den Wald — dann schluckt er weniger Licht. Unterm Strich kühlt der Wald dadurch 2100 sogar etwas mehr. Ein später gepflanzter Baum kühlt bis 2100 deutlich weniger, ihm bleibt weniger Zeit: 2085 gepflanzt in Aachen (DE) nur noch 32 %.</p>
     <p>Balken: Wirkung je Baum im Jahr 2100 nach Pflanzjahr. Enthalten sind höhere Störungsrate, vollere Atmosphäre und weniger verbleibende Zeit; getrennt zeigt sie die Leiter im Backup („Was jede Erweiterung der Systemgrenze kostet“).</p>
   </aside>
 </section>
@@ -149,10 +152,11 @@
   <header class="sh"><h2>Was jede Erweiterung der Systemgrenze kostet</h2></header>
   <div class="body">
     <div class="chart" data-stops="auto" data-chart="k14" data-label="Temperaturwirkung je Baum 2100 nach jeder Erweiterung der Systemgrenze"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:1800; font-size:21px">Jede Erweiterung kostet Kühlung: in Aachen (DE) von 158 auf 35 (·10⁻¹⁵ K je Baum); den größten Schritt macht die Rückgabe durch Ozean und Land. In Joensuu (FI) bleiben von 108 nur 12, bei Marabá (BR) von 226 noch 65. Nur die Störung gibt etwas zurück: Sie lichtet den Wald, der dann weniger Licht schluckt. Eine Ökobilanz mit GWP100 sieht nur einen Teil davon: Sie mittelt die Rückgabe über 100 Jahre bei festem CO₂-Hintergrund — vollere Atmosphäre und Rückkopplung auf den Baum fehlen ihr.</p></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:1800; font-size:21px">Jede Erweiterung kostet Kühlung, am meisten die Rückgabe durch Ozean und Land: Aachen (DE) von 158 auf 35, Joensuu (FI) von 108 auf 12, Marabá (BR) von 226 auf 65 (·10⁻¹⁵ K je Baum).</p></div>
   </div>
   <p class="src">Eigene Rechnung, volles Modell mit dem Klima-Emulator FaIR (Leach et al. 2021; Smith et al. 2024), SSP2-4,5; jede Stufe schaltet einen Prozess dazu.</p>
   <aside class="notes">
+    <p class="q">Ausführlich: Jede Erweiterung kostet Kühlung: in Aachen (DE) von 158 auf 35 (·10⁻¹⁵ K je Baum); den größten Schritt macht die Rückgabe durch Ozean und Land. In Joensuu (FI) bleiben von 108 nur 12, bei Marabá (BR) von 226 noch 65. Nur die Störung gibt etwas zurück: Sie lichtet den Wald, der dann weniger Licht schluckt. Eine Ökobilanz mit GWP100 sieht nur einen Teil davon: Sie mittelt die Rückgabe über 100 Jahre bei festem CO₂-Hintergrund — vollere Atmosphäre und Rückkopplung auf den Baum fehlen ihr.</p>
     <p>Leiter: Temperaturwirkung je Baum in 2100 nach jeder Erweiterung der Systemgrenze, kumulativ (nbs.storyline_figures.ladder_delta_t). Aachen: -158 → -136 → -63 → -34 → -35; Joensuu: -108 → -79 → -29 → -9 → -12; Marabá: -226 → -211 → -106 → -65 → -65 (·10⁻¹⁵ K). Bewusst nicht das Jahr t*: In Joensuu liegen Kohlenstoff und Albedo nur rund 20 % auseinander, eine moderate Änderung kippt dort das Jahr von 2048 auf „nie“, obwohl sich die Temperaturwirkung nur von −13 auf +4 verschiebt. „Vollere Atmosphäre“ umfasst den Schritt vom Lehrbuchwert 1,76 (entspricht 389 ppm) auf den logarithmischen Antrieb mit SSP2-4,5-Hintergrund und den Wechsel von der Joos- auf die FaIR-Rückgabe.</p>
   </aside>
 </section>
@@ -161,10 +165,11 @@
   <header class="sh"><h2>Einfluss des Pflanzjahres</h2></header>
   <div class="body">
     <div class="chart" data-chart="w3" data-label="Kühlung 2050 und 2100 nach Pflanzjahr, gemessen an der Pflanzung 2026, kühlende Flächen"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800; font-size:22px">Für die Kühlung im Jahr 2100 ist es fast gleich, ob 2026 oder 2046 gepflanzt wird. Für das Maximum der Erwärmung um 2050 nicht: Eine Verzögerung um fünf Jahre verringert die Kühlung dort um knapp ein Viertel, um zehn Jahre um die Hälfte, um zwanzig Jahre fast vollständig. Für die Wirkung um 2050 ist der Pflanzzeitpunkt entscheidend.</p></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800; font-size:22px">Für 2100 ist das Pflanzjahr fast egal, für die Spitze um 2050 entscheidend: Fünf Jahre später kostet dort knapp ein Viertel der Kühlung, zwanzig Jahre fast alles.</p></div>
   </div>
   <p class="src">Eigene Rechnung, volles Modell: typischer Wald je Zelle auf den 0,39 Gha, in jedem Pflanzjahr dieselbe Fläche; Störung steigt mit der Erwärmung (Grünig et al. 2026); FaIR (Leach et al. 2021), SSP2-4,5; je Baum gerechnet und über die Bäume summiert. Höhepunkt der Erwärmung im niedrigsten Szenario: 2049 (Folie 2).</p>
   <aside class="notes">
+    <p class="q">Ausführlich: Für die Kühlung im Jahr 2100 ist es fast gleich, ob 2026 oder 2046 gepflanzt wird. Für das Maximum der Erwärmung um 2050 nicht: Eine Verzögerung um fünf Jahre verringert die Kühlung dort um knapp ein Viertel, um zehn Jahre um die Hälfte, um zwanzig Jahre fast vollständig. Für die Wirkung um 2050 ist der Pflanzzeitpunkt entscheidend.</p>
     <p>Im Kapitel Klima haben wir gesehen: Ein später gepflanzter Baum kühlt bis 2100 weniger, weil ihm Zeit fehlt und die Welt, in die er wächst, wärmer ist. Hier dasselbe für alle Bäume auf der kühlenden Fläche. Hellgrün die Kühlung im Jahr 2100: Ob 2026 oder 2046 gepflanzt — fast gleich; der jüngere Wald bindet bis dahin noch kräftig, und seine Albedo ist noch nicht voll da. Dunkelgrün die Kühlung um 2050, wenn die Erwärmung im niedrigsten Szenario ihren Höhepunkt hat. Da zählt nur, was bis dahin gewachsen ist: fünf Jahre Warten kosten knapp ein Viertel, zehn Jahre die Hälfte. Wer die Spitze der Erwärmung drücken will, muss jetzt pflanzen.</p>
     <p class="q">Falls Fragen kommen — Kühlung 2050 relativ zur Pflanzung 2026: 2031 77 %, 2036 51 %, 2041 25 %, 2046 6 %. Kühlung 2100: 101 % bis 101 % (der jüngere Wald hat 2100 weniger Albedo-Strafe und wächst noch). Je Baum gerechnet und aufsummiert (linear); absolut kühlt die Pflanzung 2026 so 2050 um 14,4 mK, fast wie im FaIR-Lauf mit der ganzen Fläche (13,8 mK). Die Störung steigt mit der Erwärmung, ein später gepflanzter Wald lebt in einer wärmeren Welt. Spätere Pflanzjahre als 2046 im Kapitel Klima je Baum.</p>
   </aside>
@@ -288,11 +293,17 @@
 </section>
 
 <!-- Atlas -->
-<section class="slide backup" data-title="Atlas: alle Ergebnisse interaktiv">
+<section class="slide backup" data-ch="vergleich" data-title="Atlas: alle Ergebnisse interaktiv">
   <header class="sh"><h2>Atlas: alle Ergebnisse interaktiv</h2></header>
-  <div class="body" style="justify-content:center; gap:28px">
-    <p class="lead rise">Jede Zelle, jedes Jahr: Waldtyp, Albedo, Temperaturwirkung eines Baums, DAC-Strom, Netto-Anteil und Ausbau, 2026 bis 2100.</p>
-    <p class="rise" style="--d:200; font: 500 34px/1.3 var(--sans)"><a href="atlas/" style="color: var(--ch)">timodiepers.github.io/dissvortrag/atlas</a></p>
+  <div class="body atlas-pointer">
+    <div>
+      <p class="lead rise">Jede 0,5°-Zelle, jedes Jahr von 2026 bis 2100: Waldtyp, Albedo, Temperaturwirkung eines Baums, DAC-Strom, Netto-Anteil und Ausbau.</p>
+      <p class="small rise" style="--d:150">Live eingebettet auf Folie 33.</p>
+    </div>
+    <a class="atlas-qr rise" style="--d:300" href="https://timodiepers.github.io/dissvortrag/atlas/" target="_blank" rel="noopener">
+      <img src="img/atlas_qr.svg" alt="QR-Code zum Atlas">
+      <span>timodiepers.github.io/<br>dissvortrag/atlas</span>
+    </a>
   </div>
   <p class="src">Dieselben Daten wie auf den Folien (atlas/export_atlas.py).</p>
   <aside class="notes"><p>Für Fragen zu einzelnen Orten: der Atlas zeigt jede 0,5°-Zelle mit ihrer ganzen Kette.</p></aside>

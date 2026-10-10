@@ -661,10 +661,13 @@ class MplChart {
     const W0 = this.host.clientWidth, H0 = this.host.clientHeight;
     if (!W0 || !H0) return false;
     const r = this.d.w / this.d.h, W = Math.min(W0, H0 * r), H = W / r;
-    if (this.W && Math.abs(this.W - W) < 1 && Math.abs(this.H - H) < 1) return false;
+    // centred again on every call: the host can change height without the figure changing size
+    // (a map's player inserted below it takes room), and a stale offset pushes the figure over it
+    const place = () => Object.assign(this.inner.style, { left: Math.round((W0 - this.W) / 2) + 'px', top: Math.round((H0 - this.H) / 2) + 'px' });
+    if (this.W && Math.abs(this.W - W) < 1 && Math.abs(this.H - H) < 1) { place(); return false; }
     this.W = Math.round(W); this.H = Math.round(H); this.s = this.W / this.d.w;
-    Object.assign(this.inner.style, { width: this.W + 'px', height: this.H + 'px',
-      left: Math.round((W0 - this.W) / 2) + 'px', top: Math.round((H0 - this.H) / 2) + 'px' });
+    Object.assign(this.inner.style, { width: this.W + 'px', height: this.H + 'px' });
+    place();
     return true;
   }
   visible(i, k) {
