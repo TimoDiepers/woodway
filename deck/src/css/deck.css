@@ -983,3 +983,5 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .pdef { display: grid; grid-template-columns: 96px 1fr; gap: 10px 14px; margin: 18px 0 0; align-items: baseline; }
 .pdef dt { font-size: 24px; text-align: right; }
 .pdef dd { margin: 0; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
+/* a takeaway across the whole slide, its sentence centred on one line */
+.takeaway.wide { margin-top: 10px; text-align: center; white-space: nowrap; font-size: 23px; }
