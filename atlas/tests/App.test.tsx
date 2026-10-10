@@ -33,7 +33,7 @@ describe("App", () => {
   it("static layers keep the slider for the global strip", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await userEvent.click(screen.getByRole("radio", { name: "Sunlight at the ground" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Solar radiation at the ground" }));
     expect(screen.getByRole("slider")).toBeInTheDocument();
     expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
@@ -41,7 +41,7 @@ describe("App", () => {
   it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await userEvent.click(screen.getByRole("radio", { name: "Sunlight at the ground" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Solar radiation at the ground" }));
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "DAC build-out" }));
@@ -86,7 +86,7 @@ describe("layer list keyboard", () => {
     await screen.findByTestId("map");
     const cur = screen.getByRole("radio", { name: "Temperature effect of one tree" });
     expect(cur).toHaveAttribute("tabindex", "0");
-    expect(screen.getByRole("radio", { name: "Sunlight at the ground" })).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByRole("radio", { name: "Solar radiation at the ground" })).toHaveAttribute("tabindex", "-1");
     cur.focus();
     await userEvent.keyboard("{ArrowDown}");
     const next = screen.getByRole("radio", { name: "Net share after albedo" });

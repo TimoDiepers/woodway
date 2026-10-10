@@ -8,8 +8,9 @@ export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer:
   const t = useT(), num = useNum();
   const lang = useAtlas((s) => s.lang);
   const sc = scaleOf(atlas, layer);
-  const fmt = (v: number) => num(v, Number.isInteger(v) ? 0 : 1);
+  const fmt = (v: number) => num(v, Number.isInteger(v) ? 0 : 1).replace(/^-/, "\u2212");
   const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
+  const inlineUnit = !compact && unit.length > 0 && unit.length <= 4;   // a short unit ("%") sits with the ticks
   return (
     <figure className={compact ? "flex flex-col gap-1 text-[11px]" : "flex flex-col gap-1.5 text-xs"} aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
       <figcaption className={compact ? "ch-text font-serif text-sm font-semibold leading-tight" : "ch-text font-serif text-base font-semibold leading-tight"}>{t(layer.label)}</figcaption>
@@ -30,8 +31,9 @@ export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer:
             <span>{fmt(sc.domain[0])}</span>
             {sc.mid !== undefined && <span>{fmt(sc.mid)}</span>}
             <span>{fmt(sc.domain[1])}</span>
+            {inlineUnit && <span className="ml-2">{unit}</span>}
           </div>
-          {!compact && <p className="text-inkMuted">{unit}{layer.id === "deltaT" && ` · ${t("legend.cools")} ← → ${t("legend.warms")}`}</p>}
+          {!compact && !inlineUnit && <p className="text-inkMuted">{unit}{layer.id === "deltaT" && ` · ${t("legend.cools")} ← → ${t("legend.warms")}`}</p>}
           </div>
           {compact && <p className="shrink-0 text-inkMuted">{unit}</p>}
         </div>
