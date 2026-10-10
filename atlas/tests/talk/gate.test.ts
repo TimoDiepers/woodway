@@ -28,4 +28,14 @@ describe("CmdGate", () => {
     expect(g.accept(st(5))).toBe(true);
     expect(g.busy()).toBe(false);
   });
+  it("keeps ignoring a stale reply to the goto after its time ran out", () => {
+    let t = 0;
+    const g = new CmdGate(() => t, 300);
+    g.begin({ send: "goto", n: 5, step: 0 });
+    t = 400;
+    expect(g.busy()).toBe(false);
+    expect(g.accept(st(2))).toBe(false);
+    expect(g.accept(st(5))).toBe(true);
+    expect(g.accept(st(2))).toBe(true);   // answered: nothing is expected any more
+  });
 });

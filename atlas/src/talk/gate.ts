@@ -8,16 +8,16 @@ export class CmdGate {
 
   busy(): boolean {
     if (this.since === null) return false;
-    if (this.now() - this.since > this.ttl) { this.since = null; this.expect = null; return false; } // lost reply
+    if (this.now() - this.since > this.ttl) { this.since = null; return false; } // lost reply: keys flow again, a late goto reply stays stale
     return true;
   }
   begin(cmd: NonNullable<Cmd>) {
     this.since = this.now();
     this.expect = cmd.send === "goto" ? cmd.n : null;
   }
-  /** true when the reply answers the command in flight (or nothing is in flight). */
+  /** true when the reply answers the last goto (or no goto is waiting for its answer). */
   accept(s: DeckState): boolean {
-    if (this.busy() && this.expect !== null && s.i !== this.expect) return false;
+    if (this.expect !== null && s.i !== this.expect) return false;
     this.since = null;
     this.expect = null;
     return true;
