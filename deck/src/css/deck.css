@@ -785,7 +785,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .mmore { padding: 6px 8px; }
 .mcard.pop-in { opacity: 0; }
 .mmore.pop-in { opacity: 0; }
-.slide.active :is(.mcard, .mmore).pop-in { animation: pop 1s var(--ease) calc(var(--d, 0) * 1ms) both; }
+.slide.active :is(.mcard, .mmore).pop-in { animation: pop .85s var(--ease) calc(var(--d, 0) * 1ms) both; }
 .embed :is(.mcard, .mmore).pop-in, .all :is(.mcard, .mmore).pop-in { opacity: 1; }
 /* Woodway once more, beside the sun, level with the thanks */
 .ende-qr-pos { position: absolute; right: 30px; top: 440px; }
