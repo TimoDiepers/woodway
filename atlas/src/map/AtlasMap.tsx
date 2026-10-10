@@ -28,6 +28,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   const buffers = useMemo(() => ({ colors: new Uint32Array(360 * 720), img: new Uint32Array(IMG_W * IMG_H) }), []);
   const [loaded, setLoaded] = useState(false);
   const urlRef = useRef<string | null>(null);
+  const applied = useRef<{ src: ImageSource | null; url: string | null }>({ src: null, url: null });
   const pending = useRef(0);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -52,15 +53,24 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       ctx.putImageData(new ImageData(new Uint8ClampedArray(buffers.img.buffer), IMG_W, IMG_H), 0, 0);
       canvas.toBlob((blob) => {
         if (!blob || ticket !== pending.current) return;
-        const url = URL.createObjectURL(blob);
-        const src = mapRef.current?.getMap().getSource("atlas") as ImageSource | undefined;
-        src?.updateImage({ url, coordinates: IMAGE_COORDS });
-        if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-        urlRef.current = url;
+        const old = urlRef.current;
+        urlRef.current = URL.createObjectURL(blob);
+        apply();
+        if (old) URL.revokeObjectURL(old);
       });
     });
     return () => cancelAnimationFrame(raf);
   }, [atlas, layer, year, loaded, canvas, buffers]);
+
+  // A theme switch replaces the map style; react-map-gl then adds a fresh image source with the empty
+  // placeholder. Each source (and each new painting) gets the latest painted image exactly once.
+  function apply() {
+    const src = mapRef.current?.getMap().getSource("atlas") as ImageSource | undefined;
+    if (!src || !urlRef.current) return;
+    if (applied.current.src === src && applied.current.url === urlRef.current) return;
+    src.updateImage({ url: urlRef.current, coordinates: IMAGE_COORDS });
+    applied.current = { src, url: urlRef.current };
+  }
 
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180
@@ -76,6 +86,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       mapStyle={dark ? paperBasemapDark : paperBasemap}
       projection={projection}
       onLoad={() => setLoaded(true)}
+      onSourceData={(e) => { if (e.sourceId === "atlas") apply(); }}
       onClick={(e) => onCell(pick(e))}
       onMouseMove={onHover ? (e) => onHover(pick(e), e.point.x, e.point.y) : undefined}
       onMouseLeave={onHover ? () => onHover(null, 0, 0) : undefined}
