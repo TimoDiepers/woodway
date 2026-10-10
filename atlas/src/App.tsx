@@ -10,7 +10,6 @@ import AtlasMap from "@/map/AtlasMap";
 import { CompactSheet } from "@/ui/CompactSheet";
 import { HoverReadout } from "@/ui/HoverReadout";
 import { CellPanel } from "@/ui/CellPanel";
-import { GlobalStrip } from "@/ui/GlobalStrip";
 import { TitlePlate } from "@/ui/TitlePlate";
 import { ToolColumn } from "@/ui/ToolColumn";
 import { Dock } from "@/ui/Dock";
@@ -137,12 +136,12 @@ export default function App() {
           // the details carry the dock on top, so the year stays in reach while reading a cell
           <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
             peek={<Dock layer={layer} onLayer={pickLayer} bare row={dockRow} />}>
-            <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} dense />
+            <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} />
           </CompactSheet>
         ) : (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3"
             style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingRight: mode === "side" ? TOOLS_W + 12 : undefined }}>
-            <div ref={dockRef} className={dockRow ? "w-full max-w-2xl" : "w-full max-w-md"}><Dock layer={layer} onLayer={pickLayer} row={dockRow} /></div>
+            <div ref={dockRef} className="flex w-full justify-center"><Dock layer={layer} onLayer={pickLayer} row={dockRow} /></div>
           </div>
         )}
       </div>
@@ -158,15 +157,13 @@ export default function App() {
         {tools}
       </div>
       {open && (
-        <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-96 overflow-auto overscroll-contain p-4">
-          <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} />
+        <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-[25rem] overflow-auto overscroll-contain p-4">
+          <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} />
         </section>
       )}
-      {!open && (
-        <div className="panel absolute bottom-4 right-4 z-10 w-[26rem] p-3"><GlobalStrip atlas={atlas} year={s.year} /></div>
-      )}
-      {/* one line, as wide as the corner allows: clear of the strip or the details on the right */}
-      <div className="pointer-events-none absolute bottom-4 left-4 z-10 w-[min(44rem,calc(100%-30rem))]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      {/* centred, as in woodway: layer and year in one line, as wide as it needs; clear of the details when open */}
+      <div className="pointer-events-none absolute bottom-4 left-4 z-10 flex justify-center transition-[right] duration-300"
+        style={{ right: open ? "calc(25rem + 2rem)" : "1rem", paddingBottom: "env(safe-area-inset-bottom)" }}>
         <Dock layer={layer} onLayer={pickLayer} row />
       </div>
     </div>

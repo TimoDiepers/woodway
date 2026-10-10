@@ -13,8 +13,11 @@ export function Dock({ layer, onLayer, bare = false, row = false }: { layer: Lay
   const { year, setYear, playing, setPlaying } = useAtlas();
   return (
     <div role="group" aria-label={t("dock.label")} data-ch={layer.group === "dac" ? "dac" : "baeume"}
-      className={(bare ? "" : "panel pointer-events-auto rounded-xl ") + (row ? "flex items-center gap-3 p-1.5" : "flex flex-col gap-1 p-1.5")}>
-      <div className={row ? "w-[min(19rem,48%)] shrink-0" : ""}><LayerPicker value={layer.id} onChange={onLayer} /></div>
+      // sized to what it holds: a layer without years is the dropdown alone, not an empty bar
+      className={(bare ? "" : "panel pointer-events-auto rounded-xl ") + (row
+        ? "flex items-center gap-3 p-1.5 " + (bare ? "w-full" : layer.timed ? "w-[min(42rem,100%)]" : "w-[min(20rem,100%)]")
+        : "flex w-full flex-col gap-1 p-1.5 " + (bare ? "" : "max-w-md"))}>
+      <div className={row ? (layer.timed ? "w-[min(19rem,48%)] shrink-0" : "w-full") : ""}><LayerPicker value={layer.id} onChange={onLayer} /></div>
       {layer.timed && (
         <div className={row ? "min-w-0 flex-1 border-l border-[var(--paper-line)] pl-3 pr-1" : "px-1.5"}>
           <TimeSlider year={year} onYear={setYear} playing={playing} onPlaying={setPlaying} />

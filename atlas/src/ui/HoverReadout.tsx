@@ -12,7 +12,7 @@ export function HoverReadout({ atlas, layer, year, cell, x, y }: { atlas: Atlas;
   else if (Number.isFinite(v)) {
     const sc = scaleOf(atlas, layer);
     const unit = layer.unit ? (layer.unit.includes(".") ? t(layer.unit as Key) : layer.unit) : sc?.unit ?? "";
-    text = t("hover.value", { value: num(v, Math.abs(v) < 10 ? 1 : 0), unit });
+    text = t("hover.value", { value: num(v, Math.abs(v) < 10 ? 1 : 0).replace(/^-/, "\u2212"), unit });
   } else text = t((layer.reason(atlas, cell) ?? "reason.noTrees") as Key);
   return (
     <div className="panel pointer-events-none absolute z-20 px-2 py-1 text-xs tabular-nums" style={{ left: x + 14, top: y - 10 }}>

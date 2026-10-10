@@ -44,7 +44,6 @@ describe("App", () => {
     await pickLayer("Solar radiation at the ground");
     expect(screen.queryByRole("slider")).toBeNull();
     expect(useAtlas.getState().playing).toBe(false);                     // nothing left to play
-    expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
     await pickLayer("DAC net share");
     expect(screen.getByRole("slider")).toBeInTheDocument();
     await pickLayer("Temperature effect of one tree");
@@ -74,6 +73,22 @@ describe("desktop layout", () => {
     expect(screen.getByRole("region", { name: "Cell details" })).toBeInTheDocument();
     expect(map.props.cell).toBe(cellAt(6.08, 50.78));
     act(() => useAtlas.getState().setCell(null));
+  });
+  it("no always-on worldwide box: the 1.5 °C result lives in the overview", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(screen.queryByText("Warming above 1.5 °C, worldwide")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
+    expect(await screen.findByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
+  });
+  it("a condition row in the details switches the map's layer", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
+    await userEvent.click(screen.getByRole("button", { name: /^Solar radiation at the ground:/ }));
+    expect(useAtlas.getState().layer).toBe("sun");
+    expect(screen.queryByRole("slider")).toBeNull();          // a static layer: the dock is the dropdown alone
+    act(() => { useAtlas.getState().setLayer("deltaT"); useAtlas.getState().setCell(null); });
   });
 });
 
