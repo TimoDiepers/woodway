@@ -10,15 +10,20 @@ import { Takeaway } from "@/ui/deck/Takeaway";
 
 const TICK = { fontSize: 11, fill: "var(--muted)", fontFamily: "var(--sans)" };
 
-function Chart({ title, years, series, year }: { title: string; years: number[]; series: { key: string; color: string; values: number[] }[]; year: number }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const data = useMemo(() => years.map((y, k) => Object.fromEntries([["year", y], ...series.map((s) => [s.key, s.values[k]])])), [years, series[0].values]);
+/** Lines use fixed data keys (v0, v1); the translated label is only the line's name, so a language switch
+ *  never orphans a line from its data. The data depends on the values alone (memoised per cell upstream). */
+function Chart({ title, years, series, year }: { title: string; years: number[]; series: { label: string; color: string; values: number[] }[]; year: number }) {
+  const v0 = series[0].values, v1 = series[1]?.values;
+  const data = useMemo(() => {
+    const cols = v1 ? [v0, v1] : [v0];
+    return years.map((y, k) => Object.fromEntries([["year", y], ...cols.map((v, i) => [`v${i}`, v[k]])]));
+  }, [years, v0, v1]);
   return (
     <section className="mt-3">
       <h3 className="text-xs font-medium text-inkMuted">{title}</h3>
       {series.length > 1 && (
         <p className="flex gap-3 text-[11px] text-inkMuted">
-          {series.map((s) => <span key={s.key}><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: s.color }} />{s.key}</span>)}
+          {series.map((s, i) => <span key={i}><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: s.color }} />{s.label}</span>)}
         </p>
       )}
       <div className="h-28">
@@ -30,7 +35,7 @@ function Chart({ title, years, series, year }: { title: string; years: number[];
             <ReferenceLine x={year} stroke="var(--ink)" strokeDasharray="3 3" />
             <Tooltip formatter={(v: number) => v.toFixed(1)} labelFormatter={(y) => String(y)}
               contentStyle={{ background: "var(--paper)", border: "1px solid var(--paper-line)", fontSize: 12, fontFamily: "var(--sans)" }} />
-            {series.map((s) => <Line key={s.key} dataKey={s.key} name={s.key} stroke={s.color} dot={false} strokeWidth={2} isAnimationActive={false} />)}
+            {series.map((s, i) => <Line key={i} dataKey={`v${i}`} name={s.label} stroke={s.color} dot={false} strokeWidth={2} isAnimationActive={false} />)}
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -63,11 +68,11 @@ export function CellPanel({ atlas, cell, year, onClose }: { atlas: Atlas; cell: 
             <div style={until ? ({ "--ch": "var(--alb)", "--ch-soft": "#ecc19a" } as React.CSSProperties) : undefined}>
               <Takeaway ch={until ? undefined : "baeume"}>{cool ? t("panel.coolsFrom", { year: cool }) : until ? t("panel.coolsUntil", { year: until }) : t("panel.neverCools")}</Takeaway>
             </div>
-            <Chart title={t("panel.stock")} years={s.years} year={year} series={[{ key: t("panel.stockSeries"), color: "var(--co2)", values: s.m }]} />
+            <Chart title={t("panel.stock")} years={s.years} year={year} series={[{ label: t("panel.stockSeries"), color: "var(--co2)", values: s.m }]} />
             <Chart title={t("panel.forcing")} years={s.years} year={year} series={[
-              { key: t("panel.forcingCo2"), color: "var(--co2)", values: s.phiCo2 },
-              { key: t("panel.forcingAlb"), color: "var(--alb)", values: s.phiAlb }]} />
-            <Chart title={t("panel.temperature")} years={s.years} year={year} series={[{ key: "ΔT", color: "#14532d", values: s.dt }]} />
+              { label: t("panel.forcingCo2"), color: "var(--co2)", values: s.phiCo2 },
+              { label: t("panel.forcingAlb"), color: "var(--alb)", values: s.phiAlb }]} />
+            <Chart title={t("panel.temperature")} years={s.years} year={year} series={[{ label: "ΔT", color: "#14532d", values: s.dt }]} />
           </>
         ) : (
           <p className="mt-2">{t("panel.noForest")}</p>

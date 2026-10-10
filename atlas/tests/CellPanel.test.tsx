@@ -1,9 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import { cloneElement, type ReactElement } from "react";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import { CellPanel } from "@/ui/CellPanel";
 import { coolsFrom, coolsUntil, deltaT } from "@/model/model";
+import { useAtlas } from "@/store";
+
+// jsdom has no layout: give the charts a fixed size so recharts draws its lines.
+vi.mock("recharts", async (orig) => {
+  const m = await orig<typeof import("recharts")>();
+  return { ...m, ResponsiveContainer: ({ children }: { children: ReactElement }) => cloneElement(children, { width: 360, height: 112 }) };
+});
+
+const drawn = (root: HTMLElement) =>
+  [...root.querySelectorAll(".recharts-line-curve")].filter((p) => (p.getAttribute("d") ?? "").length > 10).length;
 
 const DIR = path.resolve(__dirname, "../public/data/");
 const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
@@ -32,5 +43,16 @@ describe("CellPanel", () => {
     while (!(at.f.type[cell] && deltaT(at, cell, 2100) >= 0 && coolsUntil(at, cell) !== null)) cell++;
     render(<CellPanel atlas={at} cell={cell} year={2050} onClose={() => {}} />);
     expect(screen.getByText(`Cools the climate until ${coolsUntil(at, cell)}, then warms: the albedo outweighs the CO₂`)).toBeInTheDocument();
+  });
+  it("keeps every curve after a language switch", async () => {
+    const at = await loadAtlas("data/", diskFetch);
+    const r = at.meta.reference[0];
+    const { container } = render(<CellPanel atlas={at} cell={r.i * 720 + r.j} year={2050} onClose={() => {}} />);
+    expect(drawn(container)).toBe(4);   // carbon; CO₂ and albedo forcing; ΔT
+    act(() => useAtlas.getState().setLang("de"));
+    expect(screen.getByText("Kohlenstoff in einem Baum [kg C]")).toBeInTheDocument();
+    expect(drawn(container)).toBe(4);
+    act(() => useAtlas.getState().setLang("en"));
+    expect(drawn(container)).toBe(4);
   });
 });
