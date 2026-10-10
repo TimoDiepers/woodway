@@ -33,7 +33,11 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: atlas/package-lock.json
-      - run: npm ci && npm run build
+      - run: npm ci
+        working-directory: atlas
+      - run: npx vitest run   # a renamed anchor slide of the deck fails here, before anything is deployed
+        working-directory: atlas
+      - run: npm run build
         working-directory: atlas
       - run: cp -R atlas/dist deck/dist/atlas
       - uses: actions/configure-pages@v5

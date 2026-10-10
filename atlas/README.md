@@ -19,4 +19,4 @@ Data: `public/data/meta.json` (grid, type curves, palettes, global paths) and `f
     uv run python deck/build.py   # the deck must be built first (dev serves it under /deck/)
     cd atlas && npm run dev       # http://localhost:5173/talk.html
 
-The order of deck slides and atlas slides is in `src/talk/sequence.ts`, the atlas slides themselves in `src/talk/slides.ts`. Keys: → / Space / PageDown / Enter next, ← / PageUp / Backspace back, Home first, B end of the main part, N notes, F fullscreen. In production the deck is loaded from `../index.html?host`, in development from `/deck/index.html?host`.
+The order of deck slides and atlas slides is in `src/talk/sequence.ts`, the atlas slides themselves in `src/talk/slides.ts`. Keys: → / Space / PageDown / Enter next, ← / PageUp / Backspace back, Home first, B jump to the backup, N notes, F fullscreen. In production the deck is loaded from `../index.html?host`, in development from `/deck/index.html?host`.

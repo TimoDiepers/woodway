@@ -9,8 +9,10 @@ const serveDeck = {
   name: "serve-deck",
   configureServer(server: import("vite").ViteDevServer) {
     server.middlewares.use("/deck", (req, res, next) => {
-      const p = path.join(deckDist, decodeURIComponent((req.url ?? "/").split("?")[0]).replace(/^\/$/, "/index.html"));
-      if (!p.startsWith(deckDist) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) return next();
+      let rel: string;
+      try { rel = decodeURIComponent((req.url ?? "/").split("?")[0]); } catch { return next(); }   // malformed %-escapes
+      const p = path.join(deckDist, rel.replace(/^\/$/, "/index.html"));
+      if (!(p === deckDist || p.startsWith(deckDist + path.sep)) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) return next();
       res.setHeader("Content-Type", p.endsWith(".html") ? "text/html" : p.endsWith(".js") ? "text/javascript" : p.endsWith(".css") ? "text/css" : "application/octet-stream");
       fs.createReadStream(p).pipe(res);
     });
@@ -21,7 +23,7 @@ const serveDeck = {
 export default defineConfig({
   base: "./",
   plugins: [react(), serveDeck],
-  server: { fs: { allow: [".."] } },
+  server: { fs: { allow: [path.resolve(__dirname, "../deck"), __dirname] } },
   build: { rollupOptions: { input: { main: path.resolve(__dirname, "index.html"), talk: path.resolve(__dirname, "talk.html") } } },
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   test: { globals: true, environment: "jsdom", setupFiles: ["./tests/setup.ts"], css: true },
