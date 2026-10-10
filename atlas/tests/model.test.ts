@@ -66,4 +66,11 @@ describe("model", () => {
     const total = at.meta.build.years.map((y) => dacBuildMt(at, i * 720 + j, y));
     expect(Math.max(...total)).toBeGreaterThan(0);
   });
+  it("an owner's cells add up to its capacity", () => {
+    const b = at.meta.build, owner = b.owner[0], t = b.years.indexOf(2080);
+    let sum = 0;
+    b.cells.forEach(([i, j], k) => { if (b.owner[k] === owner) sum += dacBuildMt(at, i * 720 + j, 2080); });
+    expect(sum).toBeCloseTo(1000 * b.capacityGt[owner][t], 6);
+    expect(sum).toBeGreaterThan(0);
+  });
 });

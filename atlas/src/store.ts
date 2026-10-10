@@ -39,7 +39,7 @@ export const useAtlas = create<AtlasState>((set) => ({
   layer: "deltaT",
   setLayer: (layer) => set({ layer }),
   year: 2100,
-  setYear: (year) => set({ year: Math.max(2026, Math.min(2100, Math.round(year))) }),
+  setYear: (year) => { if (Number.isFinite(year)) set({ year: Math.max(2026, Math.min(2100, Math.round(year))) }); },
   cell: null,
   setCell: (cell) => set({ cell }),
   playing: false,
