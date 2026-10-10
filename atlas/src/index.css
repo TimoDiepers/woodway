@@ -210,3 +210,11 @@ body::after {
   border-radius: 8px;
   box-shadow: 0 10px 24px -18px rgba(30, 26, 18, .45);
 }
+
+/* The sheet is a surface, not a control: no browser focus frame around the whole of it. */
+[data-vaul-drawer]:focus, [data-vaul-drawer]:focus-visible { outline: none; }
+
+/* On touch the year slider gets a thumb-sized hit area; the track keeps its look. */
+@media (pointer: coarse) {
+  .year-range { height: 2.75rem; }
+}

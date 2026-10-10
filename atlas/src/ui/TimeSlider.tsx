@@ -23,12 +23,12 @@ export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max =
   return (
     <div className="flex items-center gap-3">
       <button aria-label={t(playing ? "slider.pause" : "slider.play")} onClick={() => onPlaying(!playing)}
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ch)] text-[var(--paper)]">
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ch)] text-[var(--paper)] [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11">
         {playing ? <Pause size={16} /> : <Play size={16} />}
       </button>
       <input type="range" aria-label={t("slider.year")} min={min} max={max} step={1} value={Math.round(year)}
         onChange={(e) => { onPlaying(false); onYear(+e.target.value); }}
-        className="w-full" style={{ accentColor: "var(--ch)" }} />
+        className="year-range w-full" style={{ accentColor: "var(--ch)" }} />
       <output className="ch-text w-12 text-right font-serif text-lg font-semibold tabular-nums">{Math.round(year)}</output>
     </div>
   );

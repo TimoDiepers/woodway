@@ -30,7 +30,7 @@ export function LayerPicker({ value, onChange }: { value: LayerId; onChange(id: 
             {LAYERS.filter((l) => l.group === g).map((l) => (
               <li key={l.id}>
                 <button role="radio" data-layer={l.id} aria-checked={l.id === value} tabIndex={l.id === value ? 0 : -1} onClick={() => onChange(l.id)}
-                  className={cn("w-full rounded-r border-l-[3px] py-1.5 pl-2.5 pr-2 text-left text-sm leading-snug transition-colors",
+                  className={cn("w-full rounded-r border-l-[3px] py-1.5 pl-2.5 pr-2 text-left text-sm leading-snug transition-colors [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:py-2.5 [@media(pointer:coarse)]:text-[15px]",
                     l.id === value
                       ? "border-[var(--ch)] bg-[color-mix(in_srgb,var(--ch-soft)_45%,transparent)] font-medium text-ink"
                       : "border-transparent text-inkMuted hover:bg-ink/5 hover:text-ink")}>

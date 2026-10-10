@@ -2,40 +2,46 @@ import { useMemo } from "react";
 import { X } from "lucide-react";
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Atlas } from "@/data/types";
-import { cellSeries, coolsFrom, coolsUntil, dacBuildMt, dacNet, typeKey } from "@/model/model";
+import { cellSeries, coolsFrom, coolsUntil, dacBuildMt, dacNet, deltaT, netShare, typeKey, yearIndex } from "@/model/model";
 import { cellCenter } from "@/map/lookup";
 import { useNum, useT, type Key } from "@/i18n/useT";
 import { Kicker } from "@/ui/deck/Kicker";
 import { Takeaway } from "@/ui/deck/Takeaway";
 
 const TICK = { fontSize: 11, fill: "var(--muted)", fontFamily: "var(--sans)" };
+const TICK_DENSE = { ...TICK, fontSize: 10 };
 
 /** Lines use fixed data keys (v0, v1); the translated label is only the line's name, so a language switch
  *  never orphans a line from its data. The data depends on the values alone (memoised per cell upstream). */
-function Chart({ title, years, series, year }: { title: string; years: number[]; series: { label: string; color: string; values: number[] }[]; year: number }) {
+function Chart({ title, years, series, year, dense = false }: { title: string; years: number[]; series: { label: string; color: string; values: number[] }[]; year: number; dense?: boolean }) {
   const v0 = series[0].values, v1 = series[1]?.values;
   const data = useMemo(() => {
     const cols = v1 ? [v0, v1] : [v0];
     return years.map((y, k) => Object.fromEntries([["year", y], ...cols.map((v, i) => [`v${i}`, v[k]])]));
   }, [years, v0, v1]);
+  const legend = series.length > 1 && series.map((s, i) => (
+    <span key={i} className="whitespace-nowrap"><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: s.color }} />{s.label}</span>
+  ));
   return (
-    <section className="mt-3">
-      <h3 className="text-xs font-medium text-inkMuted">{title}</h3>
-      {series.length > 1 && (
-        <p className="flex gap-3 text-[11px] text-inkMuted">
-          {series.map((s, i) => <span key={i}><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: s.color }} />{s.label}</span>)}
-        </p>
+    <section className={dense ? "mt-2" : "mt-3"}>
+      {dense ? (
+        <h3 className="flex flex-wrap items-baseline gap-x-2 text-[11px] leading-tight text-inkMuted"><span className="font-medium text-ink">{title}</span>{legend}</h3>
+      ) : (
+        <>
+          <h3 className="text-xs font-medium text-inkMuted">{title}</h3>
+          {legend && <p className="flex gap-3 text-[11px] text-inkMuted">{legend}</p>}
+        </>
       )}
-      <div className="h-28">
+      <div className={dense ? "h-[76px]" : "h-28"}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
-            <XAxis dataKey="year" type="number" domain={[years[0], years.at(-1)!]} ticks={[2026, 2050, 2075, 2100]} tick={TICK} stroke="var(--paper-line)" />
-            <YAxis tick={TICK} width={42} stroke="var(--paper-line)" />
+          <LineChart data={data} margin={dense ? { top: 4, right: 6, bottom: 0, left: 0 } : { top: 6, right: 8, bottom: 0, left: 0 }}>
+            <XAxis dataKey="year" type="number" domain={[years[0], years.at(-1)!]} ticks={dense ? [2026, 2050, 2100] : [2026, 2050, 2075, 2100]} tick={dense ? TICK_DENSE : TICK} stroke="var(--paper-line)" height={dense ? 18 : 30} />
+            <YAxis tick={dense ? TICK_DENSE : TICK} width={dense ? 30 : 42} tickCount={dense ? 3 : 5} stroke="var(--paper-line)" />
             <ReferenceLine y={0} stroke="var(--muted)" strokeOpacity={0.4} />
             <ReferenceLine x={year} stroke="var(--ink)" strokeDasharray="3 3" />
             <Tooltip formatter={(v: number) => v.toFixed(1)} labelFormatter={(y) => String(y)}
               contentStyle={{ background: "var(--paper)", border: "1px solid var(--paper-line)", fontSize: 12, fontFamily: "var(--sans)" }} />
-            {series.map((s, i) => <Line key={i} dataKey={`v${i}`} name={s.label} stroke={s.color} dot={false} strokeWidth={2} isAnimationActive={false} />)}
+            {series.map((s, i) => <Line key={i} dataKey={`v${i}`} name={s.label} stroke={s.color} dot={false} strokeWidth={dense ? 1.75 : 2} isAnimationActive={false} />)}
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -43,7 +49,8 @@ function Chart({ title, years, series, year }: { title: string; years: number[];
   );
 }
 
-export function CellPanel({ atlas, cell, year, onClose }: { atlas: Atlas; cell: number; year: number; onClose(): void }) {
+/** `dense`: the phone sheet — the same chain in a tighter grid: key figures for the slider year, three flat charts. */
+export function CellPanel({ atlas, cell, year, onClose, dense = false }: { atlas: Atlas; cell: number; year: number; onClose(): void; dense?: boolean }) {
   const t = useT(), num = useNum();
   const { lat, lon } = cellCenter(cell);
   const key = typeKey(atlas, cell);
@@ -56,6 +63,58 @@ export function CellPanel({ atlas, cell, year, onClose }: { atlas: Atlas; cell: 
   const eta = dacNet(atlas, cell, year);
   const build = dacBuildMt(atlas, cell, year);
   const [group, zone] = key ? key.split("_") : ["", ""];
+  if (dense) {
+    const y = Math.round(year), k = yearIndex(atlas, year);
+    const status = cool ? t("panel.coolsFrom", { year: cool }) : until ? t("panel.coolsUntil", { year: until }) : t("panel.neverCools");
+    const fmt = (v: number, d = 0) => (Number.isFinite(v) ? num(v, d).replace(/^-/, "\u2212") : "–");
+    const facts = key && s ? [
+      { label: t("panel.factDt", { year: y }), value: fmt(deltaT(atlas, cell, year) * 1e15, 1), unit: "10⁻¹⁵ K" },
+      { label: t("panel.factNet", { year: y }), value: fmt(netShare(atlas, cell, year) * 100), unit: "%" },
+      { label: t("panel.factStock", { year: y }), value: fmt(s.m[k], 1), unit: "kg C" },
+    ] : [];
+    return (
+      <article className="relative text-[13px] leading-snug" data-ch="baeume">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-serif text-[15px] font-semibold leading-tight text-[var(--ch)]">
+              {key ? t("panel.forest", { type: t(`type.${group}` as Key), zone: t(`zone.${zone}` as Key) }) : t("panel.noForest")}
+            </h2>
+            <p className="mt-0.5 text-xs text-inkMuted">
+              {key && <>{t("panel.areaShort", { area: num(atlas.f.area[cell] / 1e6), trees: num(atlas.f.trees[cell] / 1e6, 1) })} · </>}
+              {num(lat, 2)}, {num(lon, 2)}
+            </p>
+          </div>
+          <button aria-label={t("panel.close")} onClick={onClose} className="-mr-2 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full active:bg-ink/10"><X size={18} /></button>
+        </div>
+        {key && s && (
+          <>
+            <dl className="mt-2 grid grid-cols-3 divide-x divide-[var(--paper-line)] rounded-md border border-[var(--paper-line)] bg-paper/60">
+              {facts.map((f) => (
+                <div key={f.label} className="px-2 py-1.5">
+                  <dt className="truncate text-[10.5px] text-inkMuted">{f.label}</dt>
+                  <dd className="font-serif text-[15px] font-semibold tabular-nums leading-tight text-ink">{f.value}<span className="ml-0.5 font-sans text-[10.5px] font-normal text-inkMuted">{f.unit}</span></dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-2 flex items-center gap-2 text-xs font-medium" style={{ color: until || !cool ? "var(--alb)" : "var(--ch)" }}>
+              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "currentColor" }} />{status}
+            </p>
+            <Chart dense title={t("panel.temperature")} years={s.years} year={year} series={[{ label: "ΔT", color: "#14532d", values: s.dt }]} />
+            <Chart dense title={t("panel.forcing")} years={s.years} year={year} series={[
+              { label: t("panel.forcingCo2"), color: "var(--co2)", values: s.phiCo2 },
+              { label: t("panel.forcingAlb"), color: "var(--alb)", values: s.phiAlb }]} />
+            <Chart dense title={t("panel.stock")} years={s.years} year={year} series={[{ label: t("panel.stockSeries"), color: "var(--co2)", values: s.m }]} />
+          </>
+        )}
+        <p className="mt-2 border-t border-[var(--paper-line)] pt-2 text-xs text-inkMuted" data-ch="dac">
+          <span className="mr-1 font-semibold text-[var(--ch)]">DAC</span>
+          {atlas.f.dacOk[cell]
+            ? <>{t("panel.dacLine", { mwh: num(atlas.f.elec[cell], 2), pct: num(eta * 100), year: y })}{build > 0 && <> · {t("panel.dacLineBuild", { mt: num(build, 1) })}</>}</>
+            : t("panel.dacTooCold")}
+        </p>
+      </article>
+    );
+  }
   return (
     <article className="relative text-sm">
       <button aria-label={t("panel.close")} onClick={onClose} className="absolute right-0 top-0 grid h-8 w-8 place-items-center rounded hover:bg-ink/5"><X size={16} /></button>

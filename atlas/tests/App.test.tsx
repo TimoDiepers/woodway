@@ -75,7 +75,7 @@ describe("place search", () => {
     await userEvent.type(screen.getByRole("searchbox", { name: "Search a place" }), "Berlin{Enter}");
     await userEvent.click(await screen.findByRole("button", { name: "Berlin, Deutschland" }));
     expect(useAtlas.getState().cell).toBe(cellAt(13.3888599, 52.5170365));
-    expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365 });
+    expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365, zoom: 4 });
     act(() => useAtlas.getState().setCell(null));
   });
 });

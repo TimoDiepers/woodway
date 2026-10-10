@@ -16,8 +16,11 @@ export interface AtlasMapProps {
   onHover?(cell: number | null, x: number, y: number): void;
   projection?: "globe" | "mercator"; dark?: boolean;
   sites?: { name: string; lat: number; lon: number; color: string }[];
-  flyTo?: { lon: number; lat: number } | null;
+  /** zoom omitted: keep the current zoom and only bring the point into view (a tapped cell on a phone) */
+  flyTo?: { lon: number; lat: number; zoom?: number } | null;
   initialView?: { longitude: number; latitude: number; zoom: number };
+  /** screen area covered by UI (a phone's top bar and bottom sheet): the camera centres in what is left */
+  insets?: { top: number; bottom: number; right?: number };
 }
 
 type Coords = typeof IMAGE_COORDS;
@@ -44,7 +47,7 @@ function viewImage(map: MaplibreMap) {
 }
 
 export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, projection = "globe", dark = false,
-  sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 } }: AtlasMapProps) {
+  sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 }, insets }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
   // The painting goes straight from this canvas to the GPU (a maplibre canvas source, not an encoded image).
   const canvas = useMemo(() => document.createElement("canvas"), []);
@@ -58,9 +61,25 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
 
   useEffect(() => () => { pending.current++; }, []);
 
+  const padding = { top: insets?.top ?? 0, bottom: insets?.bottom ?? 0, left: 0, right: insets?.right ?? 0 };
+  // a jump in this commit already carries the new padding; the inset easing must not cut it short
+  const jumping = useRef(false);
   useEffect(() => {
-    if (flyTo) mapRef.current?.flyTo({ center: [flyTo.lon, flyTo.lat], zoom: 4, duration: 1200 });
+    if (!flyTo) return;
+    const map = mapRef.current;
+    if (!map) return;
+    jumping.current = true; queueMicrotask(() => { jumping.current = false; });
+    if (flyTo.zoom === undefined) map.easeTo({ center: [flyTo.lon, flyTo.lat], padding, duration: 450 });
+    else map.flyTo({ center: [flyTo.lon, flyTo.lat], zoom: flyTo.zoom, padding, duration: 1200 });
+    // padding is read at the time of the jump on purpose
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flyTo]);
+  // the sheet moving up or down shifts the free part of the screen: keep the view's centre in it
+  useEffect(() => {
+    if (!loaded || !insets || jumping.current) return;
+    mapRef.current?.easeTo({ padding, duration: 300 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, insets?.top, insets?.bottom, insets?.right]);
 
   // Paint the view: one paint per animation frame, the latest request wins. The cells' colours are kept
   // until layer or year change; a moved view only redraws the hexagons.
