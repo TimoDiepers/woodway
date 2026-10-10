@@ -3,7 +3,7 @@ import type { Layer } from "@/model/layers";
 import { reasonColor, scaleOf } from "@/model/layers";
 import { hexToRgba, scaleColor, type RGBA } from "@/color/scale";
 import { LAT_MAX } from "./lookup";
-import { clampBounds, hexCentres, HEX_R_DEG, type Bounds } from "./hex";
+import { clampBounds, hexCentres, mercY, HEX_R_DEG, HEX_R_M, HEX_ROW_M, type Bounds } from "./hex";
 
 /** The whole map (to ±85°): where the canvas source sits before the first painting. */
 export const IMAGE_COORDS: [[number, number], [number, number], [number, number], [number, number]] =
@@ -26,7 +26,6 @@ export function cellColors(at: Atlas, layer: Layer, year: number, out: Uint32Arr
   return out;
 }
 
-const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
 
 /**
  * Paints the 0.5° hexagons of the view into a canvas of w×h px that covers `bounds` in Web Mercator, as the
@@ -46,8 +45,10 @@ export function paintHexView(ctx: CanvasRenderingContext2D, w: number, h: number
   for (let i = 0; i < hx.lon.length; i++) {
     if (hx.lat[i] !== lat) {   // rows share their latitude, and so the y of their corners
       lat = hx.lat[i];
-      yT = (yN - mercY(lat + HEX_R_DEG)) * ky; yU = (yN - mercY(lat + HEX_R_DEG / 2)) * ky;
-      yD = (yN - mercY(lat - HEX_R_DEG / 2)) * ky; yB = (yN - mercY(lat - HEX_R_DEG)) * ky;
+      // the row's Mercator y, snapped to the lattice (the centres' latitudes are only float32)
+      const m = (Math.round(mercY(lat) / HEX_ROW_M - 0.5) + 0.5) * HEX_ROW_M;
+      yT = (yN - m - HEX_R_M) * ky; yU = (yN - m - HEX_R_M / 2) * ky;
+      yD = (yN - m + HEX_R_M / 2) * ky; yB = (yN - m + HEX_R_M) * ky;
     }
     const c = colors[hx.cell[i]];
     if (!c) continue;   // ocean stays transparent

@@ -4,7 +4,7 @@ import { loadAtlas } from "@/data/load";
 import { layerById, scaleOf } from "@/model/layers";
 import { scaleColor } from "@/color/scale";
 import { cellAt, LAT_MAX } from "@/map/lookup";
-import { hexCentres, HEX_R_DEG } from "@/map/hex";
+import { hexCentres, HEX_R_DEG, HEX_R_M, mercY } from "@/map/hex";
 import { paintHexView } from "@/map/paint";
 
 const DIR = path.resolve(__dirname, "../public/data/");
@@ -13,9 +13,9 @@ const wrap = (lon: number) => ((((lon + 180) % 360) + 360) % 360) - 180;
 const rows = (lat: Float32Array) => [...new Set(lat)].sort((a, b) => a - b);
 
 describe("hexCentres", () => {
-  it("a 2°×2° box at the equator: one hexagon per cell, each centre in its own cell, a hex lattice", () => {
+  it("a 2°×2° box at the equator: one hexagon per cell, each centre in its own cell, a hex lattice in map units", () => {
     const h = hexCentres({ west: 0, south: 0, east: 2, north: 2 });
-    // √3·R = 0.5° across, 1.5·R = 0.433° between rows: 4 / (0.5 · 0.433) ≈ 18.5 hexagons
+    // √3·R = 0.5° across, 1.5·R between rows (at the equator ≈ 0.433°): 4 / (0.5 · 0.433) ≈ 18.5 hexagons
     expect(Math.abs(h.lon.length - 4 / (0.5 * 1.5 * HEX_R_DEG))).toBeLessThanOrEqual(2);
     for (let i = 0; i < h.lon.length; i++) {
       expect(h.lon[i]).toBeGreaterThanOrEqual(0); expect(h.lon[i]).toBeLessThanOrEqual(2);
@@ -23,7 +23,8 @@ describe("hexCentres", () => {
       expect(h.cell[i]).toBe(cellAt(h.lon[i], h.lat[i]));
     }
     const ys = rows(h.lat);
-    for (let k = 1; k < ys.length; k++) expect(ys[k] - ys[k - 1]).toBeCloseTo(1.5 * HEX_R_DEG, 4);
+    // rows 1.5·R apart in Web-Mercator y (R in the same units: √3·R = 0.5° of longitude in radians)
+    for (let k = 1; k < ys.length; k++) expect(mercY(ys[k]) - mercY(ys[k - 1])).toBeCloseTo(1.5 * HEX_R_M, 6);
     // neighbouring rows are offset by a quarter degree, every row is spaced 0.5° across
     for (let k = 1; k < ys.length; k++) {
       const a = Math.min(...[...h.lon].filter((_, i) => h.lat[i] === ys[k - 1]));
@@ -32,6 +33,18 @@ describe("hexCentres", () => {
     }
     const row0 = [...h.lon].filter((_, i) => h.lat[i] === ys[0]).sort((a, b) => a - b);
     for (let k = 1; k < row0.length; k++) expect(row0[k] - row0[k - 1]).toBeCloseTo(0.5, 4);
+  });
+
+  it("hexagons are regular on the map at every latitude: height / width = 2/√3", () => {
+    for (const lat0 of [0, 50, 70]) {
+      const h = hexCentres({ west: 10, south: lat0, east: 12, north: lat0 + 2 });
+      const ys = rows(h.lat);
+      const dy = mercY(ys[1]) - mercY(ys[0]);                 // row spacing on the map = 1.5·R
+      const row0 = [...h.lon].filter((_, i) => h.lat[i] === ys[0]).sort((a, b) => a - b);
+      const dx = ((row0[1] - row0[0]) * Math.PI) / 180;       // centre spacing on the map = width = √3·R
+      const ratio = (2 * dy) / 1.5 / dx;                      // 2R / (√3·R)
+      expect(Math.abs(ratio / (2 / Math.sqrt(3)) - 1), `${lat0}°`).toBeLessThan(0.01);
+    }
   });
 
   it("no centres beyond ±85°", () => {
@@ -80,7 +93,7 @@ describe("paintHexView", () => {
       // the centre, and points well inside the hexagon (not in the cell): the whole hexagon has the colour
       expect(pixel(hx.lon[i], hx.lat[i])).toBe(want);
       expect(pixel(hx.lon[i] + 0.2, hx.lat[i])).toBe(want);
-      expect(pixel(hx.lon[i], hx.lat[i] + 0.8 * HEX_R_DEG)).toBe(want);
+      expect(pixel(hx.lon[i], (Math.atan(Math.sinh(mercY(hx.lat[i]) + 0.8 * HEX_R_M)) * 180) / Math.PI)).toBe(want);
     }
     // hexagons over the sea (the North Sea in the north-west corner) are not painted
     const sea = [...hx.cell.keys()].filter((i) => !at.f.land[hx.cell[i]]);
