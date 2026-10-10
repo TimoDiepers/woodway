@@ -8,7 +8,7 @@ export const ANCHORS: { id: AtlasSlideId; after: string }[] = [
   { id: "albedo", after: "Temperaturwirkung eines Baums je Ort" },
   { id: "dacStrom", after: "DAC-Modell" },
   { id: "dacAusbau", after: "DAC-Ausbau" },
-  { id: "atlas", after: "Atlas: alle Ergebnisse interaktiv" },
+  { id: "atlas", after: "Woodway: alle Ergebnisse interaktiv" },
 ];
 
 export const SEQUENCE: Item[] = DECK_TITLES.flatMap((title, i) => [
