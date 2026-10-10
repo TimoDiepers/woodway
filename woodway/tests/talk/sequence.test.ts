@@ -5,7 +5,7 @@ describe("sequence", () => {
   it("reads the deck's slide titles in order", () => {
     expect(DECK_TITLES[0]).toBe("Titel");
     expect(DECK_TITLES).toContain("Danke");
-    expect(DECK_TITLES.at(-1)).toBe("Woodway: alle Ergebnisse interaktiv");
+    expect(DECK_TITLES[DECK_TITLES.indexOf("Danke") + 1]).toBe("Woodway: alle Ergebnisse interaktiv");
   });
   it("anchors exist", () => {
     for (const a of ANCHORS) expect(() => deckIndex(a.after)).not.toThrow();

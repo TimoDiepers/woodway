@@ -761,6 +761,28 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.finale.active .night, .embed .slide.finale .night, .all .slide.finale .night { opacity: 0; }
 .slide.finale.active > .sh, .slide.finale.active > .body, .embed .slide.finale > .sh, .embed .slide.finale > .body,
 .all .slide.finale > .sh, .all .slide.finale > .body { opacity: 1; }
+/* under the summary: where the rest of the results live */
+.woodway-hint { display: grid; grid-template-columns: 196px 1fr 112px; gap: 24px; align-items: center; width: 900px; margin-top: 20px;
+  padding: 12px 14px 12px 12px; border-radius: 12px; background: rgba(255, 255, 255, .55); border: 1px solid #d8d0bb;
+  color: var(--ink-2); text-decoration: none; font: 400 19px/1.38 var(--sans); }
+.woodway-hint .wpv { width: 196px; height: 112px; object-fit: cover; border-radius: 8px; border: 1px solid var(--paper-line); background: #e7e0d0; }
+.woodway-hint .txt { min-width: 0; }
+.woodway-hint b { display: block; font: 600 25px/1.2 var(--serif); color: var(--ch); margin-bottom: 4px; white-space: nowrap; }
+.woodway-hint b .wink { font: italic 400 19px/1 var(--serif); color: var(--muted); margin-left: .2em; }
+.woodway-hint em { display: inline; margin-left: .3em; font-style: normal; font-weight: 600; color: var(--ink); }
+.woodway-hint .qr { width: 112px; height: 112px; padding: 6px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
+/* the last slide: the summary's day scene stands still (no second sunrise); the call, then on the click thanks,
+   a young tree and birds */
+.slide.ende .sunrise { transform: none; transition: none; }
+.slide.ende > .body { opacity: 1; transition: none; padding-top: 120px; }
+.slide.ende .num { display: none; }
+.slide.ende h1 { font-size: 76px; line-height: 1.08; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; margin: 0; }
+.slide.ende .call { margin-top: 30px; font: 500 34px/1.3 var(--serif, inherit); color: var(--ch); }
+.slide.ende .call2 { margin-top: 10px; font: 400 26px/1.35 var(--serif); color: var(--ink-2); }
+.slide.ende .thanks { margin-top: 38px; opacity: 0; transition: opacity .8s var(--ease) 1.4s; }
+.slide.ende .thanks.shown { opacity: 1; }
+.slide.ende .danke { margin: 0; font: italic 500 46px/1.2 var(--serif, inherit); color: var(--clay); }
+.slide.ende .who { margin-top: 12px; font: 400 20px/1.5 var(--sans); color: var(--ink-2); }
 .slide.finale .sapling { transform-box: fill-box; transform-origin: 50% 100%; }
 .slide.active.finale .sapling.shown { animation: sprout 1.8s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes sprout { from { transform: scale(.05); } to { transform: scale(1); } }
