@@ -49,14 +49,13 @@
 .ov-close:hover { background: #2c3832; }
 .ov-body { flex: 1; overflow-y: auto; padding: 8px 28px 40px; scrollbar-color: #56625a transparent; overscroll-behavior: contain; }
 .ov h3 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin: 22px 0 12px; }
-.ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 18px 16px; }
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px 16px; }
 .ov-card { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 7px; cursor: pointer; min-width: 0;
-  container-type: inline-size; }
+  -webkit-tap-highlight-color: transparent; }
 .ov-pv { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: var(--paper);
   outline: 2px solid transparent; outline-offset: 2px; transition: outline-color .15s, transform .15s; }
-.ov-pv iframe { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; border: 0; pointer-events: none;
-  transform-origin: 0 0; transform: scale(calc(100cqw / 1600px)); }
-@supports not (width: 1cqw) { .ov-pv iframe { transform: scale(.135); } }
+.ov-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
+.ov-num { position: absolute; inset: 0; display: grid; place-items: center; font: 600 28px/1 var(--sans); color: #9aa79f; }
 .ov-card:hover .ov-pv, .ov-card:focus-visible .ov-pv { outline-color: #9fb294; transform: translateY(-2px); }
 .ov-card[aria-current="true"] .ov-pv { outline-color: #e8b84f; }
 .ov-cap { display: flex; gap: 8px; align-items: baseline; font-size: 13px; line-height: 1.3; color: #cfd6cf; min-width: 0; }
@@ -64,5 +63,15 @@
 .ov-cap span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ov-cap em { margin-left: auto; flex: none; font-style: normal; font-size: 11px; letter-spacing: .04em; color: #e8b84f; }
 .ov-atlas { position: absolute; inset: 0; display: grid; place-items: center; background: var(--paper); }
+/* phones: two slides per row, so the whole talk is a few flicks long */
+@media (max-width: 600px) {
+  .ov-head { padding: 12px 16px 10px; }
+  .ov-head span { display: none; }
+  .ov-body { padding: 4px 16px 32px; }
+  .ov h3 { margin: 18px 0 10px; }
+  .ov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+  .ov-cap { font-size: 12px; gap: 6px; }
+  .ov-cap em { display: none; }
+}
 .ov-hex { width: 34%; aspect-ratio: 1 / 1.1547; background: var(--ch); opacity: .85;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }

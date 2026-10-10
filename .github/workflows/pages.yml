@@ -35,6 +35,10 @@ jobs:
           cache-dependency-path: atlas/package-lock.json
       - run: npm ci
         working-directory: atlas
+      # stills of every slide for the talk's slide overview; without them the cards show their numbers
+      - run: node scripts/thumbs.mjs
+        working-directory: atlas
+        continue-on-error: true
       - run: npx vitest run   # a renamed anchor slide of the deck fails here, before anything is deployed
         working-directory: atlas
       - run: npm run build

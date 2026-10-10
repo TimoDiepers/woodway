@@ -4,14 +4,14 @@ import type { Cmd, DeckState } from "./navigation";
 export const DECK_URL = import.meta.env.DEV ? "/deck/index.html?host" : "../index.html?host";
 
 export interface DeckFrameHandle { send: (cmd: NonNullable<Cmd>) => void }
-interface Props { onState: (s: DeckState) => void; onMissing: () => void }
+interface Props { onState: (s: DeckState) => void; onMissing: () => void; onReload?: () => void }
 
 const ANSWER_TIMEOUT_MS = 4000;
 // The deck listens as soon as its script has run; its iframe `load` event waits for every data file
 // (seconds), so greet it from the start until it answers.
 const HELLO_EVERY_MS = 250;
 
-const DeckFrame = forwardRef<DeckFrameHandle, Props>(function DeckFrame({ onState, onMissing }, ref) {
+const DeckFrame = forwardRef<DeckFrameHandle, Props>(function DeckFrame({ onState, onMissing, onReload }, ref) {
   const frame = useRef<HTMLIFrameElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const answered = useRef(false);
@@ -39,12 +39,16 @@ const DeckFrame = forwardRef<DeckFrameHandle, Props>(function DeckFrame({ onStat
     return () => { window.removeEventListener("message", onMessage); clearTimeout(timer.current); };
   }, [onState]);
 
-  useEffect(() => {
+  const startGreeting = useCallback(() => {
+    clearInterval(greet.current);
     greet.current = setInterval(() => { if (!answered.current) post({ cmd: "hello" }); else clearInterval(greet.current); }, HELLO_EVERY_MS);
-    return () => clearInterval(greet.current);
   }, [post]);
+  useEffect(() => { startGreeting(); return () => clearInterval(greet.current); }, [startGreeting]);
 
   const onLoad = () => {
+    // a second load is the deck's page coming back (the browser dropped it, or it was reloaded): greet it anew
+    // and let the shell send it back to where the talk is
+    if (answered.current) { answered.current = false; startGreeting(); onReload?.(); }
     post({ cmd: "hello" });
     clearTimeout(timer.current);
     if (!answered.current) timer.current = setTimeout(() => { if (!answered.current) onMissing(); }, ANSWER_TIMEOUT_MS);

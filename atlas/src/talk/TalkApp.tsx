@@ -8,6 +8,7 @@ import { MAIN_END, SEQUENCE } from "./sequence";
 import { SLIDES, atlasSteps } from "./slides";
 import AtlasSlide from "./AtlasSlide";
 import TalkOverview from "./TalkOverview";
+import { SlideBoundary } from "./SlideBoundary";
 import { LayoutGrid } from "lucide-react";
 import type { Atlas } from "@/data/types";
 
@@ -68,14 +69,27 @@ export default function TalkApp() {
     if (SEQUENCE[p.k].kind === "deck") movePos(follow(SEQUENCE, p, s));
   }, [movePos]);
   const onMissing = useCallback(() => setMissing(true), []);
+  // the deck's page came back from scratch (slide 1): send it to the slide the talk is on
+  const onReload = useCallback(() => {
+    const p = posRef.current;
+    let k = p.k;
+    while (k > 0 && SEQUENCE[k].kind !== "deck") k--;
+    const it = SEQUENCE[k];
+    if (it.kind !== "deck") return;
+    const cmd = { send: "goto", n: it.i, step: k === p.k ? p.step : "end" } as const;
+    gate.current.begin(cmd);
+    frame.current?.send(cmd);
+  }, []);
 
   const apply = useCallback((r: { pos: Pos; cmd: Cmd }) => {
     movePos(r.pos);
     if (r.cmd) { gate.current.begin(r.cmd); frame.current?.send(r.cmd); }
   }, [movePos]);
+  // A jump (overview, Home, B) is an explicit wish: it supersedes a command still in flight instead of being dropped;
+  // the gate then waits for this goto's answer and ignores the older one.
   const go = useCallback((k: number) => {
     const it = SEQUENCE[k];
-    if (!it || gate.current.busy()) return;
+    if (!it) return;
     movePos({ k, step: 0 });
     if (it.kind === "deck") {
       const cmd = { send: "goto", n: it.i, step: 0 } as const;
@@ -117,10 +131,10 @@ export default function TalkApp() {
     <div className="talk-stage" onClick={forward}>
       <div className="talk-deck" style={{ transform: `translate(-50%, -50%) scale(${scale})` }} data-k={pos.k} data-step={pos.step}>
         <div style={{ visibility: atlasShown ? "hidden" : "visible" }}>
-          <DeckFrame ref={frame} onState={onState} onMissing={onMissing} />
+          <DeckFrame ref={frame} onState={onState} onMissing={onMissing} onReload={onReload} />
         </div>
         {def && (atlas
-          ? <AtlasSlide def={def} atlas={atlas} step={pos.step} />
+          ? <SlideBoundary key={def.title} title={def.title}><AtlasSlide def={def} atlas={atlas} step={pos.step} /></SlideBoundary>
           : <section className="rslide" data-ch={def.ch}><header className="sh"><h2>{def.title}</h2></header>
               <p role={atlasFailed ? "alert" : undefined}>{atlasFailed ? "Die Atlas-Daten fehlen: erst atlas/export_atlas.py ausführen." : "Atlas wird geladen …"}</p></section>)}
       </div>
