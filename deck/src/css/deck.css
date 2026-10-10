@@ -985,3 +985,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .pdef dd { margin: 0; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
 /* a takeaway across the whole slide, its sentence centred on one line */
 .takeaway.wide { margin-top: 10px; text-align: center; white-space: nowrap; font-size: 23px; }
+/* on paper instead of green: the formula symbols keep their colours */
+.takeaway.light { background: var(--paper-deep); color: var(--ink); border: 1.5px solid var(--ch-soft); box-shadow: none; }
+.takeaway.light::before { background: var(--ch); }
