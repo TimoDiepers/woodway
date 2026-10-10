@@ -15,6 +15,7 @@ import { ToolColumn } from "@/ui/ToolColumn";
 import { Dock } from "@/ui/Dock";
 import { type Place } from "@/ui/PlaceSearch";
 import { cellAt, cellCenter } from "@/map/lookup";
+import { forwardDeckKeys } from "@/lib/deckKeys";
 
 type Jump = { lon: number; lat: number; zoom?: number };
 
@@ -56,6 +57,7 @@ export default function App() {
   const dockRow = useMediaQuery("(min-width: 600px)");
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   useEffect(() => { document.documentElement.lang = s.lang; }, [s.lang]);
+  useEffect(() => forwardDeckKeys(), []);
   useEffect(() => {
     loadAtlas().then(setAtlas).catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
   }, []);

@@ -13,6 +13,15 @@ function stored<T extends string>(key: string, allowed: readonly T[], fallback: 
     return fallback;
   }
 }
+/** ?lang=de / ?theme=light from the page address (the deck's iframe): for this visit, never saved */
+function fromUrl<T extends string>(key: string, allowed: readonly T[]): T | null {
+  try {
+    const v = new URLSearchParams(location.search).get(key) as T | null;
+    return v && allowed.includes(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
 function save(key: string, v: string) {
   try { localStorage.setItem(key, v); } catch { /* private mode: keep it for this visit only */ }
 }
@@ -39,9 +48,9 @@ interface AtlasState {
 }
 
 export const useAtlas = create<AtlasState>((set) => ({
-  lang: stored("atlas-lang", ["en", "de"] as const, "en"),
+  lang: fromUrl("lang", ["en", "de"] as const) ?? stored("atlas-lang", ["en", "de"] as const, "en"),
   setLang: (lang) => { save("atlas-lang", lang); document.documentElement.lang = lang; set({ lang }); },
-  theme: stored("atlas-theme", ["light", "dark", "system"] as const, "system"),
+  theme: fromUrl("theme", ["light", "dark", "system"] as const) ?? stored("atlas-theme", ["light", "dark", "system"] as const, "system"),
   setTheme: (theme) => { save("atlas-theme", theme); set({ theme }); },
   projection: stored("atlas-projection", ["globe", "mercator"] as const, "globe"),
   setProjection: (projection) => { save("atlas-projection", projection); set({ projection }); },

@@ -1226,7 +1226,15 @@ const deckMedia = {
     if (!s || s._media) return; s._media = true;
     for (const im of s.querySelectorAll('img[data-src]')) { im.src = im.dataset.src; im.removeAttribute('data-src'); }
   },
-  around(slides, n) { for (const k of [n, n + 1, n - 1, n + 2]) this.load(slides[k]); },
+  around(slides, n) {
+    for (const k of [n, n + 1, n - 1, n + 2]) this.load(slides[k]);
+    // live iframes (the atlas): only on this slide and the next, and only in the projector window
+    if (!document.documentElement.classList.contains('embed'))
+      for (const k of [n, n + 1]) for (const f of slides[k]?.querySelectorAll('iframe[data-live-src]') ?? []) {
+        f.addEventListener('load', () => f.classList.add('on'), { once: true });
+        f.src = f.dataset.liveSrc; f.removeAttribute('data-live-src');
+      }
+  },
   rest(slides) {   // a few slides at a time, so a jump still gets the line quickly
     let k = 0;
     const tick = () => {
@@ -1265,7 +1273,10 @@ class Deck {
     setTimeout(() => document.getElementById('hint').classList.add('gone'), 5000);
   }
   onMessage(e) {
-    const d = e.data; if (!d || d.src !== 'dv') return;
+    const d = e.data;
+    // the embedded atlas hands back the paging keys once a click has put focus into it
+    if (d && d.src === 'atlas-key' && !this.embed) { if (d.dir === 'next') this.next(); else if (d.dir === 'prev') this.prev(); return; }
+    if (!d || d.src !== 'dv') return;
     if (this.embed) { if ('goto' in d) this.go(d.goto, d.step); return; }
     this.peer = e.source;
     if (d.cmd === 'next') this.next(); else if (d.cmd === 'prev') this.prev();

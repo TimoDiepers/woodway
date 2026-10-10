@@ -2,9 +2,7 @@
 
 **Talk:** https://timodiepers.github.io/dissvortrag/
 
-**Atlas:** https://timodiepers.github.io/dissvortrag/atlas/
-
-**Talk (React, with live maps):** https://timodiepers.github.io/dissvortrag/atlas/talk.html
+**Atlas:** https://timodiepers.github.io/dissvortrag/atlas/ (also live on the talk's last slide)
 
 Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 

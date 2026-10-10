@@ -797,3 +797,21 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 
 /* inside the React deck (?host): the shell draws menu, hint and progress */
 .host #menu-fab, .host .hint, .host .progress { display: none !important; }
+
+/* ---------- the last slide: the live atlas ---------- */
+.atlas-live { display: grid; grid-template-columns: 1fr 372px; gap: 48px; flex: 1; min-height: 0; }
+.atlas-frame {
+  position: relative; margin: 0; min-height: 0; border-radius: 10px; overflow: hidden;
+  background: #e7e0d0; border: 1px solid var(--paper-line); box-shadow: 0 14px 30px -22px rgba(30, 26, 18, .55);
+}
+.atlas-frame img, .atlas-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; object-position: center; }
+/* drawn at 80 % and scaled up: the atlas's own labels come out a quarter larger, legible across a room */
+.atlas-frame iframe { width: 80%; height: 80%; transform: scale(1.25); transform-origin: 0 0; opacity: 0; transition: opacity .5s var(--ease); }
+.atlas-frame iframe.on { opacity: 1; }
+.atlas-side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.atlas-side .lead { font-size: 28px; }
+.atlas-qr {
+  margin-top: auto; display: flex; align-items: center; gap: 18px; color: var(--ink); text-decoration: none;
+  font: 500 17px/1.35 var(--sans);
+}
+.atlas-qr img { width: 150px; height: 150px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid var(--paper-line); }
