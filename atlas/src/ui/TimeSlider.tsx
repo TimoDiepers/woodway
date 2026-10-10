@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { Pause, Play } from "lucide-react";
 import { useT } from "@/i18n/useT";
 
 const YEARS_PER_SECOND = 6;
 
+/** Play, a slim track that fills up to the year, and the year itself: one line, ~36 px tall. */
 export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max = 2100 }:
   { year: number; onYear(y: number): void; playing: boolean; onPlaying(p: boolean): void; min?: number; max?: number }) {
   const t = useT();
@@ -20,16 +21,20 @@ export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max =
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [playing, min, max, onYear, onPlaying]);
+  const pct = ((Math.round(year) - min) / (max - min)) * 100;
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
+      {/* the disc is 32 px; on touch the button around it reaches 40 px without growing the row's look */}
       <button aria-label={t(playing ? "slider.pause" : "slider.play")} onClick={() => onPlaying(!playing)}
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ch)] text-[var(--paper)] [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11">
-        {playing ? <Pause size={16} /> : <Play size={16} />}
+        className="group -my-1 -ml-1 grid h-10 w-10 shrink-0 place-items-center rounded-full focus-visible:outline-none [@media(pointer:fine)]:h-8 [@media(pointer:fine)]:w-8 [@media(pointer:fine)]:m-0">
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ch)] text-[var(--paper)] transition-transform group-active:scale-95 group-focus-visible:ring-2 group-focus-visible:ring-[var(--ch)]/40 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-panel">
+          {playing ? <Pause size={14} fill="currentColor" strokeWidth={0} /> : <Play size={14} className="translate-x-px" fill="currentColor" strokeWidth={0} />}
+        </span>
       </button>
       <input type="range" aria-label={t("slider.year")} min={min} max={max} step={1} value={Math.round(year)}
         onChange={(e) => { onPlaying(false); onYear(+e.target.value); }}
-        className="year-range w-full" style={{ accentColor: "var(--ch)" }} />
-      <output className="ch-text w-12 text-right font-serif text-lg font-semibold tabular-nums">{Math.round(year)}</output>
+        className="year-range min-w-0 flex-1" style={{ "--pct": `${pct}%` } as CSSProperties} />
+      <output className="ch-text w-11 text-right font-serif text-[15px] font-semibold tabular-nums leading-none">{Math.round(year)}</output>
     </div>
   );
 }

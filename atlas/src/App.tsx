@@ -20,8 +20,8 @@ import { cellAt, cellCenter } from "@/map/lookup";
 type Jump = { lon: number; lat: number; zoom?: number };
 
 const WORLD = { lon: 10, lat: 25 };
-const TOOLS_W = 64;      // the phone's tool column and its margin, in px
-const DOCK_H = 120;      // until the dock has measured itself
+const TOOLS_W = 60;      // the phone's tool column and its margin, in px
+const DOCK_H = 90;      // until the dock has measured itself
 
 /** The height of an element, followed as it changes (the dock grows a slider, the plate loses its hint). */
 function useHeight<T extends HTMLElement>(fallback: number) {
@@ -53,6 +53,8 @@ export default function App() {
   const mode = useLayoutMode();
   const vh = useViewportHeight();
   const wide = mode === "desktop";
+  // layer and year on one line once the screen is wide enough for both
+  const dockRow = useMediaQuery("(min-width: 600px)");
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   useEffect(() => { document.documentElement.lang = s.lang; }, [s.lang]);
   useEffect(() => {
@@ -134,13 +136,13 @@ export default function App() {
         {open ? (
           // the details carry the dock on top, so the year stays in reach while reading a cell
           <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
-            peek={<Dock layer={layer} onLayer={pickLayer} bare />}>
+            peek={<Dock layer={layer} onLayer={pickLayer} bare row={dockRow} />}>
             <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} dense />
           </CompactSheet>
         ) : (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3"
             style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", paddingRight: mode === "side" ? TOOLS_W + 12 : undefined }}>
-            <div ref={dockRef} className="w-full max-w-md"><Dock layer={layer} onLayer={pickLayer} /></div>
+            <div ref={dockRef} className={dockRow ? "w-full max-w-2xl" : "w-full max-w-md"}><Dock layer={layer} onLayer={pickLayer} row={dockRow} /></div>
           </div>
         )}
       </div>
@@ -156,15 +158,16 @@ export default function App() {
         {tools}
       </div>
       {open && (
-        <section aria-label={t("panel.details")} className="panel absolute bottom-4 right-4 top-[4.75rem] z-10 w-96 overflow-auto p-4">
+        <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-96 overflow-auto overscroll-contain p-4">
           <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} />
         </section>
       )}
       {!open && (
         <div className="panel absolute bottom-4 right-4 z-10 w-[26rem] p-3"><GlobalStrip atlas={atlas} year={s.year} /></div>
       )}
-      <div className="pointer-events-none absolute bottom-4 left-4 z-10 w-[24rem]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <Dock layer={layer} onLayer={pickLayer} />
+      {/* one line, as wide as the corner allows: clear of the strip or the details on the right */}
+      <div className="pointer-events-none absolute bottom-4 left-4 z-10 w-[min(44rem,calc(100%-30rem))]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <Dock layer={layer} onLayer={pickLayer} row />
       </div>
     </div>
   );

@@ -214,7 +214,31 @@ body::after {
 /* The sheet is a surface, not a control: no browser focus frame around the whole of it. */
 [data-vaul-drawer]:focus, [data-vaul-drawer]:focus-visible { outline: none; }
 
-/* On touch the year slider gets a thumb-sized hit area; the track keeps its look. */
+/* The year slider: a 4 px track filled in the layer's colour up to the year, a 16 px thumb ringed in paper.
+   The input itself is the hit area (28 px, 40 px on touch); only the track is drawn. */
+.year-range { --fill: var(--ch); appearance: none; -webkit-appearance: none; background: transparent; height: 1.75rem; cursor: pointer; margin: 0; }
+.year-range:focus { outline: none; }
+.year-range::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px;
+  background: linear-gradient(to right, var(--fill) var(--pct, 100%), var(--paper-line) var(--pct, 100%));
+}
+.year-range::-moz-range-track { height: 4px; border-radius: 2px; background: var(--paper-line); }
+.year-range::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--fill); }
+.year-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%;
+  background: var(--fill); border: 2px solid rgb(var(--color-panel)); box-shadow: 0 1px 3px rgba(30, 26, 18, .35);
+  transition: transform .12s;
+}
+.year-range::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 50%; background: var(--fill); border: 2px solid rgb(var(--color-panel));
+  box-shadow: 0 1px 3px rgba(30, 26, 18, .35);
+}
+.year-range:active::-webkit-slider-thumb { transform: scale(1.15); }
+.year-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ch) 35%, transparent); }
+.year-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ch) 35%, transparent); }
+/* on the dark panel the chapter colour is too deep to read as a filled track: its soft tone instead */
+.dark .year-range { --fill: var(--ch-soft); }
 @media (pointer: coarse) {
-  .year-range { height: 2.75rem; }
+  .year-range { height: 2.5rem; }
+  .year-range::-webkit-slider-thumb { width: 20px; height: 20px; margin-top: -8px; }
 }

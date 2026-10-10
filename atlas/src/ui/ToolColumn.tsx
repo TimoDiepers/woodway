@@ -31,7 +31,7 @@ export function ToolColumn({ atlas, layer, year, compact, onPlace, onRecenter, o
   const toggle = (p: PanelId) => (o: boolean) => setOpen(o ? p : open === p ? null : open);
 
   const btn = compact
-    ? "grid h-11 w-11 place-items-center text-ink hover:bg-ink/5 active:bg-ink/10 aria-expanded:bg-ink/10"
+    ? "grid h-10 w-10 place-items-center text-ink hover:bg-ink/5 active:bg-ink/10 aria-expanded:bg-ink/10"
     : "grid h-9 w-9 place-items-center rounded-md text-ink hover:bg-ink/5 aria-expanded:bg-ink/10";
   const tool = (label: string, icon: ReactNode, onClick?: () => void, expanded?: boolean) => (
     <button type="button" aria-label={label} title={compact ? undefined : label} onClick={onClick} className={btn}
