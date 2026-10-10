@@ -826,15 +826,3 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 /* a one-line key under a formula: what each symbol stands for */
 .eqdef { margin: 6px 0 0; font: 400 18px/1.4 var(--sans); color: var(--muted); max-width: 760px; }
 .eqdef .katex { font-size: 1em; color: var(--ink); }
-/* the tree ledger: the naive estimate's trees against the room there is (slide "Wiederbewaldbare Fläche") */
-.treeledger { display: grid; gap: 6px; align-self: end; max-width: 640px; }
-.treeledger .tl-row { display: grid; grid-template-columns: 290px 1fr 48px; align-items: center; gap: 14px; margin: 0;
-  font: 400 19px/1.2 var(--sans); color: var(--ink); }
-.treeledger .tl-bar { height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--paper-line) 45%, transparent); overflow: hidden; }
-.treeledger .tl-bar i { display: block; height: 100%; border-radius: 3px; }
-.treeledger .tl-need .tl-bar i { background: repeating-linear-gradient(135deg, var(--muted) 0 3px, transparent 3px 7px); }
-.treeledger .tl-room .tl-bar i { background: var(--moss-soft); }
-.treeledger .tl-cool .tl-bar i { background: var(--moss); }
-.treeledger .tl-v { font: 600 22px/1 var(--sans); font-variant-numeric: tabular-nums; text-align: right; }
-.treeledger .tl-cool .tl-v { color: var(--moss); }
-.treeledger .tl-unit { margin: 2px 0 0; font: 400 15px/1.2 var(--sans); color: var(--muted); text-align: right; }
