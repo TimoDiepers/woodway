@@ -785,10 +785,10 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .mmore { padding: 6px 8px; }
 .mcard.pop-in { opacity: 0; }
 .mmore.pop-in { opacity: 0; }
-.slide.active :is(.mcard, .mmore).pop-in { animation: pop .6s var(--ease) calc(var(--d, 0) * 1ms) both; }
+.slide.active :is(.mcard, .mmore).pop-in { animation: pop 1s var(--ease) calc(var(--d, 0) * 1ms) both; }
 .embed :is(.mcard, .mmore).pop-in, .all :is(.mcard, .mmore).pop-in { opacity: 1; }
-/* Woodway once more, between the thanks and the sun */
-.ende-qr-pos { position: absolute; left: 700px; top: 440px; }
+/* Woodway once more, beside the sun, level with the thanks */
+.ende-qr-pos { position: absolute; right: 30px; top: 440px; }
 .ende-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; }
 .ende-qr span { font: 600 30px/1 var(--serif); color: var(--ch); }
 .ende-qr img { width: 150px; height: 150px; padding: 9px; background: #fff; border-radius: 10px; border: 1px solid var(--paper-line); }
@@ -803,7 +803,8 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .mi-dots circle:nth-child(1) { --i: 0; } .mi-dots circle:nth-child(2) { --i: 1; } .mi-dots circle:nth-child(3) { --i: 2; }
 @keyframes mi-bob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 .embed .mi-dots circle, .all .mi-dots circle { opacity: 1; }
-/* the pictures come alive with their tile (delays follow the tile's --d) */
+/* one tile at a time, about a second apart, so each picture is already moving when the next arrives;
+   the pictures come alive with their tile (delays follow the tile's --d) */
 .mi * { transform-box: fill-box; }
 .mcard .mi, .mmore .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
 .slide.active .mi-bird { animation: mi-land 2.2s cubic-bezier(.2, .7, .3, 1) var(--t) both; }
