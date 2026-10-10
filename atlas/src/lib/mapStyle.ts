@@ -13,14 +13,15 @@ export const paperBasemap: StyleSpecification = {
     {
       id: "bg",
       type: "background",
-      paint: { "background-color": "#e7e0d0" },
+      // the sea: a shade lighter than the page, so the globe reads as a disc on it; land greys sit below both
+      paint: { "background-color": "#efe9dc" },
     },
   ],
   // Soft warm atmosphere instead of the globe cutting straight into the page
   // — a golden haze at the limb (dawn/dusk terminator, not sci-fi blue), and
   // the sky itself is the exact paper color so it blends outward seamlessly.
   sky: {
-    "sky-color": "#f2ede2",
+    "sky-color": "#e7e0d0",
     "horizon-color": "#d6ccb6",
     "fog-color": "#d6ccb6",
     "sky-horizon-blend": 0.6,

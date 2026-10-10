@@ -11,8 +11,9 @@
    used all over for the panel/card backgrounds — keep working; a hex string
    there can't be composited with an alpha value at build time. */
 :root {
-  --color-paper: 242 237 226; /* --paper #f2ede2 */
-  --color-panel: 231 224 208; /* --paper-deep #e7e0d0 */
+  /* the page is the deck's deeper paper; panels sit on it a step lighter, as sheets laid on a desk */
+  --color-paper: 231 224 208; /* --paper-deep #e7e0d0 */
+  --color-panel: 250 247 240; /* #faf7f0 */
   --color-panel-border: 214 204 182; /* --paper-line #d6ccb6 */
   --color-ink: 27 36 32; /* --ink #1b2420 */
   --color-ink-muted: 93 102 95; /* --muted #5d665f */
