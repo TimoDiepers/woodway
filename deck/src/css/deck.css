@@ -776,19 +776,20 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.ende .sunrise { transform: none; transition: none; }
 .slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
-.slide.ende .more h2 { margin: 0 0 24px; font-size: 48px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
-.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.mcard { margin: 0; padding: 10px 16px 14px; border-radius: 14px; background: rgba(255, 255, 255, .55); border: 1px solid #e0d8c3; }
-.mcard .mi { display: block; width: 100%; height: 150px; }
-.mcard figcaption { margin-top: 6px; font: 400 18px/1.35 var(--sans); color: var(--ink-2); }
-.mcard figcaption b { display: block; margin-bottom: 2px; font: 600 23px/1.2 var(--serif); color: var(--ch); }
-.slide.ende .thanks { margin-top: 40px; opacity: 0; transition: opacity .8s var(--ease); }
+.slide.ende .more h2 { margin: 0 0 22px; font-size: 48px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
+.mgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+.mcard { margin: 0; padding: 6px 8px; border-radius: 14px; background: rgba(255, 255, 255, .55); border: 1px solid #e0d8c3; }
+.mcard .mi { display: block; width: 100%; height: 136px; }
+.mcard.pop-in { opacity: 0; }
+.slide.active .mcard.pop-in { animation: pop .6s var(--ease) calc(var(--d, 0) * 1ms) both; }
+.embed .mcard.pop-in, .all .mcard.pop-in { opacity: 1; }
+.slide.ende .thanks { margin-top: 38px; opacity: 0; transition: opacity .8s var(--ease); }
 .slide.ende .thanks.shown { opacity: 1; }
 .slide.ende .thanks h1 { margin: 0; font-size: 70px; line-height: 1.05; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; }
-.slide.ende .call { margin: 16px 0 0; font: 500 32px/1.25 var(--serif); color: var(--ch); }
-.slide.ende .call2 { margin: 4px 0 0; font: italic 400 25px/1.3 var(--serif); color: var(--ink-2); }
-.slide.ende .who { margin-top: 18px; font: 400 18px/1.45 var(--sans); color: var(--ink-2); }
-/* the four pictures come alive with their card (delays follow the card's --d) */
+.slide.ende .call { margin: 16px 0 0; font: 500 30px/1.3 var(--serif); color: var(--ch); }
+.slide.ende .call i { font-weight: 400; color: var(--ink-2); }
+.slide.ende .who { margin-top: 16px; font: 400 18px/1.45 var(--sans); color: var(--ink-2); }
+/* the pictures come alive with their tile (delays follow the tile's --d) */
 .mi * { transform-box: fill-box; }
 .mcard .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
 .slide.active .mi-bird { animation: mi-land 2.2s cubic-bezier(.2, .7, .3, 1) var(--t) both; }
@@ -824,11 +825,51 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.active .mi-rain path { animation: mi-drop 1.5s linear calc(var(--t) + var(--k, 0s)) infinite; }
 .mi-rain path:nth-child(2) { --k: .5s; } .mi-rain path:nth-child(3) { --k: .25s; } .mi-rain path:nth-child(4) { --k: .9s; } .mi-rain path:nth-child(5) { --k: 1.1s; }
 @keyframes mi-drop { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } to { transform: translateY(80px); opacity: 0; } }
-.mi-dots circle { transform-origin: 50% 50%; opacity: 0; }
-.slide.active .mi-dots circle { animation: pop .5s var(--ease) calc(var(--t) + .3s + var(--i) * .3s) both, mi-bob 1.4s ease-in-out calc(var(--t) + 1.4s + var(--i) * .2s) infinite alternate; }
-.mi-dots circle:nth-child(1) { --i: 0; } .mi-dots circle:nth-child(2) { --i: 1; } .mi-dots circle:nth-child(3) { --i: 2; }
-@keyframes mi-bob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-.embed .mi-dots circle, .all .mi-dots circle { opacity: 1; }
+.mi-b { transform-origin: 50% 100%; } .mi-h { transform-origin: 0 50%; }
+.slide.active .mi-b { animation: grow .7s var(--ease) calc(var(--t) + .5s + var(--i) * .25s) both; }
+.slide.active .mi-h { animation: mi-span .6s var(--ease) calc(var(--t) + .5s + var(--i) * .25s) both; }
+@keyframes mi-span { from { transform: scaleX(0); } }
+.mi-roof, .mi-arrow { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.slide.active .mi-arrow { animation: draw .5s var(--ease) var(--t) both; }
+.mi-arrow-h, .mi-c { opacity: 0; }
+.slide.active .mi-arrow-h { animation: fadein .3s ease calc(var(--t) + .45s) both; }
+.slide.active .mi-roof { animation: draw .9s var(--ease) calc(var(--t) + 1.5s) both; }
+.slide.active .mi-c { animation: pop .6s var(--ease) calc(var(--t) + 2.5s) both; }
+.mi-apples circle, .mi-bloom g { transform-origin: 50% 50%; opacity: 0; }
+.slide.active :is(.mi-apples circle, .mi-bloom g) { animation: pop .5s var(--ease) calc(var(--t) + .3s + var(--i) * .2s) both; }
+.slide.active .mi-fall { animation: mi-fall 4.5s cubic-bezier(.5, 0, .8, .6) calc(var(--t) + 1.4s) infinite; }
+@keyframes mi-fall { 0%, 30% { transform: translateY(0); opacity: 1; } 52% { transform: translateY(45px); } 58% { transform: translateY(38px); } 64%, 88% { transform: translateY(45px); opacity: 1; } 100% { transform: translateY(45px); opacity: 0; } }
+.slide.active .mi-bee { animation: mi-bee 5s ease-in-out var(--t) infinite; }
+@keyframes mi-bee { 0% { transform: translate(0, 0); } 25% { transform: translate(-60px, -26px); } 50% { transform: translate(-96px, 6px); } 75% { transform: translate(-40px, 22px); } 100% { transform: translate(0, 0); } }
+.mi-dust circle, .mi-fresh circle { opacity: 0; }
+.slide.active .mi-dust circle { animation: mi-dust 3s ease-in calc(var(--t) + var(--k)) infinite; }
+@keyframes mi-dust { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: .8; } 100% { transform: translateX(90px); opacity: 0; } }
+.slide.active .mi-fresh circle { animation: mi-fresh 3s ease-out calc(var(--t) + var(--k)) infinite; }
+@keyframes mi-fresh { 0% { transform: translateX(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateX(46px); opacity: 0; } }
+.mi-swing { transform-box: view-box; transform-origin: 130px 104px; }
+.slide.active .mi-swing { animation: mi-rock 2.6s ease-in-out infinite alternate; }
+@keyframes mi-rock { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+.mi-sw { transform-box: view-box; transform-origin: 164px 60px; }
+.slide.active .mi-sw { animation: mi-sw 1.6s ease-in-out infinite alternate; }
+@keyframes mi-sw { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+.mi-waves path { opacity: 0; }
+.slide.active .mi-waves path { animation: mi-wave 1.8s ease-out calc(var(--t) + var(--k)) infinite; }
+@keyframes mi-wave { from { transform: translateX(0); opacity: .9; } to { transform: translateX(50px); opacity: 0; } }
+.slide.active .mi-car { animation: mbob .25s ease-in-out infinite alternate; }
+.mi-flame { transform-origin: 50% 100%; }
+.slide.active .mi-flame { animation: mi-flick .35s ease-in-out infinite alternate; }
+@keyframes mi-flick { from { transform: scale(1, 1); } to { transform: scale(.94, 1.08); } }
+.mi-spark circle { opacity: 0; }
+.slide.active .mi-spark circle { animation: mi-spark 1.5s ease-out calc(var(--t) + var(--k)) infinite; }
+@keyframes mi-spark { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-60px); opacity: 0; } }
+.mi-page { transform-box: view-box; transform-origin: 130px 105px; }
+.slide.active .mi-page { animation: mi-page 3.2s ease-in-out calc(var(--t) + .6s) infinite; }
+@keyframes mi-page { 0%, 35% { transform: scaleX(1); } 70%, 100% { transform: scaleX(-1); } }
+.mi-leaf { transform-origin: 0 100%; }
+.slide.active .mi-leaf { animation: pop .6s var(--ease) calc(var(--t) + .4s) both; }
+.embed .mi :is(.mi-apples circle, .mi-bloom g, .mi-dust circle, .mi-fresh circle, .mi-waves path, .mi-spark circle), .all .mi :is(.mi-apples circle, .mi-bloom g, .mi-dust circle, .mi-fresh circle, .mi-waves path, .mi-spark circle) { opacity: 1; }
+.embed .mi :is(.mi-arrow-h, .mi-c), .all .mi :is(.mi-arrow-h, .mi-c) { opacity: 1; }
+.embed .mi :is(.mi-roof, .mi-arrow), .all .mi :is(.mi-roof, .mi-arrow) { stroke-dashoffset: 0; }
 .embed .mi *, .all .mi * { animation: none !important; opacity: initial; stroke-dashoffset: 0; }
 .embed .mi-merc, .all .mi-merc { transform: scaleY(.42); fill: #4f8fb0; } .embed .mi-bulb, .all .mi-bulb { fill: #4f8fb0; }
 .embed .mi-vapor path, .all .mi-vapor path, .embed .mi-rain path, .all .mi-rain path { opacity: .8; }
