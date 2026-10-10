@@ -787,8 +787,8 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .mmore.pop-in { opacity: 0; }
 .slide.active :is(.mcard, .mmore).pop-in { animation: pop .6s var(--ease) calc(var(--d, 0) * 1ms) both; }
 .embed :is(.mcard, .mmore).pop-in, .all :is(.mcard, .mmore).pop-in { opacity: 1; }
-/* Woodway once more, beside the sun, level with the thanks */
-.ende-qr-pos { position: absolute; right: 30px; top: 440px; }
+/* Woodway once more, between the thanks and the sun */
+.ende-qr-pos { position: absolute; left: 700px; top: 440px; }
 .ende-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; }
 .ende-qr span { font: 600 30px/1 var(--serif); color: var(--ch); }
 .ende-qr img { width: 150px; height: 150px; padding: 9px; background: #fff; border-radius: 10px; border: 1px solid var(--paper-line); }
