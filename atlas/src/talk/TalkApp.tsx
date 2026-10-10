@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { loadAtlas } from "@/data/load";
 import { useAtlas } from "@/store";
 import DeckFrame, { type DeckFrameHandle } from "./DeckFrame";
+import { CmdGate } from "./gate";
 import { follow, next, prev, type Cmd, type DeckState, type Pos } from "./navigation";
 import { MAIN_END, SEQUENCE, type AtlasSlideId } from "./sequence";
 
@@ -21,9 +22,9 @@ export default function TalkApp() {
   const [missing, setMissing] = useState(false);
   const [scale, setScale] = useState(fitScale);
   const frame = useRef<DeckFrameHandle>(null);
+  const gate = useRef(new CmdGate());
 
   useEffect(() => {
-    document.documentElement.classList.remove("dark"); // the talk is always the light paper deck
     useAtlas.getState().setLang("de");
     loadAtlas("data/").catch(() => { /* atlas slides report their own missing data */ });
   }, []);
@@ -35,6 +36,8 @@ export default function TalkApp() {
   }, []);
 
   const onState = useCallback((s: DeckState) => {
+    if (!gate.current.accept(s)) return; // late reply to a superseded command
+    setMissing(false);
     setDeck(s);
     setPos((p) => (SEQUENCE[p.k].kind === "deck" ? follow(SEQUENCE, p, s) : p));
   }, []);
@@ -42,16 +45,20 @@ export default function TalkApp() {
 
   const apply = useCallback((r: { pos: Pos; cmd: Cmd }) => {
     setPos(r.pos);
-    if (r.cmd) frame.current?.send(r.cmd);
+    if (r.cmd) { gate.current.begin(r.cmd); frame.current?.send(r.cmd); }
   }, []);
   const go = useCallback((k: number) => {
     const it = SEQUENCE[k];
-    if (!it) return;
+    if (!it || gate.current.busy()) return;
     setPos({ k, step: 0 });
-    if (it.kind === "deck") frame.current?.send({ send: "goto", n: it.i, step: 0 });
+    if (it.kind === "deck") {
+      const cmd = { send: "goto", n: it.i, step: 0 } as const;
+      gate.current.begin(cmd);
+      frame.current?.send(cmd);
+    }
   }, []);
-  const forward = useCallback(() => apply(next(SEQUENCE, pos, deck, atlasSteps)), [apply, pos, deck]);
-  const back = useCallback(() => apply(prev(SEQUENCE, pos, deck, atlasSteps)), [apply, pos, deck]);
+  const forward = useCallback(() => { if (!gate.current.busy()) apply(next(SEQUENCE, pos, deck, atlasSteps)); }, [apply, pos, deck]);
+  const back = useCallback(() => { if (!gate.current.busy()) apply(prev(SEQUENCE, pos, deck, atlasSteps)); }, [apply, pos, deck]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
