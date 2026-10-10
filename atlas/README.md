@@ -2,6 +2,8 @@
 
 The talk's model, cell by cell: forest type, albedo, the temperature effect of one tree, DAC electricity, net share and build-out, 2026–2100, in English and German.
 
+Place search asks OpenStreetMap's Nominatim, and only when Enter is pressed; nothing else leaves the page.
+
     uv run python atlas/export_atlas.py   # model → public/data (run after a model change)
     cd atlas && npm install
     npm run dev                           # http://localhost:5173

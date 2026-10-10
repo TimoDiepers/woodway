@@ -6,10 +6,15 @@ import path from "node:path";
 const map = vi.hoisted(() => ({ props: {} as Record<string, unknown> }));
 vi.mock("@/map/AtlasMap", () => ({ default: (p: Record<string, unknown>) => { map.props = p; return <div data-testid="map" />; } }));
 const DIR = path.resolve(__dirname, "../public/data/");
-globalThis.fetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
+const BERLIN = [{ display_name: "Berlin, Deutschland", lat: "52.5170365", lon: "13.3888599" }];
+globalThis.fetch = (async (url: string) =>
+  String(url).startsWith("https://nominatim.openstreetmap.org/")
+    ? new Response(JSON.stringify(BERLIN))
+    : new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
 
 import App from "@/App";
 import { useAtlas } from "@/store";
+import { cellAt } from "@/map/lookup";
 
 describe("App", () => {
   it("shows the map, the layer list and the legend", async () => {
@@ -60,6 +65,18 @@ describe("projection", () => {
     act(() => useAtlas.getState().setLang("de"));
     expect(screen.getByRole("button", { name: "Karte" })).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("en"));
+  });
+});
+
+describe("place search", () => {
+  it("picking a result selects its cell and flies there", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    await userEvent.type(screen.getByRole("searchbox", { name: "Search a place" }), "Berlin{Enter}");
+    await userEvent.click(await screen.findByRole("button", { name: "Berlin, Deutschland" }));
+    expect(useAtlas.getState().cell).toBe(cellAt(13.3888599, 52.5170365));
+    expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365 });
+    act(() => useAtlas.getState().setCell(null));
   });
 });
 

@@ -16,6 +16,8 @@ import { CellPanel } from "@/ui/CellPanel";
 import { SiteButtons } from "@/ui/SiteButtons";
 import { GlobalStrip } from "@/ui/GlobalStrip";
 import { MobileSheet } from "@/ui/MobileSheet";
+import { PlaceSearch, type Place } from "@/ui/PlaceSearch";
+import { cellAt } from "@/map/lookup";
 
 export default function App() {
   const t = useT();
@@ -37,6 +39,11 @@ export default function App() {
   if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
   const layer = layerById(s.layer);
   const pick = (id: LayerId) => s.setLayer(id);
+  const goTo = (p: Place) => {
+    const c = cellAt(p.lon, p.lat);
+    s.setCell(c !== null && atlas.f.land[c] ? c : null);
+    setFlyTo({ lon: p.lon, lat: p.lat });
+  };
   const ch = layer.group === "dac" ? "dac" : "baeume";
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -48,6 +55,7 @@ export default function App() {
         <div className="pointer-events-auto mt-2"><SiteButtons atlas={atlas} onPick={(c, site) => { s.setCell(c); setFlyTo({ lon: site.lon, lat: site.lat }); }} /></div>
       </div>
       <aside className="panel absolute left-4 top-32 max-h-[calc(100%-13.5rem)] w-60 overflow-auto p-3 max-md:hidden">
+        {wide && <div className="mb-3"><PlaceSearch onPick={goTo} /></div>}
         <LayerPicker value={s.layer} onChange={pick} />
         <div className="mt-4 border-t border-[var(--paper-line)] pt-3"><Legend atlas={atlas} layer={layer} /></div>
       </aside>
@@ -67,6 +75,7 @@ export default function App() {
       </div>
       {!wide && (
         <MobileSheet title={t("app.title")}>
+          <div className="mb-3"><PlaceSearch onPick={goTo} /></div>
           {s.cell !== null
             ? <CellPanel atlas={atlas} cell={s.cell} year={s.year} onClose={() => s.setCell(null)} />
             : <><LayerPicker value={s.layer} onChange={pick} /><div className="mt-4"><SourceLine>{t(layer.source)}</SourceLine></div><div className="mt-4 border-t border-[var(--paper-line)] pt-3"><GlobalStrip atlas={atlas} year={s.year} /></div></>}
