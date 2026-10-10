@@ -4,11 +4,11 @@ import { useAtlas } from "@/store";
 import DeckFrame, { type DeckFrameHandle } from "./DeckFrame";
 import { CmdGate } from "./gate";
 import { follow, next, prev, type Cmd, type DeckState, type Pos } from "./navigation";
-import { MAIN_END, SEQUENCE, type AtlasSlideId } from "./sequence";
+import { MAIN_END, SEQUENCE } from "./sequence";
+import { SLIDES, atlasSteps } from "./slides";
+import AtlasSlide from "./AtlasSlide";
+import type { Atlas } from "@/data/types";
 
-// Filled in with the atlas slides (Task 4): clicks per slide and the speaker notes.
-const atlasSteps = (_id: AtlasSlideId): number => 0;
-const ATLAS_NOTES: Partial<Record<AtlasSlideId, string>> = {};
 
 const NEXT_KEYS = new Set(["ArrowRight", " ", "PageDown", "Enter"]);
 const PREV_KEYS = new Set(["ArrowLeft", "PageUp", "Backspace"]);
@@ -21,12 +21,14 @@ export default function TalkApp() {
   const [notesOpen, setNotesOpen] = useState(false);
   const [missing, setMissing] = useState(false);
   const [scale, setScale] = useState(fitScale);
+  const [atlas, setAtlas] = useState<Atlas | null>(null);
+  const [atlasFailed, setAtlasFailed] = useState(false);
   const frame = useRef<DeckFrameHandle>(null);
   const gate = useRef(new CmdGate());
 
   useEffect(() => {
     useAtlas.getState().setLang("de");
-    loadAtlas("data/").catch(() => { /* atlas slides report their own missing data */ });
+    loadAtlas("data/").then(setAtlas).catch(() => setAtlasFailed(true));
   }, []);
 
   useEffect(() => {
@@ -63,6 +65,8 @@ export default function TalkApp() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;   // typing in the atlas search must not turn pages
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) && !(el instanceof HTMLInputElement && el.type === "range")) return;
       if (NEXT_KEYS.has(e.key)) { e.preventDefault(); forward(); }
       else if (PREV_KEYS.has(e.key)) { e.preventDefault(); back(); }
       else if (e.key === "Home") { e.preventDefault(); go(0); }
@@ -79,7 +83,8 @@ export default function TalkApp() {
 
   const item = SEQUENCE[pos.k];
   const atlasShown = item.kind === "atlas";
-  const notes = item.kind === "atlas" ? ATLAS_NOTES[item.id] : undefined;
+  const notes = item.kind === "atlas" ? SLIDES[item.id].notes : undefined;
+  const def = item.kind === "atlas" ? SLIDES[item.id] : null;
 
   return (
     <div className="talk-stage" onClick={forward}>
@@ -87,15 +92,17 @@ export default function TalkApp() {
         <div style={{ visibility: atlasShown ? "hidden" : "visible" }}>
           <DeckFrame ref={frame} onState={onState} onMissing={onMissing} />
         </div>
-        {item.kind === "atlas" && (
-          <section className="rslide" data-atlas={item.id} data-step={pos.step}><h2>{item.id}</h2></section>
-        )}
+        {def && (atlas
+          ? <AtlasSlide def={def} atlas={atlas} step={pos.step} num={pos.k + 1} />
+          : <section className="rslide" data-ch={def.ch}><header className="sh"><h2>{def.title}</h2></header>
+              <p role={atlasFailed ? "alert" : undefined}>{atlasFailed ? "Die Atlas-Daten fehlen: erst atlas/export_atlas.py ausführen." : "Atlas wird geladen …"}</p></section>)}
       </div>
       {missing && <p role="alert" className="talk-missing">Das HTML-Deck fehlt: erst python deck/build.py ausführen.</p>}
+      {def && <div className="talk-ground" data-ch={def.ch ?? "baeume"} />}
       <div className="talk-progress" style={{ transform: `scaleX(${pos.k / (SEQUENCE.length - 1)})` }} />
       <div className={"talk-drawer" + (notesOpen ? " open" : "")} aria-live="polite" onClick={(e) => e.stopPropagation()}>
         <h5>Sprechernotizen</h5>
-        {notes ? <p>{notes}</p> : <p className="q">{item.kind === "atlas" ? "Keine Notizen." : "Notizen dieser Folie stehen im HTML-Deck."}</p>}
+        {notes ? notes.map((n, i) => <p key={i}>{n}</p>) : <p className="q">{item.kind === "atlas" ? "Keine Notizen." : "Notizen dieser Folie stehen im HTML-Deck."}</p>}
       </div>
     </div>
   );
