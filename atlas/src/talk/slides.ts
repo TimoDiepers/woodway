@@ -31,7 +31,7 @@ const albedo: AtlasSlideDef = {
     return `Wo Bäume kühlen (${gha(g.kuehlt)} Gha), bleiben ${pct(netShareArea(at, 2100, true))} ihrer CO₂-Wirkung; über alle ${gha(g.alle)} Gha wiederbewaldbarer Fläche nur ${pct(netShareArea(at, 2100, false))}.`;
   },
   source: `${MODEL_SRC} Albedo: Duveiller et al. 2018.`,
-  notes: ["Anteil der CO₂-Wirkung, der nach dem Albedo-Effekt übrig bleibt: nahe 100 % in den Tropen, deutlich weniger oder negativ dort, wo ein Wald den Boden dunkler macht."],
+  notes: ["Anteil der CO₂-Wirkung, der nach dem Albedo-Effekt übrig bleibt: hoch in den Tropen, deutlich weniger oder negativ dort, wo ein Wald den Boden dunkler macht."],
 };
 const dacStrom: AtlasSlideDef = {
   id: "dacStrom", title: "DAC wird mit dem Strom sauber", ch: "dac", layer: "dacNet", years: [2026, 2040, 2070],

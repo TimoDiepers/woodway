@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Atlas } from "@/data/types";
 import { layerById } from "@/model/layers";
-import { cellAt } from "@/map/lookup";
 import AtlasMap from "@/map/AtlasMap";
 import { useAtlas } from "@/store";
 import { CellPanel } from "@/ui/CellPanel";
 import { GlobalStrip } from "@/ui/GlobalStrip";
 import { LayerPicker } from "@/ui/LayerPicker";
 import { Legend } from "@/ui/Legend";
-import { PlaceSearch, type Place } from "@/ui/PlaceSearch";
 import { TimeSlider } from "@/ui/TimeSlider";
 import { SourceLine } from "@/ui/deck/SourceLine";
 import { Takeaway } from "@/ui/deck/Takeaway";
@@ -41,20 +39,19 @@ function useAnimatedYear(target: number): number {
   return year;
 }
 
-export default function AtlasSlide({ def, atlas, step, num }: { def: AtlasSlideDef; atlas: Atlas; step: number; num?: number }) {
+/** Keyed by slide: each slide starts at its own first year instead of running there from the previous one. */
+export default function AtlasSlide(p: { def: AtlasSlideDef; atlas: Atlas; step: number }) {
+  return <SlideBody key={p.def.id} {...p} />;
+}
+
+function SlideBody({ def, atlas, step }: { def: AtlasSlideDef; atlas: Atlas; step: number }) {
   const store = useAtlas();
-  const [flyTo, setFlyTo] = useState<{ lon: number; lat: number } | null>(null);
   const target = def.years[Math.max(0, Math.min(def.years.length - 1, step))];
   const animated = useAnimatedYear(target);
   const free = !!def.free;
   const layer = layerById(free ? store.layer : def.layer);
   const year = free ? store.year : animated;
   const sites = useMemo(() => (def.sitesFrom !== undefined && step >= def.sitesFrom ? atlas.meta.sites : []), [def.sitesFrom, step, atlas]);
-  const goTo = (p: Place) => {
-    const c = cellAt(p.lon, p.lat);
-    store.setCell(c !== null && atlas.f.land[c] ? c : null);
-    setFlyTo({ lon: p.lon, lat: p.lat });
-  };
   const stop = (e: { stopPropagation(): void }) => e.stopPropagation();
 
   return (
@@ -63,11 +60,10 @@ export default function AtlasSlide({ def, atlas, step, num }: { def: AtlasSlideD
       <div className="rmap" onClick={free ? stop : undefined}>
         <AtlasMap atlas={atlas} layer={layer} year={year} cell={free ? store.cell : null}
           onCell={free ? store.setCell : () => {}} projection="mercator" dark={false}
-          sites={sites} initialView={VIEW} flyTo={flyTo} />
+          sites={sites} initialView={VIEW} />
         {free ? (
           <>
             <aside className="panel rpanel left">
-              <div className="mb-2"><PlaceSearch onPick={goTo} /></div>
               <LayerPicker value={store.layer} onChange={store.setLayer} />
             </aside>
             {store.cell !== null
@@ -85,7 +81,6 @@ export default function AtlasSlide({ def, atlas, step, num }: { def: AtlasSlideD
       </div>
       <Takeaway ch={def.ch} size="slide">{def.takeaway(atlas, step)}</Takeaway>
       <SourceLine>{def.source}</SourceLine>
-      {num !== undefined && <span className="num">{num}</span>}
     </section>
   );
 }

@@ -66,7 +66,7 @@ export default function TalkApp() {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const el = e.target as HTMLElement | null;   // typing in the atlas search must not turn pages
-      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) && !(el instanceof HTMLInputElement && el.type === "range")) return;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(el.tagName))) return;
       if (NEXT_KEYS.has(e.key)) { e.preventDefault(); forward(); }
       else if (PREV_KEYS.has(e.key)) { e.preventDefault(); back(); }
       else if (e.key === "Home") { e.preventDefault(); go(0); }
@@ -93,7 +93,7 @@ export default function TalkApp() {
           <DeckFrame ref={frame} onState={onState} onMissing={onMissing} />
         </div>
         {def && (atlas
-          ? <AtlasSlide def={def} atlas={atlas} step={pos.step} num={pos.k + 1} />
+          ? <AtlasSlide def={def} atlas={atlas} step={pos.step} />
           : <section className="rslide" data-ch={def.ch}><header className="sh"><h2>{def.title}</h2></header>
               <p role={atlasFailed ? "alert" : undefined}>{atlasFailed ? "Die Atlas-Daten fehlen: erst atlas/export_atlas.py ausführen." : "Atlas wird geladen …"}</p></section>)}
       </div>

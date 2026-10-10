@@ -4,7 +4,8 @@ import path from "node:path";
 import { loadAtlas } from "@/data/load";
 import type { Atlas } from "@/data/types";
 
-vi.mock("@/map/AtlasMap", () => ({ default: () => <div data-testid="map" /> }));
+const seen = vi.hoisted(() => ({ year: 0 }));
+vi.mock("@/map/AtlasMap", () => ({ default: (p: { year: number }) => { seen.year = p.year; return <div data-testid="map" />; } }));
 import AtlasSlide from "@/talk/AtlasSlide";
 import { SLIDES, atlasSteps } from "@/talk/slides";
 
@@ -28,6 +29,18 @@ describe("AtlasSlide", () => {
   it("albedo slide gives both area-level shares", () => {
     const { container } = render(<AtlasSlide def={SLIDES.albedo} atlas={at} step={0} />);
     expect(container.querySelector(".takeaway")!.textContent).toMatch(/Wo Bäume kühlen \(0,39 Gha\), bleiben 57 % ihrer CO₂-Wirkung; über alle 0,83 Gha wiederbewaldbarer Fläche nur 12 %\./);
+  });
+  it("a new slide starts at its own first year, without running there", () => {
+    const { rerender, container } = render(<AtlasSlide def={SLIDES.albedo} atlas={at} step={0} />);
+    expect(seen.year).toBe(2100);
+    rerender(<AtlasSlide def={SLIDES.dacStrom} atlas={at} step={0} />);
+    expect(seen.year).toBe(2026);
+    expect(container.querySelector(".ryear")!.textContent).toBe("2026");
+  });
+  it("shows no slide number and no place search on the free slide", () => {
+    const { container } = render(<AtlasSlide def={SLIDES.atlas} atlas={at} step={0} />);
+    expect(container.querySelector(".num")).toBeNull();
+    expect(container.querySelector("input[type=search], input[type=text]")).toBeNull();
   });
   it("counts clicks: years plus the sites click", () => {
     expect(atlasSteps("jedeZelle")).toBe(3);
