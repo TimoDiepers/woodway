@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import Map, { Layer as MLayer, Marker, Source, type MapRef, type MapLayerMouseEvent } from "react-map-gl/maplibre";
-import type { ImageSource } from "maplibre-gl";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Map, { Layer as MLayer, Marker, Source, type MapRef, type MapLayerMouseEvent, type SourceProps } from "react-map-gl/maplibre";
+import type { CanvasSource, CanvasSourceSpecification, Map as MaplibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Atlas } from "@/data/types";
 import type { Layer } from "@/model/layers";
 import { paperBasemap, paperBasemapDark } from "@/lib/mapStyle";
-import { cellColors, mercatorImage, IMAGE_COORDS, IMG_W, IMG_H } from "./paint";
+import { cellColors, paintHexView, IMAGE_COORDS } from "./paint";
+import { clampBounds } from "./hex";
 import { cellAt, cellCenter } from "./lookup";
 import Borders from "./Borders";
 
@@ -19,58 +20,75 @@ export interface AtlasMapProps {
   initialView?: { longitude: number; latitude: number; zoom: number };
 }
 
-const EMPTY = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+type Coords = typeof IMAGE_COORDS;
+
+// The painted image reaches this far beyond the view (share of its span per side), so a short pan or zoom
+// out stays covered until the repaint at its end.
+const MARGIN = 0.15;
+// A painting larger than this is drawn at a lower resolution (texture size, memory, paint time).
+const MAX_SIDE = 4096, MAX_PX = 10e6;
+const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+
+/** The image for the current view: bounds clamped to the paintable world, canvas size at device pixels. */
+function viewImage(map: MaplibreMap) {
+  const v = map.getBounds();
+  const [w0, s0, e0, n0] = [v.getWest(), v.getSouth(), v.getEast(), v.getNorth()];
+  const mx = MARGIN * (e0 - w0), my = MARGIN * (n0 - s0);
+  const b = clampBounds({ west: w0 - mx, south: s0 - my, east: e0 + mx, north: n0 + my });
+  const world = 512 * 2 ** map.getZoom() * (window.devicePixelRatio || 1);   // the world's width in device px
+  let w = (world * (b.east - b.west)) / 360, h = (world * (mercY(b.north) - mercY(b.south))) / (2 * Math.PI);
+  const k = Math.min(1, MAX_SIDE / w, MAX_SIDE / h, Math.sqrt(MAX_PX / (w * h)));
+  w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+  const coords: Coords = [[b.west, b.north], [b.east, b.north], [b.east, b.south], [b.west, b.south]];
+  return { b, w, h, coords };
+}
 
 export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, projection = "globe", dark = false,
   sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 } }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
-  const canvas = useMemo(() => { const c = document.createElement("canvas"); c.width = IMG_W; c.height = IMG_H; return c; }, []);
-  const buffers = useMemo(() => ({ colors: new Uint32Array(360 * 720), img: new Uint32Array(IMG_W * IMG_H) }), []);
+  // The painting goes straight from this canvas to the GPU (a maplibre canvas source, not an encoded image).
+  const canvas = useMemo(() => document.createElement("canvas"), []);
   const [loaded, setLoaded] = useState(false);
-  const urlRef = useRef<string | null>(null);
-  const applied = useRef<{ src: ImageSource | null; url: string | null }>({ src: null, url: null });
+  // where the canvas sits; a theme switch re-adds the source from these props and the canvas as it is
+  const [coords, setCoords] = useState<Coords>(IMAGE_COORDS);
   const pending = useRef(0);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const latest = useRef({ atlas, layer, year });
+  latest.current = { atlas, layer, year };
+  const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; colors: Uint32Array } | null>(null);
 
-  useEffect(() => () => {
-    pending.current++;
-    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-  }, []);
+  useEffect(() => () => { pending.current++; }, []);
 
   useEffect(() => {
     if (flyTo) mapRef.current?.flyTo({ center: [flyTo.lon, flyTo.lat], zoom: 4, duration: 1200 });
   }, [flyTo]);
 
-  // Repaint on layer/year change: one paint per animation frame, the latest request wins.
-  useEffect(() => {
-    if (!loaded) return;
+  // Paint the view: one paint per animation frame, the latest request wins. The cells' colours are kept
+  // until layer or year change; a moved view only redraws the hexagons.
+  const repaint = useCallback(() => {
     const ticket = ++pending.current;
-    const raf = requestAnimationFrame(() => {
-      if (ticket !== pending.current) return;
-      cellColors(atlas, layer, year, buffers.colors);
-      mercatorImage(buffers.colors, buffers.img);
-      const ctx = (ctxRef.current ??= canvas.getContext("2d"))!;
-      ctx.putImageData(new ImageData(new Uint8ClampedArray(buffers.img.buffer), IMG_W, IMG_H), 0, 0);
-      canvas.toBlob((blob) => {
-        if (!blob || ticket !== pending.current) return;
-        const old = urlRef.current;
-        urlRef.current = URL.createObjectURL(blob);
-        apply();
-        if (old) URL.revokeObjectURL(old);
-      });
+    requestAnimationFrame(() => {
+      const map = mapRef.current?.getMap();
+      if (ticket !== pending.current || !map) return;
+      const t0 = performance.now();
+      const { atlas, layer, year } = latest.current;
+      let cc = colours.current;
+      if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year)
+        cc = colours.current = { atlas, layer, year, colors: cellColors(atlas, layer, year, cc?.colors) };
+      const v = viewImage(map);
+      canvas.width = v.w; canvas.height = v.h;
+      paintHexView(canvas.getContext("2d", { willReadFrequently: true })!, v.w, v.h, v.b, atlas, layer, year, cc.colors);
+      performance.measure?.("atlas:paint", { start: t0 });   // read by the headless check
+      const src = map.getSource("atlas") as CanvasSource | undefined;
+      if (src?.play) {
+        src.setCoordinates(v.coords);
+        src.play(); src.pause();   // uploads the canvas once (an animate: false source keeps its texture otherwise)
+      }
+      setCoords(v.coords);
+      performance.measure?.("atlas:upload", { start: t0 });
     });
-    return () => cancelAnimationFrame(raf);
-  }, [atlas, layer, year, loaded, canvas, buffers]);
+  }, [canvas]);
 
-  // A theme switch replaces the map style; react-map-gl then adds a fresh image source with the empty
-  // placeholder. Each source (and each new painting) gets the latest painted image exactly once.
-  function apply() {
-    const src = mapRef.current?.getMap().getSource("atlas") as ImageSource | undefined;
-    if (!src || !urlRef.current) return;
-    if (applied.current.src === src && applied.current.url === urlRef.current) return;
-    src.updateImage({ url: urlRef.current, coordinates: IMAGE_COORDS });
-    applied.current = { src, url: urlRef.current };
-  }
+  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, projection, loaded, repaint]);
 
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180
@@ -86,7 +104,8 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       mapStyle={dark ? paperBasemapDark : paperBasemap}
       projection={projection}
       onLoad={() => setLoaded(true)}
-      onSourceData={(e) => { if (e.sourceId === "atlas") apply(); }}
+      onMoveEnd={() => repaint()}
+      onResize={() => repaint()}
       onClick={(e) => onCell(pick(e))}
       onMouseMove={onHover ? (e) => onHover(pick(e), e.point.x, e.point.y) : undefined}
       onMouseLeave={onHover ? () => onHover(null, 0, 0) : undefined}
@@ -95,7 +114,8 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       style={{ position: "absolute", inset: 0, background: "rgb(var(--color-paper))" }}
       attributionControl={{ compact: true }}
     >
-      <Source id="atlas" type="image" url={EMPTY} coordinates={IMAGE_COORDS}>
+      {/* react-map-gl types <Source> without canvas sources; it passes them on to maplibre like any other */}
+      <Source {...({ id: "atlas", type: "canvas", canvas, coordinates: coords, animate: false } as CanvasSourceSpecification as unknown as SourceProps)}>
         <MLayer id="atlas-layer" type="raster" paint={{ "raster-resampling": "nearest", "raster-opacity": 0.95, "raster-fade-duration": 0 }} />
       </Source>
       <Borders dark={dark} />
