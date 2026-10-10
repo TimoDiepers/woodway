@@ -37,7 +37,7 @@ describe("App on a phone", () => {
     const tools = screen.getByRole("toolbar", { name: "Map tools" });
     // only the four tools reached for while exploring; the rest waits behind More, named in full
     expect(within(tools).getAllByRole("button").map((b) => b.getAttribute("aria-label")))
-      .toEqual(["Search a place", "Back to the whole world", "How to read this map", "More"]);
+      .toEqual(["More", "How to read this map", "Back to the whole world", "Search a place"]);
     await userEvent.click(within(tools).getByRole("button", { name: "More" }));
     const more = await screen.findByRole("dialog", { name: "More" });
     for (const name of ["Deutsch", "Flat map", "Dark"])

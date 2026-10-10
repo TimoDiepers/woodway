@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Compass, Ellipsis, ExternalLink, HelpCircle, Presentation, Search } from "lucide-react";
 import type { Layer } from "@/model/layers";
 import { useAtlas } from "@/store";
@@ -39,17 +39,22 @@ export function ToolColumn({ layer, compact, onPlace, onRecenter }: { layer: Lay
       trigger={tool(id, label, icon, compact ? () => show(open === id ? null : id) : undefined, open === id)}>{body}</ToolPanel>
   );
 
+  const items = [
+    // on a phone the search drops from the top: rising from the bottom it would sit under the keyboard
+    <Fragment key="search">{panel("search", t("search.label"), <Search size={18} aria-hidden />, { title: t("search.label") },
+      <PlaceSearch autoFocus onPick={(p) => { show(null); onPlace(p); }} />, { edge: "top" })}</Fragment>,
+    <Fragment key="recenter">{tool("recenter", t("tools.recenter"), <Compass size={18} aria-hidden />, () => { show(null); onRecenter(); })}</Fragment>,
+    <Fragment key="help">{panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, { title: t("help.title"), sub: t("help.sub") },
+      <HelpContent touch={touch} source={t(layer.source)} />, { wide: true })}</Fragment>,
+    ...(compact ? [] : [<span key="sep" className="mx-0.5 h-5 w-px bg-[var(--paper-line)]" aria-hidden />]),
+    <Fragment key="more">{panel("more", t("tools.more"), <Ellipsis size={18} aria-hidden />, { title: t("tools.more") }, <MoreMenu />)}</Fragment>,
+  ];
+
   return (
     <div role="toolbar" aria-label={t("tools.label")} aria-orientation={compact ? "vertical" : "horizontal"}
       className={"panel pointer-events-auto flex overflow-hidden " + (compact ? "flex-col divide-y divide-[var(--paper-line)] rounded-xl" : "items-center gap-0.5 p-1")}>
-      {/* on a phone the search drops from the top: rising from the bottom it would sit under the keyboard */}
-      {panel("search", t("search.label"), <Search size={18} aria-hidden />, { title: t("search.label") },
-        <PlaceSearch autoFocus onPick={(p) => { show(null); onPlace(p); }} />, { edge: "top" })}
-      {tool("recenter", t("tools.recenter"), <Compass size={18} aria-hidden />, () => { show(null); onRecenter(); })}
-      {panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, { title: t("help.title"), sub: t("help.sub") },
-        <HelpContent touch={touch} source={t(layer.source)} />, { wide: true })}
-      {!compact && <span className="mx-0.5 h-5 w-px bg-[var(--paper-line)]" aria-hidden />}
-      {panel("more", t("tools.more"), <Ellipsis size={18} aria-hidden />, { title: t("tools.more") }, <MoreMenu />)}
+      {/* on a phone the column reads from the top corner down: More first, search last */}
+      {compact ? items.reverse() : items}
     </div>
   );
 }
