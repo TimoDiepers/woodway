@@ -1272,7 +1272,7 @@ class Deck {
     else if (d.cmd === 'replay') this.go(this.i, this.step);
     else if (d.cmd === 'goto' && Number.isInteger(d.n)) {
       const n = Math.max(0, Math.min(this.slides.length - 1, d.n));
-      this.go(n, d.step === 'end' ? this.steps(this.slides[n]) : Number.isInteger(d.step) ? d.step : 0);
+      this.go(n, d.step === 'end' ? 'end' : Number.isInteger(d.step) ? d.step : 0);   // 'end' like prev(): the last state, drawn without replaying the slide
     }
     else if (d.cmd === 'hello') this.sync();
   }

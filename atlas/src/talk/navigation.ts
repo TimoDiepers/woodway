@@ -38,7 +38,11 @@ export function prev(seq: Item[], pos: Pos, deck: DeckState | null, atlasSteps: 
   }
   if (pos.step > 0) return { pos: { k: pos.k, step: pos.step - 1 }, cmd: null };
   if (!before) return stay;
-  if (before.kind === "deck") return { pos: { k: pos.k - 1, step: 0 }, cmd: { send: "goto", n: before.i, step: "end" } };
+  if (before.kind === "deck") {
+    // The deck slide is already showing its last state (the atlas slide only covered it): nothing to send.
+    const there = deck !== null && deck.i === before.i && deck.ni !== deck.i;
+    return { pos: { k: pos.k - 1, step: 0 }, cmd: there ? null : { send: "goto", n: before.i, step: "end" } };
+  }
   return { pos: { k: pos.k - 1, step: atlasSteps(before.id) }, cmd: null };
 }
 

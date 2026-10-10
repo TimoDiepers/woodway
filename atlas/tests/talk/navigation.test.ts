@@ -19,8 +19,12 @@ describe("navigation", () => {
     expect(next(seq, { k: 2, step: 1 }, st(1, 3, 3), steps).pos).toEqual({ k: 2, step: 2 });
     expect(next(seq, { k: 2, step: 2 }, st(1, 3, 3), steps)).toEqual({ pos: { k: 3, step: 0 }, cmd: { send: "goto", n: 2, step: 0 } });
   });
-  it("back into a deck slide lands on its end", () => {
-    expect(prev(seq, { k: 2, step: 0 }, st(1, 3, 3), steps)).toEqual({ pos: { k: 1, step: 0 }, cmd: { send: "goto", n: 1, step: "end" } });
+  it("back into a deck slide that already shows its end sends nothing (no replay)", () => {
+    expect(prev(seq, { k: 2, step: 0 }, st(1, 3, 3), steps)).toEqual({ pos: { k: 1, step: 0 }, cmd: null });
+  });
+  it("back into a deck slide the deck has left lands on its end", () => {
+    expect(prev(seq, { k: 2, step: 0 }, st(0, 0, 1), steps)).toEqual({ pos: { k: 1, step: 0 }, cmd: { send: "goto", n: 1, step: "end" } });
+    expect(prev(seq, { k: 2, step: 0 }, st(1, 1, 3), steps)).toEqual({ pos: { k: 1, step: 0 }, cmd: { send: "goto", n: 1, step: "end" } });
   });
   it("ignores keys until the deck answered", () => {
     expect(next(seq, { k: 0, step: 0 }, null, steps)).toEqual({ pos: { k: 0, step: 0 }, cmd: null });
