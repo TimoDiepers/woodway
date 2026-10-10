@@ -1,4 +1,5 @@
 """The atlas export reproduces the model it was cut from."""
+import gzip
 import json
 from pathlib import Path
 
@@ -35,7 +36,22 @@ def test_files_exist_and_are_small():
     assert len(meta["types"]) == 18
     assert meta["years"][0] == 2026 and meta["years"][-1] == 2100
     size = (DATA / "fields.bin").stat().st_size + (DATA / "meta.json").stat().st_size
-    assert size < 40e6  # raw; gzipped well under 6 MB (checked in Task 11)
+    assert size < 40e6  # raw
+    # what the browser downloads: the gzipped fields plus meta.json, gzipped as a server would send it
+    sent = (DATA / "fields.bin.gz").stat().st_size + len(gzip.compress((DATA / "meta.json").read_bytes(), 9))
+    assert sent < 6e6
+
+
+def test_gzipped_fields_are_the_raw_fields_and_reproducible():
+    gz = (DATA / "fields.bin.gz").read_bytes()
+    assert gzip.decompress(gz) == (DATA / "fields.bin").read_bytes()
+    assert gz[4:8] == b"\0\0\0\0"  # mtime 0: the same data gives the same bytes
+
+
+def test_unmeasured_colour_and_three_reference_sites():
+    meta, _ = _load()
+    assert meta["colors"]["unmeasured"] == "#d3ccbc"
+    assert len(meta["reference"]) == 3
 
 
 def test_cooling_area_is_the_talks_039_gha():
@@ -129,6 +145,20 @@ def test_per_cell_fields_equal_their_model_source():
     land = np.isfinite(climate_grid()["t_mean_c"]) | (area > 0)
     np.testing.assert_array_equal(fields["land"], land.astype(np.uint8))
     assert fields["land"][typ].all()
+
+
+@pytest.mark.slow
+def test_measured_field_equals_the_model():
+    from nbs.animations import typical_measured_mask
+    from nbs.map_fields import UNMEASURED
+
+    meta, fields = _load()
+    assert meta["fields"]["measured"]["dtype"] == "u1"
+    np.testing.assert_array_equal(fields["measured"], typical_measured_mask().astype(np.uint8))
+    assert meta["colors"]["unmeasured"] == UNMEASURED
+    # sun and darker exist only where the typical forest's albedo was measured locally
+    typ = fields["type"] > 0
+    assert np.isfinite(fields["sun"][typ & (fields["measured"] == 1)]).all()
 
 
 @pytest.mark.slow

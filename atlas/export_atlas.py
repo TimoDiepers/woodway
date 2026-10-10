@@ -1,7 +1,8 @@
 """Data for the atlas (atlas/public/data): every per-place result of the model on the 0.5 deg grid.
 
 Writes meta.json (grid, curves, palettes, global paths, reference values) and fields.bin (360x720
-fields, float32 or uint8, offsets in meta.json). The browser evaluates years exactly:
+fields, float32 or uint8, offsets in meta.json), plus fields.bin.gz (gzip -9, mtime 0, so the same data
+gives the same bytes), which the browser fetches and inflates; fields.bin stays as the fallback. The browser evaluates years exactly:
   tree:  dT(t) = a * dtCo2_type(t) + b * dtAlbUnit_type(t)   (nbs.aggregate: site factor and albedo
          product scale the two unit curves linearly)
   DAC:   net share interpolated linearly between the LCA base years (nbs.dac._interp does the same).
@@ -10,19 +11,20 @@ fields, float32 or uint8, offsets in meta.json). The browser evaluates years exa
 """
 from __future__ import annotations
 
+import gzip
 import json
 from pathlib import Path
 
 import numpy as np
 
 from nbs.aggregate import _product_no_nan, co2_factor_grid
-from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_alpha_q_product
+from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_alpha_q_product, typical_measured_mask
 from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS
 from nbs.dac import dac_possible, efficiency_grid, energy_grid, lca_vintages
 from nbs.dac_climate import climate_grid
 from nbs.forest_data import reforestable_area_m2
 from nbs.landscape import assign_species
-from nbs.map_fields import CATEGORIES, LAND, SCALES, TOO_COLD
+from nbs.map_fields import CATEGORIES, LAND, SCALES, TOO_COLD, UNMEASURED
 from nbs.pipeline import run_single_tree
 from nbs import albedo_grid
 from nbs.response import convolve_response, green_temperature
@@ -117,6 +119,9 @@ def main() -> None:
     f.add("sun", _by_type(albedo_grid.insolation_grid), "f4")
     f.add("darker", -100.0 * _by_type(albedo_grid.delta_alpha_grid), "f4")
     f.add("light", -typical_alpha_q_product() * _STAND_AREA_M2, "f4")
+    # albedo of the cell's typical forest measured locally; elsewhere sun/darker are NaN and light is
+    # gap-filled -- the deck (b8/b8a) shows measured cells only, so does the atlas
+    f.add("measured", typical_measured_mask().astype(np.uint8), "u1")
     f.add("a", a, "f4")
     f.add("b", b, "f4")
     f.add("elec", np.where(ok, energy_grid("waermepumpe")["strom"], np.nan), "f4")
@@ -143,6 +148,8 @@ def main() -> None:
                           "net2100": float(dt_at(i, j, 2100) / carbon),
                           "dac2026": float(efficiency_grid(2026)[i, j]), "dac2045": float(efficiency_grid(2045)[i, j])})
 
+    assert len(reference) == 3, f"expected the three example sites, got {len(reference)}"
+
     meta = {
         "version": 1,
         "grid": {"nlat": 360, "nlon": 720, "d": 0.5, "lat0": 90.0, "lon0": -180.0},
@@ -157,10 +164,12 @@ def main() -> None:
         "sites": [{"name": s.label, "lat": s.lat, "lon": s.lon, "color": s.color} for s in SITES],
         "scales": SCALES,
         "categories": {"waldtyp": CATEGORIES["waldtyp"]},
-        "colors": {"land": LAND, "tooCold": TOO_COLD},
+        "colors": {"land": LAND, "tooCold": TOO_COLD, "unmeasured": UNMEASURED},
         "reference": reference,
     }
-    (OUT / "fields.bin").write_bytes(b"".join(f.parts))
+    raw = b"".join(f.parts)
+    (OUT / "fields.bin").write_bytes(raw)
+    (OUT / "fields.bin.gz").write_bytes(gzip.compress(raw, compresslevel=9, mtime=0))
     (OUT / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
                                    encoding="utf-8")
     print(f"wrote {OUT}: {f.offset / 1e6:.1f} MB fields, {len(reference)} reference cells")
