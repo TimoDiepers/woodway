@@ -16,6 +16,7 @@ const TEX_MACROS = {
   "\\cq":  "\\textcolor{1b7837}{\\boldsymbol{#1}}",   // CO2 path
   "\\aq":  "\\textcolor{d95f02}{\\boldsymbol{#1}}",   // albedo
   "\\tq":  "\\textcolor{b2182b}{\\boldsymbol{#1}}",   // temperature
+  "\\gq":  "\\textcolor{5f7f48}{\\boldsymbol{#1}}",   // canopy closure
   "\\st":  "\\htmlData{step=#1}{#2}"          // \st{2}{…}: this term appears on click 2
 };
 

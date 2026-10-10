@@ -578,29 +578,29 @@ def carbon_curve_figure(out_path: str) -> str:
 
 
 def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 100.0) -> str:
-    """B8: yearly extra shortwave per full-grown tree as a map, plus the
-    monthly cycle at both sites as the reason why.
+    """B8: yearly extra shortwave per full-grown tree as a map.
 
-    Only locally measured cells are coloured; the rest of the range is grey.
-    (A variant that coloured the latitude-band estimates too and hatched them
-    was tried and dropped: the hatching smeared the whole map.) The colour
-    scale is stretched to vmin..vmax because the annual values cluster at
-    30-100 W -- on a 0-based scale the north-south difference vanishes,
-    although 44 vs 65 W is worth 20 years of t*.
+    Same canvas and the same place as the left map of B8a (the slide before), so
+    the map stays put when the slide changes; the right half is left free for the
+    equation the slide sets there. Only locally measured cells are coloured; the
+    rest of the range is grey. The colour scale is stretched to vmin..vmax because
+    the annual values cluster at 30-100 W -- on a 0-based scale the north-south
+    difference vanishes, although 44 vs 65 W is worth 20 years of t*.
     """
     _heading_font, body_font = _register_fonts()
     _style(body_font)
 
     annual = -typical_alpha_q_product() * _STAND_AREA_M2
-    watts, measured_all = albedo_watts_monthly()
     in_range = species_range_mask()
-    measured = in_range & measured_all
-    estimated = in_range & ~measured_all
+    measured = in_range & albedo_watts_monthly()[1]
+    estimated = in_range & ~measured
     outside = land_mask() & ~in_range
 
     cmap = _ramp_cmap(RAMP_ABSORBED)
     norm = mcolors.Normalize(vmin, vmax)
-    fig, ax_map, ax_cbar, ax_curve = _layout()
+    fig = plt.figure(figsize=(12.0, 5.1), dpi=FIG_DPI)
+    ax_map = fig.add_axes((0.01, 0.24, 0.48, 0.66))
+    ax_cbar = fig.add_axes((0.08, 0.17, 0.34, 0.03))
     _map_base(ax_map, outside, estimated, SITES_VIEW)
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
@@ -609,36 +609,9 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
     cb.outline.set_visible(False)
-    cb.set_label("zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel [W]",
-                 fontsize=12, color=C_INK)
-    fig.patches.append(plt.Rectangle((0.555, 0.115), 0.018, 0.03, transform=fig.transFigure,
-                                     fc=C_RANGE_UNMEASURED, ec="none"))
-    legend_txt = "wiederbewaldbar,\nnicht gemessen"
-    fig.text(0.578, 0.13, legend_txt, fontsize=10, color=C_INK, va="center")
-
-    _clean_axes(ax_curve)
-    x = np.arange(12)
-    top = 0.0
-    for s in SITES:
-        i, j = site_cell(s)
-        series = watts[:, i, j]
-        top = max(top, float(series.max()))
-        ax_curve.plot(x, series, color=s.color, linewidth=2.4, marker=s.marker, ms=6, mfc=s.color,
-                      mec="white", mew=1.0)
-        mean_w = float(annual[i, j])
-        ax_curve.axhline(mean_w, color=s.color, linewidth=1.2, linestyle=(0, (4, 3)), alpha=0.8)
-        ax_curve.text(11.4, mean_w, f"Ø {mean_w:.0f} W", color=C_INK, fontsize=11, ha="left", va="center",
-                      clip_on=False)
-    ax_curve.set_xlim(-0.3, 11.3)
-    ax_curve.set_xticks(x)
-    ax_curve.set_xticklabels([m[0] for m in MONTHS_DE])
-    low = min(0.0, min(float(watts[:, site_cell(s_)[0], site_cell(s_)[1]].min()) for s_ in SITES))
-    ax_curve.set_ylim(low - 6, top * 1.12)
-    ax_curve.axhline(0, color=C_INK_MUTED, linewidth=0.8)
-    ax_curve.set_ylabel("W je Baum")
-    ax_curve.set_title("Jahresgang an den drei Orten", fontsize=13, loc="left", color=C_INK)
-    fig.text(0.69, 0.06, "Lokal gemessen nach Duveiller et al. (2018).\nAusgewachsener typischer Wald statt Wiese oder Acker.",
-             fontsize=10, color=C_INK_MUTED, va="bottom")
+    cb.set_label("je ausgewachsenem Baum, Jahresmittel [W]", fontsize=11, color=C_INK)
+    fig.text(0.02, 0.015, "Grau: wiederbewaldbar, ohne lokale Messung. Lokal gemessen nach Duveiller et al. (2018).",
+             fontsize=10, color=C_INK_MUTED)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)

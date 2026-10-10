@@ -976,3 +976,10 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .eqdef .katex { font-size: 1em; color: var(--ink); }
 /* a quiet aside inside a heading: Woodway, "auf dem Holzweg" in English, is not Brightway */
 .sh h2 .wink { margin: 0 .1em 0 .35em; font: italic 400 22px/1 var(--serif, inherit); letter-spacing: 0; color: var(--muted); vertical-align: .35em; }
+
+/* slide 15: the equation in the free right half of the map figure, each symbol explained in its colour */
+.eqbox { position: absolute; top: 10px; right: 0; width: 640px; z-index: 2; }
+.eqbox .eq { font-size: 30px; text-align: left; }
+.pdef { display: grid; grid-template-columns: 96px 1fr; gap: 10px 14px; margin: 18px 0 0; align-items: baseline; }
+.pdef dt { font-size: 24px; text-align: right; }
+.pdef dd { margin: 0; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }

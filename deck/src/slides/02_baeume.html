@@ -161,17 +161,24 @@
 
 <section class="slide" data-ch="baeume" data-title="Zusätzlich absorbierte Strahlung">
   <header class="sh"><h2>Zusätzlich absorbierte Strahlung je Baum</h2></header>
-  <div class="body">
-    <div class="chart" data-slot-steps="0,1,0" data-chart="b8" data-label="Karte: zusätzlich absorbierte Sonnenstrahlung je Baum; rechts der Jahresgang in Aachen (DE), Joensuu (FI) und Marabá (BR)"></div>
-    <div class="foot">
-      <div class="eq tex rise" style="--d:1800">$$\Delta\dot Q_{\mathrm{Baum}} = A_{\mathrm{Baum}}\,\big\langle \dot q_{\mathrm{kurz}}\,(-\Delta\alpha)\big\rangle\, f(t)$$<p class="eqdef">$A_{\mathrm{Baum}}$ Standfläche je Baum (5 m²) · $\dot q_{\mathrm{kurz}}$ Einstrahlung [W/m²] · $\Delta\alpha$ Albedo Wald − Offenland · $\langle\,\rangle$ Jahresmittel der Monate · $f(t)$ Kronenschluss, 0 bis 1</p></div>
-      <p class="takeaway" data-step="1" style="--d:1600">Je Baum: Aachen 34 W, Joensuu 45 W, Marabá 21 W.</p>
+  <div class="body" style="position:relative">
+    <div class="chart" style="flex:none; height:590px" data-chart="b8" data-label="Karte: zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel"></div>
+    <div class="eqbox rise" style="--d:900">
+      <div class="eq tex">$$\Delta\dot Q_{\mathrm{Baum}} = \bq{A_{\mathrm{Baum}}}\,\big\langle \pc{\dot q_{\mathrm{kurz}}}\,\aq{(-\Delta\alpha)}\big\rangle\, \gq{f(t)}$$</div>
+      <dl class="pdef">
+        <dt>$\bq{A_{\mathrm{Baum}}}$</dt><dd>Standfläche je Baum</dd>
+        <dt>$\pc{\dot q_{\mathrm{kurz}}}$</dt><dd>Einstrahlung an der Oberfläche [W/m²], linke Karte der Vorfolie</dd>
+        <dt>$\aq{-\Delta\alpha}$</dt><dd>wie viel dunkler der Wald ist als Offenland, rechte Karte der Vorfolie</dd>
+        <dt>$\langle\,\rangle$</dt><dd>Monat für Monat multipliziert, dann übers Jahr gemittelt</dd>
+        <dt>$\gq{f(t)}$</dt><dd>Kronenschluss, 0 bis 1; hier ausgewachsen, also 1</dd>
+      </dl>
     </div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:600">Je Baum: Aachen 34 W, Joensuu 45 W, Marabá 21 W.</p></div>
   </div>
   <p class="src">Messdaten wie Vorfolie, Monat für Monat multipliziert (eigene Rechnung); typischer Wald je Zelle. Grau: keine lokale Messung, im Modell mit dem Median des Breitenbandes gefüllt (Annahme).</p>
   <aside class="notes" data-n="15">
     <p class="q">Ausführlich: Die zusätzlich absorbierte Strahlung ist dort am größten, wo Schnee liegt und die Einstrahlung hoch ist: im Jahresmittel Aachen (DE) 34 W, Joensuu (FI) 45 W, Marabá (BR) 21 W je ausgewachsenem Baum. Damit liegen beide Wirkungen vor, in zwei Einheiten: CO₂-Aufnahme in kg, absorbierte Strahlung in W. Wie sie auf das Klima wirken, zeigt das nächste Kapitel.</p>
-    <p>Aachen hat kaum Schnee — dort folgt der Effekt der Sonne, breites Maximum im Sommer. Joensuu hat im April eine Spitze: noch Schnee, Sonne schon hoch. Marabá hat keinen Schnee; dort zählt nur, dass das Kronendach etwas dunkler ist als das Weideland. Im Jahresmittel unterscheiden sich die Orte weniger als im Jahresgang. Zusammen mit dem langsameren Wachstum im Norden entscheidet das später über das Vorzeichen. Grau: wiederbewaldbar, aber ohne lokale Messung.</p>
+    <p>Die Gleichung rechts: Standfläche des Baums mal Einstrahlung mal Albedo-Kontrast, Monat für Monat, mal Kronenschluss. Die Standfläche ist für jeden Baum dieselbe, 5 Quadratmeter; das ist eine Zähleinheit, die beim Kohlenstoff genauso drinsteckt. Aachen hat kaum Schnee — dort folgt der Effekt der Sonne. Joensuu hat im Frühjahr eine Spitze: noch Schnee, Sonne schon hoch. Marabá hat keinen Schnee; dort zählt nur, dass das Kronendach etwas dunkler ist als das Weideland. Im Jahresmittel unterscheiden sich die Orte weniger als im Jahresgang. Zusammen mit dem langsameren Wachstum im Norden entscheidet das später über das Vorzeichen. Grau: wiederbewaldbar, aber ohne lokale Messung.</p>
   </aside>
 </section>
 
