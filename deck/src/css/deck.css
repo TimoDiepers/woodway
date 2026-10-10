@@ -776,6 +776,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 .slide.ende .sunrise { transform: none; transition: none; }
 .slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
+.slide.finale.ende .sunrays, .slide.finale.ende .m-fan { animation: none; }   /* the last slide holds still */
 .slide.ende .more h2 { margin: 0 0 22px; font-size: 48px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
 .slide.ende .more h2 em { font-style: normal; color: #b8573e; }
 .mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
