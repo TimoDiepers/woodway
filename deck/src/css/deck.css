@@ -434,6 +434,23 @@ body:has(#menu.open) #menu-fab { display: none; }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 .embed [data-step].shown, .all [data-step].shown { animation: none !important; opacity: 1; transform: none; top: 0; }
 
+/* slide 8: one effect per click, in the closing slide's picture language; which act globally and which only
+   on site is said last */
+.trees-do .mi { --t: .2s; }
+.td-co2 > g { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.slide.active .td-co2 > g { animation: td-in 3.9s ease-in-out var(--k) infinite; }
+@keyframes td-in { 0% { transform: none; opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(.4); opacity: 0; } }
+.td-light circle { opacity: 0; }
+.slide.active .td-in { animation: td-ray 2.4s linear var(--k) infinite; }
+@keyframes td-ray { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate(116px, 72px); opacity: 0; } }
+.slide.active .td-out { animation: td-back 2.4s linear var(--k) infinite; }
+@keyframes td-back { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(40px, -120px); opacity: 0; } }
+.td-vapor path, .td-wind path { opacity: 0; }
+.slide.active .td-vapor path { animation: td-rise 2.4s ease-out var(--k) infinite; }
+@keyframes td-rise { from { transform: translateY(16px); opacity: 0; } 30% { opacity: .9; } to { transform: translateY(-26px); opacity: 0; } }
+.slide.active .td-wind path { animation: td-blow 2.1s ease-in var(--k) infinite; }
+@keyframes td-blow { 0% { transform: translateX(-30px); opacity: 0; } 25% { opacity: .9; } 100% { transform: translateX(80px); opacity: 0; } }
+.embed .trees-do :is(.td-co2 > g, .td-light circle, .td-vapor path, .td-wind path), .all .trees-do :is(.td-co2 > g, .td-light circle, .td-vapor path, .td-wind path) { opacity: 1; }
 /* slide 9: the local effects step back (last click on slide 9, or the whole of a data-tree="dim" slide) */
 .slide:has(.dimtrigger.shown) .dimmable { opacity: .22 !important; transition: opacity .8s var(--ease); }
 .dimtrigger { display: none; }
