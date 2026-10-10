@@ -483,9 +483,22 @@ body:has(#menu.open) #menu-fab { display: none; }
 }
 
 
-/* merged albedo slide: the reference case starts large and shrinks into its corner */
-.zoomref { transform: translate(0px, 6px) scale(2.05); transition: transform .9s var(--ease); }
-svg:has(.zoomnext.shown) .zoomref { transform: none; }
+/* slide 13: it opens on slide 8's last picture, CO₂ ticked off; then only the tree and the sun stay for the reference
+   case, and that picture shrinks into the first of the four boxes */
+.alb-intro { position: relative; }
+.alb-intro > .schema { position: absolute; inset: 0; width: 100%; height: 100%; }
+.alb-stage { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .9s var(--ease), opacity .7s var(--ease) .25s; z-index: 1; }
+.alb-stage > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.slide:has(.schema [data-step="2"].shown) .alb-stage { transform: scale(.486); opacity: 0; }
+.trees-do.recap *, .alb-check { animation: none !important; }
+.trees-do.recap :is(.pop, .grow) { opacity: 1; transform: none; }
+.trees-do.recap :is(.td-co2 > g, .td-vapor path, .td-dust circle) { opacity: .85; }
+.trees-do.recap .td-light circle { opacity: 0; }
+.trees-do.recap .mi-merc { transform: scaleY(.42); fill: #4f8fb0; } .trees-do.recap .mi-bulb { fill: #4f8fb0; }
+.trees-do.recap .dimmable { opacity: .22; }
+.trees-do.recap .td-lab { transform: translateX(12px); }
+.trees-do.recap > g > :not(:first-child), .alb-check { transition: opacity .6s var(--ease); }
+.slide:has(.alb-on.shown) :is(.trees-do.recap > g > :not(:first-child), .alb-check) { opacity: 0; }
 /* merged forest-type slide: the uptake curves come in as a panel at the right */
 .sidepanel { position: absolute; top: 0; right: 0; bottom: 0; width: 470px; z-index: 3;
   display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 22px;

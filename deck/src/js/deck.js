@@ -1438,6 +1438,8 @@ addEventListener('DOMContentLoaded', () => {
     }
     // slide 8 builds effect by effect; slide 9 shows them all at once
     if (svg.closest('[data-tree="dim"]')) for (const e of svg.querySelectorAll('[data-step]')) e.removeAttribute('data-step');
+    // slide 13 opens on slide 8's last picture: everything there at once, the global effects numbered
+    if (svg.closest('[data-tree="recap"]')) { for (const e of svg.querySelectorAll('[data-step]')) e.removeAttribute('data-step'); svg.classList.add('recap'); }
   });
   for (const svg of deckEl.querySelectorAll('svg.albedo')) drawAlbedo(svg);
   if (window.katex) renderTex(deckEl);
