@@ -3,6 +3,7 @@ import type { LayerId } from "@/model/layers";
 
 export type { LayerId } from "@/model/layers";
 export type Theme = "light" | "dark" | "system";
+export type Projection = "globe" | "mercator";
 
 function stored<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
   try {
@@ -21,6 +22,8 @@ interface AtlasState {
   setLang: (l: "en" | "de") => void;
   theme: Theme;
   setTheme: (t: Theme) => void;
+  projection: Projection;
+  setProjection: (p: Projection) => void;
   layer: LayerId;
   setLayer: (l: LayerId) => void;
   year: number;
@@ -36,6 +39,8 @@ export const useAtlas = create<AtlasState>((set) => ({
   setLang: (lang) => { save("atlas-lang", lang); document.documentElement.lang = lang; set({ lang }); },
   theme: stored("atlas-theme", ["light", "dark", "system"] as const, "system"),
   setTheme: (theme) => { save("atlas-theme", theme); set({ theme }); },
+  projection: stored("atlas-projection", ["globe", "mercator"] as const, "globe"),
+  setProjection: (projection) => { save("atlas-projection", projection); set({ projection }); },
   layer: "deltaT",
   setLayer: (layer) => set({ layer }),
   year: 2100,

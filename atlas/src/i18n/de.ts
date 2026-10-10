@@ -7,6 +7,8 @@ export const de: Record<keyof typeof en, string> = {
   "app.loadError": "{file} konnte nicht geladen werden. Seite neu laden, um es erneut zu versuchen.",
   "lang.switch": "English",
   "theme.label": "Darstellung",
+  "projection.globe": "Globus",
+  "projection.flat": "Karte",
   "group.trees": "Bäume",
   "layer.label": "Ebene",
   "group.dac": "Direct Air Capture",

@@ -41,7 +41,7 @@ export default function App() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <AtlasMap atlas={atlas} layer={layer} year={s.year} cell={s.cell} onCell={s.setCell}
-        onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} initialView={{ longitude: 10, latitude: 25, zoom: wide ? 2.1 : 1.6 }} sites={atlas.meta.sites} flyTo={flyTo} />
+        onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection} initialView={{ longitude: 10, latitude: 25, zoom: wide ? 2.1 : 1.6 }} sites={atlas.meta.sites} flyTo={flyTo} />
       {wide && <HoverReadout atlas={atlas} layer={layer} year={s.year} {...hover} />}
       <div className="pointer-events-none absolute inset-x-0 top-0 p-4" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}>
         <Header />

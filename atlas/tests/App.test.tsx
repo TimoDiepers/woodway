@@ -1,13 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-vi.mock("@/map/AtlasMap", () => ({ default: () => <div data-testid="map" /> }));
+const map = vi.hoisted(() => ({ props: {} as Record<string, unknown> }));
+vi.mock("@/map/AtlasMap", () => ({ default: (p: Record<string, unknown>) => { map.props = p; return <div data-testid="map" />; } }));
 const DIR = path.resolve(__dirname, "../public/data/");
 globalThis.fetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
 
 import App from "@/App";
+import { useAtlas } from "@/store";
 
 describe("App", () => {
   it("shows the map, the layer list and the legend", async () => {
@@ -41,6 +43,23 @@ describe("App", () => {
     expect(screen.getByText("no DAC built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
+  });
+});
+
+describe("projection", () => {
+  it("toggles between globe and flat map, passes it to the map and remembers it", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(map.props.projection).toBe("globe");
+    await userEvent.click(screen.getByRole("button", { name: "Flat map" }));
+    expect(map.props.projection).toBe("mercator");
+    expect(localStorage.getItem("atlas-projection")).toBe("mercator");
+    await userEvent.click(screen.getByRole("button", { name: "Globe" }));
+    expect(map.props.projection).toBe("globe");
+    expect(localStorage.getItem("atlas-projection")).toBe("globe");
+    act(() => useAtlas.getState().setLang("de"));
+    expect(screen.getByRole("button", { name: "Karte" })).toBeInTheDocument();
+    act(() => useAtlas.getState().setLang("en"));
   });
 });
 

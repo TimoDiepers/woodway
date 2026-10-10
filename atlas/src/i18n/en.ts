@@ -5,6 +5,8 @@ export const en = {
   "app.loadError": "Could not load {file}. Reload the page to try again.",
   "lang.switch": "Deutsch",
   "theme.label": "Theme",
+  "projection.globe": "Globe",
+  "projection.flat": "Flat map",
   "group.trees": "Trees",
   "layer.label": "Layer",
   "group.dac": "Direct air capture",
