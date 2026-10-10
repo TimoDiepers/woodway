@@ -106,7 +106,6 @@ export default function App() {
     if (!wide) setSnap(0);
     setFlyTo({ lon: p.lon, lat: p.lat, zoom: 4 });
   };
-  const pickSite = (c: number, site: { lon: number; lat: number }) => openCell(c, { lon: site.lon, lat: site.lat, zoom: 4 });
   const recenter = () => { s.setCell(null); setFlyTo({ ...WORLD, zoom: worldZoom }); };
   const pickLayer = (id: LayerId) => s.setLayer(id);
   const closeCell = () => s.setCell(null);
@@ -118,8 +117,7 @@ export default function App() {
       sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />
   );
   const tools = (
-    <ToolColumn atlas={atlas} layer={layer} year={s.year} compact={!wide}
-      onPlace={goTo} onRecenter={recenter} onSite={pickSite} />
+    <ToolColumn layer={layer} compact={!wide} onPlace={goTo} onRecenter={recenter} />
   );
   const safeTop = { paddingTop: "max(0.75rem, env(safe-area-inset-top))" };
 

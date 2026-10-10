@@ -58,11 +58,11 @@ export function PlaceSearch({ onPick, fetcher = (...a) => fetch(...a), autoFocus
       {state === "error" && <p className="mt-1 px-1 text-xs text-inkMuted">{t("search.error")}</p>}
       {results && results.length === 0 && <p className="mt-1 px-1 text-xs text-inkMuted">{t("search.none")}</p>}
       {results && results.length > 0 && (
-        <ul className="mt-1 max-h-56 overflow-y-auto">
+        <ul className="mt-1 max-h-[min(14rem,40dvh)] overflow-y-auto">
           {results.map((p) => (
             <li key={`${p.lat},${p.lon}`}>
               <button type="button" onClick={() => pick(p)} title={p.name}
-                className="block w-full truncate rounded px-2 py-1.5 text-left text-xs text-ink hover:bg-ink/5">{p.name}</button>
+                className="block w-full truncate rounded px-2 py-1.5 text-left text-xs text-ink hover:bg-ink/5 active:bg-ink/10 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:text-sm">{p.name}</button>
             </li>
           ))}
         </ul>

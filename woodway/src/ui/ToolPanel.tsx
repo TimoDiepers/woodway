@@ -1,4 +1,5 @@
 import { useEffect, useId, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/primitives/popover";
 import { useT } from "@/i18n/useT";
@@ -7,10 +8,11 @@ import { useT } from "@/i18n/useT";
  * One panel, two shells (as in woodway): on a desktop a popover hinged to its button; on a phone or tablet
  * a card rising from the bottom edge, in reach of the thumb. Neither is modal: these panels change what
  * the map shows, and watching the change land is the point.
+ * `edge="top"`: on a phone the card drops from the top instead (a field there stays clear of the keyboard).
  */
-export function ToolPanel({ compact, open, onOpenChange, trigger, title, sub, children, wide = false }: {
+export function ToolPanel({ compact, open, onOpenChange, trigger, title, sub, children, wide = false, edge = "bottom" }: {
   compact: boolean; open: boolean; onOpenChange(o: boolean): void; trigger: ReactNode;
-  title: string; sub?: string; children: ReactNode; wide?: boolean;
+  title: string; sub?: string; children: ReactNode; wide?: boolean; edge?: "top" | "bottom";
 }) {
   const t = useT();
   const id = useId();
@@ -23,7 +25,7 @@ export function ToolPanel({ compact, open, onOpenChange, trigger, title, sub, ch
 
   const head = (
     <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h2 id={id} className="font-serif text-[15px] font-semibold leading-tight text-ink">{title}</h2>
         {sub && <p className="text-[11px] italic leading-snug text-inkMuted">{sub}</p>}
       </div>
@@ -49,13 +51,18 @@ export function ToolPanel({ compact, open, onOpenChange, trigger, title, sub, ch
   return (
     <>
       {trigger}
-      {open && (
+      {/* on <body>: inside the tool column's layer it would slide under the dock and the detail sheet */}
+      {open && createPortal(
         <div role="dialog" aria-labelledby={id}
-          className="panel fixed inset-x-2 bottom-2 z-40 flex max-h-[min(72dvh,36rem)] flex-col overflow-hidden rounded-xl shadow-xl animate-in fade-in-0 slide-in-from-bottom-4"
-          style={{ marginBottom: "env(safe-area-inset-bottom)" }}>
+          className={"panel fixed inset-x-2 z-40 flex max-h-[min(72dvh,36rem)] flex-col overflow-hidden rounded-xl animate-in fade-in-0 "
+            + (edge === "top" ? "top-2 slide-in-from-top-4" : "bottom-2 slide-in-from-bottom-4")}
+          // solid and lifted (the .panel rule is see-through and flat): it lies over the dock and the detail sheet
+          style={{ background: "rgb(var(--color-panel))", boxShadow: "0 12px 40px -12px rgba(20, 18, 12, .55)",
+            ...(edge === "top" ? { marginTop: "env(safe-area-inset-top)" } : { marginBottom: "env(safe-area-inset-bottom)" }) }}>
           <div className="shrink-0 border-b border-[var(--paper-line)] px-4 pb-2 pt-3">{head}</div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-5 pt-3">{children}</div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

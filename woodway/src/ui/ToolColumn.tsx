@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { BarChart2, Compass, Globe, HelpCircle, Map as MapIcon, Moon, Presentation, Search, Sun } from "lucide-react";
-import type { Atlas } from "@/data/types";
+import { Compass, Ellipsis, ExternalLink, HelpCircle, Presentation, Search } from "lucide-react";
 import type { Layer } from "@/model/layers";
 import { useAtlas } from "@/store";
 import { useT } from "@/i18n/useT";
@@ -8,11 +7,8 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
 import { ToolPanel } from "@/ui/ToolPanel";
 import { HelpContent } from "@/ui/HelpContent";
 import { PlaceSearch, type Place } from "@/ui/PlaceSearch";
-import { SiteButtons } from "@/ui/SiteButtons";
-import { GlobalStrip } from "@/ui/GlobalStrip";
-import { SourceLine } from "@/ui/deck/SourceLine";
 
-type PanelId = "search" | "overview" | "help";
+type PanelId = "search" | "help" | "more";
 
 /** The talk's slides: published next to woodway under slides/; in development the dev server serves the built deck. */
 const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
@@ -21,62 +17,86 @@ const EMBEDDED = typeof window !== "undefined" && window.parent !== window;
 
 /**
  * The map's tools in one card: a column against the right edge on a phone, a row top right on a desktop.
- * Utilities only (find, go home, restyle, look things up); what the map shows is decided in the dock.
+ * Only what is reached for while exploring sits there (find, go home, how to read the map); the slides and the
+ * display settings wait one tap further in "More", each with its name written out.
  */
-export function ToolColumn({ atlas, layer, year, compact, onPlace, onRecenter, onSite }: {
-  atlas: Atlas; layer: Layer; year: number; compact: boolean;
-  onPlace(p: Place): void; onRecenter(): void; onSite(cell: number, site: { lon: number; lat: number }): void;
-}) {
+export function ToolColumn({ layer, compact, onPlace, onRecenter }: { layer: Layer; compact: boolean; onPlace(p: Place): void; onRecenter(): void }) {
   const t = useT();
-  const { lang, setLang, theme, setTheme, projection, setProjection } = useAtlas();
-  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
   const touch = useMediaQuery("(pointer: coarse)") || compact;
-  const dark = theme === "dark" || (theme === "system" && prefersDark);
-  const [open, setOpen] = useState<PanelId | null>(null);
-  const toggle = (p: PanelId) => (o: boolean) => setOpen(o ? p : open === p ? null : open);
+  const [open, show] = useState<PanelId | null>(null);
+  const toggle = (p: PanelId) => (o: boolean) => show(o ? p : open === p ? null : open);
 
   const btn = compact
-    ? "grid h-10 w-10 place-items-center text-ink hover:bg-ink/5 active:bg-ink/10 aria-expanded:bg-ink/10"
+    ? "grid h-11 w-11 place-items-center text-ink hover:bg-ink/5 active:bg-ink/10 aria-expanded:bg-ink/10"
     : "grid h-9 w-9 place-items-center rounded-md text-ink hover:bg-ink/5 aria-expanded:bg-ink/10";
-  const tool = (label: string, icon: ReactNode, onClick?: () => void, expanded?: boolean) => (
-    <button type="button" aria-label={label} title={compact ? undefined : label} onClick={onClick} className={btn}
+  const tool = (id: string, label: string, icon: ReactNode, onClick?: () => void, expanded?: boolean) => (
+    <button type="button" data-tool={id} aria-label={label} title={compact ? undefined : label} onClick={onClick} className={btn}
       {...(expanded !== undefined ? { "aria-expanded": expanded, "aria-haspopup": "dialog" as const } : {})}>{icon}</button>
   );
-  const panel = (id: PanelId, label: string, icon: ReactNode, sub: string | undefined, body: ReactNode, wide = false) => (
-    <ToolPanel compact={compact} open={open === id} onOpenChange={toggle(id)} title={label} sub={sub} wide={wide}
-      trigger={tool(label, icon, compact ? () => setOpen(open === id ? null : id) : undefined, open === id)}>{body}</ToolPanel>
+  const panel = (id: PanelId, label: string, icon: ReactNode, head: { title: string; sub?: string },
+    body: ReactNode, opts: { wide?: boolean; edge?: "top" | "bottom" } = {}) => (
+    <ToolPanel compact={compact} open={open === id} onOpenChange={toggle(id)} {...head} {...opts}
+      trigger={tool(id, label, icon, compact ? () => show(open === id ? null : id) : undefined, open === id)}>{body}</ToolPanel>
   );
 
   return (
     <div role="toolbar" aria-label={t("tools.label")} aria-orientation={compact ? "vertical" : "horizontal"}
       className={"panel pointer-events-auto flex overflow-hidden " + (compact ? "flex-col divide-y divide-[var(--paper-line)] rounded-xl" : "items-center gap-0.5 p-1")}>
-      {panel("search", t("search.label"), <Search size={18} aria-hidden />, undefined,
-        <PlaceSearch autoFocus onPick={(p) => { setOpen(null); onPlace(p); }} />)}
-      {tool(t("tools.recenter"), <Compass size={18} aria-hidden />, () => { setOpen(null); onRecenter(); })}
-      {tool(t(projection === "globe" ? "projection.flat" : "projection.globe"),
-        projection === "globe" ? <MapIcon size={18} aria-hidden /> : <Globe size={18} aria-hidden />,
-        () => setProjection(projection === "globe" ? "mercator" : "globe"))}
-      {tool(t("theme.label"), dark ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />, () => setTheme(dark ? "light" : "dark"))}
-      <button type="button" aria-label={t("lang.switch")} title={compact ? undefined : t("lang.switch")}
-        onClick={() => setLang(lang === "en" ? "de" : "en")} className={`${btn} text-[13px] font-semibold tracking-wide`}>
-        {t("lang.short")}
-      </button>
-      {panel("overview", t("tools.overview"), <BarChart2 size={18} aria-hidden />, t("tools.overviewSub"), (
-        <div className="flex flex-col gap-4">
-          <GlobalStrip atlas={atlas} year={year} />
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-inkMuted">{t("sites.label")}</h3>
-            <SiteButtons atlas={atlas} bare onPick={(c, s) => { setOpen(null); onSite(c, s); }} />
-          </section>
-          <SourceLine>{t(layer.source)}</SourceLine>
-        </div>
-      ), true)}
-      {!EMBEDDED && (
-        <a href={SLIDES_URL} target="_blank" rel="noopener" aria-label={t("tools.slides")} title={compact ? undefined : t("tools.slides")} className={btn}>
-          <Presentation size={18} aria-hidden />
-        </a>
-      )}
-      {panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, t("help.sub"), <HelpContent touch={touch} />, true)}
+      {/* on a phone the search drops from the top: rising from the bottom it would sit under the keyboard */}
+      {panel("search", t("search.label"), <Search size={18} aria-hidden />, { title: t("search.label") },
+        <PlaceSearch autoFocus onPick={(p) => { show(null); onPlace(p); }} />, { edge: "top" })}
+      {tool("recenter", t("tools.recenter"), <Compass size={18} aria-hidden />, () => { show(null); onRecenter(); })}
+      {panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, { title: t("help.title"), sub: t("help.sub") },
+        <HelpContent touch={touch} source={t(layer.source)} />, { wide: true })}
+      {!compact && <span className="mx-0.5 h-5 w-px bg-[var(--paper-line)]" aria-hidden />}
+      {panel("more", t("tools.more"), <Ellipsis size={18} aria-hidden />, { title: t("tools.more") }, <MoreMenu />)}
+    </div>
+  );
+}
+
+/** The slides as a named row, then the three display settings as segmented choices. */
+function MoreMenu() {
+  const t = useT();
+  const { lang, setLang, theme, setTheme, projection, setProjection } = useAtlas();
+  const row = "flex min-h-11 w-full items-center gap-3 rounded-md px-2 text-left text-sm font-medium text-ink hover:bg-ink/5 active:bg-ink/10";
+  return (
+    <div className="flex flex-col">
+      <nav className="-mx-2 flex flex-col">
+        {!EMBEDDED && (
+          <a href={SLIDES_URL} target="_blank" rel="noopener" className={row}>
+            <Presentation size={18} className="shrink-0 text-inkMuted" aria-hidden />
+            <span className="flex-1">{t("tools.slides")}</span>
+            <ExternalLink size={14} className="shrink-0 text-inkMuted" aria-hidden />
+          </a>
+        )}
+      </nav>
+      <div className="mt-2 flex flex-col gap-2.5 border-t border-[var(--paper-line)] pt-3">
+        <Choice label={t("projection.label")} value={projection} onChange={setProjection}
+          options={[{ value: "globe", label: t("projection.globe") }, { value: "mercator", label: t("projection.flat") }]} />
+        <Choice label={t("theme.label")} value={theme} onChange={setTheme}
+          options={[{ value: "light", label: t("theme.light") }, { value: "dark", label: t("theme.dark") }, { value: "system", label: t("theme.system") }]} />
+        {/* each language under its own name, so a visitor who reads only one still finds it */}
+        <Choice label={t("lang.label")} value={lang} onChange={setLang}
+          options={[{ value: "en", label: "English" }, { value: "de", label: "Deutsch" }]} />
+      </div>
+    </div>
+  );
+}
+
+function Choice<T extends string>({ label, value, options, onChange }: {
+  label: string; value: T; options: { value: T; label: string }[]; onChange(v: T): void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm text-inkMuted">{label}</span>
+      <div role="group" aria-label={label} className="flex rounded-lg border border-[var(--paper-line)] bg-paper/60 p-0.5">
+        {options.map((o) => (
+          <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}
+            className="h-8 rounded-md px-3 text-[13px] font-medium text-inkMuted transition-colors hover:text-ink [@media(pointer:coarse)]:h-10 aria-pressed:bg-panel aria-pressed:text-ink aria-pressed:shadow-[0_1px_2px_rgba(30,26,18,.18)]">
+            {o.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

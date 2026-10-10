@@ -32,6 +32,7 @@ describe("App", () => {
   it("language switch relabels the legend", async () => {
     render(<App />);
     await screen.findByTestId("map");
+    await userEvent.click(screen.getByRole("button", { name: "More" }));
     await userEvent.click(screen.getByRole("button", { name: "Deutsch" }));
     expect(screen.getAllByText("Temperaturwirkung eines Baums").length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "English" }));
@@ -74,13 +75,6 @@ describe("desktop layout", () => {
     expect(map.props.cell).toBe(cellAt(6.08, 50.78));
     act(() => useAtlas.getState().setCell(null));
   });
-  it("no always-on worldwide box: the 1.5 °C result lives in the overview", async () => {
-    render(<App />);
-    await screen.findByTestId("map");
-    expect(screen.queryByText("Warming above 1.5 °C, worldwide")).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
-    expect(await screen.findByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
-  });
   it("a condition row in the details switches the map's layer", async () => {
     render(<App />);
     await screen.findByTestId("map");
@@ -93,10 +87,12 @@ describe("desktop layout", () => {
 });
 
 describe("projection", () => {
-  it("toggles between globe and flat map, passes it to the map and remembers it", async () => {
+  it("picks globe or flat map in More, passes it to the map and remembers it, passes it to the map and remembers it", async () => {
     render(<App />);
     await screen.findByTestId("map");
     expect(map.props.projection).toBe("globe");
+    await userEvent.click(screen.getByRole("button", { name: "More" }));
+    expect(screen.getByRole("button", { name: "Globe" })).toHaveAttribute("aria-pressed", "true");
     await userEvent.click(screen.getByRole("button", { name: "Flat map" }));
     expect(map.props.projection).toBe("mercator");
     expect(localStorage.getItem("atlas-projection")).toBe("mercator");

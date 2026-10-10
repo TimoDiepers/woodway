@@ -35,9 +35,14 @@ describe("App on a phone", () => {
     const plate = screen.getByRole("banner");
     expect(within(plate).getByRole("figure", { name: "Temperature effect of one tree" })).toBeInTheDocument();
     const tools = screen.getByRole("toolbar", { name: "Map tools" });
-    for (const name of ["Search a place", "Back to the whole world", "Overview", "How to read this map", "Deutsch", "Flat map"])
-      expect(within(tools).getByRole("button", { name })).toBeInTheDocument();
-    const slides = within(tools).getByRole("link", { name: "Slides of the talk" });
+    // only the four tools reached for while exploring; the rest waits behind More, named in full
+    expect(within(tools).getAllByRole("button").map((b) => b.getAttribute("aria-label")))
+      .toEqual(["Search a place", "Back to the whole world", "How to read this map", "More"]);
+    await userEvent.click(within(tools).getByRole("button", { name: "More" }));
+    const more = await screen.findByRole("dialog", { name: "More" });
+    for (const name of ["Deutsch", "Flat map", "Dark"])
+      expect(within(more).getByRole("button", { name })).toBeInTheDocument();
+    const slides = within(more).getByRole("link", { name: "Slides of the talk" });
     expect(slides).toHaveAttribute("target", "_blank");
     expect(slides.getAttribute("href")).toMatch(/slides\/$|\/deck\/index\.html$/);
     expect(insets().right).toBeGreaterThan(0);          // the globe centres left of the tool column
@@ -109,17 +114,6 @@ describe("App on a phone", () => {
     expect(useAtlas.getState().cell).toBeNull();
   });
 
-  it("the overview holds the worldwide result and the example places", async () => {
-    render(<App />);
-    await screen.findByTestId("map");
-    expect(screen.queryByText("Warming above 1.5 °C, worldwide")).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
-    const panel = await screen.findByRole("dialog", { name: "Overview" });
-    expect(within(panel).getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
-    await userEvent.click(within(panel).getByRole("button", { name: /Aachen/ }));
-    expect(screen.queryByRole("dialog", { name: "Overview" })).toBeNull();
-    expect(screen.getByRole("region", { name: "Cell details" })).toBeInTheDocument();
-  });
 
   it("a first-visit hint says what to do, retires after the first cell and comes back from the help panel", async () => {
     render(<App />);
