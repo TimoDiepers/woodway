@@ -6,3 +6,15 @@
 .rslide .sh h2 { font: 600 50px/1.08 var(--serif); letter-spacing: -0.015em; font-variation-settings: "opsz" 72; color: var(--ch); max-width: 1180px; }
 .rslide .num { position: absolute; left: 88px; bottom: 20px; font: 500 14px/1 var(--sans); color: var(--muted); }
 .talk-ground { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--ch, transparent); }
+.talk-deck > div { position: absolute; inset: 0; }
+.talk-progress { position: fixed; left: 0; top: 0; width: 100%; height: 3px; background: var(--ch, var(--moss, #4d6b45)); transform-origin: 0 50%; transition: transform .4s ease; z-index: 20; }
+.talk-missing { position: fixed; left: 50%; top: 40%; transform: translateX(-50%); z-index: 40; padding: 16px 24px; background: var(--paper-deep, #ece6d6); color: var(--ink); font: 500 20px/1.4 var(--sans); border-radius: 6px; }
+.talk-drawer {
+  position: fixed; left: 0; right: 0; bottom: 0; max-height: 42vh; overflow: auto; z-index: 30;
+  background: #1f2823; color: #e8e3d6; padding: 22px 32px 28px; font: 400 17px/1.55 var(--sans);
+  transform: translateY(100%); transition: transform .35s ease;
+}
+.talk-drawer.open { transform: none; }
+.talk-drawer h5 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin-bottom: 12px; }
+.talk-drawer p { margin-bottom: 10px; max-width: 110ch; }
+.talk-drawer p.q { color: #b9c7b0; font-style: italic; }
