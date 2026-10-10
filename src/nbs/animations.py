@@ -639,15 +639,17 @@ def albedo_ingredients_figure(out_path: str) -> str:
     darker = -100.0 * _by_type(albedo_grid.delta_alpha_grid)
 
     fig = plt.figure(figsize=(12.0, 5.1), dpi=FIG_DPI)
+    # each map names its symbol in the equation of the next slide, in that equation's colour
     panels = [
         (fig.add_axes((0.01, 0.24, 0.48, 0.66)), fig.add_axes((0.08, 0.17, 0.34, 0.03)), q, RAMP_SUN,
-         (90.0, 260.0), "Kurzwellige Einstrahlung an der Oberfläche, Jahresmittel [W/m²]", "Einstrahlung an der Oberfläche"),
+         (90.0, 260.0), "Kurzwellige Einstrahlung an der Oberfläche, Jahresmittel [W/m²]", "Einstrahlung an der Oberfläche",
+         r"$\dot{q}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.24, 0.48, 0.66)), fig.add_axes((0.58, 0.17, 0.34, 0.03)), darker, RAMP_SNOW,
          (0.0, 18.0), "Albedo-Differenz Offenland − Wald [Prozentpunkte]",
-         "Albedo-Kontrast Wald gegen Offenland"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$-\Delta\alpha$", "#d95f02"),
     ]
     units = {id(q): "W/m²", id(darker): "%-Punkte"}
-    for ax, cax, field, ramp, (lo, hi), label, title in panels:
+    for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:
         _map_base(ax, outside, unmeasured, SITES_VIEW)
         cmap = _ramp_cmap(ramp)
         norm = mcolors.Normalize(lo, hi)
@@ -655,6 +657,8 @@ def albedo_ingredients_figure(out_path: str) -> str:
                       shading="auto", zorder=3)
         _site_markers(ax, lambda s, f=field: f"{f[site_cell(s)]:.0f} {units[id(f)]}")
         ax.set_title(title, loc="left", fontsize=15, color=C_INK, fontweight="bold")
+        ax.text(0.96, 1.0, symbol, transform=ax.transAxes, ha="right", va="bottom", fontsize=19, color=symbol_color,
+                fontweight="bold")
         cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal",
                           extend="both")
         cb.outline.set_visible(False)

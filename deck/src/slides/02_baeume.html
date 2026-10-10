@@ -149,8 +149,8 @@
 <section class="slide" data-ch="baeume" data-title="Einstrahlung und Albedo-Kontrast">
   <header class="sh"><h2>Einstrahlung und Albedo-Kontrast</h2></header>
   <div class="body">
-    <div class="chart" data-slot-steps="0,1,0,1" data-chart="b8a" data-label="Zwei Weltkarten: Einstrahlung am Boden und wie viel dunkler der Wald ist"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1600">Absorbierte Strahlung = Einstrahlung × Albedo-Kontrast; Schnee → größerer Kontrast.</p></div>
+    <div class="chart" style="flex:none; height:590px" data-slot-steps="0,1,0,1" data-chart="b8a" data-label="Zwei Weltkarten: Einstrahlung am Boden und wie viel dunkler der Wald ist"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1600">Absorbierte Strahlung = Einstrahlung $\dot q$ × Albedo-Kontrast $-\Delta\alpha$; Schnee → größerer Kontrast.</p></div>
   </div>
   <p class="src">Messdaten: Satellit MODIS, Albedo von Wald gegen Offenland aus benachbarten Flächen verglichen, auf 0,5° gemittelt (Duveiller et al. 2018); Einstrahlung aus demselben Datensatz. Grau: keine lokale Messung.</p>
   <aside class="notes" data-n="14">
@@ -164,10 +164,10 @@
   <div class="body" style="position:relative">
     <div class="chart" style="flex:none; height:590px" data-chart="b8" data-label="Karte: zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel"></div>
     <div class="eqbox rise" style="--d:900">
-      <div class="eq tex">$$\Delta\dot Q_{\mathrm{Baum}} = \bq{A_{\mathrm{Baum}}}\,\big\langle \pc{\dot q_{\mathrm{kurz}}}\,\aq{(-\Delta\alpha)}\big\rangle\, \gq{f(t)}$$</div>
+      <div class="eq tex">$$\Delta\dot Q_{\mathrm{Baum}} = \bq{A_{\mathrm{Baum}}}\,\big\langle \pc{\dot q}\,\aq{(-\Delta\alpha)}\big\rangle\, \gq{f(t)}$$</div>
       <dl class="pdef">
         <dt>$\bq{A_{\mathrm{Baum}}}$</dt><dd>Standfläche je Baum</dd>
-        <dt>$\pc{\dot q_{\mathrm{kurz}}}$</dt><dd>Einstrahlung an der Oberfläche [W/m²], linke Karte der Vorfolie</dd>
+        <dt>$\pc{\dot q}$</dt><dd>Einstrahlung an der Oberfläche [W/m²], linke Karte der Vorfolie</dd>
         <dt>$\aq{-\Delta\alpha}$</dt><dd>wie viel dunkler der Wald ist als Offenland, rechte Karte der Vorfolie</dd>
         <dt>$\langle\,\rangle$</dt><dd>Monat für Monat multipliziert, dann übers Jahr gemittelt</dd>
         <dt>$\gq{f(t)}$</dt><dd>Kronenschluss, 0 bis 1; hier ausgewachsen, also 1</dd>
