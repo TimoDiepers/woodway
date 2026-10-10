@@ -63,7 +63,8 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   }, [atlas, layer, year, loaded, canvas, buffers]);
 
   const pick = (e: MapLayerMouseEvent) => {
-    const c = cellAt(e.lngLat.lng, e.lngLat.lat);
+    const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180
+    const c = cellAt(lng, lat);
     return c !== null && atlas.f.land[c] ? c : null;
   };
 
@@ -78,6 +79,8 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       onClick={(e) => onCell(pick(e))}
       onMouseMove={onHover ? (e) => onHover(pick(e), e.point.x, e.point.y) : undefined}
       onMouseLeave={onHover ? () => onHover(null, 0, 0) : undefined}
+      // the cell under a still pointer changes once the map moves (a site jump, a search): drop the readout
+      onMoveStart={onHover ? () => onHover(null, 0, 0) : undefined}
       style={{ position: "absolute", inset: 0, background: "rgb(var(--color-paper))" }}
       attributionControl={{ compact: true }}
     >
@@ -87,7 +90,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       <Borders dark={dark} />
       {sites.map((s) => (
         <Marker key={s.name} longitude={s.lon} latitude={s.lat} anchor="center">
-          <span className="block h-3 w-3 rounded-full border-2 border-white" style={{ background: s.color }} title={s.name} />
+          <span className="block h-3 w-3 rounded-full border-2 border-paper shadow-[0_0_0_1px_rgb(var(--color-ink)/0.55)]" style={{ background: s.color }} title={s.name} />
         </Marker>
       ))}
       {sel && (
