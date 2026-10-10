@@ -13,6 +13,12 @@ globalThis.fetch = (async (url: string) =>
     : new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
 
 import App from "@/App";
+
+/** The layer dropdown: open it, pick an option by its name. */
+async function pickLayer(name: string) {
+  await userEvent.click(screen.getByRole("combobox", { name: "Layer" }));
+  await userEvent.click(await screen.findByRole("option", { name }));
+}
 import { useAtlas } from "@/store";
 import { cellAt } from "@/map/lookup";
 
@@ -33,21 +39,21 @@ describe("App", () => {
   it("static layers keep the slider for the global strip", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await userEvent.click(screen.getByRole("radio", { name: "Solar radiation at the ground" }));
+    await pickLayer("Solar radiation at the ground");
     expect(screen.getByRole("slider")).toBeInTheDocument();
     expect(screen.getByText("Warming above 1.5 °C, worldwide")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
+    await pickLayer("Temperature effect of one tree");
   });
   it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await userEvent.click(screen.getByRole("radio", { name: "Solar radiation at the ground" }));
+    await pickLayer("Solar radiation at the ground");
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "DAC build-out" }));
+    await pickLayer("DAC build-out");
     expect(screen.getByText("no DAC built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "Temperature effect of one tree" }));
+    await pickLayer("Temperature effect of one tree");
   });
 });
 
@@ -80,17 +86,30 @@ describe("place search", () => {
   });
 });
 
-describe("layer list keyboard", () => {
-  it("arrow keys move the selection and focus, only the checked option is a tab stop", async () => {
+describe("layer dropdown", () => {
+  it("shows the current layer and offers every layer in two sections, trees and DAC", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    const cur = screen.getByRole("radio", { name: "Temperature effect of one tree" });
-    expect(cur).toHaveAttribute("tabindex", "0");
-    expect(screen.getByRole("radio", { name: "Solar radiation at the ground" })).toHaveAttribute("tabindex", "-1");
-    cur.focus();
-    await userEvent.keyboard("{ArrowDown}");
-    const next = screen.getByRole("radio", { name: "Net share after albedo" });
-    expect(next).toHaveAttribute("aria-checked", "true");
-    expect(next).toHaveFocus();
+    const box = screen.getByRole("combobox", { name: "Layer" });
+    expect(box).toHaveTextContent("Temperature effect of one tree");
+    expect(screen.queryByRole("radio")).toBeNull();          // no long list any more
+    await userEvent.click(box);
+    expect(await screen.findByText("Trees")).toBeInTheDocument();
+    expect(screen.getByText("Direct air capture")).toBeInTheDocument();
+    expect(screen.getAllByRole("option")).toHaveLength(10);
+    await userEvent.click(screen.getByRole("option", { name: "DAC net share" }));
+    expect(useAtlas.getState().layer).toBe("dacNet");
+    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("DAC net share");
+    await pickLayer("Temperature effect of one tree");
+  });
+  it("works with the keyboard", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    screen.getByRole("combobox", { name: "Layer" }).focus();
+    await userEvent.keyboard("{Enter}");
+    await screen.findAllByRole("option");
+    await userEvent.keyboard("{ArrowDown}{Enter}");
+    expect(useAtlas.getState().layer).toBe("netShare");
+    act(() => useAtlas.getState().setLayer("deltaT"));
   });
 });

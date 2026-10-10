@@ -4,7 +4,8 @@ import { useNum, useT, type Key } from "@/i18n/useT";
 import { useAtlas } from "@/store";
 import { SourceLine } from "@/ui/deck/SourceLine";
 
-export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer: Layer; compact?: boolean }) {
+/** `caption={false}`: the layer's name is shown elsewhere (the phone's dropdown right above). */
+export function Legend({ atlas, layer, compact = false, caption = true }: { atlas: Atlas; layer: Layer; compact?: boolean; caption?: boolean }) {
   const t = useT(), num = useNum();
   const lang = useAtlas((s) => s.lang);
   const sc = scaleOf(atlas, layer);
@@ -35,7 +36,9 @@ export function Legend({ atlas, layer, compact = false }: { atlas: Atlas; layer:
     return (
       <figure className="flex flex-col gap-1 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
         <div className="flex items-baseline gap-2">
-          <figcaption className="ch-text min-w-0 flex-1 truncate font-serif text-[13px] font-semibold leading-tight">{t(layer.label)}</figcaption>
+          {caption
+            ? <figcaption className="ch-text min-w-0 flex-1 truncate font-serif text-[13px] font-semibold leading-tight">{t(layer.label)}</figcaption>
+            : <span className="flex-1" />}
           {greys}
         </div>
         {cats}

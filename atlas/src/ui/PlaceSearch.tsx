@@ -8,7 +8,7 @@ interface NominatimHit { display_name: string; lat: string; lon: string }
 
 /** Place search after woodway's LocationSearch, reduced to an explicit submit: nothing leaves the page
  *  until Enter, then one request to OpenStreetMap's Nominatim. */
-export function PlaceSearch({ onPick, fetcher = (...a) => fetch(...a) }: { onPick(p: Place): void; fetcher?: typeof fetch }) {
+export function PlaceSearch({ onPick, fetcher = (...a) => fetch(...a), autoFocus = false }: { onPick(p: Place): void; fetcher?: typeof fetch; autoFocus?: boolean }) {
   const t = useT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Place[] | null>(null);
@@ -50,7 +50,7 @@ export function PlaceSearch({ onPick, fetcher = (...a) => fetch(...a) }: { onPic
         {state === "loading" ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-inkMuted" aria-hidden />
           : <Search className="h-3.5 w-3.5 shrink-0 text-inkMuted" aria-hidden />}
         {/* 16 px on phones: iOS zooms the page into smaller focused fields */}
-        <input ref={inputRef} type="search" value={query} onChange={(e) => setQuery(e.target.value)}
+        <input ref={inputRef} type="search" autoFocus={autoFocus} value={query} onChange={(e) => setQuery(e.target.value)}
           aria-label={t("search.label")} placeholder={t("search.placeholder")} enterKeyHint="search"
           autoCorrect="off" autoCapitalize="off" spellCheck={false}
           className="min-w-0 flex-1 bg-transparent text-base [&::-webkit-search-cancel-button]:appearance-none text-ink placeholder:text-inkMuted focus:outline-none md:text-sm" />

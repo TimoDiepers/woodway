@@ -98,7 +98,8 @@ export default function App() {
     // legend and year: what the map needs to be read, always in view
     const dock = (
       <div className="flex flex-col gap-2" data-ch={ch}>
-        <Legend atlas={atlas} layer={layer} compact />
+        <LayerPicker value={s.layer} onChange={pickLayer} />
+        <Legend atlas={atlas} layer={layer} compact caption={false} />
         <TimeSlider year={s.year} onYear={s.setYear} playing={s.playing} onPlaying={s.setPlaying} />
       </div>
     );
@@ -115,9 +116,7 @@ export default function App() {
             <CellPanel atlas={atlas} cell={s.cell} year={s.year} onClose={closeCell} dense />
           </div>
         )}
-        {section(t("sheet.layers"), <LayerPicker value={s.layer} onChange={pickLayer} />)}
         {section(t("sites.label"), <SiteButtons atlas={atlas} onPick={pickSite} bare />)}
-        <section className="mb-5"><PlaceSearch onPick={goTo} /></section>
         <section className="mb-5"><GlobalStrip atlas={atlas} year={s.year} /></section>
         <SourceLine>{t(layer.source)}</SourceLine>
       </>
@@ -127,12 +126,12 @@ export default function App() {
         {map}
         {mode === "sheet" ? (
           <>
-            <CompactBar />
+            <CompactBar onPlace={goTo} />
             <CompactSheet title={t("app.title")} peek={dock} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} onTopHeight={setPeekPx}>{rest}</CompactSheet>
           </>
         ) : (
           <>
-            <div className="absolute inset-y-0 left-0" style={{ right: SIDE_W }}><CompactBar /></div>
+            <div className="absolute inset-y-0 left-0" style={{ right: SIDE_W }}><CompactBar onPlace={goTo} /></div>
             <aside className="absolute inset-y-0 right-0 flex flex-col border-l border-[var(--paper-line)] bg-panel"
               style={{ width: SIDE_W, paddingTop: "env(safe-area-inset-top)", paddingRight: "env(safe-area-inset-right)" }}>
               <div className="shrink-0 border-b border-[var(--paper-line)] p-3">{dock}</div>
@@ -152,7 +151,7 @@ export default function App() {
         <Header />
         <div className="pointer-events-auto mt-2"><SiteButtons atlas={atlas} onPick={pickSite} /></div>
       </div>
-      <aside className="panel absolute left-4 top-32 max-h-[calc(100%-13.5rem)] w-60 overflow-auto p-3">
+      <aside className="panel absolute left-4 top-32 max-h-[calc(100%-13.5rem)] w-72 overflow-auto p-3">
         <div className="mb-3"><PlaceSearch onPick={goTo} /></div>
         <LayerPicker value={s.layer} onChange={pickLayer} />
         <div className="mt-4 border-t border-[var(--paper-line)] pt-3"><Legend atlas={atlas} layer={layer} /></div>

@@ -1,11 +1,16 @@
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const map = vi.hoisted(() => ({ props: {} as Record<string, unknown> }));
 vi.mock("@/map/AtlasMap", () => ({ default: (p: Record<string, unknown>) => { map.props = p; return <div data-testid="map" />; } }));
 const DIR = path.resolve(__dirname, "../public/data/");
-globalThis.fetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
+const BERLIN = [{ display_name: "Berlin, Deutschland", lat: "52.5170365", lon: "13.3888599" }];
+globalThis.fetch = (async (url: string) =>
+  String(url).startsWith("https://nominatim.openstreetmap.org/")
+    ? new Response(JSON.stringify(BERLIN))
+    : new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
 
 import App from "@/App";
 import { useAtlas } from "@/store";
@@ -50,5 +55,19 @@ describe("App on a phone", () => {
     act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
     act(() => (map.props.onCell as (c: number | null) => void)(null));
     expect(insets().bottom).toBe(peek);
+  });
+
+  it("search is a button in the top bar, not a field in the sheet", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    expect(screen.queryByRole("searchbox")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Search a place" }));
+    const box = await screen.findByRole("searchbox", { name: "Search a place" });
+    expect(box).toHaveFocus();
+    await userEvent.type(box, "Berlin{Enter}");
+    await userEvent.click(await screen.findByRole("button", { name: "Berlin, Deutschland" }));
+    expect(useAtlas.getState().cell).toBe(cellAt(13.3888599, 52.5170365));
+    expect(map.props.flyTo).toEqual({ lon: 13.3888599, lat: 52.5170365, zoom: 4 });
+    expect(screen.queryByRole("searchbox")).toBeNull();   // closed again
   });
 });
