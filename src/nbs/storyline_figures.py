@@ -1035,7 +1035,8 @@ def uptake_panel_figure(out_path: str) -> str:
     """B6 for the side panel next to the forest-type map: the same three lines, sized to the narrow
     panel (ticks ~19 px on the slide); each line named at its peak, the sums stand in the takeaway."""
     _setup()
-    fig, ax = plt.subplots(figsize=(4.3, 3.5), dpi=FIG_DPI)
+    # figure as large as its slot in the side panel of slide 12, so ticks and labels reach the hall minimum (2026-10-11)
+    fig, ax = plt.subplots(figsize=(3.4, 2.75), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.15, right=0.96, bottom=0.12, top=0.97)
     _clean_axes(ax)
     ax.set_xlim(YEARS[0], YEARS[-1])
@@ -1206,8 +1207,9 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     g = green_carbon_preindustrial(horizon + 1)
     t = np.arange(horizon + 1)
     c_rm, c_back = "#2e7d4f", "#8c6d5a"
-    fig, ax = plt.subplots(figsize=(4.6, 3.1), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.17, top=0.95)
+    # as wide as its 270 px high slot on slide 19 allows (about 1.9 : 1), so ticks and labels reach the hall minimum (2026-10-11)
+    fig, ax = plt.subplots(figsize=(4.6, 2.4), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.24, top=0.96)
     _clean_axes(ax)
     ax.axhline(0, color=C_INK_MUTED, linewidth=1.0)
     ax.axhline(-1, color=c_rm, linewidth=1.1, linestyle=(0, (2, 3)), alpha=0.8)

@@ -241,7 +241,7 @@ td.warn { color: var(--clay); font-weight: 500; }
 /* ===========================================================
    CHROME: progress, notes drawer, hint
    =========================================================== */
-.progress { position: fixed; left: 0; top: 0; width: 100%; height: 3px; background: var(--moss); transform-origin: 0 50%; transform: scaleX(0); transition: transform .4s var(--ease); z-index: 20; }
+.progress { position: fixed; left: 0; top: 0; width: 100%; height: 3px; background: var(--bar, var(--moss)); transform-origin: 0 50%; transform: scaleX(0); transition: transform .4s var(--ease); z-index: 20; }
 .notes { display: none; }
 .drawer {
   position: fixed; left: 0; right: 0; bottom: 0; max-height: 42vh; overflow: auto; z-index: 30;
@@ -260,6 +260,8 @@ td.warn { color: var(--clay); font-weight: 500; }
 }
 .hint.gone { opacity: 0; }
 @media (max-width: 900px), (hover: none) { .hint { display: none; } }
+/* subscript digits written by subDigits(): CO₂ in Literata lines */
+.subd { font-size: .62em; vertical-align: -.22em; line-height: 0; }
 /* screen readers hear the slide change here (Deck.go) */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 /* phones held upright: the 16:9 canvas shrinks to a quarter, so say how to read it */

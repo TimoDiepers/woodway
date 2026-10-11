@@ -689,7 +689,8 @@ class MplChart {
     const newSlots = [...new Set(d.axes.map((a, i) => this.fresh(i, k) ? this.slot[i] : -1).filter(v => v >= 0))].sort((a, b) => a - b);
     const t0 = i => (this.fresh(i, k) ? newSlots.indexOf(this.slot[i]) : 0) * 450;
     const axisFor = (a, which, i, show) => {
-      const A = a[which], labels = Object.fromEntries(A.ticks.map(t => [t[0], t[1]]));
+      // matplotlib writes 1.75; the talk is German: 1,75 (years and integers stay as they are)
+      const A = a[which], labels = Object.fromEntries(A.ticks.map(t => [t[0], /^[−-]?\d+\.\d+$/.test(t[1]) ? t[1].replace('.', ',') : t[1]]));
       const vals = A.ticks.map(t => t[0]);
       return {
         gridIndex: i, type: A.scale === 'log' ? 'log' : 'value', min: A.min, max: A.max, inverse: A.inv, show: show && a.on,
@@ -1268,6 +1269,26 @@ const deckMedia = {
   },
 };
 
+/* Literata's web subset has no subscript digits, so CO₂ in a serif line fell back to Georgia's full-size 2.
+   In HTML text (not SVG, not KaTeX) a subscript digit becomes a small digit of the line's own face. */
+function subDigits(root) {
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: t =>
+    /[\u2080-\u2089]/.test(t.data) && !t.parentElement.closest('svg, .katex, script, style, .notes') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT });
+  const hits = []; while (walk.nextNode()) hits.push(walk.currentNode);
+  for (const t of hits) {
+    const frag = document.createDocumentFragment();
+    for (const part of t.data.split(/([\u2080-\u2089]+)/)) {
+      if (!part) continue;
+      if (/[\u2080-\u2089]/.test(part)) {
+        const el = document.createElement('span'); el.className = 'subd';
+        el.textContent = [...part].map(c => String.fromCharCode(c.charCodeAt(0) - 0x2050)).join('');
+        frag.append(el);
+      } else frag.append(part);
+    }
+    t.replaceWith(frag);
+  }
+}
+
 class Deck {
   constructor() {
     this.deck = document.getElementById('deck');
@@ -1331,6 +1352,7 @@ class Deck {
         `<span class="pc${c === ch ? ' on' : ''}" data-ch="${c}"><svg><use href="#i-${c}"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</span>`).join('');
       return el;
     };
+    subDigits(this.deck);
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
       if (h) h.appendChild(path(ch));
@@ -1350,6 +1372,7 @@ class Deck {
     document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
     const plain = !s.matches('.chapter, .title');
     document.documentElement.style.setProperty('--ground', plain ? getComputedStyle(s).getPropertyValue('--ch') : 'transparent');
+    document.documentElement.style.setProperty('--bar', getComputedStyle(s).getPropertyValue(plain && !s.matches('.dark') ? '--ch' : '--ch-soft'));
   }
   fit() {
     const k = Math.min(innerWidth / 1600, innerHeight / 900);

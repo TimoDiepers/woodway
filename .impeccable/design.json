@@ -1,0 +1,354 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-10-11T18:42:36",
+ "title": "Design System: Ingenieure auf dem Holzweg?",
+ "extensions": {
+  "colorMeta": {
+   "paper": {
+    "role": "neutral",
+    "displayName": "Papier",
+    "canonical": "#f2ede2",
+    "tonalRamp": [
+     "#352c18",
+     "#584927",
+     "#7b6637",
+     "#9e8347",
+     "#c0a872",
+     "#d3c29c",
+     "#e6dcc7",
+     "#f7f4ed"
+    ]
+   },
+   "paper-deep": {
+    "role": "neutral",
+    "displayName": "Tiefes Papier",
+    "canonical": "#e7e0d0",
+    "tonalRamp": [
+     "#332b1a",
+     "#54482b",
+     "#76653c",
+     "#98814e",
+     "#baa678",
+     "#cfc1a0",
+     "#e3dbc9",
+     "#f6f4ee"
+    ]
+   },
+   "paper-line": {
+    "role": "neutral",
+    "displayName": "Papierlinie",
+    "canonical": "#d6ccb6",
+    "tonalRamp": [
+     "#312a1c",
+     "#52462e",
+     "#726340",
+     "#937f53",
+     "#b6a47c",
+     "#ccbfa4",
+     "#e2dacb",
+     "#f6f4ef"
+    ]
+   },
+   "ink": {
+    "role": "neutral",
+    "displayName": "Tinte",
+    "canonical": "#1b2420",
+    "tonalRamp": [
+     "#212c27",
+     "#374941",
+     "#4c665b",
+     "#628375",
+     "#8aa89b",
+     "#adc2b9",
+     "#d0dcd7",
+     "#f0f4f2"
+    ]
+   },
+   "muted": {
+    "role": "neutral",
+    "displayName": "Gedämpft",
+    "canonical": "#5d665f",
+    "tonalRamp": [
+     "#242825",
+     "#3d433e",
+     "#555d57",
+     "#6d7870",
+     "#949e96",
+     "#b4bbb6",
+     "#d4d8d5",
+     "#f2f3f2"
+    ]
+   },
+   "night": {
+    "role": "neutral",
+    "displayName": "Nacht",
+    "canonical": "#14181a",
+    "tonalRamp": [
+     "#21282b",
+     "#374348",
+     "#4e5d65",
+     "#647882",
+     "#8c9da6",
+     "#aebbc1",
+     "#d1d8dc",
+     "#f1f3f4"
+    ]
+   },
+   "moss": {
+    "role": "primary",
+    "displayName": "Moos (Bäume)",
+    "canonical": "#3d552d",
+    "tonalRamp": [
+     "#24321a",
+     "#3c532c",
+     "#54753e",
+     "#6c964f",
+     "#93b87a",
+     "#b3cea2",
+     "#d4e3ca",
+     "#f1f6ee"
+    ]
+   },
+   "clay": {
+    "role": "primary",
+    "displayName": "Ton (Klima)",
+    "canonical": "#6e3d3a",
+    "tonalRamp": [
+     "#321c1a",
+     "#532e2c",
+     "#75413e",
+     "#96534f",
+     "#b97d79",
+     "#cea4a2",
+     "#e3cbca",
+     "#f6efee"
+    ]
+   },
+   "fjord": {
+    "role": "primary",
+    "displayName": "Fjord (Potenzial)",
+    "canonical": "#1e536d",
+    "tonalRamp": [
+     "#112e3c",
+     "#1c4c64",
+     "#276b8c",
+     "#3289b4",
+     "#5fadd3",
+     "#8fc5e0",
+     "#bfdeed",
+     "#ebf5f9"
+    ]
+   },
+   "dac-amber": {
+    "role": "primary",
+    "displayName": "DAC-Bernstein",
+    "canonical": "#9a6516",
+    "tonalRamp": [
+     "#432c0a",
+     "#704910",
+     "#9c6616",
+     "#c9841d",
+     "#e5a84d",
+     "#edc282",
+     "#f5dcb8",
+     "#fcf4e9"
+    ]
+   },
+   "co2": {
+    "role": "secondary",
+    "displayName": "CO₂-Grün",
+    "canonical": "#2e7d4f",
+    "tonalRamp": [
+     "#153823",
+     "#225d3b",
+     "#308252",
+     "#3ea86a",
+     "#6ac891",
+     "#97d9b2",
+     "#c3e9d3",
+     "#ecf8f1"
+    ]
+   },
+   "alb": {
+    "role": "secondary",
+    "displayName": "Albedo-Orange",
+    "canonical": "#c8602a",
+    "tonalRamp": [
+     "#3f1e0d",
+     "#693316",
+     "#94471f",
+     "#be5b28",
+     "#dc8456",
+     "#e6a989",
+     "#f1cebc",
+     "#fbf0ea"
+    ]
+   },
+   "ray": {
+    "role": "secondary",
+    "displayName": "Lichtstrahl",
+    "canonical": "#d9822b",
+    "tonalRamp": [
+     "#41260c",
+     "#6c4013",
+     "#97591b",
+     "#c37323",
+     "#e09952",
+     "#e9b886",
+     "#f3d6ba",
+     "#fbf2e9"
+    ]
+   },
+   "sun": {
+    "role": "secondary",
+    "displayName": "Sonne",
+    "canonical": "#e8b84f",
+    "tonalRamp": [
+     "#443109",
+     "#71520f",
+     "#9e7315",
+     "#cb941b",
+     "#e7b64b",
+     "#eecc81",
+     "#f6e2b7",
+     "#fcf6e8"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "chapter": {
+    "displayName": "Kapitel",
+    "purpose": "Nur Kapitelfolien, hell auf Kapitelfarbe."
+   },
+   "headline": {
+    "displayName": "Folientitel",
+    "purpose": "Sachlicher Titel in Kapitelfarbe."
+   },
+   "body": {
+    "displayName": "Fließtext",
+    "purpose": "Aussagen; mindestens 20px."
+   },
+   "annotation": {
+    "displayName": "Beschriftung",
+    "purpose": "Legenden, Ticks, Schema; mindestens 18px."
+   },
+   "source": {
+    "displayName": "Quelle",
+    "purpose": "Einzige kleine Schrift."
+   }
+  },
+  "shadows": [
+   {
+    "name": "takeaway",
+    "value": "0 10px 24px -16px rgba(30, 26, 18, .55)",
+    "purpose": "Kurz-gesagt-Kasten liegt leicht über dem Papier."
+   }
+  ],
+  "motion": [
+   {
+    "name": "ease",
+    "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "purpose": "Alle Einblendungen und Folienwechsel."
+   },
+   {
+    "name": "slide",
+    "value": ".35s",
+    "purpose": "Folienwechsel und Seitenfarbe."
+   },
+   {
+    "name": "rise",
+    "value": ".6s",
+    "purpose": "Ein neues Element je Klick."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "canvas",
+    "value": "1600x900 (skaliert)"
+   },
+   {
+    "name": "phone-portrait",
+    "value": "orientation: portrait and pointer: coarse"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Kurz gesagt",
+   "kind": "custom",
+   "refersTo": "takeaway",
+   "description": "Takeaway in Kapitelfarbe, höchstens zwei Zeilen.",
+   "html": "<p class=\"ds-takeaway\">Volle Speicherwirkung erst nach Jahrzehnten; Störung trifft den ganzen Vorrat.</p>",
+   "css": ".ds-takeaway{position:relative;padding:16px 26px 17px 64px;background:#3d552d;color:#f2ede2;border-radius:8px;font:500 24px/1.38 Literata,Georgia,serif;box-shadow:0 10px 24px -16px rgba(30,26,18,.55);max-width:760px}.ds-takeaway::before{content:'';position:absolute;left:24px;top:19px;width:26px;height:26px;border-radius:50% 0;background:#a9bc8f}"
+  },
+  {
+   "name": "Kapitelmarker",
+   "kind": "nav",
+   "refersTo": "chapter-pill-on",
+   "description": "Scheiben je Kapitel, das aktuelle als Pille mit Namen.",
+   "html": "<div class=\"ds-path\"><span class=\"ds-pc ds-on\">Bäume</span><span class=\"ds-pc ds-k\"></span><span class=\"ds-pc ds-f\"></span></div>",
+   "css": ".ds-path{display:flex;gap:8px}.ds-pc{height:44px;min-width:44px;border-radius:22px;border:2px solid #a9bc8f;display:grid;place-items:center;font:600 20px/1 'IBM Plex Sans',sans-serif;color:#3d552d}.ds-pc.ds-on{background:#3d552d;color:#f2ede2;border-color:#3d552d;padding:0 16px}.ds-pc.ds-k{border-color:#d2a597}.ds-pc.ds-f{border-color:#9dbfcf}"
+  },
+  {
+   "name": "Schema-Knoten",
+   "kind": "card",
+   "refersTo": "schema-node",
+   "description": "Kasten in Schemata, optional mit Kanalrand.",
+   "html": "<div class=\"ds-node\"><b>CO₂-Fluss der Bäume</b><small>als negative Emission</small></div>",
+   "css": ".ds-node{display:inline-block;padding:12px 16px;background:#e7e0d0;border:1.5px solid #2e7d4f;border-radius:8px;font-family:'IBM Plex Sans',sans-serif;color:#1b2420}.ds-node b{display:block;font-size:19px;font-weight:600}.ds-node small{display:block;font-size:15px;color:#5d665f;margin-top:2px}"
+  },
+  {
+   "name": "Nummern-Badge",
+   "kind": "chip",
+   "description": "Nummerierter Kreis in Fluss- oder Kapitelfarbe.",
+   "html": "<span class=\"ds-badge\">1</span>",
+   "css": ".ds-badge{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#2e7d4f;color:#f2ede2;font:600 20px/1 'IBM Plex Sans',sans-serif}"
+  }
+ ],
+ "narrative": {
+  "northStar": "Das Feldbuch an der Wandtafel",
+  "overview": "Ein Vortrag, der wie ein sorgfältig geführtes Feldbuch aussieht und in einem großen Hörsaal funktionieren muss. Die Gestaltung erzählt die Storyline mit: Die Systemgrenze wächst vom einzelnen Baum über das Klima zum globalen Potenzial und schließlich zu DAC, und jedes Kapitel hat genau eine Farbe.",
+  "keyCharacteristics": [
+   "Papier als Grund, Tinte als Text, eine Kapitelfarbe als einzige Akzentfläche je Folie",
+   "Literata für Aussagen, IBM Plex Sans für alles, was beschriftet, misst oder zitiert",
+   "Flache Schemata",
+   "Kanalfarben mit fester Bedeutung",
+   "Lesbar aus der letzten Reihe"
+  ],
+  "rules": [
+   {
+    "name": "Die Eine-Kapitelfarbe-Regel",
+    "body": "Pro Folie trägt nur die Kapitelfarbe Fläche.",
+    "section": "colors"
+   },
+   {
+    "name": "Die Kanalfarben-Regel",
+    "body": "Eine Farbe heißt überall dasselbe; neue Farben als Token.",
+    "section": "colors"
+   },
+   {
+    "name": "Die Letzte-Reihe-Regel",
+    "body": "Ticks, Legenden, Schema ≥ 18px, Fließtext ≥ 20px auf 1600×900.",
+    "section": "typography"
+   },
+   {
+    "name": "Die Flach-wie-Papier-Regel",
+    "body": "Ein Schatten bedeutet: liegt über etwas anderem.",
+    "section": "elevation"
+   }
+  ],
+  "dos": [
+   "Do neue Farben als Token in :root anlegen.",
+   "Do Folientitel sachlich halten.",
+   "Do jede Zahl mit Quelle belegen.",
+   "Do reduzierte Bewegung mit dem Endzustand bedienen."
+  ],
+  "donts": [
+   "Don't Hex-Werte in Folien-SVGs, wenn ein Token existiert.",
+   "Don't Elemente der Vorfolie erneut animieren oder verschieben.",
+   "Don't Inhaltstext unter 20px.",
+   "Don't Slogans als Titel.",
+   "Don't dicke farbige Seitenstreifen."
+  ]
+ }
+}
