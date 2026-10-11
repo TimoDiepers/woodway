@@ -23,7 +23,9 @@
 
   --ps: #2f7a45;  --re: #7e4a74;  --zs: #3d6698;  --st: #c0392b;
   --par: #8a6a1e;
-  --co2: #2e7d4f; --alb: #c8641a;
+  --co2: #2e7d4f; --alb: #c8602a;   /* = EC.alb in the charts */
+  --ray: #d9822b;             /* reflected sunlight in the schemata */
+  --sun: #e8b84f; --sun-ray: #d9a441; --amber: #e0a83e;
 
   --ch: var(--moss);          /* overwritten per chapter */
   --ch-soft: var(--moss-soft);
@@ -251,12 +253,24 @@ td.warn { color: var(--clay); font-weight: 500; }
 .drawer h5 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin-bottom: 12px; }
 .drawer p { font-size: 17px; line-height: 1.55; margin-bottom: 10px; max-width: 110ch; }
 .drawer p.q { color: #b9c7b0; font-style: italic; }
+/* top centre: the bottom edge belongs to the slide number and the source line */
 .hint {
-  position: fixed; right: 16px; bottom: 12px; z-index: 25; font: 400 12px/1 var(--sans); color: #6b705f;
-  opacity: .8; transition: opacity 1s;
+  position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 25; white-space: nowrap;
+  font: 400 12px/1 var(--sans); color: var(--muted); transition: opacity 1s;
 }
 .hint.gone { opacity: 0; }
 @media (max-width: 900px), (hover: none) { .hint { display: none; } }
+/* screen readers hear the slide change here (Deck.go) */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* phones held upright: the 16:9 canvas shrinks to a quarter, so say how to read it */
+.rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  .rotate { display: block; position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 25;
+    padding: 10px 16px; border-radius: 8px; background: #1f2823; color: #e8e3d6; font: 500 15px/1.3 var(--sans); white-space: nowrap; }
+  .embed .rotate, .host .rotate, body:has(#menu.open) .rotate { display: none; }
+  /* the overview button moves up out of its way */
+  #menu-fab { bottom: calc(max(24px, env(safe-area-inset-bottom)) + 56px); }
+}
 kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3px; padding: 2px 4px; }
 
 /* ===========================================================
@@ -282,7 +296,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
 #pv-count { font-weight: 600; font-variant-numeric: tabular-nums; }
 #pv-title { color: #9fb294; }
 #pv-timer { font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; letter-spacing: .02em; }
-#pv-timer.paused { color: #d9a441; }
+#pv-timer.paused { color: var(--sun-ray); }
 #pv-clock { font-size: 20px; color: #b9c2b5; font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
 .pv button {
   font: 500 14px/1 var(--sans); color: #e8e3d6; background: #26302a; border: 1px solid #3a463f;
@@ -676,7 +690,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .slide.chapter.brk { background: #14181a; }
 .slide.chapter.brk .ctext { left: 0; right: 0; top: 250px; max-width: none; text-align: center; }
 .slide.chapter.brk h1 { font-size: 112px; color: #f2ede2; }
-.slide.chapter.brk h1 em { font-style: normal; color: #e0a83e; }
+.slide.chapter.brk h1 em { font-style: normal; color: var(--amber); }
 .slide.chapter.brk .eng { opacity: 0; transform: translateX(380px); transition: transform 1.4s var(--ease), opacity .6s; }
 .slide.chapter.brk .eng.shown { opacity: 1; transform: none; }
 .slide.chapter.brk .eng .bubble { opacity: 0; transform: scale(.85); transform-box: fill-box; transform-origin: 90% 100%; transition: opacity .4s 1.3s, transform .5s 1.3s var(--ease); }
@@ -791,9 +805,9 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 
 /* DAC chapter: dark like its break slide */
 .slide.dark { --ink: #f2ede2; --ink-2: #d6dbd6; --muted: #9aa39d; --paper-deep: #20282b; --paper-line: #3a4447; --fjord-soft: #9cc3d6; }
-.slide.dark .inp h4, .slide.dark .bridge b { color: #e0a83e; }
+.slide.dark .inp h4, .slide.dark .bridge b { color: var(--amber); }
 .slide.dark .inp .q { color: #8d958f; }
-.slide.dark .inp { border-top-color: #e0a83e; }
+.slide.dark .inp { border-top-color: var(--amber); }
 /* the conclusion in daylight */
 .slide.finale { --ch: #4f7a3a; --ch-soft: #b5cf98; background: linear-gradient(180deg, #fbf1d3 0%, #f4eedd 46%, #f2ede2 100%); }
 .slide.finale > .sh, .slide.finale > .body { position: relative; z-index: 1; }

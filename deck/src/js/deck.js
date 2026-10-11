@@ -72,7 +72,7 @@ let chartUid = 0;
    goes. SVG renderer, so text stays sharp when the deck scales.
    =========================================================== */
 const EC = {
-  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb',
+  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#c8602a',   // = --alb
   font: "'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif"
 };
 const ecNum = (v, d = 1) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -268,8 +268,8 @@ const EC_GAP = {
     const series = [
       { id: 'k', type: 'line', showSymbol: false, data: P(D.k), lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, z: 5,
         endLabel: end(`Bäume, kühlende Fl.: ${ecNum(D.k[D.k.length - 1], 0)} mK`, '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1600 },
-      { id: 'al', type: 'line', showSymbol: false, data: P(D.al), lineStyle: { color: '#c8602a', width: 3.4 }, itemStyle: { color: '#c8602a' }, z: 5,
-        endLabel: end(`alle Flächen: ${ecNum(D.al[D.al.length - 1], 0)} mK`, '#c8602a'), labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1600, animationDelay: 200 }
+      { id: 'al', type: 'line', showSymbol: false, data: P(D.al), lineStyle: { color: EC.alb, width: 3.4 }, itemStyle: { color: EC.alb }, z: 5,
+        endLabel: end(`alle Flächen: ${ecNum(D.al[D.al.length - 1], 0)} mK`, EC.alb), labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1600, animationDelay: 200 }
     ];
     if (k >= 1) {
       /* the limit as one number: how far Very Low ends above 1.5 deg C in 2100, and what the trees close of it */
@@ -376,7 +376,7 @@ const EC_TEMPSUM = {
 
 /* the gap chart on a dark slide: light text and lines, the colours of the curves stay */
 function ecDark(o) {
-  const map = { [EC.ink]: '#f2ede2', [EC.ink2]: '#d6dbd6', [EC.muted]: '#9aa39d', [EC.grid]: '#2c3437', [EC.line]: '#3a4447', '#8a918c': '#6d756f', '#8e0d16': '#ff7a6e', '#c4121f': '#ff5a4f', '#2f7a45': '#6cc28a', '#c8602a': '#ef8a52' };
+  const map = { [EC.ink]: '#f2ede2', [EC.ink2]: '#d6dbd6', [EC.muted]: '#9aa39d', [EC.grid]: '#2c3437', [EC.line]: '#3a4447', '#8a918c': '#6d756f', '#8e0d16': '#ff7a6e', '#c4121f': '#ff5a4f', '#2f7a45': '#6cc28a', [EC.alb]: '#ef8a52' };
   const walk = v => { if (Array.isArray(v)) return v.map(walk); if (v && typeof v === 'object' && v.constructor === Object) { for (const k in v) v[k] = walk(v[k]); return v; }
                       return typeof v === 'string' && map[v] ? map[v] : v; };
   return walk(o);
@@ -395,7 +395,7 @@ const EC_ZEIT = {
       animationDuration: 1800 }, extra || {});
     const p = D.pfade, f = v => ecNum(v, 0);
     const series = [
-      line('al', p.alle, '#c8602a', `alle Flächen: ${f(p.alle[n])} mK`),
+      line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`),
       line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, { animationDelay: 200 })];
     if (k >= 1) {
       series.push(line('fo', p.forst, '#14532d', `+ Forst, Holz gebunden: ${f(p.forst[n])} mK`, { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300 }));
@@ -1167,12 +1167,20 @@ class SlideMenu {
     if (!this.built) this.build();
     this.loadThumbs();
     this.cards.forEach((c, i) => c.classList.toggle('cur', i === this.deck.i));
+    this.back = document.activeElement;
     this.el.classList.add('open'); this.fab.setAttribute('aria-expanded', 'true');
+    document.querySelector('main').inert = true;
     this.scale();
     const cur = this.cards[this.deck.i];
     cur.scrollIntoView({ block: 'center' }); cur.focus({ preventScroll: true });
   }
-  close() { this.el.classList.remove('open'); this.fab.setAttribute('aria-expanded', 'false'); document.activeElement?.blur(); }
+  close() {
+    this.el.classList.remove('open'); this.fab.setAttribute('aria-expanded', 'false');
+    document.querySelector('main').inert = false;
+    // focus goes back where it came from (the button on touch screens); after a key press there was nothing to return to
+    if (this.back && this.back !== document.body && this.back.isConnected) this.back.focus({ preventScroll: true }); else document.activeElement?.blur();
+    this.back = null;
+  }
   toggle() { this.isOpen ? this.close() : this.open(); }
   jump(i) { this.close(); this.deck.go(i, 0); }
   cols() {
@@ -1195,7 +1203,10 @@ class SlideMenu {
     else if (k === 'ArrowUp') { e.preventDefault(); move(i - this.cols()); }
     else if (k === 'Home') { e.preventDefault(); move(0); }
     else if (k === 'End') { e.preventDefault(); move(n - 1); }
-    else if (k === 'Tab') return;
+    else if (k === 'Tab') {   // modal: Tab runs round the close button and the cards
+      const ring = [this.el.querySelector('.menu-close'), ...this.cards], j = ring.indexOf(document.activeElement);
+      e.preventDefault(); ring[(j + (e.shiftKey ? -1 : 1) + ring.length) % ring.length].focus();
+    }
   }
 }
 
@@ -1227,6 +1238,8 @@ function slideJumper(count, titleOf, jump) {
 /* phones and tablets: no second deck copy for the overview's previews and no live woodway — together they
    exceed what iOS grants a tab, and Safari kills the page ("a problem repeatedly occurred") */
 const deckLean = matchMedia('(hover: none), (pointer: coarse)').matches;
+/* reduced motion: charts and numbers arrive in their end state, as the CSS entrances do */
+const deckCalm = matchMedia('(prefers-reduced-motion: reduce)');
 
 /* ---------- images: current slide first, the rest in the background ---------- */
 const deckMedia = {
@@ -1325,7 +1338,8 @@ class Deck {
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
       }
-      s.setAttribute('aria-label', `Folie ${n + 1}: ${s.dataset.title || ''}`);
+      s.setAttribute('role', 'group'); s.setAttribute('aria-roledescription', 'Folie');
+      s.setAttribute('aria-label', `${n + 1}: ${s.dataset.title || ''}`);
     });
   }
   stage(s) {
@@ -1364,6 +1378,7 @@ class Deck {
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
     this.stage(s);
     if (!this.embed) history.replaceState(null, '', `#${n + 1}`);
+    if (!this.embed && n !== this.said) { this.said = n; document.getElementById('sr-status').textContent = `Folie ${n + 1} von ${this.slides.length}: ${s.dataset.title || ''}`; }
     const notes = s.querySelector('.notes');
     this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
@@ -1383,14 +1398,14 @@ class Deck {
     for (const h of s.querySelectorAll('.chart')) {
       const ch = h._chart; if (!ch) continue;
       const k = this.step - (+h.dataset.step || 0);
-      if (animate && k >= 0 && k <= ch.nSteps) {
+      if (animate && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
         ch.play(k);
       } else ch.final(k);
     }
     for (const c of s.querySelectorAll('.count')) {
       const host = c.closest('[data-step]'), k = host ? +host.dataset.step : 0;
       if (k > this.step) continue;
-      countUp(c, !(animate && k === this.step));
+      countUp(c, !(animate && k === this.step) || deckCalm.matches);
     }
     this.sync();
   }
@@ -1408,7 +1423,7 @@ class Deck {
       else if (k === 'End') this.go(this.mainEnd - 1, 0);
       else if (k === 'b' || k === 'B') this.go(this.mainEnd, 0);
       else if (k === 'r' || k === 'R') this.go(this.i, this.step);
-      else if (k === 'n' || k === 'N') this.drawer.classList.toggle('open');
+      else if (k === 'n' || k === 'N') this.drawer.inert = !this.drawer.classList.toggle('open');
       else if (k === 'p' || k === 'P') this.openPresenter();
       else if (k === 'f' || k === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
     });

@@ -124,13 +124,13 @@ window.DACFILM = @@DACFILM@@;
     cumNote.textContent = p === P.c ? `von ${fmt(P.c.speicher, 0)} Gt Speicher` : 'Gt netto entnommen';
   }
   const ease = f => f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
-  const DUR = 12000;
+  const DUR = 12000, calm = matchMedia('(prefers-reduced-motion: reduce)');   // reduced motion: each phase shows its last year
   // `drawn` names the resting picture on the canvas (a phase played out, or held still off screen): while it stays
   // the same nothing is drawn, since every write to the film's numbers restyles the whole deck
   let start = null, phase = -1, from = PH[0], drawn = null;
   function tick(now) {
     requestAnimationFrame(tick);
-    const live = sec.classList.contains('active') && !(window.deck && window.deck.still);
+    const live = sec.classList.contains('active') && !(window.deck && window.deck.still) && !calm.matches;
     const k = trig.reduce((n, e, i) => e.classList.contains('shown') ? i + 1 : n, 0);
     if (k !== phase) { from = PH[Math.max(0, phase)] || PH[0]; phase = k; start = now;
       box.classList.toggle('late', PH[k].cls === 'late'); box.classList.toggle('max', PH[k].cls === 'max'); goal.textContent = PH[k].chip; }
