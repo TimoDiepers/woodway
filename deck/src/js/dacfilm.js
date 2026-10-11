@@ -125,17 +125,22 @@ window.DACFILM = @@DACFILM@@;
   }
   const ease = f => f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
   const DUR = 12000;
-  let start = null, phase = -1, from = PH[0];
+  // `drawn` names the resting picture on the canvas (a phase played out, or held still off screen): while it stays
+  // the same nothing is drawn, since every write to the film's numbers restyles the whole deck
+  let start = null, phase = -1, from = PH[0], drawn = null;
   function tick(now) {
+    requestAnimationFrame(tick);
     const live = sec.classList.contains('active') && !(window.deck && window.deck.still);
     const k = trig.reduce((n, e, i) => e.classList.contains('shown') ? i + 1 : n, 0);
     if (k !== phase) { from = PH[Math.max(0, phase)] || PH[0]; phase = k; start = now;
       box.classList.toggle('late', PH[k].cls === 'late'); box.classList.toggle('max', PH[k].cls === 'max'); goal.textContent = PH[k].chip; }
     const f = live ? Math.min(1, (now - start) / DUR) : 1, e = ease(f), s = ease(Math.min(1, f * 4)), ph = PH[k];
+    const rest = f < 1 ? null : (live ? 'live' : 'still') + k;
+    if (rest !== null && rest === drawn) return;
+    drawn = rest;
     const ym = from.ym + (ph.ym - from.ym) * s, tm = from.tmin + (ph.tmin - from.tmin) * s;
     if (k === 0) { frame(ph, Y0, ph.ym, 0); g.clearRect(0, 0, W, H); }
     else frame(ph, Y0 + e * (NY - 1), ym, tm);
-    requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 })();

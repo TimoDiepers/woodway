@@ -534,15 +534,20 @@ svg:has(.f-co2.shown) .albmark { opacity: .18; transition: opacity .5s; }
 .ghwrap:has(> .chart.shown) > svg { opacity: 0; }
 .f-box .fbox { border-color: #1b7837; border-width: 2.5px; border-radius: 6px; }
 
-/* slide 18: the drawing moves a little */
-svg.anim .flow { stroke-dasharray: 44 5; animation: ghflow 1.6s linear infinite; }
-svg.anim .flow[stroke-dasharray] { stroke-dasharray: 7 5; animation-duration: 1.1s; }
+/* slide 18: the drawing moves a little (only on screen: running in the hidden slides it restyled the whole deck every frame) */
+svg.anim .flow { stroke-dasharray: 44 5; }
+:where(.slide.active) svg.anim .flow { animation: ghflow 1.6s linear infinite; }
+svg.anim .flow[stroke-dasharray] { stroke-dasharray: 7 5; }
+:where(.slide.active) svg.anim .flow[stroke-dasharray] { animation-duration: 1.1s; }
 @keyframes ghflow { to { stroke-dashoffset: -49; } }
-svg.anim .mol { transform-box: fill-box; transform-origin: center; animation: ghjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph); }
+svg.anim .mol { transform-box: fill-box; transform-origin: center; }
+:where(.slide.active) svg.anim .mol { animation: ghjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph); }
 @keyframes ghjig { from { transform: translate(-1.5px, -1px) rotate(-5deg); } to { transform: translate(1.5px, 1px) rotate(5deg); } }
-svg.anim .rays { transform-box: view-box; transform-origin: 46px 34px; animation: ghspin 24s linear infinite; }
+svg.anim .rays { transform-box: view-box; transform-origin: 46px 34px; }
+:where(.slide.active) svg.anim .rays { animation: ghspin 24s linear infinite; }
 @keyframes ghspin { to { transform: rotate(360deg); } }
-svg.anim .flowc { stroke-dasharray: 16 6; animation: ghflowc 1.3s linear infinite; }
+svg.anim .flowc { stroke-dasharray: 16 6; }
+:where(.slide.active) svg.anim .flowc { animation: ghflowc 1.3s linear infinite; }
 @keyframes ghflowc { to { stroke-dashoffset: -22; } }
 /* step by step: only what the current step is about keeps moving */
 .slide:has(.f-alb.shown) svg.s17 .t-lw { animation-play-state: paused; }
@@ -609,25 +614,30 @@ svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
 .slide:has(.locstep.shown) .hl-q::before { border-color: #6b4a2b; background: rgba(107, 74, 43, .08); }
 .slide:has(.locstep.shown) .hl-m::before { border-color: #1b7837; background: rgba(27, 120, 55, .07); }
 
-/* ---- gentle motion in schema drawings (svg.mo) ---- */
-svg.mo .m-flow { stroke-dasharray: 22 6; animation: mflow 1.3s linear infinite; }
+/* ---- gentle motion in schema drawings (svg.mo), only on the slide on screen ---- */
+svg.mo .m-flow { stroke-dasharray: 22 6; }
+:where(.slide.active) svg.mo .m-flow { animation: mflow 1.3s linear infinite; }
 @keyframes mflow { to { stroke-dashoffset: -28; } }
-svg.mo .m-flowd { animation: mflowd 2s linear infinite; }
+:where(.slide.active) svg.mo .m-flowd { animation: mflowd 2s linear infinite; }
 @keyframes mflowd { to { stroke-dashoffset: -24; } }
-svg.mo .m-rays { transform-box: fill-box; transform-origin: center; animation: mspin 28s linear infinite; }
+svg.mo .m-rays { transform-box: fill-box; transform-origin: center; }
+:where(.slide.active) svg.mo .m-rays { animation: mspin 28s linear infinite; }
 @keyframes mspin { to { transform: rotate(360deg); } }
-svg.mo .m-fan { transform-box: fill-box; transform-origin: center; animation: mspin 2.4s linear infinite; }
-svg.mo .m-steam { animation: msteam 1.8s ease-in-out infinite alternate; }
+svg.mo .m-fan { transform-box: fill-box; transform-origin: center; }
+:where(.slide.active) svg.mo .m-fan { animation: mspin 2.4s linear infinite; }
+:where(.slide.active) svg.mo .m-steam { animation: msteam 1.8s ease-in-out infinite alternate; }
 @keyframes msteam { from { transform: translateY(2px); opacity: .55; } to { transform: translateY(-4px); opacity: 1; } }
-svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: msway 4.5s ease-in-out infinite alternate; }
+svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
+:where(.slide.active) svg.mo .m-sway { animation: msway 4.5s ease-in-out infinite alternate; }
 @keyframes msway { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
-svg.mo .m-mol { animation: mjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
+:where(.slide.active) svg.mo .m-mol { animation: mjig 2.6s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
 @keyframes mjig { from { transform: translate(-2px, -1px); } to { transform: translate(2px, 1px); } }
-svg.mo .m-bob { animation: mbob 1.7s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
+:where(.slide.active) svg.mo .m-bob { animation: mbob 1.7s ease-in-out infinite alternate; animation-delay: var(--ph, 0s); }
 @keyframes mbob { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
-svg.mo .m-drift { animation: mdrift 2.4s ease-in-out infinite alternate; }
+:where(.slide.active) svg.mo .m-drift { animation: mdrift 2.4s ease-in-out infinite alternate; }
 @keyframes mdrift { from { transform: translateX(-4px); } to { transform: translateX(4px); } }
-svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: mpulse 2.2s ease-in-out infinite alternate; }
+svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
+:where(.slide.active) svg.mo .m-pulse { animation: mpulse 2.2s ease-in-out infinite alternate; }
 @keyframes mpulse { from { transform: scale(.96); } to { transform: scale(1.04); } }
 @media (prefers-reduced-motion: reduce) { svg.mo :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse) { animation: none; } }
 .slide:has([data-step="1"].shown) svg.mo :is(.m-drift, .m-flow, .m-flowd, .m-rays, .m-fan, .m-steam, .m-sway, .m-mol, .m-bob, .m-pulse):not([data-step] *) { animation-play-state: paused; }
@@ -792,7 +802,8 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; animation: 
 /* the happy end: the sun comes up when the slide opens; on the last click a young tree grows, the engineer speaks, birds pass */
 /* from the dark DAC chapter into the day: the slide opens at night, the sun comes up, the night and the dark forest
    fade, then the text */
-.slide.finale .sunrays { transform-box: fill-box; transform-origin: center; animation: sunspin 40s linear infinite; }
+.slide.finale .sunrays { transform-box: fill-box; transform-origin: center; }
+.slide.finale.active .sunrays { animation: sunspin 40s linear infinite; }
 @keyframes sunspin { to { transform: rotate(360deg); } }
 .slide.finale .sunrise { transform: translateY(300px); transition: transform 3.6s cubic-bezier(.25, .6, .25, 1) .2s; }
 .slide.finale .night { opacity: 1; transition: opacity 3.2s ease-in-out 1s; }

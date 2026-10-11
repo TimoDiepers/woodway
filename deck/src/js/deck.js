@@ -1371,6 +1371,7 @@ class Deck {
     if (!this.embed) setTimeout(() => deckMedia.rest(this.slides), 300);
   }
   applyStep(animate, entering) {
+    if (animate) this.movedAt = performance.now();   // the background chart builder waits until this has played
     // everything with data-step <= step is shown; charts run the part that belongs to this click
     const s = this.slides[this.i];
     for (const e of s.querySelectorAll('[data-step]')) e.classList.toggle('shown', (+e.dataset.step || 0) <= this.step);
@@ -1448,14 +1449,20 @@ addEventListener('DOMContentLoaded', () => {
   window.DECK_DATA.then(() => {
     // Charts are built in slices, the current slide and its neighbours first: building all of them at once is
     // another long block on the main thread. A slide that is opened before its turn builds its own (Deck.go).
+    // One chart takes ~200 ms on a phone, so the rest are built only while the deck rests (no slide change for
+    // QUIET ms, the entrances played out), nearest slides first.
+    const QUIET = 2500;
     const d = window.deck, build = h => { if (!h._chart) h._chart = h.dataset.ec ? new EChart(h) : new MplChart(h); };
     const all = [...deckEl.querySelectorAll('.chart')];
-    const near = h => Math.abs(d.slides.indexOf(h.closest('.slide')) - d.i) <= 1;
+    const dist = h => Math.abs(d.slides.indexOf(h.closest('.slide')) - d.i);
     window.__ensureCharts = s => { for (const h of s.querySelectorAll('.chart')) build(h); };
-    all.filter(near).forEach(build);
+    all.filter(h => dist(h) <= 1).forEach(build);
     d.dataReady();
-    const rest = all.filter(h => !h._chart);
+    let rest = all.filter(h => !h._chart);
     (function slice() {
+      const wait = (d.movedAt || 0) + QUIET - performance.now();
+      if (wait > 0) { setTimeout(slice, wait); return; }
+      rest = rest.filter(h => !h._chart).sort((a, b) => dist(a) - dist(b));
       const t0 = performance.now();
       while (rest.length && performance.now() - t0 < 12) build(rest.shift());
       if (rest.length) setTimeout(slice, 0);
