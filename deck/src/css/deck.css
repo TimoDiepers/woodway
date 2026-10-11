@@ -864,6 +864,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 /* one tile at a time, about a second apart, so each picture is already moving when the next arrives;
    the pictures come alive with their tile (delays follow the tile's --d) */
 .mi * { transform-box: fill-box; }
+.mi g[transform*="scale"] { transform-box: view-box; }   /* the redrawn trees scale about their own foot, set in user space */
 .mcard .mi, .mmore .mi { --t: calc(var(--d, 0) * 1ms + .5s); }
 .slide.active .mi-bird { animation: mi-land 2.2s cubic-bezier(.2, .7, .3, 1) var(--t) both; }
 @keyframes mi-land { from { transform: translate(-190px, -30px); opacity: 0; } 15% { opacity: 1; } to { transform: none; } }
