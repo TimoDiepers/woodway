@@ -26,21 +26,6 @@ export function cellColors(at: Atlas, layer: Layer, year: number, out: Uint32Arr
   return out;
 }
 
-/** Alpha of the other cells while one is selected: they stay readable, the selected one stands out. */
-export const FADED_ALPHA = 0.45;
-
-/** The colours with every cell but `focus` faded (a copy; the cached colours stay as they are). */
-export function focusColors(colors: Uint32Array, focus: number | null, alpha = FADED_ALPHA): Uint32Array {
-  if (focus === null) return colors;
-  const out = new Uint32Array(colors.length);
-  for (let c = 0; c < colors.length; c++) {
-    const v = colors[c];
-    out[c] = v === 0 ? 0 : ((Math.round((v >>> 24) * alpha) << 24) | (v & 0xffffff)) >>> 0;
-  }
-  out[focus] = colors[focus];
-  return out;
-}
-
 /**
  * Paints the 0.5° hexagons of the view into a canvas of w×h px that covers `bounds` in Web Mercator, as the
  * talk's maps do: a regular lattice, each hexagon in the colour of the cell under its centre. The hexagons are

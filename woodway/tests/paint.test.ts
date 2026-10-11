@@ -20,19 +20,3 @@ describe("cellColors", () => {
     expect(out[2]).toBe(land);
   });
 });
-
-import { focusColors } from "@/map/paint";
-
-describe("focusColors", () => {
-  it("fades every cell but the selected one, keeps holes holes, and changes nothing without a selection", () => {
-    const opaque = 0xff336699 >>> 0;
-    const colors = new Uint32Array([opaque, opaque, 0]);
-    expect(focusColors(colors, null)).toBe(colors);
-    const out = focusColors(colors, 1);
-    expect(out[1]).toBe(opaque);
-    expect(out[0] >>> 24).toBeLessThan(0x80);          // faded
-    expect(out[0] & 0xffffff).toBe(opaque & 0xffffff); // same colour, only see-through
-    expect(out[2]).toBe(0);
-    expect(colors[0]).toBe(opaque);                    // the cached colours stay untouched
-  });
-});
