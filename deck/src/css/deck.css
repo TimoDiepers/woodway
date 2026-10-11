@@ -1053,20 +1053,10 @@ svg.mo .m-sway.back { animation: none; }
 .title-scene .tt-hare { transform: translate(1680px, 822px); }
 @media (prefers-reduced-motion: reduce) { .title-scene .tt-hare { animation: none !important; transform: translate(1400px, 830px); } }
 
-/* title: the key word gets its own line and a strip of soil where saplings come up */
-.slide.title h1 .af { display: block; position: relative; width: max-content; font-size: 124px; line-height: 1; letter-spacing: -0.025em; padding-bottom: 62px; }
-.slide.title h1 .af-rest { display: block; margin-top: 10px; font-size: 64px; color: var(--ink); font-weight: 500; letter-spacing: -0.01em; }
-.af-soil { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; overflow: visible; }
-.af-grow { transform-box: fill-box; transform-origin: 50% 100%; }
-.af-leaf { transform-box: fill-box; transform-origin: 50% 100%; }
-.slide.active .af-line { animation: af-draw 1.1s cubic-bezier(.4, 0, .2, 1) 1.1s backwards; stroke-dasharray: 1; }
-@keyframes af-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-/* each sapling has its own long cycle: up, a while standing, sinks back, comes up again; the cycles drift apart, so latecomers still see one sprout now and then */
-.slide.active .af-grow { animation: af-grow var(--c) linear var(--k) infinite backwards; }
-@keyframes af-grow { 0% { transform: scale(0); opacity: 1; animation-timing-function: cubic-bezier(.3, 1.5, .5, 1); }
-  2.5% { transform: none; } 84% { transform: none; opacity: 1; animation-timing-function: ease-in; }
-  91%, 100% { transform: scale(.2); opacity: 0; } }
-.slide.active .af-leaf { animation: af-sway var(--w) ease-in-out calc(var(--k) + .9s) infinite alternate; }
-@keyframes af-sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-:is(.embed, .all) .af :is(.af-line, .af-grow, .af-leaf) { animation: none !important; }
-@media (prefers-reduced-motion: reduce) { .af :is(.af-line, .af-grow, .af-leaf) { animation: none !important; } }
+/* title: type alone carries it. The word stands upright in moss; the claim leans in italic clay,
+   its quotation marks drawn a size up so the doubt is legible from the back row */
+.slide.title h1 .af { display: block; width: max-content; font-size: 124px; line-height: 1; letter-spacing: -0.025em; padding-bottom: 14px; }
+.slide.title h1 .af-rest { display: block; margin-top: 10px; font-size: 62px; font-style: italic; font-weight: 500; color: var(--clay); letter-spacing: -0.005em; }
+.slide.title h1 .af-q { font-size: 1.15em; line-height: 0; position: relative; }
+.slide.title h1 .af-q:first-child { margin-left: .06em; }
+.slide.title h1 .af-q:last-child { top: .1em; margin-left: .03em; }
