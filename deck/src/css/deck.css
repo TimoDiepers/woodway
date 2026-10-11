@@ -267,15 +267,6 @@ td.warn { color: var(--clay); font-weight: 500; }
 .subd { font-size: .62em; vertical-align: -.22em; line-height: 0; }
 /* screen readers hear the slide change here (Deck.go) */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-/* phones held upright: the 16:9 canvas shrinks to a quarter, so say how to read it */
-.rotate { display: none; }
-@media (orientation: portrait) and (pointer: coarse) {
-  .rotate { display: block; position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 25;
-    padding: 10px 16px; border-radius: 8px; background: #1f2823; color: #e8e3d6; font: 500 15px/1.3 var(--sans); white-space: nowrap; }
-  .embed .rotate, .host .rotate, body:has(#menu.open) .rotate { display: none; }
-  /* the overview button moves up out of its way */
-  html #menu-fab { bottom: calc(max(24px, env(safe-area-inset-bottom)) + 56px); }
-}
 kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3px; padding: 2px 4px; }
 
 /* ===========================================================
@@ -1025,5 +1016,8 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 :is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-sway, .m-mol, .m-steam, .m-bob, .m-drift, .m-pulse) { animation-iteration-count: 4; }
 :is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-rays, .m-fan) { animation-iteration-count: 1; }
 .slide.finale:not(.ende) .sunrays { animation-iteration-count: 1; }
+/* the closing slide stays alive through the questions: its forest keeps swaying after the sapling click
+   (the rule above that rests the opening picture once click 1 is shown would stop it) */
+.slide.finale.ende svg.mo .m-sway { animation-play-state: running !important; }
 /* summary slide: only the front row of the forest sways */
 svg.mo .m-sway.back { animation: none; }
