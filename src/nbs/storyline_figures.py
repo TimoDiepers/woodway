@@ -1435,7 +1435,7 @@ def forest_type_map_figure(out_path: str) -> str:
 
     # world map at full width, legend in one row underneath (2026-10-06: the map was too small on the slide)
     fig, ax = plt.subplots(figsize=(12.0, 4.7), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.15, top=0.995)
+    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.2, top=0.995)
     ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
     _map_axes(ax)
     for s in SITES:
@@ -1446,10 +1446,11 @@ def forest_type_map_figure(out_path: str) -> str:
     order = sorted(TYPES, key=lambda t: -areas[t])
     handles = [Patch(facecolor=TYPE_COLORS[t], label=f"{TYPE_NAMES[t]}\n{de_gha(areas[t])}") for t in order]
     handles.append(Patch(facecolor=_COLOR_LAND, label="nicht wiederbewaldbar\n(Wald, Acker, Stadt, Savanne, …)"))
-    ax.text(0.995, 0.03, "Kräftige Farbe: ≥ 30 % der Fläche wiederbewaldbar", transform=ax.transAxes, ha="right",
-            fontsize=10, color=C_INK_MUTED)
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=len(handles), frameon=False,
+    # legend and note stay in the left two thirds: on the slide the uptake panel covers the right third (2026-10-11)
+    fig.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.005, 0.0), ncol=3, frameon=False,
                fontsize=11, columnspacing=1.6, handlelength=1.3, handletextpad=0.5)
+    ax.text(0.005, 0.03, "Kräftige Farbe:\n≥ 30 % der Fläche\nwiederbewaldbar", transform=ax.transAxes,
+            ha="left", va="bottom", fontsize=10, color=C_INK_MUTED)   # in the empty South Pacific
     return _save(fig, out_path)
 
 
