@@ -260,6 +260,9 @@ td.warn { color: var(--clay); font-weight: 500; }
 }
 .hint.gone { opacity: 0; }
 @media (max-width: 900px), (hover: none) { .hint { display: none; } }
+/* the question that leads to the next slide: under the takeaway, not in it (the takeaway states a result) */
+.bridge { margin-top: 10px; font: italic 400 23px/1.35 var(--serif); color: var(--ch); text-align: right; }
+.bridge::before { content: "→ "; font-style: normal; }
 /* subscript digits written by subDigits(): CO₂ in Literata lines */
 .subd { font-size: .62em; vertical-align: -.22em; line-height: 0; }
 /* screen readers hear the slide change here (Deck.go) */

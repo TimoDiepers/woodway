@@ -441,19 +441,19 @@ const EC_TEMPO = {
     const series = [
       L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
       L('g20', T.g20.rest, '#f0b04a', 'Wachstum ≤ 20 %/a',
-        { markPoint: peak(T.g20.rest, '#f0b04a', `Spitze ${ecNum(Math.max(...T.g20.rest), 0)} mK`, 'top') })];
+        { markPoint: peak(T.g20.rest, '#f0b04a', `Spitze ${ecNum(Math.max(...T.g20.rest) / 1000, 2)} K`, 'top') })];
     if (k >= 2) series.push(L('frei', T.frei.rest, '#3fd0b0', 'ohne Wachstumsgrenze',
-      { lineStyle: { color: '#3fd0b0', width: 3.4 }, markPoint: peak(T.frei.rest, '#3fd0b0', `${ecNum(Math.max(...T.frei.rest), 0)} mK`, 'top') }));
+      { lineStyle: { color: '#3fd0b0', width: 3.4 }, markPoint: peak(T.frei.rest, '#3fd0b0', `${ecNum(Math.max(...T.frei.rest) / 1000, 2)} K`, 'top') }));
     return {
       animationDurationUpdate: 900,
-      title: { text: 'Erwärmung über 1,5 °C [mK]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       grid: { left: 70, right: 24, top: 64, bottom: 40 },
       legend: { orient: 'vertical', right: 24, top: 60, itemGap: 12, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
                 textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 19 }, data: series.map(s => s.name) },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19 }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },   // data in mK, read in K
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v ? ecNum(v / 1000, 1) : '0' }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
       series
     };
   }

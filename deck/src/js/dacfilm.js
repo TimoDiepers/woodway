@@ -30,7 +30,7 @@ window.DACFILM = @@DACFILM@@;
     for (const y of [2026, 2050, 2075, 2100]) el('text', Object.assign({ x: X(y), y: SH - 4, 'text-anchor': 'middle', 'font-size': 18, fill: '#8d958f' }, F)).textContent = y;
     return X;
   };
-  const XA = panel(40, 560, 'Kapazität weltweit [Gt CO₂/a]'), XB = panel(800, 1270, 'Erwärmung über 1,5 °C [mK]');
+  const XA = panel(40, 560, 'Kapazität weltweit [Gt CO₂/a]'), XB = panel(800, 1270, 'Erwärmung über 1,5 °C [K]');
   el('line', { x1: 40, x2: 560, y1: SH - B, y2: SH - B, stroke: '#4a524d', 'stroke-width': 1.5 });
   const area = el('path', {}), ghost = el('path', { fill: 'none', stroke: '#f0b04a', 'stroke-width': 2.5, 'stroke-dasharray': '2 5' });
   const lim = el('path', { fill: 'none', stroke: '#b9c0bb', 'stroke-width': 2, 'stroke-dasharray': '6 5' });
@@ -46,7 +46,7 @@ window.DACFILM = @@DACFILM@@;
   const ip = P.a.dac.indexOf(Math.max(...P.a.dac));
   const over = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#ffd2c8' }, F));
   // at the peak DAC is still tiny: that is why it cannot lower it
-  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip], 0)} mK, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
+  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
   const below = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#6fe3c8', 'text-anchor': 'end' }, F));
   // capacity: the year the growth limit first allows 1 Gt/a, and the year the final capacity is reached
   const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= P.a.peak - 0.01);
