@@ -1308,15 +1308,20 @@ class Deck {
     this.peer = window.open(location.href.split(/[?#]/)[0] + '?presenter', 'dv-presenter', 'width=1440,height=900');
   }
   decorate() {
+    // Where the talk stands: the chapters as on the overview slide, each its icon in its own colour, the current
+    // one named. Content slides carry it top right, the chapter openers top left (on their colour, inverted).
     const chapters0 = ['baeume', 'klima', 'vergleich'];
+    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial', dac: 'DAC' };
+    const path = ch => {
+      const el = document.createElement('div'); el.className = 'path'; el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = (ch === 'dac' ? [...chapters0, 'dac'] : chapters0).map(c =>
+        `<span class="pc${c === ch ? ' on' : ''}" data-ch="${c}"><svg><use href="#i-${c}"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</span>`).join('');
+      return el;
+    };
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
-      if (h) {
-        const path = document.createElement('div'); path.className = 'path'; path.setAttribute('aria-hidden', 'true');
-        const chapters = ch === 'dac' ? [...chapters0, 'dac'] : chapters0;
-        path.innerHTML = chapters.map(c => `<svg class="${c === ch ? 'on' : ''}"><use href="#i-${c}"/></svg>`).join('');
-        h.appendChild(path);
-      }
+      if (h) h.appendChild(path(ch));
+      else if (s.matches('.chapter:not(.brk):not(.backup)')) s.appendChild(path(ch));
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
       }

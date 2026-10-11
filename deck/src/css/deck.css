@@ -67,14 +67,24 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
 [data-ch="vergleich"] { --ch: var(--fjord); --ch-soft: var(--fjord-soft); }
 
 /* ---------- header: title left, chapter path right ---------- */
-.sh { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; margin-bottom: 36px; }
+.sh { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 36px; }
 .sh h2 {
   font-size: 50px; line-height: 1.08; font-weight: 600; letter-spacing: -0.015em;
   font-variation-settings: "opsz" 72; color: var(--ch); text-wrap: balance; max-width: 1180px;
 }
-.path { display: flex; gap: 14px; padding-top: 10px; flex: none; }
-.path svg { width: 30px; height: 30px; stroke: var(--paper-line); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.path svg.on { stroke: var(--ch); }
+/* chapter marker: one disc per chapter in its own colour, the current one a filled pill with its name */
+.path { display: flex; align-items: center; gap: 8px; padding-top: 6px; flex: none; }
+.path .pc { display: flex; align-items: center; gap: 10px; height: 44px; min-width: 44px; justify-content: center; border-radius: 22px;
+  border: 2px solid color-mix(in srgb, var(--ch) 45%, var(--paper)); color: var(--ch); }
+.path .pc svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.path .pc.on { background: var(--ch); border-color: var(--ch); color: var(--paper); padding: 0 16px 0 11px; }
+.path .pc b { font: 600 20px/1 var(--sans); }
+.slide.dark .path .pc:not(.on) { border-color: color-mix(in srgb, var(--ch-soft) 40%, #14181a); color: var(--ch-soft); }
+.slide.dark .path .pc.on { color: #14181a; background: var(--ch-soft); border-color: var(--ch-soft); }
+/* on a chapter opener: top left, above the title, light on the chapter's colour */
+.slide.chapter > .path { position: absolute; left: 120px; top: 108px; padding: 0; }
+.slide.chapter > .path .pc { border-color: color-mix(in srgb, var(--paper) 45%, var(--ch-host)); color: color-mix(in srgb, var(--paper) 80%, var(--ch-host)); }
+.slide.chapter > .path .pc.on { background: var(--paper); border-color: var(--paper); color: var(--ch); }
 
 /* ground line: every content slide stands on a thin strip of its chapter colour */
 /* the ground line sits at the bottom of the screen, not of the 16:9 box (see Deck.stage) */
@@ -202,7 +212,7 @@ td.warn { color: var(--clay); font-weight: 500; }
    the ground, back to front, when a chapter opens.
    =========================================================== */
 .slide.title, .slide.chapter { padding: 0; }
-.slide.chapter { background: var(--ch); color: var(--paper); }
+.slide.chapter { background: var(--ch); color: var(--paper); --ch-host: var(--ch); }
 .slide.chapter .ctext { position: absolute; left: 120px; top: 300px; max-width: 800px; }
 .slide.chapter h1 { font-size: 104px; font-weight: 600; letter-spacing: -0.02em; font-variation-settings: "opsz" 72; line-height: 1; }
 .slide.chapter p { margin-top: 28px; font-size: 30px; font-style: italic; color: color-mix(in srgb, var(--paper) 82%, var(--ch)); }
