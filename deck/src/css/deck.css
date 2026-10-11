@@ -839,7 +839,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .slide.ende .sunrise { transform: none; transition: none; }
 .slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
-.slide.finale.ende .sunrays, .slide.finale.ende .m-fan { animation: none; }   /* the last slide holds still */
+.slide.finale.ende .m-fan { animation: none; }
 .slide.ende .more h2 { margin: 0 0 22px; font-size: 48px; line-height: 1.1; font-weight: 600; color: var(--moss); letter-spacing: -0.015em; }
 .slide.ende .more h2 em { font-style: normal; color: #b8573e; }
 .mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
@@ -1013,11 +1013,27 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 
 /* ambient loops on chapter openers, interludes and the summary: a few cycles on arrival, then the picture rests in
    its start pose (an even count of an alternating loop, one turn of a spin), so nothing moves while the talk goes on */
-:is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-sway, .m-mol, .m-steam, .m-bob, .m-drift, .m-pulse) { animation-iteration-count: 4; }
-:is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-rays, .m-fan) { animation-iteration-count: 1; }
+:is(.slide.chapter, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-sway, .m-mol, .m-steam, .m-bob, .m-drift, .m-pulse) { animation-iteration-count: 4; }
+:is(.slide.chapter, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-rays, .m-fan) { animation-iteration-count: 1; }
 .slide.finale:not(.ende) .sunrays { animation-iteration-count: 1; }
 /* the closing slide stays alive through the questions: its forest keeps swaying after the sapling click
    (the rule above that rests the opening picture once click 1 is shown would stop it) */
 .slide.finale.ende svg.mo .m-sway { animation-play-state: running !important; }
 /* summary slide: only the front row of the forest sways */
 svg.mo .m-sway.back { animation: none; }
+
+/* title slide: it is up while the room fills, so it stays alive. Clouds drift above the title, CO₂ floats into the
+   crowns, now and then a bird crosses, a butterfly by the small tree; trees and sun rays from the shared motion set */
+.title-scene :is(.tt-cloud, .tt-co2, .tt-bird) { opacity: 0; }
+.slide.active .title-scene .tt-cloud { animation: tt-cloud var(--dur) linear var(--k) infinite; }
+@keyframes tt-cloud { 0% { transform: none; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translateX(var(--dx)); opacity: 0; } }
+.title-scene .tt-co2 { transform-box: fill-box; transform-origin: center; }
+.slide.active .title-scene .tt-co2 { animation: tt-co2 9s ease-in-out calc(var(--k) + 1.6s) infinite; }
+@keyframes tt-co2 { 0% { transform: none; opacity: 0; } 14% { opacity: 1; } 70% { opacity: 1; transform: translate(calc(var(--x) * .8), calc(var(--y) * .8)); }
+  100% { transform: translate(var(--x), var(--y)) scale(.3); opacity: 0; } }
+.slide.active .title-scene .tt-bird { animation: tt-bird 26s linear 4s infinite; }
+@keyframes tt-bird { 0% { transform: none; opacity: 0; } 2% { opacity: 1; } 15% { transform: translate(-280px, -18px); } 30% { transform: translate(-560px, 6px); }
+  44% { transform: translate(-840px, -12px); opacity: 1; } 46%, 100% { transform: translate(-880px, -12px); opacity: 0; } }
+.title-scene .tt-wing { transform-box: fill-box; transform-origin: 90% 90%; }
+.slide.active .title-scene .tt-wing { animation: mi-flap .24s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .title-scene :is(.tt-cloud, .tt-co2, .tt-bird, .tt-wing) { animation: none !important; } .title-scene .tt-cloud { opacity: 1; } }
