@@ -1019,3 +1019,11 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 /* on paper instead of green: the formula symbols keep their colours */
 .takeaway.light { background: var(--paper-deep); color: var(--ink); border: 1.5px solid var(--ch-soft); box-shadow: none; }
 .takeaway.light::before { background: var(--ch); }
+
+/* ambient loops on chapter openers, interludes and the summary: a few cycles on arrival, then the picture rests in
+   its start pose (an even count of an alternating loop, one turn of a spin), so nothing moves while the talk goes on */
+:is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-sway, .m-mol, .m-steam, .m-bob, .m-drift, .m-pulse) { animation-iteration-count: 4; }
+:is(.slide.chapter, .slide.title, .slide.ambient, .slide.finale:not(.ende)) svg.mo :is(.m-rays, .m-fan) { animation-iteration-count: 1; }
+.slide.finale:not(.ende) .sunrays { animation-iteration-count: 1; }
+/* summary slide: only the front row of the forest sways */
+svg.mo .m-sway.back { animation: none; }

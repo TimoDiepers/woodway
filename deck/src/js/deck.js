@@ -1418,6 +1418,7 @@ class Deck {
     // everything with data-step <= step is shown; charts run the part that belongs to this click
     const s = this.slides[this.i];
     for (const e of s.querySelectorAll('[data-step]')) e.classList.toggle('shown', (+e.dataset.step || 0) <= this.step);
+    this.rest(s);
     for (const h of s.querySelectorAll('.chart')) {
       const ch = h._chart; if (!ch) continue;
       const k = this.step - (+h.dataset.step || 0);
@@ -1431,6 +1432,24 @@ class Deck {
       countUp(c, !(animate && k === this.step) || deckCalm.matches);
     }
     this.sync();
+  }
+  rest(s) {
+    // only the newest click moves: endless loops of earlier clicks (and of the opening picture) stop in a still
+    // frame, so the eye goes to what just arrived; a loop that fades in and out stops where it is most visible
+    if (s.matches('.ende')) return;   // the closing slide keeps its scene alive through the questions
+    for (const a of document.getAnimations()) {
+      const t = a.effect && a.effect.target;
+      if (!t || !s.contains(t) || a.effect.getComputedTiming().iterations !== Infinity) continue;
+      const host = t.closest('[data-step]'), k = host ? +host.dataset.step || 0 : 0;
+      if (k >= this.step) { if (a.playState === 'paused') a.play(); continue; }
+      if (a.playState === 'paused') continue;
+      const fade = a.effect.getKeyframes().filter(f => f.opacity !== undefined);
+      if (fade.length) {
+        const f = fade.reduce((b, x) => +x.opacity > +b.opacity ? x : b);
+        a.currentTime = (a.effect.getTiming().delay || 0) + f.computedOffset * a.effect.getComputedTiming().duration;
+      }
+      a.pause();
+    }
   }
   next() { if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); } else if (this.i < this.slides.length - 1) this.go(this.i + 1, 0); }
   prev() { if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
