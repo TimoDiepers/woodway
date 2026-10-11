@@ -588,7 +588,7 @@ svg:has(.gh3.shown) .gh2 text { opacity: 0; }
 .slide:has(.ghsteps > [data-step="1"].shown) .froad.late .fw:not(.cur) { color: #a49c8c; }
 .slide:has(.fswap.shown) .froad .fw.swaps .w { display: none; }
 .slide:has(.fswap.shown) .froad .fw.swaps .s { display: inline; animation: fadein .6s var(--ease) both; }
-.epsdef { border-left: 5px solid #1b7837; background: rgba(27, 120, 55, .07); border-radius: 6px; padding: 10px 14px; }
+.epsdef { border: 1.5px solid rgba(27, 120, 55, .35); background: rgba(27, 120, 55, .07); border-radius: 8px; padding: 10px 16px; }
 .epsdef p { font: 400 20px/1.4 var(--sans); color: var(--ink); }
 /* slide 18: the steps of the greenhouse effect, numbered like the drawing */
 .ghs { position: relative; padding-left: 44px; font: 400 21px/1.4 var(--sans); color: var(--ink); }
@@ -735,12 +735,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .play .side .takeaway::before { left: 16px; top: 14px; width: 22px; height: 22px; }
 .play .strips { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 12px; }
 .play .strips svg { width: 100%; height: auto; overflow: visible; display: block; }
-.mix2 { display: grid; grid-template-columns: 1fr 470px; gap: 56px; flex: 1; min-height: 0; align-items: start; }
-.mix2 h5 { font: 600 22px/1.25 var(--sans); color: var(--ink); margin: 0 0 8px; }
-.mix2 h5 small { font-weight: 400; color: var(--muted); font-size: 18px; }
-.mix2 svg { width: 100%; overflow: visible; }
-.mix2 .box { border-left: 4px solid #9a6516; padding: 6px 0 6px 20px; }
-.mix2 .box p { font: 400 21px/1.4 var(--sans); color: var(--ink-2); margin: 10px 0 0; }
 
 .mapnote { font: 400 19px/1.35 var(--sans); color: var(--muted); margin: 0; }
 .ptab { width: 100%; border-collapse: collapse; font: 400 18px/1.3 var(--sans); color: var(--ink-2); margin: 2px 0 6px; }
@@ -748,9 +742,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .ptab th:first-child, .ptab td:first-child { text-align: left; }
 .ptab thead th { font-weight: 600; color: var(--muted); font-size: 17px; border-bottom: 1px solid var(--line, #d6ccb6); }
 .pnote { font: italic 400 18px/1.3 var(--serif); color: var(--ink-2); margin: 0 0 2px; }
-.outlook { border-left: 4px solid var(--ch); padding: 10px 0 10px 22px; margin-top: 18px; }
-.outlook h4 { font: 600 23px/1.3 var(--sans); color: var(--ch); margin: 0 0 6px; }
-.outlook p { font: 400 21px/1.45 var(--sans); color: var(--ink-2); margin: 0; }
 
 /* slide 20: the fifth point frames Delta T of the solution as the fourth did */
 .slide:has(.ts5.shown) .hl-r::before { border-color: #b2182b; background: rgba(178, 24, 43, .07); }
@@ -807,8 +798,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .slide.finale { --ch: #4f7a3a; --ch-soft: #b5cf98; background: linear-gradient(180deg, #fbf1d3 0%, #f4eedd 46%, #f2ede2 100%); }
 .slide.finale > .sh, .slide.finale > .body { position: relative; z-index: 1; }
 .slide.finale .cols3 .col p { font-size: 22px; line-height: 1.42; }
-.slide.finale .outlook { margin-top: 26px; background: rgba(255, 255, 255, .45); border-radius: 0 10px 10px 0; }
-.slide.finale .outlook p { font-size: 20px; }
 /* the happy end: the sun comes up when the slide opens; on the last click a young tree grows, the engineer speaks, birds pass */
 /* from the dark DAC chapter into the day: the slide opens at night, the sun comes up, the night and the dark forest
    fade, then the text */
