@@ -468,7 +468,37 @@ const EC_TEMPO = {
     };
   }
 };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO };
+/* the optimisation against the simulation: warming above 1.5 °C, trees alone, DAC simulated (spread by storage)
+   and optimised, both at the 20 %/a growth limit (click 1 brings the optimised line) */
+const EC_DACOPT = {
+  steps: 1,
+  option(k) {
+    const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const L = (id, ys, color, name, extra) => Object.assign({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5,
+      lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: 1600 }, extra || {});
+    const ip = C.hand_20.temp.indexOf(Math.max(...C.hand_20.temp));
+    const series = [
+      L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
+      L('hand', C.hand_20.temp, '#b9c0bb', 'DAC Simulation', { lineStyle: { color: '#b9c0bb', width: 3.4 },
+        markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#f2ede2', borderColor: '#14181a', borderWidth: 2 },
+          label: { show: true, position: 'top', distance: 10, color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+                   formatter: `Spitze ${D.jahre[ip]}: ${ecNum(C.hand_20.spitze / 1000, 2)} K` }, data: [{ coord: [D.jahre[ip], C.hand_20.temp[ip]] }] } })];
+    if (k >= 1) series.push(L('opt', C.opt_20.temp, '#f0b04a', 'DAC Optimierung', { lineStyle: { color: '#f0b04a', width: 3.4, type: [10, 6] }, z: 6 }));
+    return {
+      animationDurationUpdate: 900,
+      title: { text: 'Erwärmung über 1,5 °C [K], Wachstum ≤ 20 %/a', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      grid: { left: 70, right: 24, top: 64, bottom: 40 },
+      legend: { orient: 'vertical', right: 24, top: 60, itemGap: 12, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
+                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 19 }, data: series.map(s => s.name) },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },   // data in mK, read in K
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v ? ecNum(v / 1000, 1) : '0' }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      series
+    };
+  }
+};
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dacopt: EC_DACOPT };
 
 class EChart {
   constructor(host) {

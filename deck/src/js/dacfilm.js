@@ -1,11 +1,15 @@
-window.DACFILM = @@DACFILM@@;
-
-/* DAC film: the 2100 path (click 1), the 2085 path (click 2), everything the storage allows (click 3) */
-(function () {
-  const D = window.DACFILM, sec = document.querySelector('section[data-title="DAC-Ausbau"]');
-  if (!D || !sec) return;
+/* DAC film: a world map of DAC capacity with two strips below (world capacity, warming above 1.5 °C).
+   Each slide with data-dacfilm="<path>" gets one: the result film plays its path on click (data-dacfilm="opt");
+   with data-still the slide shows the end state at once (the cases "by hand"). data-ghost names a path drawn
+   dashed for comparison, data-chip the label at the top right, data-lim="no" hides the growth limit.
+   The data (data/dacfilm.js, built by scripts/build_dacfilm_data.py) load in the background with the charts. */
+function dacFilm(sec) {
+  const D = window.DACFILM;
+  if (!D || !D.paths[sec.dataset.dacfilm]) return;
+  const cfg = { key: sec.dataset.dacfilm, ghost: sec.dataset.ghost, chip: sec.dataset.chip || '', still: 'still' in sec.dataset,
+                lim: sec.dataset.lim !== 'no' };
   const box = sec.querySelector('.film'), cv = sec.querySelector('.fmap canvas'), svg = sec.querySelector('.strip');
-  const trig = [sec.querySelector('.ftrig1')];
+  const trig = [...sec.querySelectorAll('.ftrig1')];
   const yr = sec.querySelector('.yr'), nCap = sec.querySelector('.n-cap'), nCum = sec.querySelector('.n-cum'), goal = sec.querySelector('.goal');
   const cumNote = nCum.querySelector('small');
   const W = 1424, H = 483, S = 2, NS = 'http://www.w3.org/2000/svg', Y0 = D.years[0], NY = D.years.length;
@@ -15,8 +19,9 @@ window.DACFILM = @@DACFILM@@;
   const mk = (key, col, light) => { const p = Object.assign({}, D.paths[key]);
     p.cell = D.cells.map((_, i) => p.cc[D.owner[i]].map(v => v / D.n[D.owner[i]]));
     p.col = col; p.light = light; return p; };
-  const P = { a: mk('opt', '#f0b04a', '#f0b04a') };
-  const PH = [{ p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }, { p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }];
+  const P = { a: mk(cfg.key, '#f0b04a', '#f0b04a') };
+  if (cfg.ghost) P.g = mk(cfg.ghost, '#b9c0bb', '#b9c0bb');
+  const PH = [0, 1].map(() => ({ p: P.a, ym: 7.6, tmin: 0, chip: cfg.chip, cls: '', ghost: !!P.g }));
   const lerp = (arr, t) => { const i = Math.min(arr.length - 2, Math.floor(t)), f = t - i; return arr[i] + f * (arr[i + 1] - arr[i]); };
   const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/\./g, '\u202f');
 
@@ -46,10 +51,10 @@ window.DACFILM = @@DACFILM@@;
   const ip = P.a.dac.indexOf(Math.max(...P.a.dac));
   const over = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#ffd2c8' }, F));
   // at the peak DAC is still tiny: that is why it cannot lower it
-  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
+  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K` + (P.a.tot[ip] < P.a.peak / 2 ? `, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a` : '');
   const below = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#6fe3c8', 'text-anchor': 'end' }, F));
   // capacity: the year the growth limit first allows 1 Gt/a, and the year the final capacity is reached
-  const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= P.a.peak - 0.01);
+  const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= Math.max(...P.a.tot) - 0.01);
   const dot1 = el('circle', { r: 6, fill: '#f0b04a', stroke: '#14181a', 'stroke-width': 2 });
   const lab1 = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#f0b04a', 'text-anchor': 'end' }, F));
   lab1.textContent = `1 Gt/a erst ${Y0 + i1}`;
@@ -63,22 +68,22 @@ window.DACFILM = @@DACFILM@@;
     const full = (arr, X, Yf) => arr.map((v, i) => `${i ? 'L' : 'M'}${X(Y0 + i).toFixed(1)},${Yf(v).toFixed(1)}`).join(' ');
     area.setAttribute('d', upto > 0 ? `M${XA(Y0)},${Y(0)} ` + pts(p.tot, XA, Y).replace(/^M/, 'L') + `L${XA(Y0 + f).toFixed(1)},${Y(0)} Z` : '');
     area.setAttribute('fill', p.col);
-    ghost.setAttribute('d', ph.ghost ? full(P.a.tot, XA, Y) : '');
-    glab.setAttribute('x', XA(2100) + 10); glab.setAttribute('y', Y(P.a.peak) + 6); glab.textContent = ph.ghost ? `7-Gt-Pfad` : '';
+    ghost.setAttribute('d', ph.ghost ? full(P.g.tot, XA, Y) : '');
+    glab.setAttribute('x', XA(2100) + 10); glab.setAttribute('y', Y(P.g ? P.g.peak : 0) + 6); glab.textContent = ph.ghost ? sec.dataset.ghostLabel || '' : '';
     let d = '', lx = 0, ly = 0;
     D.lim.forEach((v, i) => { if (v <= ymax * 1.02) { d += `${d ? 'L' : 'M'}${XA(Y0 + i).toFixed(1)},${Y(v).toFixed(1)} `; lx = XA(Y0 + i); ly = Y(v); } });
-    lim.setAttribute('d', d); lab2.setAttribute('x', lx - 10); lab2.setAttribute('y', ly + 4);
+    lim.setAttribute('d', cfg.lim ? d : ''); lab2.style.opacity = cfg.lim ? 1 : 0; lab2.setAttribute('x', lx - 10); lab2.setAttribute('y', ly + 4);
     lab.setAttribute('x', XA(2100) + 10); lab.setAttribute('y', Y(lerp(p.tot, f)) - 6); lab.setAttribute('fill', p.light);
     lab.textContent = upto >= NY - 1 ? `${fmt(p.peak, 1)} Gt/a ab ${Y0 + iMax}` : '';
     dot1.setAttribute('cx', XA(Y0 + i1)); dot1.setAttribute('cy', Y(1)); lab1.setAttribute('x', XA(Y0 + i1) - 12); lab1.setAttribute('y', Y(1) - 12);
-    dot1.style.opacity = lab1.style.opacity = upto >= i1 ? 1 : 0;
+    dot1.style.opacity = lab1.style.opacity = upto >= i1 && i1 > 0 ? 1 : 0;   // built from the start: nothing to mark
     // warming: Very Low and trees are known, the DAC line runs with the film; below zero only for "everything"
     zero.setAttribute('y1', YT(0)); zero.setAttribute('y2', YT(0)); zlab.setAttribute('y', YT(0) + 6);
     vlP.setAttribute('d', full(D.vl, XB, YT)); trP.setAttribute('d', full(D.tree, XB, YT));
     tLine.setAttribute('d', upto > 0 ? pts(p.dac, XB, YT) : ''); tLine.setAttribute('stroke', p === P.c ? '#6fe3c8' : '#ff5a4f');
     tArea.setAttribute('d', upto > 0 ? `M${XB(Y0)},${YT(0)} ` + pts(p.dac, XB, YT).replace(/^M/, 'L') + `L${XB(Y0 + f).toFixed(1)},${YT(0)} Z` : '');
     tArea.setAttribute('fill', p === P.c ? '#3fd0b0' : '#ff5a4f');
-    tGhost.setAttribute('d', ph.ghost ? full(P.a.dac, XB, YT) : '');
+    tGhost.setAttribute('d', ph.ghost ? full(P.g.dac, XB, YT) : ''); tGhost.setAttribute('stroke', '#b9c0bb');
     lVL.setAttribute('y', YT(D.vl[NY - 1]) - 8); lTr.setAttribute('y', YT(D.tree[NY - 1]) + 14);
     const end = p.dac[NY - 1];
     lDac.textContent = end < -5 ? `+ DAC: −${fmt(-end / 1000, 2)} K` : '+ DAC'; lDac.setAttribute('fill', p === P.c ? '#6fe3c8' : '#ff5a4f');
@@ -142,5 +147,7 @@ window.DACFILM = @@DACFILM@@;
     if (k === 0) { frame(ph, Y0, ph.ym, 0); g.clearRect(0, 0, W, H); }
     else frame(ph, Y0 + e * (NY - 1), ym, tm);
   }
-  requestAnimationFrame(tick);
-})();
+  if (cfg.still) { box.classList.add('still'); goal.textContent = cfg.chip; frame(PH[1], Y0 + NY - 1, PH[1].ym, 0); }   // the end state, drawn once
+  else requestAnimationFrame(tick);
+}
+window.DECK_DATA.then(() => document.querySelectorAll('section[data-dacfilm]').forEach(dacFilm));

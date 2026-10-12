@@ -34,16 +34,24 @@ def _load(name: str) -> dict:
 
 
 def data() -> dict[str, str]:
-    """Values for the @@NAME@@ markers, read fresh from chart_data on every build."""
+    """Values for the @@NAME@@ markers, read fresh from chart_data on every build. The DAC film's own data
+    (scripts/build_dacfilm_data.py) go to data/dacfilm.js instead (dacfilm_js), loaded in the background."""
     film = _load("dacfilm.json")
-    land, basins = film.pop("land"), film.pop("basins")
     return {
         "TEMPSUM": _json(_load("tempsum.json"), ascii=False),  # scripts/build_tempsum_data.py
         "ZEIT": _json(_load("zeitpfade.json")),                # scripts/build_zeitpfade_data.py
-        "DACFILM": _json(film),                                # scripts/build_dacfilm_data.py
-        "DACFILM_LAND": land,
-        "DACFILM_BASINS": basins,
+        "DACFILM_LAND": "img/dac_land.png",       # written by dacfilm_js(): one file, not a copy in every DAC slide
+        "DACFILM_BASINS": "img/dac_basins.png",
     }
+
+
+def dacfilm_js() -> None:
+    import base64
+
+    film = _load("dacfilm.json")
+    for k in ("land", "basins"):   # the map backgrounds as image files
+        (DIST / "img" / f"dac_{k}.png").write_bytes(base64.b64decode(film.pop(k).split(",", 1)[1]))
+    _write_js(DIST / "data" / "dacfilm.js", "DACFILM", film)
 
 
 def assemble() -> str:
@@ -89,6 +97,7 @@ def main() -> None:
         shutil.rmtree(DIST)
     shutil.copytree(ASSETS, DIST)
     prune(page)
+    dacfilm_js()
     (DIST / "index.html").write_text(page, encoding="utf-8")
     kb, n = len(page.encode()) // 1024, page.count('<section class="slide')
     print(f"deck/dist/index.html  {kb} KB, {n} slides")

@@ -7,7 +7,7 @@
   const started = new Promise(ok => { begin = ok; });
   let asked = false;
   window.__deckDataNow = () => { if (!asked) { asked = true; begin(); } };
-  window.DECK_DATA = started.then(() => Promise.all(["data/cmip7.js", "data/ec_charts.js", "data/maps.js", "vendor/echarts/echarts.min.js"].map(src => new Promise(ok => {
+  window.DECK_DATA = started.then(() => Promise.all(["data/cmip7.js", "data/ec_charts.js", "data/maps.js", "data/dacfilm.js", "vendor/echarts/echarts.min.js"].map(src => new Promise(ok => {
     const s = document.createElement('script'); s.src = src; s.async = true; s.dataset.dyn = 1;
     s.onload = s.onerror = ok; document.head.appendChild(s);
   })))).then(() => { /* the deck draws four of the seven CMIP7 markers */
