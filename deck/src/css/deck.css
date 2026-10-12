@@ -125,8 +125,13 @@ strong { font-weight: 600; }
 
 .src {
   position: absolute; left: 150px; right: 88px; bottom: 18px;
-  font: 400 13px/1.35 var(--sans); color: var(--muted); text-wrap: pretty;
+  font: 400 13px/1.4 var(--sans); color: var(--muted); text-wrap: pretty;
 }
+/* one item per source: linked reference in bold, what it supplies in brackets; italic = own work or assumption */
+.src > span + span::before { content: "·"; margin: 0 .6em; font-weight: 700; color: var(--paper-line); }
+.src a { font-weight: 600; color: var(--ink-2); text-decoration: none; border-bottom: 1px dotted currentColor; }
+.src a:hover { color: var(--moss); border-bottom-style: solid; }
+.src i { font-style: italic; font-weight: 600; color: var(--ink-2); }
 
 /* ---------- figure + side column ---------- */
 .split > *, .cols > *, .cols3 > * { min-width: 0; }
