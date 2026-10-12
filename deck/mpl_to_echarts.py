@@ -152,6 +152,25 @@ def plain(s: str) -> str:
     return "\n".join(out)
 
 
+def sub_runs(s: str) -> list[list] | None:
+    """[[text, lowered], ...] for a one-line text whose subscript has letters (no unicode subscript for those):
+    the deck sets such a subscript smaller and lower. None for every other text, which plain() covers."""
+    if "\n" in s:
+        return None
+    runs = text_runs(s)
+    if not any(sh < 0 and not all(c in "0123456789+-−=() " for c in t) for t, sh, _it in runs):
+        return None
+    out: list[list] = []
+    for t, sh, _it in runs:
+        low = 1 if sh < 0 else 0
+        t = plain(f"${{}}^{{{t}}}$") if sh > 0 else t
+        if out and out[-1][1] == low:
+            out[-1][0] += t
+        else:
+            out.append([t, low])
+    return out
+
+
 def _col(c):
     r = to_rgba(c)
     return None if r[3] == 0 else to_hex(r, keep_alpha=False)
@@ -210,6 +229,8 @@ class DataScene:
             y = (bb.y0 + bb.y1) / 2
         w = t.get_weight()
         d = {"s": plain(s), "c": _col(t.get_color()) or "#000000", "fs": round(t.get_fontsize() * self.px, 2), "al": align}
+        if sub := sub_runs(s):
+            d["sub"] = sub
         if rot:
             d["rot"] = rot if rot <= 180 else rot - 360
         if w in ("bold", "semibold", "demibold", "heavy", "black") or (isinstance(w, (int, float)) and w >= 600):

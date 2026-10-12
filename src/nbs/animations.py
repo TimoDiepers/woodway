@@ -643,10 +643,10 @@ def albedo_ingredients_figure(out_path: str) -> str:
     panels = [
         (fig.add_axes((0.01, 0.24, 0.48, 0.66)), fig.add_axes((0.08, 0.17, 0.34, 0.03)), q, RAMP_SUN,
          (90.0, 260.0), "Kurzwellige Einstrahlung an der Oberfläche, Jahresmittel [W/m²]", "Einstrahlung an der Oberfläche",
-         r"$\dot{q}$", "#8a6a1e"),
+         r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.24, 0.48, 0.66)), fig.add_axes((0.58, 0.17, 0.34, 0.03)), darker, RAMP_SNOW,
          (0.0, 18.0), "Albedo-Differenz Offenland − Wald [Prozentpunkte]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$-\Delta\alpha$", "#d95f02"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha$", "#d95f02"),
     ]
     units = {id(q): "W/m²", id(darker): "%-Punkte"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

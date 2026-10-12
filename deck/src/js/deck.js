@@ -57,6 +57,15 @@ function E(tag, attrs, parent) {
   if (parent) parent.appendChild(e);
   return e;
 }
+/* a chart text with a letter subscript (q̇_ein): rich text, the subscript smaller and lower */
+function subRich(t, f) {
+  if (!t.sub) return {};
+  const n = f.fontSize, base = { fontFamily: f.fontFamily, fontWeight: f.fontWeight, color: t.c, verticalAlign: 'bottom' };
+  return {
+    formatter: t.sub.map(([x, low]) => `{${low ? 'lo' : 'up'}|${x.replace(/[{}|]/g, '')}}`).join(''),
+    rich: { up: { ...base, fontStyle: f.fontStyle, fontSize: n, lineHeight: n * 1.18, padding: [0, 0, n * .22, 0] },
+            lo: { ...base, fontStyle: 'normal', fontSize: n * .68, lineHeight: n * .8 } } };
+}
 const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
 const easeOut = p => 1 - Math.pow(1 - p, 3);
 const easeInOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
@@ -784,7 +793,7 @@ class MplChart {
       });
       if (texts.length) series.push({
         id: id('t'), type: 'scatter', xAxisIndex: i, yAxisIndex: i, z: 30, silent: true, clip: false, symbolSize: 0,
-        data: texts.map(t => ({ value: [t.x, t.y], label: { show: true, position: 'inside', formatter: t.s, color: t.c, align: t.al,
+        data: texts.map(t => ({ value: [t.x, t.y], label: { show: true, position: 'inside', formatter: t.s, color: t.c, align: t.al, ...subRich(t, font(t, 16)),
           verticalAlign: 'middle', rotate: t.rot || 0, lineHeight: (t.fs || 16) * s * 1.18, ...font(t, 16),
           backgroundColor: t.bg ? (t.bga < 1 ? `rgba(${parseInt(t.bg.slice(1, 3), 16)},${parseInt(t.bg.slice(3, 5), 16)},${parseInt(t.bg.slice(5, 7), 16)},${t.bga})` : t.bg) : 'transparent',
           // dark labels get a paper halo so they stay readable over lines and bars; light ones sit on colour and need none
@@ -815,8 +824,9 @@ class MplChart {
 
   textEl(id, t, font, W, H) {
     const f = font(t, 16);
+    const r = subRich(t, f);
     return { id, type: 'text', x: t.f[0] * W, y: t.f[1] * H, rotation: (t.rot || 0) * Math.PI / 180, silent: true, z: 40,
-             style: { text: t.s, fill: t.c, textAlign: t.al, textVerticalAlign: 'middle', font: `${f.fontStyle} ${f.fontWeight} ${f.fontSize}px ${f.fontFamily}`, lineHeight: f.fontSize * 1.18 } };
+             style: { text: r.formatter || t.s, rich: r.rich, fill: t.c, textAlign: t.al, textVerticalAlign: 'middle', font: `${f.fontStyle} ${f.fontWeight} ${f.fontSize}px ${f.fontFamily}`, lineHeight: f.fontSize * 1.18 } };
   }
 
   legendEl(id, lg, W, H, s) {
