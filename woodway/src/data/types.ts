@@ -5,7 +5,7 @@ export interface Meta {
   fields: Record<string, {offset: number; dtype: "f4" | "u1"; length: number}>;
   types: string[];
   typeGroup: Record<string, string>;
-  curves: Record<string, {m: number[]; phiCo2: number[]; phiAlbUnit: number[]; dtCo2: number[]; dtAlbUnit: number[]}>;
+  curves: Record<string, {m: number[]; closure: number[]; phiCo2: number[]; phiAlbUnit: number[]; dtCo2: number[]; dtAlbUnit: number[]}>;
   dacYears: number[];
   build: {years: number[]; countries: string[]; cells: [number, number][]; owner: number[]; capacityGt: number[][]};
   global: {years: number[]; need: number[]; afterTrees: number[]; afterDac: number[]; dacCapacityGt: number[];

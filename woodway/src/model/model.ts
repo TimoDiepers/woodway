@@ -21,6 +21,12 @@ export function deltaT(at: Atlas, cell: number, year: number): number {
   return at.f.a[cell] * c.dtCo2[k] + at.f.b[cell] * c.dtAlbUnit[k];
 }
 
+/** Canopy closure f(t) of the cell's forest type, 0 to 1: the share of the mature tree's extra absorbed light. */
+export function closure(at: Atlas, cell: number, year: number): number {
+  const key = typeKey(at, cell);
+  return key ? at.meta.curves[key].closure[yearIndex(at, year)] : NaN;
+}
+
 export function netShare(at: Atlas, cell: number, year: number): number {
   const key = typeKey(at, cell);
   if (!key) return NaN;

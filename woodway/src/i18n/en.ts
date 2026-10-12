@@ -40,6 +40,7 @@ export const en = {
   "legend.warms": "warms",
   "src.forestType": "Forest type: Hasler et al. 2024; reforestable area: Walker et al. 2022.",
   "src.albedo": "Albedo and sunlight: Duveiller et al. 2018, annual means.",
+  "src.light": "Albedo and sunlight: Duveiller et al. 2018, annual means; times canopy closure of the typical forest, planted 2026 (Williams et al. 2026).",
   "src.deltaT": "Own model: typical forest of the cell, planted 2026, FaIR (Leach et al. 2021), SSP2-4.5.",
   "src.dac": "Own model: sorbent DAC with heat pump (Sendi et al. 2022), electricity mix REMIND-EU SSP2-NDC via premise.",
   "src.build": "Own optimisation: lowest peak warming above 1.5 °C, growth limit +20 %/a, storage Gidden et al. 2025. Each country's capacity is spread evenly over its cells near a sediment basin with the top 10 % net share (2050).",

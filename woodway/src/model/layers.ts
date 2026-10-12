@@ -1,6 +1,6 @@
 import type { Atlas, Scale } from "@/data/types";
 import type { Key } from "@/i18n/useT";
-import { dacBuildMt, dacNet, deltaT, netShare, typeKey } from "./model";
+import { closure, dacBuildMt, dacNet, deltaT, netShare, typeKey } from "./model";
 
 export type LayerId = "forestType" | "area" | "sun" | "darker" | "light" | "deltaT" | "netShare" | "elec" | "dacNet" | "dacBuild";
 
@@ -51,7 +51,8 @@ export const LAYERS: Layer[] = [
     value: (at, c) => (at.f.type[c] ? (100 * at.f.area[c]) / ROW_AREA[Math.floor(c / 720)] : NaN), reason: noTrees, greys: TREES },
   { id: "sun", group: "trees", label: "layer.sun", source: "src.albedo", timed: false, kind: "num", scale: "sonne", value: measured("sun"), reason: unmeasured, greys: ALBEDO },
   { id: "darker", group: "trees", label: "layer.darker", source: "src.albedo", timed: false, kind: "num", scale: "abdunkeln", value: measured("darker"), reason: unmeasured, greys: ALBEDO },
-  { id: "light", group: "trees", label: "layer.light", source: "src.albedo", timed: false, kind: "num", scale: "licht", value: measured("light"), reason: unmeasured, greys: ALBEDO },
+  { id: "light", group: "trees", label: "layer.light", source: "src.light", timed: true, kind: "num", scale: "licht",
+    value: (at, c, y) => measured("light")(at, c) * closure(at, c, y), reason: unmeasured, greys: ALBEDO },
   { id: "deltaT", group: "trees", label: "layer.deltaT", source: "src.deltaT", timed: true, kind: "num", scale: "baumwirkung", unit: "unit.deltaT",
     value: (at, c, y) => deltaT(at, c, y) * 1e15, reason: noTrees, greys: TREES },
   { id: "netShare", group: "trees", label: "layer.netShare", source: "src.deltaT", timed: true, kind: "num", scale: "dac_netto", unit: "unit.netShare",

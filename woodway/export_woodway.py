@@ -52,6 +52,7 @@ def type_curves() -> dict:
         out[key] = {
             "m": _r(res.trajectory.stock_kgC),
             "phiCo2": _r(res.phi_co2),
+            "closure": _r(res.trajectory.closure),
             "phiAlbUnit": _r(unit_alb),
             "dtCo2": _r(convolve_response(g_t, res.phi_co2)),
             "dtAlbUnit": _r(convolve_response(g_t, unit_alb)),

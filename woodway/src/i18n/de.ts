@@ -42,6 +42,7 @@ export const de: Record<keyof typeof en, string> = {
   "legend.warms": "wärmt",
   "src.forestType": "Waldtyp: Hasler et al. 2024; wiederbewaldbare Fläche: Walker et al. 2022.",
   "src.albedo": "Albedo und Sonneneinstrahlung: Duveiller et al. 2018, Jahresmittel.",
+  "src.light": "Albedo und Sonneneinstrahlung: Duveiller et al. 2018, Jahresmittel; mal Kronenschluss des typischen Walds, gepflanzt 2026 (Williams et al. 2026).",
   "src.deltaT": "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, FaIR (Leach et al. 2021), SSP2-4,5.",
   "src.dac": "Eigenes Modell: Sorbens-DAC mit Wärmepumpe (Sendi et al. 2022), Strommix REMIND-EU SSP2-NDC über premise.",
   "src.build": "Eigene Optimierung: niedrigste Spitze der Erwärmung über 1,5 °C, Hochlauf +20 %/a, Speicher Gidden et al. 2025. Die Kapazität eines Landes ist gleichmäßig auf seine Zellen nahe einem Sedimentbecken mit den besten 10 % Netto-Anteil (2050) verteilt.",

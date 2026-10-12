@@ -45,6 +45,15 @@ describe("layers", () => {
     expect(en["reason.unmeasured"]).toBe("reforestable, not measured locally");
     expect(de["reason.unmeasured"]).toBe("wiederbewaldbar, nicht lokal gemessen");
   });
+  it("extra absorbed light grows with canopy closure: none at planting, mature value times f(t) later", () => {
+    let c = 0;
+    while (!(at.f.type[c] && at.f.measured[c])) c++;
+    const l = layerById("light"), f = at.meta.curves[at.meta.types[at.f.type[c] - 1]].closure;
+    expect(l.timed).toBe(true);
+    expect(l.value(at, c, 2026)).toBe(0);
+    expect(l.value(at, c, 2100)).toBeCloseTo(at.f.light[c] * f.at(-1)!, 6);
+    expect(Math.abs(l.value(at, c, 2100))).toBeLessThan(Math.abs(at.f.light[c]));
+  });
   it("the build-out names both grey reasons", () => {
     expect(layerById("dacBuild").greys).toEqual(["reason.noDac", "reason.tooCold"]);
   });
