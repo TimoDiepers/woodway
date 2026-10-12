@@ -1393,9 +1393,15 @@ class Deck {
     n = Math.max(0, Math.min(this.slides.length - 1, n));
     if (this.booted && window.__deckDataNow) window.__deckDataNow();   // the speaker moves on: load the charts now
     if (window.__ensureCharts) { window.__ensureCharts(this.slides[n]); delete this.slides[n]._steps; }
+    if (window.__ensureTex) window.__ensureTex(this.slides[n]);
     deckMedia.around(this.slides, n);
     const s = this.slides[n], again = n === this.i && s.classList.contains('active');
     if (again && !this.still) { s.classList.remove('active'); void s.offsetWidth; }   // restart CSS entrances
+    const prev = this.slides[this.i];
+    if (prev && prev !== s && prev.classList.contains('active')) {   // drawn while it fades out
+      prev.classList.add('leaving'); clearTimeout(prev._leave);
+      prev._leave = setTimeout(() => prev.classList.remove('leaving'), 400);
+    }
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
@@ -1507,30 +1513,47 @@ addEventListener('DOMContentLoaded', () => {
     if (svg.closest('[data-tree="recap"]')) { for (const e of svg.querySelectorAll('[data-step]')) e.removeAttribute('data-step'); svg.classList.add('recap'); }
   });
   for (const svg of deckEl.querySelectorAll('svg.albedo')) drawAlbedo(svg);
-  if (window.katex) renderTex(deckEl);
   window.deck = new Deck();
+  // formulas, typeset one slide per task (the current one first): they carry click steps, so the slide counts again
+  const texed = new WeakSet(), texOne = s => {
+    if (!window.katex || texed.has(s)) return false; texed.add(s);
+    if (!s.textContent.includes('$')) return false;
+    renderTex(s); delete s._steps; return true;
+  };
+  window.__ensureTex = texOne;
+  const tex = () => {
+    const d = window.deck;
+    if (texOne(d.slides[d.i])) d.applyStep(false, false);
+    const rest = [...d.slides];
+    (function next() { while (rest.length && !texOne(rest.shift())); if (rest.length) setTimeout(next, 30); })();
+  };
+  if (window.katex) tex(); else document.getElementById('katex-js').addEventListener('load', tex, { once: true });
   window.DECK_DATA.then(() => {
-    // Charts are built in slices, the current slide and its neighbours first: building all of them at once is
-    // another long block on the main thread. A slide that is opened before its turn builds its own (Deck.go).
-    // One chart takes ~200 ms on a phone, so the rest are built only while the deck rests (no slide change for
-    // QUIET ms, the entrances played out), nearest slides first.
-    const QUIET = 2500;
+    // Charts are built in slices: building all of them at once is another long block on the main thread, and one
+    // chart takes ~200 ms on a phone. The current slide's charts come at once; the slides around it (one back,
+    // three ahead) only while the deck rests (no slide change for QUIET ms, the entrances played out); the far
+    // ones after a longer rest and never on the title slide, whose scene keeps moving while people come in.
+    // A slide that is opened before its turn builds its own (Deck.go).
+    const QUIET = 2500, QUIET_FAR = 8000;
     const d = window.deck, build = h => { if (!h._chart) h._chart = h.dataset.ec ? new EChart(h) : new MplChart(h); };
     const all = [...deckEl.querySelectorAll('.chart')];
-    const dist = h => Math.abs(d.slides.indexOf(h.closest('.slide')) - d.i);
+    const at = h => d.slides.indexOf(h.closest('.slide')), dist = h => Math.abs(at(h) - d.i);
+    const near = h => at(h) - d.i >= -1 && at(h) - d.i <= 3;
     window.__ensureCharts = s => { for (const h of s.querySelectorAll('.chart')) build(h); };
-    all.filter(h => dist(h) <= 1).forEach(build);
+    all.filter(h => dist(h) === 0).forEach(build);
     d.dataReady();
     let rest = all.filter(h => !h._chart);
-    (function slice() {
-      const wait = (d.movedAt || 0) + QUIET - performance.now();
-      if (wait > 0) { setTimeout(slice, wait); return; }
-      rest = rest.filter(h => !h._chart).sort((a, b) => dist(a) - dist(b));
-      const t0 = performance.now();
-      while (rest.length && performance.now() - t0 < 12) build(rest.shift());
-      if (rest.length) setTimeout(slice, 0);
-      else for (const s of d.slides) delete s._steps;   // click counts include every chart now
-    })();
+    const slice = () => {
+      rest = rest.filter(h => !h._chart);
+      if (!rest.length) { for (const s of d.slides) delete s._steps; return; }   // click counts include every chart now
+      const idle = performance.now() - (d.movedAt || 0);
+      const far = idle >= QUIET_FAR && !d.slides[d.i].matches('.title');
+      const next = rest.filter(h => near(h) || far).sort((a, b) => dist(a) - dist(b))[0];
+      if (!next || idle < QUIET) { setTimeout(slice, Math.max(250, QUIET - idle)); return; }
+      build(next); delete next.closest('.slide')._steps;
+      setTimeout(slice, 120);   // one chart per task, with frames in between for whatever still moves
+    };
+    setTimeout(slice, 0);   // not in the same task as the data scripts
   });
 });
 

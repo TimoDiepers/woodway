@@ -63,6 +63,9 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   transition: opacity .35s var(--ease), visibility 0s linear .35s;
 }
 .slide.active { visibility: visible; opacity: 1; transition: opacity .35s var(--ease); z-index: 2; }
+/* the browser skips style and layout of every slide that is not on screen (or fading out): laying out all of
+   them at once held up the first slide's entrance; a chart that measures a hidden slide gets that slide laid out alone */
+#deck > .slide:not(.active):not(.leaving) { content-visibility: hidden; }
 
 [data-ch="baeume"]    { --ch: var(--moss);  --ch-soft: var(--moss-soft); }
 [data-ch="klima"]     { --ch: var(--clay);  --ch-soft: var(--clay-soft); }
@@ -329,7 +332,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
   html, body { overflow: visible; background: none; }
   .viewport { position: static; display: block; }
   .deck { position: static; transform: none !important; box-shadow: none; width: auto; height: auto; background: none; }
-  .slide { position: relative; visibility: visible; opacity: 1; width: 1600px; height: 900px; page-break-after: always; background: var(--paper); }
+  .slide { position: relative; visibility: visible; opacity: 1; content-visibility: visible !important; width: 1600px; height: 900px; page-break-after: always; background: var(--paper); }
   .slide.chapter { background: var(--ch); }
   .frag { opacity: 1 !important; }
   .progress, .drawer, .hint { display: none; }
