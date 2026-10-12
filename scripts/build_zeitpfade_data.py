@@ -53,17 +53,17 @@ def main() -> None:
     ort = {"optimiert": cases["g20"]["kap"], "nach_speicher": round(naive["kapazitaet_gt"], 2),
            "spitze_nach_speicher": round(1000 * float((gap - np.array(naive["kuehlung_k"])).max()), 1)}
     print("ort", ort)
-    # chapter 4 told as "try by hand, then optimise": the same target everywhere (1.5 deg C by 2100 with the
-    # least capacity); by hand = capacity spread over the countries by their storage, optimised = per country
-    # and year (nbs.dac_optim.solve)
+    # chapter 4: the optimisation (1.5 deg C by 2100 with the least capacity, per country and year,
+    # nbs.dac_optim.solve) at the 20 %/a growth limit, then the growth rate as the lever (30, 50 %/a, no limit)
+    # and a later start
     def _case(r):
         x = np.array(r["x"]); over = 1000 * (gap - np.array(r["kuehlung_k"]))
         return {"kap": round(float(r["kapazitaet_gt"]), 2), "w": [round(float(v), 3) for v in x.sum(axis=0)],
                 "temp": [round(float(v), 1) for v in np.maximum(over, 0)], "spitze": round(float(over.max()), 1),
                 "laender": r["laender"], "x_2100": [round(float(v), 4) for v in x[:, -1]]}
-    dac = {"hand_sofort": _case(solve_naive(gap, sofort=True)), "hand_20": _case(solve_naive(gap)),
-           "hand_2035": _case(solve_naive(gap, start_jahr=2035)), "hand_2040": _case(solve_naive(gap, start_jahr=2040)),
-           "opt_frei": _case(solve(gap_k=gap, growth=1e6, limit_start=False)), "opt_20": _case(solve(gap_k=gap)),
+    dac = {"opt_20": _case(solve(gap_k=gap)),
+           "opt_30": _case(solve(gap_k=gap, growth=1.3)), "opt_50": _case(solve(gap_k=gap, growth=1.5)),
+           "opt_frei": _case(solve(gap_k=gap, growth=1e6, limit_start=False)),
            "opt_2035": _case(solve(gap_k=gap, start_jahr=2035)), "opt_2040": _case(solve(gap_k=gap, start_jahr=2040))}
     print({k: (v["kap"], v["spitze"]) for k, v in dac.items()})
     out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths,

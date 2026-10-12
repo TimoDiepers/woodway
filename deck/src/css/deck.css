@@ -987,9 +987,9 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .vt .ln.g20 { border-color: #f0b04a; }
 .vt .ln.frei { border-color: #3fd0b0; }
 .vt .ln.none { border-color: transparent; }
-.vt .ln.hand { border-color: #b9c0bb; }
-/* hand calculation against the optimisation: the optimised column comes with its click */
-.vt2 .r { grid-template-columns: 1fr 130px 150px; }
+.vt .ln.g30 { border-color: #e0903e; }
+.vt .ln.g50 { border-color: #cc6f34; }
+
 /* chapter 3: the managed forest in two lines, beside its curve */
 .forstpos { position: absolute; left: 112px; top: 74px; width: 330px; pointer-events: none; }
 .forstbox { position: relative; display: grid; grid-template-columns: 92px 1fr; gap: 14px;
@@ -1097,3 +1097,28 @@ svg.mo .m-sway.back { animation: none; }
 .slide.title h1 .af-q { font-size: 1.15em; line-height: 0; position: relative; }
 .slide.title h1 .af-q:first-child { margin-left: .06em; }
 .slide.title h1 .af-q:last-child { top: .1em; margin-left: .03em; }
+
+/* DAC chapter, result of the optimisation: a still map of the capacity in 2100 (dacMap) with numbers beside it */
+.dmap { position: relative; width: 100%; aspect-ratio: 1424 / 483; overflow: hidden; }
+.dmap img { position: absolute; left: 0; top: -1.66%; width: 100%; height: 116.4%; image-rendering: pixelated; }
+.dmap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dleg { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 4px 12px; font: 400 18px/1.2 var(--sans); color: #b9c0bb; }
+.dleg > span:first-child { grid-column: 1 / -1; }
+.dleg i { grid-column: 1 / -1; width: 240px; height: 12px; border-radius: 3px; }
+.dleg > span:nth-of-type(3) { text-align: right; }
+.dsim { display: grid; grid-template-columns: 1fr 470px; gap: 36px; flex: 1; min-height: 0; }
+.dmapcol { display: flex; flex-direction: column; justify-content: center; gap: 14px; min-width: 0; }
+.dside { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.dside .chart { flex: 1; min-height: 0; }
+.dside .takeaway { margin-top: 6px; font-size: 21px; }
+.dk { font: 600 17px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.dnum { font: 600 52px/1.05 var(--sans); color: #f0b04a; font-variant-numeric: tabular-nums; }
+.dnum small { font-size: 21px; font-weight: 500; color: #b9c0bb; }
+.dsub { font: 400 19px/1.35 var(--sans); color: #d6dbd6; }
+.dbar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; gap: 2px; font: 600 17px/34px var(--sans); color: #14181a; }
+.dbar span { flex: none; padding: 0 8px; white-space: nowrap; overflow: hidden; background: #f0b04a; }
+.dbar span:nth-child(2) { background: #e0903e; } .dbar span:nth-child(3) { background: #cc6f34; }
+.dbar span:nth-child(4) { background: #b0552d; } .dbar span:nth-child(5) { background: #8e4128; } .dbar span:nth-child(6) { background: #6e3424; }
+.dbar span.rest { background: #3a4447; color: #b9c0bb; font-weight: 500; }
+.dcharts { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.dcharts .chart { flex: 1; min-height: 0; }

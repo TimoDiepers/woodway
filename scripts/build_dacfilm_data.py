@@ -1,8 +1,7 @@
 """Data for the DAC result film and its still pictures (deck/chart_data/dacfilm.json).
 
 One DAC path against the warming that remains after the trees (managed forest, timber bound; nbs.tree_paths):
-the least highest warming above 1.5 deg C, then at that peak the least DAC for 1.5 deg C by 2100, growth limit
-20 %/a (nbs.dac_optim.solve_min_peak).
+the least DAC capacity for 1.5 deg C by 2100, growth limit 20 %/a (nbs.dac_optim.solve).
 Each country's capacity is spread evenly over the cells the optimisation counts for it (cells near a sediment basin, at or above the
 90 % quantile of the net share; here fixed by the year 2050), plus dark map backgrounds (land, basins).
 
@@ -18,7 +17,7 @@ from PIL import Image
 
 from nbs.dac import dac_possible, efficiency_grid
 from nbs.dac_climate import climate_grid
-from nbs.dac_optim import growth_limit, solve_min_peak, solve_naive
+from nbs.dac_optim import growth_limit, solve
 from nbs.tree_paths import delta_t
 from nbs.vergleich_figures import overshoot_series
 from nbs.dac_storage import iso3_grid, storage_mask
@@ -41,17 +40,10 @@ def main() -> None:
     need = np.array(overshoot_series()["noetig_k"]) * 1000
     tree = -delta_t("forst") * 1000
     paths, cool = {}, {}
-    r = solve_min_peak((need - tree) / 1000)
-    assert r["status"] == "spitze_und_ziel"
+    r = solve(gap_k=(need - tree) / 1000)   # 1.5 deg C by 2100 with the least capacity, as on the slides
+    assert r["status"] == "geschlossen"
     paths["opt"] = (r["laender"], np.array(r["x"]), np.array(r["eta"]))
     cool["opt"] = np.array(r["kuehlung_k"])
-    # by hand, for the slides before the optimisation: the capacity spread over the countries by their storage,
-    # all of it from 2026 on (as the trees planted at once), then with the growth limit from 2030
-    for key, kw in (("hand_sofort", {"sofort": True}), ("hand_20", {})):
-        r = solve_naive((need - tree) / 1000, **kw)
-        assert r["status"] == "geschlossen"
-        paths[key] = (r["laender"], np.array(r["x"]), np.array(r["eta"]))
-        cool[key] = np.array(r["kuehlung_k"])
 
     lat, lon = grid_lats(), grid_lons()
     rows = (lat <= LAT_N) & (lat >= LAT_S)

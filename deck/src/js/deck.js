@@ -468,37 +468,58 @@ const EC_TEMPO = {
     };
   }
 };
-/* the optimisation against the simulation: warming above 1.5 °C, trees alone, DAC simulated (spread by storage)
-   and optimised, both at the 20 %/a growth limit (click 1 brings the optimised line) */
-const EC_DACOPT = {
-  steps: 1,
-  option(k) {
-    const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const L = (id, ys, color, name, extra) => Object.assign({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5,
-      lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: 1600 }, extra || {});
-    const ip = C.hand_20.temp.indexOf(Math.max(...C.hand_20.temp));
-    const series = [
-      L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
-      L('hand', C.hand_20.temp, '#b9c0bb', 'DAC Simulation', { lineStyle: { color: '#b9c0bb', width: 3.4 },
-        markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#f2ede2', borderColor: '#14181a', borderWidth: 2 },
-          label: { show: true, position: 'top', distance: 10, color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600,
-                   formatter: `Spitze ${D.jahre[ip]}: ${ecNum(C.hand_20.spitze / 1000, 2)} K` }, data: [{ coord: [D.jahre[ip], C.hand_20.temp[ip]] }] } })];
-    if (k >= 1) series.push(L('opt', C.opt_20.temp, '#f0b04a', 'DAC Optimierung', { lineStyle: { color: '#f0b04a', width: 3.4, type: [10, 6] }, z: 6 }));
+/* a small dark chart beside the DAC map (result of the optimisation), from deck/chart_data/zeitpfade.json
+   (key dac); line names at the line ends */
+function ecDacSmall(title, yMax, yFmt, lines) {
+  return { steps: 0, option() {
+    const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const series = lines(D).map(([id, ys, color, name, dash, area]) => ({ id, type: 'line', showSymbol: false, data: P(ys), z: area ? 4 : 5,
+      lineStyle: { color, width: dash ? 2.4 : 3.2, type: dash || 'solid' }, itemStyle: { color }, animationDuration: 1400,
+      areaStyle: area ? { color, opacity: .28 } : undefined,
+      endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 }, labelLayout: { moveOverlap: 'shiftY' } }));
     return {
-      animationDurationUpdate: 900,
-      title: { text: 'Erwärmung über 1,5 °C [K], Wachstum ≤ 20 %/a', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      grid: { left: 70, right: 24, top: 64, bottom: 40 },
-      legend: { orient: 'vertical', right: 24, top: 60, itemGap: 12, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
-                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 19 }, data: series.map(s => s.name) },
+      title: { text: title, left: 60, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      grid: { left: 60, right: 150, top: 42, bottom: 32 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },   // data in mK, read in K
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v ? ecNum(v / 1000, 1) : '0' }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: yMax, interval: yMax / 4, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, formatter: yFmt }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
       series
     };
-  }
-};
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dacopt: EC_DACOPT };
+  } };
+}
+const kOf = v => v ? ecNum(v / 1000, 1) : '0';   // data in mK, read in K
+/* result of the optimisation: warming above 1.5 °C, trees alone and with DAC */
+const EC_DACTEMP = ecDacSmall('Erwärmung über 1,5 °C [K]', 400, kOf, D => [
+  ['b', D.baeume_rest, '#7fbf8c', 'nur Bäume', [8, 6]], ['d', D.dac.opt_20.temp, '#ff5a4f', '+ DAC', null, true]]);
+/* the lever: world capacity of the optimisation at faster growth limits and without one, and the warming above
+   1.5 °C that follows (two charts, one above the other) */
+function ecDacTempo(title, key, yMax, yFmt, trees) {
+  return { steps: 0, option() {
+    const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const L = (id, ys, color, name, w, dash) => ({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5, lineStyle: { color, width: w || 3, type: dash || 'solid' },
+      itemStyle: { color }, animationDuration: 1600,
+      endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' } });
+    const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4), L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'),
+                    L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'), L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4)];
+    if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
+      for (const x of series) x.endLabel.show = false;
+      series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));
+    }
+    return {
+      title: { text: title, left: 60, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      grid: { left: 60, right: 150, top: 40, bottom: 34 },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: yMax, interval: yMax / 4, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, formatter: yFmt }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      series
+    };
+  } };
+}
+const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 8, v => String(v), false);
+const EC_DACTEMPO_T = ecDacTempo('Erwärmung über 1,5 °C [K]', 'temp', 400, kOf, true);
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T };
 
 class EChart {
   constructor(host) {

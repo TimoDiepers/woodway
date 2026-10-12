@@ -284,12 +284,10 @@ def solve_max(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0
 
 
 def solve_naive(gap_k: NDArray, ziel_jahr: int = TARGET_YEAR, growth: float = GROWTH, stufe: str = "prudent",
-                quantil: float = 0.9, pathway: str = "SSP2-NDC", start_jahr: int = 2030, sofort: bool = False) -> dict:
+                quantil: float = 0.9, pathway: str = "SSP2-NDC") -> dict:
     """The simple case for comparison: the world capacity spread over the countries in proportion to their safe
     storage, the same every year (no choice of place by electricity or climate); least capacity that closes
-    *gap_k* from *ziel_jahr* on, with the same growth limit and plants running on (8.8 Mt/a reached in
-    *start_jahr*). sofort=True: no growth limit at all, the whole capacity runs from the first year on, as the
-    trees planted at once."""
+    *gap_k* from *ziel_jahr* on, with the same growth limit and plants running on."""
     from scipy.optimize import linprog
 
     countries, eta, storage = _setup(stufe, quantil, pathway)
@@ -299,18 +297,12 @@ def solve_naive(gap_k: NDArray, ziel_jahr: int = TARGET_YEAR, growth: float = GR
     gap = np.maximum(0.0, np.asarray(gap_k, dtype=float))
     n, i = N_Y, int(ziel_jahr - YEARS[0])
     cool = (-k * eta_mix[:, None]).T                                 # cooling[t] per Gt/a of world capacity in y
-    if sofort:   # one capacity W from the first year on: the least W that closes the gap from ziel_jahr on
-        w = np.full(n, float(np.max(gap[i:] / cool[i:].sum(axis=1))))
-        x = share[:, None] * w[None, :]
-        assert np.all(x.sum(axis=1) <= storage * (1 + 1e-6)), "storage would bind; the simple case is not defined"
-        return {"status": "geschlossen", "laender": countries, "x": x.tolist(), "eta": eta.tolist(), "kuehlung_k": (cool @ w).tolist(),
-                "kapazitaet_gt": float(w.max()), "brutto_gt": float(w.sum()), "netto_gt": float((w * eta_mix).sum())}
     a, b = [-cool[i:]], [-gap[i:]]
     for t_ in range(1, n):                                           # running on, growth limit
         r = np.zeros(n); r[t_ - 1], r[t_] = 1.0, -1.0; a.append(r[None]); b.append([0.0])
-        if YEARS[t_] > start_jahr:
+        if YEARS[t_] > 2030:
             r = np.zeros(n); r[t_], r[t_ - 1] = 1.0, -growth; a.append(r[None]); b.append([0.0])
-    bounds = [(0.0, max(0.0, START_2030_GT * (y - start_jahr + 5) / 5) if y <= start_jahr else None) for y in YEARS]
+    bounds = [(0.0, START_2030_GT * (y - 2025) / 5 if y <= 2030 else None) for y in YEARS]
     A, B = np.vstack(a), np.concatenate([np.atleast_1d(v) for v in b])
     res = linprog(np.r_[np.zeros(n - 1), 1.0], A_ub=A, b_ub=B, bounds=bounds, method="highs")  # least final capacity
     if res.status != 0:

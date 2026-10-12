@@ -1,13 +1,9 @@
-/* DAC film: a world map of DAC capacity with two strips below (world capacity, warming above 1.5 °C).
-   Each slide with data-dacfilm="<path>" gets one: the result film plays its path on click (data-dacfilm="opt");
-   with data-still the slide shows the end state at once (the cases "by hand"). data-ghost names a path drawn
-   dashed for comparison, data-chip the label at the top right, data-lim="no" hides the growth limit.
-   The data (data/dacfilm.js, built by scripts/build_dacfilm_data.py) load in the background with the charts. */
+/* DAC film (backup): a world map of DAC capacity with two strips below (world capacity, warming above 1.5 °C),
+   played year by year on click for the slide with data-dacfilm="<path>". The data (data/dacfilm.js, built by
+   scripts/build_dacfilm_data.py) load in the background with the charts. */
 function dacFilm(sec) {
   const D = window.DACFILM;
   if (!D || !D.paths[sec.dataset.dacfilm]) return;
-  const cfg = { key: sec.dataset.dacfilm, ghost: sec.dataset.ghost, chip: sec.dataset.chip || '', still: 'still' in sec.dataset,
-                lim: sec.dataset.lim !== 'no' };
   const box = sec.querySelector('.film'), cv = sec.querySelector('.fmap canvas'), svg = sec.querySelector('.strip');
   const trig = [...sec.querySelectorAll('.ftrig1')];
   const yr = sec.querySelector('.yr'), nCap = sec.querySelector('.n-cap'), nCum = sec.querySelector('.n-cum'), goal = sec.querySelector('.goal');
@@ -19,9 +15,8 @@ function dacFilm(sec) {
   const mk = (key, col, light) => { const p = Object.assign({}, D.paths[key]);
     p.cell = D.cells.map((_, i) => p.cc[D.owner[i]].map(v => v / D.n[D.owner[i]]));
     p.col = col; p.light = light; return p; };
-  const P = { a: mk(cfg.key, '#f0b04a', '#f0b04a') };
-  if (cfg.ghost) P.g = mk(cfg.ghost, '#b9c0bb', '#b9c0bb');
-  const PH = [0, 1].map(() => ({ p: P.a, ym: 7.6, tmin: 0, chip: cfg.chip, cls: '', ghost: !!P.g }));
+  const P = { a: mk(sec.dataset.dacfilm, '#f0b04a', '#f0b04a') };
+  const PH = [0, 1].map(() => ({ p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }));
   const lerp = (arr, t) => { const i = Math.min(arr.length - 2, Math.floor(t)), f = t - i; return arr[i] + f * (arr[i + 1] - arr[i]); };
   const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/\./g, '\u202f');
 
@@ -51,7 +46,7 @@ function dacFilm(sec) {
   const ip = P.a.dac.indexOf(Math.max(...P.a.dac));
   const over = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#ffd2c8' }, F));
   // at the peak DAC is still tiny: that is why it cannot lower it
-  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K` + (P.a.tot[ip] < P.a.peak / 2 ? `, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a` : '');
+  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
   const below = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#6fe3c8', 'text-anchor': 'end' }, F));
   // capacity: the year the growth limit first allows 1 Gt/a, and the year the final capacity is reached
   const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= Math.max(...P.a.tot) - 0.01);
@@ -68,22 +63,22 @@ function dacFilm(sec) {
     const full = (arr, X, Yf) => arr.map((v, i) => `${i ? 'L' : 'M'}${X(Y0 + i).toFixed(1)},${Yf(v).toFixed(1)}`).join(' ');
     area.setAttribute('d', upto > 0 ? `M${XA(Y0)},${Y(0)} ` + pts(p.tot, XA, Y).replace(/^M/, 'L') + `L${XA(Y0 + f).toFixed(1)},${Y(0)} Z` : '');
     area.setAttribute('fill', p.col);
-    ghost.setAttribute('d', ph.ghost ? full(P.g.tot, XA, Y) : '');
-    glab.setAttribute('x', XA(2100) + 10); glab.setAttribute('y', Y(P.g ? P.g.peak : 0) + 6); glab.textContent = ph.ghost ? sec.dataset.ghostLabel || '' : '';
+    ghost.setAttribute('d', ph.ghost ? full(P.a.tot, XA, Y) : '');
+    glab.setAttribute('x', XA(2100) + 10); glab.setAttribute('y', Y(P.a.peak) + 6); glab.textContent = ph.ghost ? `7-Gt-Pfad` : '';
     let d = '', lx = 0, ly = 0;
     D.lim.forEach((v, i) => { if (v <= ymax * 1.02) { d += `${d ? 'L' : 'M'}${XA(Y0 + i).toFixed(1)},${Y(v).toFixed(1)} `; lx = XA(Y0 + i); ly = Y(v); } });
-    lim.setAttribute('d', cfg.lim ? d : ''); lab2.style.opacity = cfg.lim ? 1 : 0; lab2.setAttribute('x', lx - 10); lab2.setAttribute('y', ly + 4);
+    lim.setAttribute('d', d); lab2.setAttribute('x', lx - 10); lab2.setAttribute('y', ly + 4);
     lab.setAttribute('x', XA(2100) + 10); lab.setAttribute('y', Y(lerp(p.tot, f)) - 6); lab.setAttribute('fill', p.light);
     lab.textContent = upto >= NY - 1 ? `${fmt(p.peak, 1)} Gt/a ab ${Y0 + iMax}` : '';
     dot1.setAttribute('cx', XA(Y0 + i1)); dot1.setAttribute('cy', Y(1)); lab1.setAttribute('x', XA(Y0 + i1) - 12); lab1.setAttribute('y', Y(1) - 12);
-    dot1.style.opacity = lab1.style.opacity = upto >= i1 && i1 > 0 ? 1 : 0;   // built from the start: nothing to mark
+    dot1.style.opacity = lab1.style.opacity = upto >= i1 ? 1 : 0;
     // warming: Very Low and trees are known, the DAC line runs with the film; below zero only for "everything"
     zero.setAttribute('y1', YT(0)); zero.setAttribute('y2', YT(0)); zlab.setAttribute('y', YT(0) + 6);
     vlP.setAttribute('d', full(D.vl, XB, YT)); trP.setAttribute('d', full(D.tree, XB, YT));
     tLine.setAttribute('d', upto > 0 ? pts(p.dac, XB, YT) : ''); tLine.setAttribute('stroke', p === P.c ? '#6fe3c8' : '#ff5a4f');
     tArea.setAttribute('d', upto > 0 ? `M${XB(Y0)},${YT(0)} ` + pts(p.dac, XB, YT).replace(/^M/, 'L') + `L${XB(Y0 + f).toFixed(1)},${YT(0)} Z` : '');
     tArea.setAttribute('fill', p === P.c ? '#3fd0b0' : '#ff5a4f');
-    tGhost.setAttribute('d', ph.ghost ? full(P.g.dac, XB, YT) : ''); tGhost.setAttribute('stroke', '#b9c0bb');
+    tGhost.setAttribute('d', ph.ghost ? full(P.a.dac, XB, YT) : '');
     lVL.setAttribute('y', YT(D.vl[NY - 1]) - 8); lTr.setAttribute('y', YT(D.tree[NY - 1]) + 14);
     const end = p.dac[NY - 1];
     lDac.textContent = end < -5 ? `+ DAC: −${fmt(-end / 1000, 2)} K` : '+ DAC'; lDac.setAttribute('fill', p === P.c ? '#6fe3c8' : '#ff5a4f');
@@ -147,7 +142,46 @@ function dacFilm(sec) {
     if (k === 0) { frame(ph, Y0, ph.ym, 0); g.clearRect(0, 0, W, H); }
     else frame(ph, Y0 + e * (NY - 1), ym, tm);
   }
-  if (cfg.still) { box.classList.add('still'); goal.textContent = cfg.chip; frame(PH[1], Y0 + NY - 1, PH[1].ym, 0); }   // the end state, drawn once
-  else requestAnimationFrame(tick);
+  requestAnimationFrame(tick);
 }
 window.DECK_DATA.then(() => document.querySelectorAll('section[data-dacfilm]').forEach(dacFilm));
+
+/* A still DAC map (result of the optimisation): the film's dark world, hexagons on 2° blocks, each the capacity of
+   2100 in that block. <div class="dmap" data-path="<path>" data-scale="<paths>">: the colour scale runs to the
+   largest block of all paths in data-scale (maps side by side compare). */
+function dacMap(host) {
+  const D = window.DACFILM, p = D && D.paths[host.dataset.path];
+  if (!p) return;
+  // the map's width: as laid out, or as set in the slide (data-w) where the page is not laid out (a preview frame)
+  const W = host.clientWidth || +host.dataset.w || 0, H = W * 483 / 1424, S = 2, NY = D.years.length;
+  if (W < 10) return;
+  const cv = host.querySelector('canvas'); cv.width = W * S; cv.height = H * S;
+  const g = cv.getContext('2d'); g.scale(S, S);
+  const XY = D.cells.map(([lo, la]) => [(lo + 180) / 360 * W, (82 - la) / 122 * H]);
+  const PX = W / 360, R = Math.sqrt((2 * PX) ** 2 / 2.598), HW = Math.sqrt(3) * R;
+  const blockOf = (x, y) => Math.floor(x / (2 * PX)) + ':' + Math.floor(y / (2 * PX));
+  const members = new Map();
+  XY.forEach(([x, y], i) => { const k = blockOf(x, y); if (!members.has(k)) members.set(k, []); members.get(k).push(i); });
+  const cellv = q => D.cells.map((_, i) => q.cc[D.owner[i]][NY - 1] / D.n[D.owner[i]]);
+  const HEX = [];
+  for (let j = 0, py = 0; py <= H + R; j++, py = j * 1.5 * R)
+    for (let px = j % 2 ? HW / 2 : 0; px <= W + HW; px += HW) { const m = members.get(blockOf(px, py)); if (m) HEX.push({ x: px, y: py, m }); }
+  const block = v => HEX.map(h => h.m.reduce((n, i) => n + v[i], 0));
+  const vmax = Math.max(...(host.dataset.scale || host.dataset.path).split(',').map(k => Math.max(...block(cellv(D.paths[k])))));
+  const STOPS = [[122, 38, 52], [205, 78, 45], [240, 176, 74], [255, 240, 190]];   // as the film
+  const ramp = f => { const x = Math.max(0, Math.min(1, f)) * (STOPS.length - 1), i = Math.min(STOPS.length - 2, Math.floor(x)), u = x - i;
+    return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * u)).join(',')})`; };
+  const corner = Array.from({ length: 6 }, (_, k) => [Math.cos(Math.PI / 180 * (60 * k - 90)), Math.sin(Math.PI / 180 * (60 * k - 90))]);
+  block(cellv(p)).forEach((v, k) => {
+    if (v <= 1e-6) return;
+    const h = HEX[k];
+    g.beginPath(); corner.forEach(([u, w], q) => g[q ? 'lineTo' : 'moveTo'](h.x + (R + .45) * u, h.y + (R + .45) * w)); g.closePath();
+    g.fillStyle = ramp(Math.sqrt(v / vmax)); g.fill();
+  });
+  const leg = host.closest('.slide').querySelector('.dleg');   // one legend per slide, the scale is shared
+  if (leg && !leg.childElementCount) {
+    const fmt = v => v.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+    leg.innerHTML = `<span>Kapazität je 2°-Block 2100</span><i style="background:linear-gradient(90deg,${[0, .25, .5, .75, 1].map(f => ramp(Math.sqrt(f))).join(',')})"></i><span>0</span><span>${fmt(vmax)} Gt/a</span>`;
+  }
+}
+window.DECK_DATA.then(() => document.querySelectorAll('.dmap').forEach(dacMap));
