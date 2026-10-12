@@ -59,7 +59,7 @@
     <div style="display:grid; grid-template-columns:210px 1fr; align-items:center; gap:0 10px">
       <div class="rise" data-step="1" style="font:italic 600 22px/1.3 var(--serif); color:var(--ink-2); text-align:right; padding-right:10px; grid-row:span 2; align-self:end; padding-bottom:22px">Modellierung<br>über Parameter&nbsp;↘</div>
       <div class="eq tex" style="font-size:29px">$$\mB(t) = \underbrace{\mPS(t) - \mRE(t) - \mZS(t)}_{\text{Wachstum}} - \underbrace{\mST(t)}_{\text{Störung}}$$</div>
-      <div class="eq tex" data-step="1" style="font-size:29px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \st{2}{{}\cdot \left(1 - \sc{s_{0}}\, \textcolor{aaaaaa}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)}$$</div>
+      <div class="eq tex" data-step="1" style="font-size:29px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \st{2}{{}\cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)}$$</div>
     </div>
     <div style="display:grid; grid-template-columns:470px 1fr; gap:40px; flex:1; min-height:0; margin-top:4px">
       <dl class="legend tex" style="align-content:center">
@@ -94,7 +94,7 @@
   <div class="body">
     <div style="display:grid; grid-template-columns:860px 1fr; gap:44px; flex:1; min-height:0; align-items:center">
     <div class="sidecol"><p class="ptitle">Typische Waldtypen</p><div class="chart" data-chart="b5" data-label="Karte: typischer Waldtyp auf der wiederbewaldbaren Fläche"></div></div>
-    <div class="sidecol"><p class="ptitle">CO₂-Aufnahme je Baum, gepflanzt 2026</p><div class="eq tex" style="font-size:17px; margin:2px 0 4px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{aaaaaa}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$$</div><table class="ptab tex"><thead><tr><th></th><th>$\pc{m^{c}_{\mathrm{max}}}$ [kg C]</th><th>$\pc{k}$ [1/a]</th><th>$\pc{p}$</th><th>$\sc{s_{0}}$ [1/a]</th></tr></thead><tbody><tr><td style="color:#2f6fb7">Aachen</td><td>49</td><td>0,043</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#b8357f">Joensuu</td><td>33</td><td>0,045</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#6a4c9c">Marabá</td><td>69</td><td>0,045</td><td>2,0</td><td>0,005</td></tr></tbody></table><div class="chart" data-chart="b6s" data-label="CO₂-Aufnahme eines Baums je Jahr von 2026 bis 2100, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div><p class="takeaway" data-step="1" style="--d:0; margin-top:6px">Bis 2100 je Baum: Aachen 163, Joensuu 111, Marabá 232&nbsp;kg CO₂.</p></div>
+    <div class="sidecol"><p class="ptitle">CO₂-Aufnahme je Baum, gepflanzt 2026</p><div class="eq tex" style="font-size:17px; margin:2px 0 4px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$$</div><table class="ptab tex"><thead><tr><th></th><th>$\pc{m^{c}_{\mathrm{max}}}$ [kg C]</th><th>$\pc{k}$ [1/a]</th><th>$\pc{p}$</th><th>$\sc{s_{0}}$ [1/a]</th></tr></thead><tbody><tr><td style="color:#2f6fb7">Aachen</td><td>49</td><td>0,043</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#b8357f">Joensuu</td><td>33</td><td>0,045</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#6a4c9c">Marabá</td><td>69</td><td>0,045</td><td>2,0</td><td>0,005</td></tr></tbody></table><div class="chart" data-chart="b6s" data-label="CO₂-Aufnahme eines Baums je Jahr von 2026 bis 2100, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div><p class="takeaway" data-step="1" style="--d:0; margin-top:6px">Bis 2100 je Baum: Aachen 163, Joensuu 111, Marabá 232&nbsp;kg CO₂.</p></div>
     </div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (Waldtyp: wahrscheinlichste Waldklasse, aus Satelliten-Landbedeckung MODIS)</span><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (wiederbewaldbare Fläche, Kohlenstoff der Zelle, Klimazone; aus Inventur- und Satellitendaten hochgerechnet)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a> (Wachstumstempo, begrenzt nach <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a>)</span><span><i>Eigene Rechnung</i> (Kurven; alles auf 0,5° zusammengefasst)</span><span><i>Annahme</i> (Störung mit heutiger Rate; 2000 Bäume je ha)</span></p>
@@ -166,8 +166,8 @@
   <div class="body" style="position:relative">
     <div class="chart" style="flex:1; min-height:0" data-chart="b8" data-label="Karte: zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel"></div>
     <div class="eqbox rise" style="--d:900; bottom:0; display:flex; flex-direction:column">
-      <div style="margin:auto 0">
-      <div class="eq tex">$$\Delta\dot Q_{\mathrm{Baum}} = \bq{A_{\mathrm{Baum}}}\, \pc{\dot q_{\mathrm{ein}}}\, \aq{\Delta\alpha}\, \gq{f(t)}$$</div>
+      <div>
+      <div class="eq tex">$$\bq{\Delta\dot Q_{\mathrm{Baum}}} = \bq{A_{\mathrm{Baum}}}\, \pc{\dot q_{\mathrm{ein}}}\, \aq{\Delta\alpha}\, \gq{f(t)}$$</div>
       <dl class="pdef">
         <dt>$\bq{A_{\mathrm{Baum}}}$</dt><dd>Standfläche je Baum</dd>
         <dt>$\pc{\dot q_{\mathrm{ein}}}$</dt><dd>Einstrahlung an der Oberfläche [W/m²], linke Karte der Vorfolie</dd>
@@ -175,8 +175,13 @@
         <dt>$\gq{f(t)}$</dt><dd>Kronenschluss, 0 bis 1; hier ausgewachsen, also 1</dd>
       </dl>
       </div>
-      <!-- in the right column, so the map keeps the full height, as the maps of the slide before -->
-      <p class="takeaway" data-step="1" style="--d:300">Beide Wirkungen liegen vor, in zwei Einheiten: CO₂-Aufnahme in kg, Strahlung in W.</p>
+      <!-- in the right column, so the map keeps the full height, as the maps of the slide before; light, so the
+           formulas keep their colours -->
+      <div class="takeaway light tw2" data-step="1" style="--d:300"><p>Beide Wirkungen je Baum:</p>
+        <div class="twf">
+          <span class="lab">Kohlenstoffaufnahme [kg C]</span><span class="tex">$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$</span>
+          <span class="lab">Zusätzlich absorbierte Strahlung [W]</span><span class="tex">$\bq{\Delta\dot Q_{\mathrm{Baum}}}(t) = \bq{A_{\mathrm{Baum}}}\, \pc{\dot q_{\mathrm{ein}}}\, \aq{\Delta\alpha}\, \gq{f(t)}$</span>
+        </div></div>
       <p class="bridge" data-step="1" style="--d:1100">Aber was heißt das für den Klimawandel?</p>
     </div>
   </div>
@@ -184,6 +189,7 @@
   <aside class="notes" data-n="15">
     <p class="q">Ausführlich: Die zusätzlich absorbierte Strahlung ist dort am größten, wo Schnee liegt und die Einstrahlung hoch ist: im Jahresmittel Aachen (DE) 34 W, Joensuu (FI) 45 W, Marabá (BR) 21 W je ausgewachsenem Baum. Damit liegen beide Wirkungen vor, in zwei Einheiten: CO₂-Aufnahme in kg, absorbierte Strahlung in W. Wie sie auf das Klima wirken, zeigt das nächste Kapitel.</p>
     <p>Die Gleichung rechts: Standfläche des Baums mal Einstrahlung mal Albedo-Kontrast, Monat für Monat, mal Kronenschluss. Die Standfläche ist für jeden Baum dieselbe, 5 Quadratmeter; das ist eine Zähleinheit, die beim Kohlenstoff genauso drinsteckt. Aachen hat kaum Schnee — dort folgt der Effekt der Sonne. Joensuu hat im Frühjahr eine Spitze: noch Schnee, Sonne schon hoch. Marabá hat keinen Schnee; dort zählt nur, dass das Kronendach etwas dunkler ist als das Weideland. Im Jahresmittel unterscheiden sich die Orte weniger als im Jahresgang. Zusammen mit dem langsameren Wachstum im Norden entscheidet das später über das Vorzeichen. Grau: wiederbewaldbar, aber ohne lokale Messung.</p>
+    <p>Klick: Damit haben wir beide Wirkungen eines Baums als Formel: die Kohlenstoffaufnahme m^c_Baum(t) von Folie 12, in Kilogramm Kohlenstoff, und die zusätzlich absorbierte Strahlung ΔQ̇_Baum in Watt. Zwei Einheiten, die man nicht direkt vergleichen kann — genau das löst das nächste Kapitel.</p>
   </aside>
 </section>
 

@@ -1037,6 +1037,13 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 /* on paper instead of green: the formula symbols keep their colours */
 .takeaway.light { background: var(--paper-deep); color: var(--ink); border: 1.5px solid var(--ch-soft); box-shadow: none; }
 .takeaway.light::before { background: var(--ch); }
+/* slide 15: the takeaway names both effects of a tree as formulas, each with its unit */
+.takeaway.tw2 { margin-top: auto; padding: 20px 20px 22px 64px; }
+.takeaway.tw2 > p { font-size: 24px; }
+/* the formulas use the box's full width, under the leaf too */
+.takeaway.tw2 .twf { display: grid; gap: 4px 0; margin: 6px 0 0 -40px; }
+.takeaway.tw2 .twf .lab { font: 400 18px/1.3 var(--sans); color: var(--ink-2); margin-top: 14px; }
+.takeaway.tw2 .twf .tex { font-size: 23px; color: var(--ink); white-space: nowrap; }
 
 /* ambient loops on chapter openers, interludes and the summary: a few cycles on arrival, then the picture rests in
    its start pose (an even count of an alternating loop, one turn of a spin), so nothing moves while the talk goes on */

@@ -615,7 +615,8 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
-    _title_with_symbol(ax_map, "Zusätzlich absorbierte Strahlung je Baum", r"$\Delta\dot{Q}_{\mathrm{Baum}}$", C_INK)
+    _title_with_symbol(ax_map, "Zusätzlich absorbierte Strahlung je Baum", r"$\Delta\dot{Q}_{\mathrm{Baum}}$",
+                       "#6b4a2b")   # tree brown, as \bq in the deck's formulas
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
