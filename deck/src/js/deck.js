@@ -471,14 +471,13 @@ class EChart {
     this.k = null;
     this.final(this.nSteps);
     // the box settles only after fonts and formulas are laid out
+    // (its first call comes when the slide is first drawn; a resize to the same size would cut the entrance short)
     new ResizeObserver(() => {
       if (!host.clientWidth || !host.clientHeight) return;
+      if (host.clientWidth === this.chart.getWidth() && host.clientHeight === this.chart.getHeight()) return;
       this.chart.resize({ width: host.clientWidth, height: host.clientHeight });
-      if (this.spec.unitRange) {
-        const before = this.spec.pxPerUnit;
-        this.spec.pxPerUnit = (host.clientHeight - this.spec.unitRange[1]) / this.spec.unitRange[0];
-        if (Math.abs((before || 0) - this.spec.pxPerUnit) > 0.5) this.final(this.k ?? this.nSteps);
-      }
+      if (this.spec.unitRange) this.spec.pxPerUnit = (host.clientHeight - this.spec.unitRange[1]) / this.spec.unitRange[0];
+      this.final(this.k ?? this.nSteps);   // a resize stops a running entrance part-way: draw the whole click instead
     }).observe(host);
   }
   set(k, animate, fresh) {
@@ -1417,10 +1416,11 @@ class Deck {
     // charts exist now: recount the clicks and draw the current slide in its present state
     for (const s of this.slides) delete s._steps;
     this.ready = true;
-    if (this.still) this.go(this.i, this.step); else this.applyStep(false, false);
+    if (this.still) this.go(this.i, this.step); else this.applyStep(false, false, true);
     if (!this.embed) setTimeout(() => deckMedia.rest(this.slides), 300);
   }
-  applyStep(animate, entering) {
+  applyStep(animate, entering, late) {
+    // late: the charts were not there when the slide came up; they play their entrance now, the rest stays put
     if (animate) this.movedAt = performance.now();   // the background chart builder waits until this has played
     // everything with data-step <= step is shown; charts run the part that belongs to this click
     const s = this.slides[this.i];
@@ -1429,7 +1429,7 @@ class Deck {
     for (const h of s.querySelectorAll('.chart')) {
       const ch = h._chart; if (!ch) continue;
       const k = this.step - (+h.dataset.step || 0);
-      if (animate && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
+      if ((animate || late) && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
         ch.play(k);
       } else ch.final(k);
     }
@@ -1523,7 +1523,8 @@ addEventListener('DOMContentLoaded', () => {
   window.__ensureTex = texOne;
   const tex = () => {
     const d = window.deck;
-    if (texOne(d.slides[d.i])) d.applyStep(false, false);
+    const s = d.slides[d.i];
+    if (texOne(s)) for (const e of s.querySelectorAll('.katex [data-step]')) e.classList.toggle('shown', (+e.dataset.step || 0) <= d.step);
     const rest = [...d.slides];
     (function next() { while (rest.length && !texOne(rest.shift())); if (rest.length) setTimeout(next, 30); })();
   };
