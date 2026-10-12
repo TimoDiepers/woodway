@@ -154,8 +154,8 @@ const EC_TEMPERATURE = {
     if (k >= 1) {
       const f = D.facts.VL;
       series.push({ id: 'peak', type: 'scatter', z: 6, data: [[f.peak_jahr, f.peak_k]], symbolSize: 11,
-                    itemStyle: { color: '#4c5bd4', borderColor: '#fff', borderWidth: 2 }, tooltip: { show: false },
-                    label: { show: true, position: 'top', distance: 10, color: '#3a46a8', fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+                    itemStyle: { color: '#2e7d4f', borderColor: '#fff', borderWidth: 2 }, tooltip: { show: false },
+                    label: { show: true, position: 'top', distance: 10, color: '#24603d', fontFamily: EC.font, fontSize: 19, fontWeight: 600,
                              formatter: `Höchstwert ${ecNum(f.peak_k)} °C (${f.peak_jahr})` } });
     }
     return {
@@ -186,10 +186,11 @@ const EC_REMOVAL = {
   option(k) {
     const D = window.CMIP7, ext = D.ext, M = D.markers, col = key => M.find(m => m.k === key).color;
     const lab = key => M.find(m => m.k === key).label;
+    const neg = v => (v < 0 ? '−' : '') + ecNum(Math.abs(v), 0);   // removal drawn as a negative flow
     const series = [];
     M.forEach((m, i) => {
       const r = D.rem[m.k]; let acc = 0;
-      const v = r.y.map((y, j) => [y, r.novel[j] + r.land[j]]).filter(p => p[0] >= 2024 && p[0] <= 2100).map(p => [p[0], +(acc += p[1]).toFixed(1)]);
+      const v = r.y.map((y, j) => [y, r.novel[j] + r.land[j]]).filter(p => p[0] >= 2024 && p[0] <= 2100).map(p => [p[0], -(acc += p[1]).toFixed(1)]);
       series.push({ id: `s${m.k}`, name: m.label, type: 'line', showSymbol: false, xAxisIndex: 0, yAxisIndex: 0,
                     data: v, lineStyle: { color: m.color, width: 2.4 }, itemStyle: { color: m.color }, z: 3,
                     markLine: i ? undefined : { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.muted, type: [2, 4], width: 1 },
@@ -199,7 +200,7 @@ const EC_REMOVAL = {
     });
     M.forEach((m, i) => {
       const r = D.rem[m.k]; let acc = 0, N = 24;
-      const v = r.y.map((y, j) => [y, r.novel[j] + r.land[j]]).filter(p => p[0] >= 2024 && p[0] <= 2100).map(p => [p[0], (acc += p[1])]);
+      const v = r.y.map((y, j) => [y, r.novel[j] + r.land[j]]).filter(p => p[0] >= 2024 && p[0] <= 2100).map(p => [p[0], -(acc += p[1])]);
       const c = [1, 3, 5].map(j => parseInt(m.color.slice(j, j + 2), 16)).join(',');
       for (let b = 0; b < N; b++)
         series.push({ id: `a${m.k}${b}`, type: 'line', stack: `area${m.k}`, xAxisIndex: 0, yAxisIndex: 0, showSymbol: false, silent: true,
@@ -212,29 +213,29 @@ const EC_REMOVAL = {
     const order = M.map(m => m.k).sort((a, b) => endOf(a) - endOf(b));
     {
       series.push({ id: 'total', name: 'Summe 2024–2100', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, barWidth: '62%',
-                    data: order.map(key => ({ value: D.cum.find(c => c.k === key).total, itemStyle: { color: col(key), borderRadius: [0, 10, 10, 0] } })),
+                    data: order.map(key => ({ value: -D.cum.find(c => c.k === key).total, itemStyle: { color: col(key), borderRadius: [10, 0, 0, 10] } })),
                     animationDuration: 900, animationDelay: i => i * 90,
-                    label: { show: true, position: 'right', color: EC.ink, fontFamily: EC.font, fontSize: 20, formatter: p => ecNum(p.value, 0) } });
+                    label: { show: true, position: 'left', color: EC.ink, fontFamily: EC.font, fontSize: 20, formatter: p => neg(p.value) } });
     }
     const title = (text, left) => ({ text, left, top: 0, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } });
     return {
       animationEasing: 'cubicOut', animationDurationUpdate: 700,
-      title: [title('CO₂-Entnahme, kumuliert seit 2024', 70), title('Summe 2024–2100', '66%')],
-      grid: [{ left: 70, right: '47%', top: 46, bottom: 44 }, { left: '66%', right: 70, top: 46, bottom: 44 }],
+      title: [title('Negative CO₂-Emissionen, kumuliert seit 2024', 70), title('Summe 2024–2100', '58%')],
+      grid: [{ left: 70, right: '47%', top: 46, bottom: 44 }, { left: '58%', right: 210, top: 46, bottom: 44 }],
       xAxis: [ecAxis({ type: 'value', gridIndex: 0, min: 2025, max: 2100, interval: 25, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => String(v) } }),
-              ecAxis({ type: 'value', gridIndex: 1, min: 0, max: 400, interval: 100, name: 'Gt CO₂, 2024–2100', nameLocation: 'middle', nameGap: 30,
-                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => ecNum(v, 0) }, splitLine: { show: true, lineStyle: { color: EC.grid } } })],
-      yAxis: [ecAxis({ type: 'value', gridIndex: 0, min: 0, name: 'Gt CO₂, kumuliert', nameLocation: 'middle', nameGap: 48, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
-              ecAxis({ type: 'category', gridIndex: 1, data: order.map(lab),
+              ecAxis({ type: 'value', gridIndex: 1, min: -400, max: 0, interval: 100, name: 'Gt CO₂, 2024–2100', nameLocation: 'middle', nameGap: 30,
+                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: neg }, splitLine: { show: true, lineStyle: { color: EC.grid } } })],
+      yAxis: [ecAxis({ type: 'value', gridIndex: 0, max: 0, name: 'Gt CO₂, kumuliert', nameLocation: 'middle', nameGap: 56, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: neg }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
+              ecAxis({ type: 'category', gridIndex: 1, position: 'right', data: order.map(lab),
                        axisLabel: { fontFamily: EC.font, fontSize: 19, fontWeight: 600, color: (v, i) => col(order[i]) } })],
       tooltip: ecTooltip({
         trigger: 'item',
         formatter: p => {
           if (p.seriesType === 'bar') {
             const c = D.cum.find(x => x.k === order[p.dataIndex]);
-            return `<b>${lab(c.k)}</b><br>2024–2100: <b>${ecNum(c.total, 0)} Gt CO₂</b>`;
+            return `<b>${lab(c.k)}</b><br>2024–2100: <b>${neg(-c.total)} Gt CO₂</b>`;
           }
-          return `${ecDot(p.color)}${p.seriesName.trim()}, ${p.value[0]}: <b>${ecNum(p.value[1], 0)} Gt CO₂ seit 2024</b>`;
+          return `${ecDot(p.color)}${p.seriesName.trim()}, ${p.value[0]}: <b>${neg(p.value[1])} Gt CO₂ seit 2024</b>`;
         }
       }),
       series

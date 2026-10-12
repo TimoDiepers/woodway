@@ -12,7 +12,9 @@
     s.onload = s.onerror = ok; document.head.appendChild(s);
   })))).then(() => { /* the deck draws four of the seven CMIP7 markers */
     const keep = ["H", "M", "ML", "VL"], D = window.CMIP7; if (!D) return;
-    D.markers = D.markers.filter(m => keep.includes(m.k)); D.cum = D.cum.filter(c => keep.includes(c.k)); });
+    D.markers = D.markers.filter(m => keep.includes(m.k));
+    const deckCol = { VL: "#2e7d4f", ML: "#b08326", M: "#c8602a", H: "#8e2433" };   /* deck palette: --co2, ochre, --alb, clay red */
+    D.markers.forEach(m => { m.color = deckCol[m.k] || m.color; }); D.cum = D.cum.filter(c => keep.includes(c.k)); });
   // overview thumbnails (?embed&lite): layout only, no chart data
   if (/[?&]lite\b/.test(location.search)) return;
   const h = parseInt(location.hash.slice(1), 10);
