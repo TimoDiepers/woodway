@@ -558,16 +558,30 @@ const mplRgb = c => { if (!c) return null; const m = c.match(/^#(..)(..)(..)/); 
 /* ---------- maps: hexagon tiles and the deck's colour scales (nbs.map_fields) ---------- */
 const mapHex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const mapMix = (a, b, t) => { const p = mapHex(a), q = mapHex(b); return '#' + p.map((v, i) => Math.round(v + (q[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
-function mapScale(sc, v) {
-  // piecewise linear over evenly spaced stops; a diverging scale puts its middle stop at `mid`
-  const [lo, hi] = sc.domain, n = sc.stops.length - 1;
+function mapPos(sc, v) {
+  // where a value sits on its colour scale, 0..1; a diverging scale puts its middle stop at `mid`
+  const [lo, hi] = sc.domain;
   let t = sc.mid !== undefined ? (v < sc.mid ? .5 * (v - lo) / (sc.mid - lo) : .5 + .5 * (v - sc.mid) / (hi - sc.mid)) : (v - lo) / (hi - lo);
   t = Math.max(0, Math.min(1, t));
-  if (sc.gamma) t = Math.pow(t, sc.gamma);   // bends a sequential scale (nbs.map_fields.scale_t)
-  t *= n;
-  const k = Math.min(n - 1, Math.floor(t));
-  return mapMix(sc.stops[k], sc.stops[k + 1], t - k);
+  return sc.gamma ? Math.pow(t, sc.gamma) : t;   // gamma bends a sequential scale (nbs.map_fields.scale_t)
 }
+function mapAt(sc, t) {   // piecewise linear over evenly spaced stops
+  const n = sc.stops.length - 1, k = Math.min(n - 1, Math.floor(t * n));
+  return mapMix(sc.stops[k], sc.stops[k + 1], t * n - k);
+}
+const mapScale = (sc, v) => mapAt(sc, mapPos(sc, v));
+/* A map cell's entrance: its colour runs along the scale from the neutral end (sequential: the paper, then the
+   lightest stop; diverging: the middle) to its own value, every cell at the same pace, so low values settle
+   first and high ones keep darkening. Keyframes for the cell's fill and the time that takes. */
+const MAP_PACE = 1500;   // ms from the neutral end to the far end of the scale
+function mapRun(sc, v) {
+  const t = mapPos(sc, v), t0 = sc.mid !== undefined ? .5 : 0, span = Math.abs(t - t0) / (sc.mid !== undefined ? .5 : 1);
+  const lead = sc.mid !== undefined ? 0 : 220, n = Math.max(1, Math.ceil(span * 6)), dur = lead + span * MAP_PACE;
+  const frames = lead ? [{ percent: 0, style: { fill: MAP_PAPER } }] : [];
+  for (let q = 0; q <= n; q++) frames.push({ percent: (lead + q / n * span * MAP_PACE) / Math.max(1, dur), style: { fill: mapAt(sc, t0 + (t - t0) * q / n) } });
+  return { frames, dur };
+}
+const MAP_PAPER = '#f2ede2';
 const mapFmt = (v, sc) => (sc.unit === '' ? String(Math.round(v)) : v.toLocaleString('de-DE', { maximumFractionDigits: Math.abs(v) >= 10 ? 0 : 2 }) + ' ' + sc.unit);
 
 class MplChart {
@@ -665,6 +679,7 @@ class MplChart {
     const i = this.mapAxes[0], out = [];
     this.hexSeries(out, n => `a${i}_${n}`, i, this.mapSpec.panels[0], 0, this.s);
     out.forEach(x => { x.animation = false; });
+    if (this.siteSeries) out.push(this.siteSeries());
     this.chart.setOption({ series: out });
   }
   size() {
@@ -688,6 +703,7 @@ class MplChart {
 
   option(k, animate) {
     const d = this.d, s = this.s, W = this.W, H = this.H;
+    this.texs = [];
     const grid = [], xAxis = [], yAxis = [], series = [], graphic = [];
     const stopX = this.stops ? this.stops[Math.max(0, Math.min(k, this.stops.length - 1))] : Infinity;
     const font = (it, base) => ({ fontFamily: it.serif ? MPL_SERIF : MPL_FONT, fontSize: (it.fs || base) * s,
@@ -738,7 +754,7 @@ class MplChart {
             data: dataPts, showSymbol: !!mk, symbol: sym, symbolSize: mk ? mk.size * s : 0, itemStyle: symStyle,
             lineStyle: { color: it.c, width: it.lw * s, type: it.dash ? it.dash.map(v => v * s) : 'solid', opacity: it.a ?? 1, cap: 'round' },
             connectNulls: false, clip: !it.noclip, smooth: false, emphasis: { disabled: true },
-            animationDuration: onlyMk ? 500 : 1500, animationEasing: 'cubicInOut', animationDelay: base + (onlyMk ? 900 : 0)
+            animationDuration: onlyMk ? 500 : 1500, animationEasing: 'cubicInOut', animationDelay: base + (site ? 0 : onlyMk ? 900 : 0)
           });
         } else if (it.t === 'bar') {
           if (!inX(it.r[0])) return;
@@ -782,25 +798,43 @@ class MplChart {
         }
       });
       if (bars.length) series.push(this.barSeries(id('bars'), i, bars, base, s));
-      if (this.mapSpec && this.mapAxes.includes(i)) this.hexSeries(series, id, i, this.mapSpec.panels[this.mapAxes.indexOf(i)], base, s);
+      if (this.mapSpec && this.mapAxes.includes(i)) this.hexSeries(series, id, i, this.mapSpec.panels[this.mapAxes.indexOf(i)], base, s, animate && this.fresh(i, k));
       if (this.mapSpec && this.cbarAxes.includes(i)) this.colourBar(series, id, i, a, this.mapSpec.panels[this.cbarAxes.indexOf(i)], s);
       cells.forEach((c, q) => series.push(this.cellSeries(id('c' + q), i, a, c, base, s, legendLabel)));
-      // texts in data coordinates, once their part of the chart is there
+      // texts in data coordinates, once their part of the chart is there; the three sites' labels come with
+      // the map, and on a map played year by year their value follows the year (setYear)
       const sites = window.MAPDATA ? window.MAPDATA.sites : [];
-      const texts = a.texts.filter(t => inX(t.x)).map(t => {
-        const site = a.map && sites.find(q => q.name === t.s.trim());
-        return site ? { ...t, c: '#1b2420', b: 1, bg: '#fbf8f1', bga: .94, ring: site.color } : t;
-      });
-      if (texts.length) series.push({
-        id: id('t'), type: 'scatter', xAxisIndex: i, yAxisIndex: i, z: 30, silent: true, clip: false, symbolSize: 0,
-        data: texts.map(t => ({ value: [t.x, t.y], label: { show: true, position: 'inside', formatter: t.s, color: t.c, align: t.al, ...subRich(t, font(t, 16)),
+      const textSeries = (sid, list, delay) => ({
+        id: sid, type: 'scatter', xAxisIndex: i, yAxisIndex: i, z: 30, silent: true, clip: false, symbolSize: 0,
+        data: list.map(t => ({ value: [t.x, t.y], label: { show: true, position: 'inside', formatter: t.s, color: t.c, align: t.al, ...subRich(t, font(t, 16)),
           verticalAlign: 'middle', rotate: t.rot || 0, lineHeight: (t.fs || 16) * s * 1.18, ...font(t, 16),
           backgroundColor: t.bg ? (t.bga < 1 ? `rgba(${parseInt(t.bg.slice(1, 3), 16)},${parseInt(t.bg.slice(3, 5), 16)},${parseInt(t.bg.slice(5, 7), 16)},${t.bga})` : t.bg) : 'transparent',
           // dark labels get a paper halo so they stay readable over lines and bars; light ones sit on colour and need none
           textBorderColor: 'rgba(242,237,226,.92)', textBorderWidth: t.bg || mapHex(t.c).reduce((q, v) => q + v, 0) > 560 ? 0 : 3.2 * s,
           padding: t.bg ? [2 * s, 4 * s] : 0, borderColor: t.ring || 'transparent', borderWidth: t.ring ? 1.6 * s : 0, borderRadius: t.ring ? 4 * s : 0 } })),
-        animationDuration: 500, animationDelay: base + 1300
+        animationDuration: 500, animationDelay: delay
       });
+      const siteText = t => {
+        const site = a.map && sites.find(q => t.s.trim().startsWith(q.name));
+        if (!site) return null;
+        let s2 = t.s;
+        const L = this.mapSpec && this.mapAxes.includes(i) && this.mapSpec.panels[this.mapAxes.indexOf(i)].layers.find(l => l.frames);
+        if (L) {   // the value of the site's cell in the year on show
+          const g = this.mapSpec.panels[this.mapAxes.indexOf(i)].grid, r = Math.floor((g.lat0 - site.lat) / g.d), c = Math.floor((site.lon - g.lon0) / g.d);
+          const j = L.cells.findIndex(q => q[0] === r && q[1] === c);
+          if (j >= 0) s2 = site.name + (t.s.includes('\n') ? '\n' : ': ') + mapFmt(this.frameValue(L, j), window.MAPDATA.scales[L.scale]);
+        }
+        return { ...t, s: s2, c: '#1b2420', b: 1, bg: '#fbf8f1', bga: .94, ring: site.color };
+      };
+      // a formula symbol on its own goes over the chart in KaTeX, in the slides' formula face (placeTex)
+      for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
+      const shown = a.texts.filter(t => inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
+      const texts = shown.filter(t => !siteText(t));
+      if (texts.length) series.push(textSeries(id('t'), texts, base + 1300));
+      if (siteTexts().length) {
+        series.push(textSeries(id('ts'), siteTexts(), base));
+        if (this.timeLayer && this.mapAxes.includes(i)) this.siteSeries = () => ({ ...textSeries(id('ts'), siteTexts(), 0), animation: false });
+      }
     });
     d.texts.forEach((t, j) => graphic.push(this.textEl(`ft${j}`, t, font, W, H)));
     d.legends.forEach((lg, j) => graphic.push(this.legendEl(`lg${j}`, lg, W, H, s)));
@@ -859,7 +893,8 @@ class MplChart {
     return e;
   }
 
-  hexSeries(series, id, i, panel, base, s) {
+  hexSeries(series, id, i, panel, base, s, enter) {
+    // enter: the panel comes in with this click; its cells fade in along their colour scale (mapRun)
     // regular hexagons on a pixel lattice over the map; each takes the value of the data cell under its
     // centre. Hexes about as large as a cell, so the resolution stays that of the data, without the
     // stretching that cell-shaped hexes get where the map is not square in degrees (Europe maps).
@@ -880,20 +915,25 @@ class MplChart {
         const r = Math.floor((g.lat0 - lat) / d), c = Math.floor((lon - g.lon0) / d), j = look.get(r * g.nx + c);
         if (j === undefined) continue;
         const cell = L.cells[j];
-        let col, tip = null;
+        let col, tip = null, run = null;
         if (L.kind === 'mask') { col = L.color; tip = L.label || null; }
         else if (L.kind === 'hatch') col = L.color;
         else if (L.kind === 'cat') {
           const cat = M.categories[L.cats][cell[2]], share = cell.length > 3 ? cell[3] : 1;
           // intensity = free area; square root so thinly covered blocks still show their colour
           const f = L.cats === 'waldtyp' ? Math.sqrt(Math.min(1, share)) : L.cats === 'wirkung' ? Math.sqrt(Math.max(0, (share - .3) / .7)) : 1;
-          col = mapMix('#ddd6c7', cat.color, L.cats === 'umstieg' ? 1 : .32 + .68 * f);
+          const share2 = L.cats === 'umstieg' ? 1 : .32 + .68 * f;
+          col = mapMix('#ddd6c7', cat.color, share2);
+          if (enter) run = { dur: 220 + share2 * MAP_PACE, frames: [{ percent: 0, style: { fill: MAP_PAPER } }, { percent: .1, style: { fill: '#ddd6c7' } }, { percent: 1, style: { fill: col } }] };
           tip = cat.label + (L.cats === 'waldtyp' ? `<br>${Math.round(Math.min(1, share) * 30)}${share >= 1 ? '+' : ''} % der Landfläche wiederbewaldbar` : '');
         } else {
           const sc = M.scales[L.scale], v = L.frames ? this.frameValue(L, j) : cell[2];
           col = mapScale(sc, v); tip = mapFmt(v, sc) + (L.frames ? ` (${Math.round(this.year ?? L.years[0])})` : '');
+          if (enter) run = mapRun(sc, v);
         }
-        items.push(tip ? { value: [lon, lat], col, tip: `<b>${tip}</b>` } : { value: [lon, lat], col, tooltip: { show: false } });
+        const it = tip ? { value: [lon, lat], col, tip: `<b>${tip}</b>` } : { value: [lon, lat], col, tooltip: { show: false } };
+        if (run) it.run = run;
+        items.push(it);
       }
       const hatch = L.kind === 'hatch';
       series.push({
@@ -902,9 +942,13 @@ class MplChart {
         renderItem: (p, api) => {
           const it = items[p.dataIndex], [x, y] = api.coord(it.value);
           if (hatch) return { type: 'line', shape: { x1: x - R * .6, y1: y + R * .6, x2: x + R * .6, y2: y - R * .6 }, style: { stroke: it.col, lineWidth: Math.max(.8, 1.1 * s), opacity: .75 } };
-          return { type: 'polygon', shape: { points: pts.map(([u, v]) => [x + Rr * u, y + Rr * v]) }, style: { fill: it.col }, enterFrom: { style: { opacity: 0 } } };
+          const shape = { points: pts.map(([u, v]) => [x + Rr * u, y + Rr * v]) };
+          if (!it.run) return { type: 'polygon', shape, style: { fill: it.col }, enterFrom: { style: { opacity: 0 } } };
+          // starts on the scale's neutral colour, so nothing shows its end colour before its turn
+          return { type: 'polygon', shape, style: { fill: it.run.frames[0].style.fill },
+                   keyframeAnimation: { duration: it.run.dur, delay: base + 250, easing: 'linear', keyframes: it.run.frames } };
         },
-        animationDuration: 450, animationDelay: q => base + (items[q].value[0] - x0) / (x1 - x0) * 1100 + li * 120, progressive: 0
+        animationDuration: 450, animationDelay: base + li * 60, progressive: 0
       });
     });
   }
@@ -991,9 +1035,31 @@ class MplChart {
 
   set(k, animate, fresh) {
     if (!this.chart) return;
-    if (fresh) this.chart.clear();
+    if (fresh) { this.chart.clear(); for (const e of this.inner.querySelectorAll(':scope > .mtex')) e.remove(); }
     this.chart.setOption(this.option(k, animate), { replaceMerge: ['series', 'graphic', 'grid', 'xAxis', 'yAxis'] });
     this.k = k;
+    this.placeTex(animate);
+  }
+  placeTex(animate) {
+    // formula symbols of the figure (its texts that are one $…$), set with KaTeX at their place, boxed in their
+    // colour like the highlighted terms of the formulas (.froad .fw.cur); they come with their panel and its title,
+    // without an entrance of their own, and one already there stays as it is
+    const old = new Map([...this.inner.querySelectorAll(':scope > .mtex')].map(e => [e.dataset.key, e]));
+    for (const { t, a, key } of this.texs) {
+      const W = this.W, H = this.H, left = a.box[0] * W, top = a.box[1] * H, bw = a.box[2] * W, bh = a.box[3] * H;
+      const x = left + (t.x - a.x.min) / (a.x.max - a.x.min) * bw, y = top + (a.y.max - t.y) / (a.y.max - a.y.min) * bh;
+      let el = old.get(key); old.delete(key);
+      if (!el) {
+        el = document.createElement('span'); el.className = 'mtex'; el.dataset.key = key;
+        katex.render(t.b ? `\\boldsymbol{${t.tex}}` : t.tex, el, { throwOnError: false, strict: false });
+        this.inner.append(el);
+      }
+      const tx = t.al === 'right' ? '-100%' : t.al === 'center' ? '-50%' : '0';
+      // KaTeX sets its formulas at 1.21 em: divided out, the symbol is as large as the figure's text of that size
+      Object.assign(el.style, { left: x + 'px', top: y + 'px', transform: `translate(${tx},-50%)`, color: t.c,
+        borderColor: t.c, background: `color-mix(in srgb, ${t.c} 8%, transparent)`, fontSize: (t.fs || 16) * this.s / 1.21 + 'px' });
+    }
+    for (const e of old.values()) e.remove();
   }
   play(k) { this.set(Math.min(k, this.nSteps), true, k === 0 || this.k === null || k < this.k); }
   final(k) { this.set(Math.max(0, Math.min(k, this.nSteps)), false, true); }

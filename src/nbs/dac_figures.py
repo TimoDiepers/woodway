@@ -112,6 +112,11 @@ def energy_map_figure(out_path: str) -> str:
     im = ax.imshow(np.ma.masked_invalid(blocks), extent=(-180, 180, -90, 90), origin="upper", cmap=cmap,
                    vmin=1.1, vmax=1.9, interpolation="nearest")
     _map_axes(ax)
+    from nbs import map_fields as M
+    from nbs.vergleich_figures import de_num, map_site_value, world_site_labels
+
+    data = M.MAPS["d1"]()
+    world_site_labels(ax, lambda s: None if (v := map_site_value(data, s)) is None else f"{de_num(v, 2)} MWh/t")
     cax = fig.add_axes([0.33, 0.045, 0.34, 0.025])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
     cb.set_label("Strom je t CO$_2$ [MWh], Wärmepumpe eingerechnet", fontsize=11)
@@ -343,10 +348,10 @@ def switch_year_figure(out_path: str) -> str:
 def dac_net_figure(out_path: str) -> str:
     """D5 layout: one world map of the net share of a removed tonne (nbs.map_fields.dac_net_over_time,
     drawn and played year by year by the deck), colour bar underneath; the first frame (2025) as reference."""
-    from nbs.vergleich_figures import _world_map_skeleton
+    from nbs.vergleich_figures import _world_map_skeleton, de_num
 
     return _world_map_skeleton(out_path, "d5", "Anteil einer entnommenen Tonne, der netto bleibt [%]",
-                               [-50, 0, 25, 50, 75, 100], "zu kalt für Sorbens-DAC", sites=True)
+                               [-50, 0, 25, 50, 75, 100], "zu kalt für Sorbens-DAC", lambda v: f"{de_num(v)} %")
 
 
 DAC_PATHWAYS = (("SSP2-PkBudg650", "sehr optimistisch", "#0d4f57"), ("SSP2-NDC", "Mitte", "#2f9c98"),

@@ -1435,22 +1435,24 @@ def forest_type_map_figure(out_path: str) -> str:
         rgba[sel, :3] = base + (rgb - base) * (0.12 + 0.88 * share[sel, None])
         rgba[sel, 3] = 1.0
 
-    # world map at full width, legend in one row underneath (2026-10-06: the map was too small on the slide)
-    fig, ax = plt.subplots(figsize=(12.0, 4.7), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.15, top=0.995)
+    # the left 860 px of the slide, the three sites' curves beside it (2026-10-12); legend in two rows underneath.
+    # 7.4 in for 860 px keeps the fonts at the size they had on the full-width map
+    fig, ax = plt.subplots(figsize=(7.4, 4.1), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.25, top=0.995)
     ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
     _map_axes(ax)
-    for s in SITES:
-        ax.plot(s.lon, s.lat, marker=s.marker, ms=9, mfc="white", mec=C_INK, mew=2.0, zorder=6)
-        ax.annotate(s.label, (s.lon, s.lat), xytext=(7, 5 if s.name == "Joensuu" else -12),
-                    textcoords="offset points", fontsize=11, fontweight="bold", color=C_INK, zorder=7)
+    from nbs import map_fields as M
+    from nbs.vergleich_figures import map_site_value, world_site_labels
+
+    data = M.MAPS["b5"]()
+    world_site_labels(ax, lambda s_: map_site_value(data, s_), dict(mfc="white", mec=C_INK))
     areas = {t: float(w[typ == t].sum() / 1e13) for t in TYPES}
     order = sorted(TYPES, key=lambda t: -areas[t])
     handles = [Patch(facecolor=TYPE_COLORS[t], label=f"{TYPE_NAMES[t]}\n{de_gha(areas[t])}") for t in order]
     handles.append(Patch(facecolor=_COLOR_LAND, label="nicht wiederbewaldbar\n(Wald, Acker, Stadt, Savanne, …)"))
     ax.text(0.995, 0.03, "Kräftige Farbe: ≥ 30 % der Fläche wiederbewaldbar", transform=ax.transAxes, ha="right",
             fontsize=10, color=C_INK_MUTED)
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=len(handles), frameon=False,
+    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=3, frameon=False,
                fontsize=11, columnspacing=1.6, handlelength=1.3, handletextpad=0.5)
     return _save(fig, out_path)
 

@@ -314,6 +314,14 @@ def _map_base(ax, field_mask_outside: NDArray, unmeasured: NDArray | None, exten
     ax.set_axis_off()
 
 
+def _title_with_symbol(ax, title: str, symbol: str, color: str) -> None:
+    """A map's title and, right after it, its symbol in the slides' equation (the deck sets the symbol with
+    KaTeX, boxed in its colour); some room between title and map."""
+    t = ax.set_title(title, loc="left", fontsize=15, color=C_INK, fontweight="bold", pad=16)
+    ax.annotate(symbol, xy=(1, 0.5), xycoords=t, xytext=(14, 0), textcoords="offset points", ha="left", va="center",
+                fontsize=15, color=color, fontweight="bold")
+
+
 def _site_markers(ax, values=None) -> None:
     """The three sites; *values* maps a site to a second label line (the value of its cell)."""
     (x0, x1), (y0, y1) = ax.get_xlim(), ax.get_ylim()
@@ -598,20 +606,22 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
 
     cmap = _ramp_cmap(RAMP_ABSORBED)
     norm = mcolors.Normalize(vmin, vmax)
-    fig = plt.figure(figsize=(12.0, 5.1), dpi=FIG_DPI)
-    ax_map = fig.add_axes((0.01, 0.24, 0.48, 0.66))
-    ax_cbar = fig.add_axes((0.08, 0.17, 0.34, 0.03))
+    # the left half of the slide, laid out as the left map of the slide before (B8a), with title and symbol;
+    # equation and definitions on the right, in HTML
+    fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
+    ax_map = fig.add_axes((0.01, 0.16, 0.48, 0.73))
+    ax_cbar = fig.add_axes((0.08, 0.085, 0.34, 0.028))
     _map_base(ax_map, outside, estimated, SITES_VIEW)
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
+    _title_with_symbol(ax_map, "Zusätzlich absorbierte Strahlung je Baum", r"$\Delta\dot{Q}_{\mathrm{Baum}}$", C_INK)
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
     cb.outline.set_visible(False)
-    cb.set_label("je ausgewachsenem Baum, Jahresmittel [W]", fontsize=11, color=C_INK)
-    fig.text(0.02, 0.015, "Grau: wiederbewaldbar, ohne lokale Messung. Lokal gemessen nach Duveiller et al. (2018).",
-             fontsize=10, color=C_INK_MUTED)
+    # the title names the quantity: the bar carries only its unit, to its right
+    ax_cbar.text(1.03, 0.5, "[W]", transform=ax_cbar.transAxes, ha="left", va="center", fontsize=11, color=C_INK)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)
@@ -638,14 +648,15 @@ def albedo_ingredients_figure(out_path: str) -> str:
     q = _by_type(albedo_grid.insolation_grid)
     darker = -100.0 * _by_type(albedo_grid.delta_alpha_grid)
 
-    fig = plt.figure(figsize=(12.0, 5.1), dpi=FIG_DPI)
+    # the whole slide body (no takeaway under it): taller figure, the maps as large as their half allows
+    fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
     # each map names its symbol in the equation of the next slide, in that equation's colour
     panels = [
-        (fig.add_axes((0.01, 0.24, 0.48, 0.66)), fig.add_axes((0.08, 0.17, 0.34, 0.03)), q, RAMP_SUN,
-         (90.0, 260.0), "Kurzwellige Einstrahlung an der Oberfläche, Jahresmittel [W/m²]", "Einstrahlung an der Oberfläche",
+        (fig.add_axes((0.01, 0.16, 0.48, 0.73)), fig.add_axes((0.08, 0.085, 0.34, 0.028)), q, RAMP_SUN,
+         (90.0, 260.0), "[W/m²]", "Einstrahlung an der Oberfläche",
          r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
-        (fig.add_axes((0.51, 0.24, 0.48, 0.66)), fig.add_axes((0.58, 0.17, 0.34, 0.03)), darker, RAMP_SNOW,
-         (0.0, 18.0), "Albedo-Differenz Offenland − Wald [Prozentpunkte]",
+        (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
+         (0.0, 18.0), "[%-Punkte]",
          "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha$", "#d95f02"),
     ]
     units = {id(q): "W/m²", id(darker): "%-Punkte"}
@@ -656,15 +667,12 @@ def albedo_ingredients_figure(out_path: str) -> str:
         ax.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
         _site_markers(ax, lambda s, f=field: f"{f[site_cell(s)]:.0f} {units[id(f)]}")
-        ax.set_title(title, loc="left", fontsize=15, color=C_INK, fontweight="bold")
-        ax.text(0.96, 1.0, symbol, transform=ax.transAxes, ha="right", va="bottom", fontsize=19, color=symbol_color,
-                fontweight="bold")
+        _title_with_symbol(ax, title, symbol, symbol_color)
         cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal",
                           extend="both")
         cb.outline.set_visible(False)
-        cb.set_label(label, fontsize=11, color=C_INK)
-    fig.text(0.02, 0.015, "Grau: wiederbewaldbar, ohne lokale Messung. Lokal gemessen nach Duveiller et al. (2018). "
-             "Die zusätzlich absorbierte Strahlung ist das monatliche Produkt beider Größen.", fontsize=10, color=C_INK_MUTED)
+        # the title names the quantity: the bar carries only its unit, to its right
+        cax.text(1.03, 0.5, label, transform=cax.transAxes, ha="left", va="center", fontsize=11, color=C_INK)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)

@@ -231,6 +231,8 @@ class DataScene:
         d = {"s": plain(s), "c": _col(t.get_color()) or "#000000", "fs": round(t.get_fontsize() * self.px, 2), "al": align}
         if sub := sub_runs(s):
             d["sub"] = sub
+        if re.fullmatch(r"\$[^$]+\$", s.strip()):   # a formula symbol on its own: the deck sets it with KaTeX
+            d["tex"] = s.strip()[1:-1]
         if rot:
             d["rot"] = rot if rot <= 180 else rot - 360
         if w in ("bold", "semibold", "demibold", "heavy", "black") or (isinstance(w, (int, float)) and w >= 600):

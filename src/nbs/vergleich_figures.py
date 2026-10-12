@@ -865,14 +865,48 @@ def build_all(out_dir: str) -> list[str]:
     ]
 
 
-def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, sites: bool) -> str:
-    """Layout of a world hex map: map at full width, colour bar and legend underneath.
+def map_site_value(data: dict, site):
+    """The value the deck shows in *site*'s cell of a map (nbs.map_fields): a number, or for a category map the
+    category's label; None where the cell is empty."""
+    from nbs import map_fields as M
+
+    panel = data["panels"][0]
+    g = panel["grid"]
+    r, c = int((g["lat0"] - site.lat) // g["d"]), int((site.lon - g["lon0"]) // g["d"])
+    layer = next(L for L in panel["layers"] if L["kind"] in ("num", "cat"))
+    cell = next((q for q in layer["cells"] if q[0] == r and q[1] == c), None)
+    if cell is None:
+        return None
+    return M.CATEGORIES[layer["cats"]][cell[2]]["label"] if layer["kind"] == "cat" else cell[2]
+
+
+def world_site_labels(ax, text_of, marker=None) -> None:
+    """The three sites on a world map, each labelled with its name and, below it, *text_of(site)* (its value);
+    *marker* overrides the marker style.
+    Joensuu's label above its marker, the others below, so Aachen's and Joensuu's do not meet."""
+    from nbs.animations import SITES
+
+    for s in SITES:
+        ax.plot(s.lon, s.lat, linestyle="none", zorder=6,
+                **(dict(marker=s.marker, ms=9, mfc=s.color, mec="white", mew=2.0) | (marker or {})))
+        value = text_of(s)
+        text = s.label if value is None else f"{s.label}\n{value}"
+        up = s.name == "Joensuu"
+        ax.annotate(text, (s.lon, s.lat), xytext=(7, 6) if up else (7, -8), textcoords="offset points",
+                    va="bottom" if up else "top", fontsize=11, fontweight="bold", color=C_INK, zorder=7)
+
+
+def de_num(v: float, nd: int = 0) -> str:
+    return f"{v:.{nd}f}".replace(".", ",").replace("-", "−")
+
+
+def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text) -> str:
+    """Layout of a world hex map: map at full width, colour bar and legend underneath; the three sites with
+    *site_text(value)* of their cell.
 
     The deck draws the map itself (nbs.map_fields + the HTML renderer, exported to the
     pptx as SVG); this figure supplies the layout, the borders and a reference picture."""
     from nbs import map_fields as M
-    from nbs.animations import SITES
-
     _setup()
     data = M.MAPS[key]()
     layer = next(L for L in data["panels"][0]["layers"] if L["kind"] == "num")
@@ -885,11 +919,7 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     im = ax.imshow(np.ma.masked_invalid(grid), extent=(-180, 180, -90, 90), origin="upper", cmap=M.scale_cmap(sc),
                    norm=M.scale_norm(sc), interpolation="nearest")
     _map_axes(ax)
-    if sites:
-        for s in SITES:
-            ax.plot(s.lon, s.lat, marker=s.marker, ms=9, mfc=s.color, mec="white", mew=2.0, zorder=6, linestyle="none")
-            ax.annotate(s.label, (s.lon, s.lat), xytext=(7, 5 if s.name == "Joensuu" else -12), textcoords="offset points",
-                        fontsize=11, fontweight="bold", color=C_INK, zorder=7)
+    world_site_labels(ax, lambda s: None if (v := map_site_value(data, s)) is None else site_text(v))
     cax = fig.add_axes([0.3, 0.045, 0.36, 0.025])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
     cb.set_label(cbar_label, fontsize=11)
@@ -903,7 +933,7 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
 def reforestable_share_figure(out_path: str) -> str:
     """V0: where trees could go at all -- reforestable share of each 2 deg block's land."""
     return _world_map_skeleton(out_path, "v0", "wiederbewaldbarer Anteil der Landfläche [%]", [0, 5, 10, 20, 30, 50],
-                               "kein Platz für Bäume (Wald, Acker, Stadt, …)", sites=False)
+                               "kein Platz für Bäume (Wald, Acker, Stadt, …)", lambda v: f"{de_num(v)} %")
 
 
 def feasibility_figure(out_path: str) -> str:
@@ -932,4 +962,5 @@ def feasibility_figure(out_path: str) -> str:
 def tree_effect_figure(out_path: str) -> str:
     """K15: temperature effect in 2100 of one tree of the local typical forest, planted in the start year."""
     return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [10$^{-15}$ K]: grün kühlt, orange wärmt",
-                               [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume", sites=True)
+                               [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
+                               lambda v: f"{de_num(v)}·10$^{{-15}}$ K")
