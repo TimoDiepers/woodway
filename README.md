@@ -1,10 +1,9 @@
 # Ingenieure auf dem Holzweg?
 
-**Woodway** (every result of the model, cell by cell): https://woodway.tidi.dev/
+Slides, model and interactive map of my PhD defence talk at RWTH Aachen. As is tradition there, the defence talk is on a topic other than the dissertation itself. This one asks how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 
-**Slides:** https://woodway.tidi.dev/slides/ (woodway is also live on the talk's last slide)
-
-Model and slides for a PhD defence talk: how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
+- **Slides:** https://woodway.tidi.dev/slides/ (sources in `deck/`)
+- **Woodway**, every result of the model cell by cell: https://woodway.tidi.dev/ (sources in `woodway/`, also live on the talk's last slide)
 
 The talk widens the system boundary step by step. It starts with one tree, which takes up carbon and absorbs extra sunlight because its canopy is darker than the land it replaces. Next comes the carbon cycle, where ocean and land hand back part of the removed CO₂. Then the Earth's energy balance turns forcing into temperature. Finally the view grows to every reforestable 0.5° cell, and then to DAC as the second removal route. Everything is computed year by year, so the result is a temperature path to 2100 rather than one number.
 
@@ -40,7 +39,7 @@ src/nbs/            the model
   legacy/                                              the earlier level 0–6 framework, kept with its tests
 scripts/            fetch and prepare data, compute the deck's numbers and data
 deck/               the HTML talk (see below)
-atlas/              the interactive map of all results (see atlas/README.md)
+woodway/            the interactive map of all results (see woodway/README.md)
 data/               inputs (data/raw is not in git)
 docs/methods/       method notes: forest types, FaIR, DAC model, literature
 notebooks/          01 one tree, 03 the global layer
