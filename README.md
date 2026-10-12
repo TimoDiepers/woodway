@@ -1,4 +1,4 @@
-# Ingenieure auf dem Holzweg?
+# Aufforstung als Klima-Technologie
 
 Slides, model and interactive map of my PhD defence talk at RWTH Aachen. As is tradition there, the defence talk is on a topic other than the dissertation itself. This one asks how much afforestation cools the climate once you follow the carbon past the tree, and how much direct air capture (DAC) has to do on top.
 

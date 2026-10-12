@@ -1,5 +1,5 @@
 ---
-name: Ingenieure auf dem Holzweg?
+name: Aufforstung als Klima-Technologie
 description: Dissertationsvortrag als HTML-Deck – Papier, Tinte und eine Farbe je Kapitel entlang einer wachsenden Systemgrenze
 colors:
   paper: "#f2ede2"
@@ -103,7 +103,7 @@ components:
     rounded: "{rounded.box}"
 ---
 
-# Design System: Ingenieure auf dem Holzweg?
+# Design System: Aufforstung als Klima-Technologie
 
 ## Overview
 

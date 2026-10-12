@@ -1,6 +1,6 @@
 # Woodway
 
-The model of the PhD defence talk "Ingenieure auf dem Holzweg?" (see the [main README](../README.md)), cell by cell: forest type, albedo, the temperature effect of one tree, DAC electricity, net share and build-out, 2026–2100, in English and German. Live at https://woodway.tidi.dev/, with the talk's slides under https://woodway.tidi.dev/slides/ (linked from the app's tool column).
+The model of the PhD defence talk "Aufforstung als Klima-Technologie" (see the [main README](../README.md)), cell by cell: forest type, albedo, the temperature effect of one tree, DAC electricity, net share and build-out, 2026–2100, in English and German. Live at https://woodway.tidi.dev/, with the talk's slides under https://woodway.tidi.dev/slides/ (linked from the app's tool column).
 
 Place search asks OpenStreetMap's Nominatim, and only when Enter is pressed; nothing else leaves the page.
 
