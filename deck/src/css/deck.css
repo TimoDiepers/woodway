@@ -54,9 +54,10 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   transform-origin: center center; transform: translate(-50%, -50%);
   background: transparent;   /* the page behind it carries the slide colour */
 }
+:root { --slide-bottom: 72px; } /* content ends here; below it only the source band (.src, .num) */
 .slide {
   position: absolute; inset: 0; overflow: hidden;
-  padding: 64px 88px 56px;
+  padding: 64px 88px var(--slide-bottom);
   display: flex; flex-direction: column;
   visibility: hidden; opacity: 0;
   transition: opacity .35s var(--ease), visibility 0s linear .35s;
@@ -93,7 +94,7 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
 .ground { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--ground, transparent); z-index: 15; transition: background-color .35s var(--ease); }
 .embed .ground { height: 0; }
 .num {
-  position: absolute; left: 88px; bottom: 20px;
+  position: absolute; left: 88px; bottom: 16px;
   font: 500 14px/1 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums;
 }
 .backup .num::before { content: "Backup · "; letter-spacing: .04em; }
@@ -112,7 +113,7 @@ strong { font-weight: 600; }
 .takeaway {
   position: relative; padding: 16px 26px 17px 64px; margin-top: 24px;
   background: var(--ch); color: var(--paper); border-radius: 8px;
-  font-style: normal; font-weight: 500; font-size: 24px; line-height: 1.38;
+  font-style: normal; font-weight: 500; font-size: 22px; line-height: 1.38;
   font-variation-settings: "opsz" 24; text-wrap: pretty;
   box-shadow: 0 10px 24px -16px rgba(30, 26, 18, .55);
 }
@@ -120,11 +121,13 @@ strong { font-weight: 600; }
   content: ""; position: absolute; left: 24px; top: 19px; width: 26px; height: 26px; background: var(--ch-soft);
   -webkit-mask: var(--leaf) center / contain no-repeat; mask: var(--leaf) center / contain no-repeat;
 }
-.aside .takeaway, .col .takeaway { font-size: 21px; }
+/* three sizes by the room it has: across the slide 24px, in a column 22px, in a narrow panel 20px */
+.body > .takeaway, .takeaway.wide { font-size: 24px; }
+.sidepanel .takeaway, .film .ftake .takeaway, .play .side .takeaway { font-size: 20px; }
 :root { --leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 3C9 3 4 8.5 4 15.5c0 1.6.3 3 .9 4.3C6 13.5 10 9.5 15 7.5 10.5 10.5 7.4 14.6 6.2 20.6 7.4 21.1 8.6 21.4 10 21.4 17 21.4 20 14 20 3Z'/%3E%3C/svg%3E"); }
 
 .src {
-  position: absolute; left: 150px; right: 88px; bottom: 18px;
+  position: absolute; left: 150px; right: 88px; bottom: 14px;
   font: 400 13px/1.4 var(--sans); color: var(--muted); text-wrap: pretty;
 }
 /* one item per source: linked reference in bold, what it supplies in brackets; italic = own work or assumption */
@@ -357,7 +360,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
 .chart text.serif { font-family: var(--serif); }
 
 .foot { display: grid; grid-template-columns: minmax(0, 1fr) 720px; gap: 40px; align-items: end; margin-top: 6px; }
-.foot .takeaway { margin-top: 0; font-size: 22px; }
+.foot .takeaway { margin-top: 0; }
 .foot .eq { font-size: 30px; }
 .foot .eq .katex-display { margin: 0; text-align: left; }
 .foot .eq .katex-display > .katex { text-align: left; }
@@ -623,9 +626,19 @@ svg.cc > g > g:first-of-type > text:not(:nth-of-type(1)) { opacity: 0; }
 
 /* slide 21: the term under discussion framed in the formula (same highlight as elsewhere) */
 .slide:has(.ts1.shown):not(:has(.ts2.shown)) .hl-p::before { border-color: #1b2420; background: rgba(27, 36, 32, .06); }
-.slide:has(.ts2.shown):not(:has(.ts3.shown)) .hl-c::before { border-color: #8a6a1e; background: rgba(138, 106, 30, .08); }
-.slide:has(.ts3.shown):not(:has(.ts4.shown)) .hl-l::before { border-color: #6b5a1e; background: rgba(107, 90, 30, .08); }
+.slide:has(.ts2.shown):not(:has(.ts3.shown)) .hl-l::before { border-color: #6b5a1e; background: rgba(107, 90, 30, .08); }
+.slide:has(.ts3.shown):not(:has(.ts4.shown)) .hl-c::before { border-color: #8a6a1e; background: rgba(138, 106, 30, .08); }
 .slide:has(.ts4.shown) .hl-r::before { border-color: #b2182b; background: rgba(178, 24, 43, .07); }
+/* backup: solving the energy balance, one row per step: explanation left, equation right */
+.deriv { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; flex: 1; min-height: 0; padding-bottom: 8px; }
+.deriv .drow { display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: 40px; align-items: center; }
+.deriv .ghs { margin: 0; }
+.deriv .eq { font-size: 25px; text-align: left; margin: 0; }
+.deriv .eq .katex-display { margin: 0; text-align: left; }
+.deriv .eq .katex-display > .katex { text-align: left; }
+/* slide 20: caption and symbol line of the solved equation, quieter than the steps above */
+.solcap { font: 400 19px/1.35 var(--sans); color: var(--muted); margin: 0; }
+.solcap + .eq { margin: 4px 0 6px !important; }
 /* the radiation in this drawing stands still: here the topic is the energy balance, not the radiation */
 svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
 
@@ -683,7 +696,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
   transition: opacity .5s var(--ease), transform .6s var(--ease); }
 .overlay.shown { opacity: 1; transform: none; }
 .overlay .chart { flex: 1; min-height: 0; }
-.overlay .takeaway { margin-top: 4px; font-size: 21px; }
+.overlay .takeaway { margin-top: 4px; }
 .body:has(.overlay.shown) > .foot { opacity: 0; transition: opacity .3s; }
 
 [data-ch="dac"] { --ch: #9a6516; --ch-soft: #e8cb92; }
@@ -746,7 +759,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .play .ctr .n { font: 600 42px/1.05 var(--sans); color: #9a6516; font-variant-numeric: tabular-nums; }
 .play .ctr .n small { font-size: 22px; font-weight: 500; }
 .play .ctr .l { font: 400 18px/1.3 var(--sans); color: var(--muted); }
-.play .side .takeaway { padding: 10px 14px 11px 46px; font-size: 19px; margin-top: 4px; }
+.play .side .takeaway { padding: 10px 14px 11px 46px; margin-top: 4px; }
 .play .side .takeaway::before { left: 16px; top: 14px; width: 22px; height: 22px; }
 .play .strips { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 12px; }
 .play .strips svg { width: 100%; height: auto; overflow: visible; display: block; }
@@ -802,7 +815,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .film .hud .leg > span:nth-of-type(3) { text-align: right; }
 .film .strip { flex: none; width: 1424px; height: 185px; display: block; overflow: visible; }
 .film .ftake { position: absolute; left: 0; top: 352px; width: 440px; }
-.film .ftake .takeaway { font-size: 20px; margin: 0; }
+.film .ftake .takeaway { margin: 0; }
 
 /* DAC chapter: dark like its break slide */
 .slide.dark { --ink: #f2ede2; --ink-2: #d6dbd6; --muted: #9aa39d; --paper-deep: #20282b; --paper-line: #3a4447; --fjord-soft: #9cc3d6; }
@@ -1011,8 +1024,8 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .pdef { display: grid; grid-template-columns: 96px 1fr; gap: 10px 14px; margin: 18px 0 0; align-items: baseline; }
 .pdef dt { font-size: 24px; text-align: right; }
 .pdef dd { margin: 0; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
-/* a takeaway across the whole slide, its sentence centred on one line */
-.takeaway.wide { margin-top: 10px; text-align: center; white-space: nowrap; font-size: 23px; }
+/* a takeaway across the whole slide on one line; left-aligned like every other takeaway, so the leaf stays with the sentence */
+.takeaway.wide { margin-top: 10px; white-space: nowrap; }
 /* on paper instead of green: the formula symbols keep their colours */
 .takeaway.light { background: var(--paper-deep); color: var(--ink); border: 1.5px solid var(--ch-soft); box-shadow: none; }
 .takeaway.light::before { background: var(--ch); }

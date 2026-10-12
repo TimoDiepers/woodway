@@ -54,7 +54,17 @@ typography:
     lineHeight: 1.42
   takeaway:
     fontFamily: "Literata, Georgia, serif"
+    fontSize: "22px"
+    fontWeight: 500
+    lineHeight: 1.38
+  takeaway-wide:
+    fontFamily: "Literata, Georgia, serif"
     fontSize: "24px"
+    fontWeight: 500
+    lineHeight: 1.38
+  takeaway-panel:
+    fontFamily: "Literata, Georgia, serif"
+    fontSize: "20px"
     fontWeight: 500
     lineHeight: 1.38
   label:
@@ -78,7 +88,7 @@ rounded:
 spacing:
   slide-x: "88px"
   slide-top: "64px"
-  slide-bottom: "56px"
+  slide-bottom: "72px"
   header-gap: "36px"
   column-gap: "56px"
 components:
@@ -164,7 +174,7 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 - **Headline** (600, 50px, 1,08): Folientitel in Kapitelfarbe, sachlich-beschreibend, höchstens zwei Zeilen.
 - **Lead** (400, 32px, 1,38): einleitende Aussage, max. 1180px breit.
 - **Body** (400, 27px, 1,42): Fließtext und Listen; Minimum für Inhaltstext 20px.
-- **Takeaway** (500, 24px, 1,38): der „Kurz gesagt“-Satz, höchstens zwei Zeilen.
+- **Takeaway** (500, 1,38): der „Kurz gesagt“-Satz, höchstens zwei Zeilen. Größe nach Platz, nie je Folie: 24px über die ganze Breite, 22px in einer Spalte, 20px in einem schmalen Panel.
 - **Label** (Plex 600, 18px): Kapitälchen-Überschriften in Spalten und Kästen, gesperrt.
 - **Annotation** (Plex 400, 19px): Legenden, Achsenticks, Schema-Text; Untergrenze 18px.
 - **Source** (Plex 400, 13px): Quellenzeile unten; die einzige Schrift, die klein sein darf.
@@ -176,7 +186,7 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 
 ## Layout
 
-Feste Leinwand von 1600×900, als Ganzes auf den Viewport skaliert; die Seitenfarbe übernimmt die Farbe der aktuellen Folie, damit die Folie bis an den Bildschirmrand läuft. Innenabstand 64/88/56px (oben/seitlich/unten). Kopfzeile mit Titel links und Kapitelmarker rechts, 36px Abstand zum Körper. Inhaltsfolien sind meist „Abbildung + Seitenspalte“ (`1fr 470px`, 56px Abstand) oder zwei gleiche Spalten; die Abbildung füllt den Rest der Höhe. Quellenzeile absolut unten ab x=150, Foliennummer bei x=88.
+Feste Leinwand von 1600×900, als Ganzes auf den Viewport skaliert; die Seitenfarbe übernimmt die Farbe der aktuellen Folie, damit die Folie bis an den Bildschirmrand läuft. Innenabstand 64/88/72px (oben/seitlich/unten); die unteren 72px sind das Quellenband, Inhalt und Takeaway enden darüber. Kopfzeile mit Titel links und Kapitelmarker rechts, 36px Abstand zum Körper. Inhaltsfolien sind meist „Abbildung + Seitenspalte“ (`1fr 470px`, 56px Abstand) oder zwei gleiche Spalten; die Abbildung füllt den Rest der Höhe. Quellenzeile absolut unten (14px Abstand) ab x=150, höchstens zwei Zeilen, Foliennummer bei x=88.
 
 Auf Handys im Hochformat bleibt die Leinwand erhalten; ein Hinweis bittet ums Drehen. Die Übersicht (M) ist ein Raster aus Miniaturen, auf schmalen Bildschirmen mit kleineren Kacheln.
 
@@ -204,7 +214,8 @@ Sanft gerundete Kästen (8px), volle Pillen (22px Radius) für Kapitelmarker und
 ### Kurz gesagt (Takeaway)
 - **Form:** Kasten mit 8px Radius in der Kapitelfarbe, helle Schrift, Blatt-Icon links in `--ch-soft`.
 - **Inhalt:** höchstens zwei Zeilen, gern Stichpunkte statt ganzer Sätze; die lange Fassung steht als „Ausführlich: …“ in den Notizen.
-- **Varianten:** `light` (tiefes Papier mit Rand in `--ch-soft`) für ruhige Folien; `wide` zentriert über die volle Breite.
+- **Varianten:** `light` (tiefes Papier mit Rand in `--ch-soft`) für ruhige Folien; `wide` einzeilig über die volle Breite, linksbündig wie alle anderen.
+- **Keine Inline-Größen:** Schriftgröße, Innenabstand und Zeilenhöhe kommen nur aus dem CSS.
 
 ### Kapitelmarker
 - **Form:** je Kapitel eine Scheibe (44px) mit Lucide-Icon in der Kapitelfarbe; das aktuelle Kapitel als gefüllte Pille mit Namen.
