@@ -9,8 +9,6 @@ The talk widens the system boundary step by step. It starts with one tree, which
 
 ## The chain
 
-One tree, two channels, one convolution:
-
     m(t)  →  ṁ_CO₂ = −(44/12)·ṁ  →  Δm_CO₂ = g_C ∗ ṁ_CO₂  →  φ_CO₂ = ε_CO₂·Δm_CO₂
           →  f(t)                                          →  φ_α = τ_atm·ΔQ̇_Baum / A_Erde
                                                            →  ΔT = g_T ∗ (φ_CO₂ + φ_α)
