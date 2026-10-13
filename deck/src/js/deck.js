@@ -626,10 +626,7 @@ const EC_VEGAN_LUECKE = {
     };
   }
 };
-/* DAC capacity of the main case without and with the vegan world */
-const EC_VEGAN_DAC = ecDacSmall('DAC-Kapazität weltweit [Gt CO₂/a]', 60, v => String(v), D => [
-  ['o', D.dac.opt_20.w, '#ff5a4f', 'ohne vegan'], ['m', D.vegan.opt_20.w, '#7fd0e0', 'mit vegan', null, true]]);
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, vegandac: EC_VEGAN_DAC };
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE };
 
 class EChart {
   constructor(host) {
