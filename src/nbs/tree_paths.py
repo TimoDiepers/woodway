@@ -117,6 +117,60 @@ def forcing(path: str, start: int = T_START, rate_gha: float | None = None,
     return nee, rf, area
 
 
+def _site_factor(keys: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
+    """Carbon of each cell relative to its forest key's median cell (as nbs.site_factor, for any carbon grid)."""
+    from nbs.forest_data import growth_by_key
+
+    g = growth_by_key()
+    ref = np.array([[g[k]["m_ref_mgc_ha"] if k in g else np.nan for k in row] for row in keys])
+    with np.errstate(invalid="ignore", divide="ignore"):
+        return np.where((carbon_mgc_ha > 0) & (ref > 0), carbon_mgc_ha / ref, 0.0)
+
+
+def cooling_cells(area_m2: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
+    """Cells with area whose typical forest still cools by T_END (finite break-even year), SSP2-4.5."""
+    from nbs.aggregate import unit_curves
+    from nbs.forest_data import key_grid
+    from nbs.map_plots import _t_star_batch
+
+    keys = key_grid(all_cells=True)
+    f = _site_factor(keys, carbon_mgc_ha)
+    out = np.zeros(area_m2.shape, bool)
+    for key in SPECIES:
+        m = (keys == key) & (area_m2 > 0) & (f > 0)
+        if not m.any():
+            continue
+        co2, alb = unit_curves(key, "ssp245")
+        traj = f[m][:, None] * co2[None, :] + np.nan_to_num(alpha_q_product(key)[m])[:, None] * alb[None, :]
+        out[m] = ~np.isinf(_t_star_batch(traj, YEARS))
+    return out
+
+
+def forcing_cells(area_m2: NDArray, carbon_mgc_ha: NDArray, start: int = T_START) -> tuple[NDArray, NDArray, float]:
+    """(net CO2 exchange [Gt CO2/a], albedo forcing [W/m^2], counted area [Gha]) of forest on any land, planted
+    at once in *start*, left to grow, only on the cells that cool (cooling_cells). Same chain as forcing()."""
+    from nbs.forest_data import key_grid
+
+    keys = key_grid(all_cells=True)
+    f = _site_factor(keys, carbon_mgc_ha)
+    cool = cooling_cells(area_m2, carbon_mgc_ha)
+    i0 = start - int(YEARS[0])
+    nee, rf, area = np.zeros(N_Y), np.zeros(N_Y), 0.0
+    for key in SPECIES:
+        m = (keys == key) & cool
+        if not m.any():
+            continue
+        sp = get_species(key)
+        n_trees = area_m2[m] / sp.stand_area_m2       # as nbs.landscape.tree_count
+        up, cl, _ = _trajectory(key, start)
+        n_sum = float((n_trees * f[m]).sum())
+        np_sum = float((n_trees * np.nan_to_num(alpha_q_product(key)[m])).sum())
+        nee[i0:] -= M_CO2_PER_C * up[i0:] * n_sum / 1e12
+        rf[i0:] += -TAU_ATM * cl[i0:] * sp.stand_area_m2 / A_EARTH_M2 * np_sum
+        area += float(area_m2[m].sum()) / 1e13
+    return nee, rf, area
+
+
 @lru_cache(maxsize=None)
 def delta_t(path: str, start: int = T_START, rate_gha: float | None = None, release: bool = False) -> NDArray:
     """Global temperature change [K] of a path, one full FaIR run (SSP2-4.5 background)."""

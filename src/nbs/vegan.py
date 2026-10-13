@@ -101,3 +101,29 @@ def freed_area_m2() -> NDArray:
 def freed_carbon_mgc_ha() -> NDArray:
     """(360, 720) unrealised AGB+BGB carbon on that area [Mg C/ha] (Walker, unconstrained)."""
     return _frei()["freed_carbon_mgc_ha"].copy()
+
+
+@lru_cache(maxsize=1)
+def _flaeche_forcing():
+    from nbs.tree_paths import forcing_cells
+
+    return forcing_cells(freed_area_m2(), freed_carbon_mgc_ha())
+
+
+@lru_cache(maxsize=1)
+def dt_flaeche() -> NDArray:
+    """Temperature change [K] on YEARS of forest on the freed land, one FaIR run (SSP2-4.5 background, as the
+    trees of chapter 2-3)."""
+    from nbs.fair_module import run_fair_baseline, run_fair_perturbed
+
+    nee, rf, _ = _flaeche_forcing()
+    base = run_fair_baseline("ssp245")
+    d = run_fair_perturbed(nee[: len(base)], rf[: len(base)], "ssp245") - base
+    out = np.append(d, d[-1])[: len(YEARS)]
+    out.setflags(write=False)
+    return out
+
+
+def flaeche_info() -> dict:
+    """Freed forest-capable land and the part of it that cools [Gha]."""
+    return {"frei_gha": float(freed_area_m2().sum() / 1e13), "kuehlt_gha": float(_flaeche_forcing()[2])}

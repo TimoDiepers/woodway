@@ -40,3 +40,21 @@ def test_released_timber_is_emitted_at_felling_only():
     nee_r, rf_r, area_r = forcing("forst", release=True)
     assert area_b == area_r and np.allclose(rf_b, rf_r)
     assert np.all(nee_r >= nee_b - 1e-12)          # releasing never removes more
+
+
+def test_forcing_cells_reproduces_the_cooling_path():
+    from nbs.forest_data import carbon_gain_mgc_ha, reforestable_area_m2
+    from nbs.tree_paths import forcing_cells
+    nee, rf, area = forcing_cells(reforestable_area_m2(), carbon_gain_mgc_ha())
+    nee_k, rf_k, area_k = forcing("kuehlt")
+    assert area == pytest.approx(area_k, rel=0.02)
+    assert nee.sum() == pytest.approx(nee_k.sum(), rel=0.02)
+
+
+def test_only_cooling_cells_count():
+    from nbs.forest_data import carbon_gain_mgc_ha, reforestable_area_m2
+    from nbs.tree_paths import cooling_cells
+    a = reforestable_area_m2()
+    cool = cooling_cells(a, carbon_gain_mgc_ha())
+    assert cool.sum() < (a > 0).sum()          # some reforestable cells warm
+    assert not np.any(cool & (a <= 0))

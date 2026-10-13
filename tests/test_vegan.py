@@ -62,3 +62,16 @@ def test_freed_carbon_where_freed():
     from nbs.vegan import freed_area_m2, freed_carbon_mgc_ha
     a, c = freed_area_m2(), freed_carbon_mgc_ha()
     assert np.all(c[a > 0] >= 0) and np.median(c[a > 0]) > 10
+
+
+def test_forest_on_freed_land_cools():
+    from nbs.vegan import dt_flaeche, flaeche_info
+    from nbs.tree_paths import delta_t, forcing
+    dt = dt_flaeche()
+    assert dt.shape == (len(YEARS),)
+    info = flaeche_info()
+    assert 0 < info["kuehlt_gha"] <= info["frei_gha"]
+    # same tree chain: cooling per cooling Gha in 2100 like the reforestation's, within a factor of two
+    per_gha = dt[-1] / info["kuehlt_gha"]
+    ref = delta_t("kuehlt")[-1] / forcing("kuehlt")[2]
+    assert 0.5 * ref > per_gha > 2.0 * ref
