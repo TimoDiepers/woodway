@@ -21,8 +21,10 @@ cannot be met, the closest approach minimises the summed shortfall instead.
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 from numpy.typing import NDArray
@@ -103,6 +105,41 @@ def _infeasible(res) -> bool:
     return res.status == 2 or (res.status == 4 and "primal_status is Infeasible" in res.message)
 
 
+def _lp(c, A_ub, b_ub, bounds):
+    """min c x subject to A_ub x <= b_ub and bounds, as scipy's linprog returns it (status 0 optimal, 2 infeasible).
+    Gurobi when it is installed and licensed -- far faster on these dense LPs -- else HiGHS. NBS_LP=highs forces
+    HiGHS."""
+    if os.environ.get("NBS_LP") != "highs":
+        try:
+            return _lp_gurobi(c, A_ub, b_ub, bounds)
+        except ImportError:
+            pass
+        except Exception as e:   # no or size-limited licence
+            if type(e).__name__ != "GurobiError":
+                raise
+    from scipy.optimize import linprog
+    return linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=bounds, method="highs")
+
+
+def _lp_gurobi(c, A_ub, b_ub, bounds):
+    import gurobipy as gp
+    from scipy.sparse import csr_matrix
+
+    lb = np.array([0.0 if b[0] is None else b[0] for b in bounds])
+    ub = np.array([np.inf if b[1] is None else b[1] for b in bounds])
+    with gp.Env(params={"OutputFlag": 0, "FeasibilityTol": 1e-9, "OptimalityTol": 1e-9, "DualReductions": 0}) as env, \
+            gp.Model(env=env) as m:
+        x = m.addMVar(len(c), lb=lb, ub=ub)
+        m.addMConstr(csr_matrix(A_ub), x, "<", np.asarray(b_ub, dtype=float))
+        m.setObjective(np.asarray(c, dtype=float) @ x)
+        m.optimize()
+        st = m.Status
+        if st == gp.GRB.OPTIMAL:
+            return SimpleNamespace(status=0, x=np.array(x.X), fun=m.ObjVal, message="Gurobi: optimal")
+        status = 2 if st == gp.GRB.INFEASIBLE else 4
+        return SimpleNamespace(status=status, x=None, fun=None, message=f"Gurobi status {st}")
+
+
 def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArray, x_from: int | None,
                     growth: float, start_2030: float | None = START_2030_GT, objective: str = "min_total",
                     years: NDArray | None = None, keep_running: bool = False,
@@ -129,7 +166,6 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     start_2030=None drops the 2026-2030 caps (unit tests); growth applies to every year after the
     first then.
     """
-    from scipy.optimize import linprog
     from scipy.sparse import lil_matrix
 
     n_c, n = eta.shape
@@ -195,7 +231,7 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
             world[t, -1] = -1.0
         A1 = np.vstack([np.hstack([A, np.zeros((A.shape[0], 1))]), world])
         B1 = np.r_[B, np.zeros(n)]
-        res = linprog(np.r_[np.zeros(nv), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
+        res = _lp(np.r_[np.zeros(nv), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)])
         if _infeasible(res):
             return False, None
         if res.status != 0:
@@ -205,7 +241,7 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
     if slack and then_total:
         # stage 1: least summed shortfall; stage 2: at that shortfall, the least total DAC
         c1 = np.r_[np.zeros(nx), np.ones(n)]
-        res = linprog(c1, A_ub=A, b_ub=B, bounds=bounds, method="highs")
+        res = _lp(c1, A_ub=A, b_ub=B, bounds=bounds)
         if res.status != 0:
             raise RuntimeError(f"LP stage 1: {res.message}")
         A = np.vstack([A, c1[None, :]]); B = np.r_[B, res.fun * (1 + 1e-6) + 1e-9]
@@ -218,7 +254,7 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
         c_obj = np.r_[np.zeros(nx), (np.arange(n) >= (x_from or 0)).astype(float)]
     else:
         c_obj = np.r_[np.ones(nx), np.zeros(nv - nx)]
-    res = linprog(c_obj, A_ub=A, b_ub=B, bounds=bounds, method="highs")
+    res = _lp(c_obj, A_ub=A, b_ub=B, bounds=bounds)
     if _infeasible(res):
         return False, None
     if res.status != 0:
@@ -361,8 +397,6 @@ def solve_naive(gap_k: NDArray, ziel_jahr: int = TARGET_YEAR, growth: float = GR
     """The simple case for comparison: the world capacity spread over the countries in proportion to their safe
     storage, the same every year (no choice of place by electricity or climate); least capacity that closes
     *gap_k* from *ziel_jahr* on, with the same growth limit and plants running LIFETIME years."""
-    from scipy.optimize import linprog
-
     countries, eta, storage = _setup(stufe, quantil, pathway)
     share = storage / storage.sum()
     eta_mix = (share[:, None] * np.maximum(eta, 0.0)).sum(axis=0)     # net share of the spread capacity per year
@@ -380,11 +414,11 @@ def solve_naive(gap_k: NDArray, ziel_jahr: int = TARGET_YEAR, growth: float = GR
     # least capacity: P >= w[t] for every t, minimise P; then at that capacity the least total
     A1 = np.vstack([np.hstack([A, np.zeros((len(A), 1))]), np.hstack([np.eye(n), -np.ones((n, 1))])])
     B1 = np.r_[B, np.zeros(n)]
-    res = linprog(np.r_[np.zeros(n), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
+    res = _lp(np.r_[np.zeros(n), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)])
     if res.status != 0:
         return {"status": "unmoeglich"}
     A2, B2 = np.vstack([A, np.eye(n)]), np.r_[B, np.full(n, res.x[-1] * (1 + 1e-6))]
-    res = linprog(np.ones(n), A_ub=A2, b_ub=B2, bounds=bounds, method="highs")
+    res = _lp(np.ones(n), A_ub=A2, b_ub=B2, bounds=bounds)
     w = res.x
     x = share[:, None] * w[None, :]
     assert np.all(x.sum(axis=1) <= storage * (1 + 1e-6)), "storage would bind; the simple case is not defined"
@@ -404,8 +438,6 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
     possible in the sense of the least summed warming above 1.5 deg C, then the least total DAC at that.
     Plants run *life* years (LIFETIME; None: never retire), storage per country, growth limit as everywhere.
     menge_gt: at most this much DAC in all (gross removal 2026-2100 [Gt])."""
-    from scipy.optimize import linprog
-
     countries, eta, storage = _setup(stufe, quantil, pathway)
     k = removal_kernel_matrix()
     gap = np.maximum(0.0, np.asarray(gap_k, dtype=float))
@@ -453,7 +485,7 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
     # stage 1: M >= gap - cooling in every year, minimise M
     A1 = np.vstack([A, np.hstack([-cool, -np.ones((n, 1))])])
     B1 = np.r_[B, -gap]
-    res = linprog(np.r_[np.zeros(nx), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)], method="highs")
+    res = _lp(np.r_[np.zeros(nx), 1.0], A_ub=A1, b_ub=B1, bounds=bounds + [(0.0, None)])
     if res.status != 0:
         raise RuntimeError(f"LP stage 1: {res.message}")
     peak = float(res.x[-1])
@@ -468,7 +500,7 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
 
         def _possible(t0: int) -> bool:
             a_, b_ = _with_from(t0)
-            r_ = linprog(np.zeros(nx + 1), A_ub=a_, b_ub=b_, bounds=b2, method="highs")
+            r_ = _lp(np.zeros(nx + 1), A_ub=a_, b_ub=b_, bounds=b2)
             if r_.status != 0 and not _infeasible(r_):
                 raise RuntimeError(f"LP T={years[t0]}: {r_.message}")
             return r_.status == 0
@@ -491,11 +523,11 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
                 world[t_, -1] = -1.0
             A4 = np.vstack([np.hstack([a3, np.zeros((len(a3), 1))]), world]); B4 = np.r_[b3, np.zeros(n)]
             b4 = b2 + [(0.0, None)]
-            res = linprog(np.r_[np.zeros(nx + 1), 1.0], A_ub=A4, b_ub=B4, bounds=b4, method="highs")
+            res = _lp(np.r_[np.zeros(nx + 1), 1.0], A_ub=A4, b_ub=B4, bounds=b4)
             if res.status != 0:
                 raise RuntimeError(f"LP capacity stage: {res.message}")
             b4[-1] = (0.0, res.x[-1] * (1 + 1e-6) + 1e-12)
-            res = linprog(np.r_[np.ones(nx), 0.0, 0.0], A_ub=A4, b_ub=B4, bounds=b4, method="highs")
+            res = _lp(np.r_[np.ones(nx), 0.0, 0.0], A_ub=A4, b_ub=B4, bounds=b4)
             if res.status != 0:
                 raise RuntimeError(f"LP total stage: {res.message}")
             status = "spitze_dann_frueh" if danach == "frueh" else "spitze_und_ziel"
@@ -504,16 +536,16 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
         A4 = np.vstack([np.hstack([A2, np.zeros((A2.shape[0], n))]), np.hstack([-cool, np.zeros((n, 1)), -np.eye(n)])])
         B4 = np.r_[B2, -gap]
         b4 = bounds + [(0.0, None)] + [(0.0, None)] * n
-        res = linprog(np.r_[np.zeros(nx + 1), np.ones(n)], A_ub=A4, b_ub=B4, bounds=b4, method="highs")
+        res = _lp(np.r_[np.zeros(nx + 1), np.ones(n)], A_ub=A4, b_ub=B4, bounds=b4)
         if res.status != 0:
             raise RuntimeError(f"LP stage 2: {res.message}")
         A5 = np.vstack([A4, np.r_[np.zeros(nx + 1), np.ones(n)][None]]); B5 = np.r_[B4, res.fun * (1 + 1e-6) + 1e-9]
-        res = linprog(np.r_[np.ones(nx), 0.0, np.zeros(n)], A_ub=A5, b_ub=B5, bounds=b4, method="highs")
+        res = _lp(np.r_[np.ones(nx), 0.0, np.zeros(n)], A_ub=A5, b_ub=B5, bounds=b4)
         if res.status != 0:
             raise RuntimeError(f"LP stage 3: {res.message}")
         status = "spitze_dann_schnell"
     if status == "spitze":
-        res = linprog(np.r_[np.ones(nx), 0.0], A_ub=A2, b_ub=B2, bounds=bounds + [(0.0, None)], method="highs")
+        res = _lp(np.r_[np.ones(nx), 0.0], A_ub=A2, b_ub=B2, bounds=bounds + [(0.0, None)])
     x = np.maximum(res.x[:nx].reshape(n_c, n), 0.0)
     cooling = cool @ x.reshape(-1)
     return {"jahre": years.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(), "kuehlung_k": cooling.tolist(),
