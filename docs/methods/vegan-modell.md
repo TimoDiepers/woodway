@@ -4,7 +4,7 @@
 
 Gedankenexperiment für Kapitel 5: Die ganze Welt isst ab 2026 vegan, ohne Übergang. Das ist ein Grenzfall, eine obere Schranke. Gerechnet wird gegen CMIP7 Very Low, die Erwärmung über 1,5 °C nach den Bäumen (als Forst, Holz gebunden) ist die Lücke. Code: `src/nbs/vegan.py`, Daten: `data/vegan/` (Quellen in `data/vegan/QUELLE.md`), Zahlen im Deck: `deck/chart_data/zeitpfade.json`, Schlüssel `vegan`.
 
-Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten Mitte der 2060er (−251 mK). Fast alles ist Methan. Ohne jedes DAC sinkt die Spitze über 1,5 °C von 0,31 auf 0,13 K (2044), ab 2065 gilt wieder 1,5 °C. Mit DAC im Hauptfall (niedrigste Spitze, dann so früh wie möglich zurück, 20 %/a) bleiben 0,1 statt 49 Gt/a; gespart bis 2100 im Median 222 Bio. € (134–338).
+Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DAC sinkt die Spitze über 1,5 °C von 0,31 auf 0,13 K (2044), ab 2065 gilt wieder 1,5 °C. Mit DAC im Hauptfall (niedrigste Spitze, dann so früh wie möglich zurück, 20 %/a) bleiben 0,1 statt 49 Gt/a; gespart bis 2100 im Median 222 Bio. € (134–338).
 
 ## 1  Emissionen nach Ursache (`emission_parts`)
 
