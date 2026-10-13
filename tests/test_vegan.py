@@ -42,3 +42,23 @@ def test_vegan_gases_cool_within_the_known_magnitude():
     from nbs.vegan import dt_gase
     dt = dt_gase()
     assert np.all(dt > -0.5) and np.all(np.isfinite(dt))
+
+
+def test_freed_land_is_plausible():
+    from nbs.vegan import freed_area_m2
+    gha = freed_area_m2().sum() / 1e13
+    assert 0.3 < gha < 2.5     # forest-capable grazing land plus 19 % of forest-capable cropland
+
+
+def test_freed_land_disjoint_from_reforestable():
+    from nbs.forest_data import reforestable_area_m2
+    from nbs.grid import cell_area_m2
+    from nbs.vegan import freed_area_m2
+    tot = freed_area_m2() + reforestable_area_m2()
+    assert np.all(tot <= cell_area_m2() * 1.0001)
+
+
+def test_freed_carbon_where_freed():
+    from nbs.vegan import freed_area_m2, freed_carbon_mgc_ha
+    a, c = freed_area_m2(), freed_carbon_mgc_ha()
+    assert np.all(c[a > 0] >= 0) and np.median(c[a > 0]) > 10

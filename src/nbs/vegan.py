@@ -81,3 +81,23 @@ def dt_gase() -> NDArray:
     out = np.append(out, out[-1])[: len(YEARS)]
     out.setflags(write=False)
     return out
+
+
+FREI = ROOT / "data/vegan/frei_0p5.npz"   # scripts/prepare_forest_data.py --only-freed
+
+
+@lru_cache(maxsize=1)
+def _frei() -> dict[str, NDArray]:
+    with np.load(FREI) as f:
+        return {k: f[k].astype(float) for k in f.files}
+
+
+def freed_area_m2() -> NDArray:
+    """(360, 720) area a vegan world frees and that could carry forest [m^2] (Walker's grazing land in full,
+    cropland at ACKER_NETTO_FREI, only where Walker's reforestation rule holds)."""
+    return _frei()["freed_area_m2"].copy()
+
+
+def freed_carbon_mgc_ha() -> NDArray:
+    """(360, 720) unrealised AGB+BGB carbon on that area [Mg C/ha] (Walker, unconstrained)."""
+    return _frei()["freed_carbon_mgc_ha"].copy()
