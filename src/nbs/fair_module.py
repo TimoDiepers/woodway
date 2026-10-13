@@ -189,6 +189,18 @@ def run_fair_perturbed(
     return _surface_temperature(f, scenario)
 
 
+def run_fair_emission_delta(delta: dict[str, NDArray], scenario: str = "cmip7-VL") -> NDArray:
+    """FaIR with changed emissions of some species over the study period (e.g. {"CH4": -x [Mt CH4/a],
+    "N2O": -y [kt N2O/a]}), in the units of the scenario's emission file. Surface temperature as run_fair_baseline."""
+    f = _create_fair(scenario)
+    for specie, d in delta.items():
+        vals = f.emissions.sel(specie=specie).values.copy()
+        vals[_START_IDX:_END_IDX, 0, 0] += np.asarray(d, dtype=float)
+        f.emissions.loc[dict(specie=specie)] = vals
+    f.run()
+    return _surface_temperature(f, scenario)
+
+
 def compute_pulse_warming(
     pulse_gtco2: float = 1.0,
     scenario: str = "ssp245",

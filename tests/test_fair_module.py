@@ -169,3 +169,21 @@ class TestPulseWarming:
         dt_small = compute_pulse_warming(pulse_gtco2=0.5, scenario="ssp245")
         dt_large = compute_pulse_warming(pulse_gtco2=1.0, scenario="ssp245")
         assert dt_large[50] > dt_small[50]
+
+
+def test_emission_delta_less_methane_cools_quickly():
+    import numpy as np
+    from nbs.fair_module import _END_IDX, _START_IDX, run_fair_baseline, run_fair_emission_delta
+    n = _END_IDX - _START_IDX
+    base = run_fair_baseline("cmip7-VL")
+    cut = run_fair_emission_delta({"CH4": np.full(n, -100.0)}, "cmip7-VL")
+    d = cut - base
+    assert d[20] < -0.1          # 100 Mt CH4/a less: clearly cooler after 20 years
+    assert abs(d[0]) < 0.02      # no jump in the first year
+
+
+def test_emission_delta_zero_is_baseline():
+    import numpy as np
+    from nbs.fair_module import _END_IDX, _START_IDX, run_fair_baseline, run_fair_emission_delta
+    n = _END_IDX - _START_IDX
+    assert np.allclose(run_fair_emission_delta({"N2O": np.zeros(n)}, "cmip7-VL"), run_fair_baseline("cmip7-VL"))
