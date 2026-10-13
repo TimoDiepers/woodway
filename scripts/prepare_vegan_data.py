@@ -28,6 +28,8 @@ JAHR = 2022
 CH4_ITEMS = ("Enteric Fermentation", "Manure Management")
 N2O_ITEMS = ("Manure Management", "Manure left on Pasture", "Manure applied to Soils")
 N2O_ACKER = ("Synthetic Fertilizers", "Crop Residues")  # scaled by the net cropland that a vegan world frees
+CO2_HOF = ("On-farm energy use", "Fertilizers Manufacturing", "Pesticides Manufacturing")  # fossil, up to the farm gate
+CO2_ENTWALDUNG = ("Net Forest conversion",)
 
 
 def main() -> None:
@@ -48,7 +50,9 @@ def main() -> None:
            "n2o_acker_kt": kt(N2O_ACKER, "Emissions (N2O)"),
            # farm totals, the denominator when Very Low's farm path is known
            "ch4_agrar_kt": kt(CH4_ITEMS + ("Rice Cultivation",), "Emissions (CH4)"),
-           "n2o_agrar_kt": kt(N2O_ITEMS + N2O_ACKER, "Emissions (N2O)")}
+           "n2o_agrar_kt": kt(N2O_ITEMS + N2O_ACKER, "Emissions (N2O)"),
+           # CO2 of farming: fossil up to the farm gate (energy, fertiliser and pesticide manufacture), deforestation
+           "co2_hof_kt": kt(CO2_HOF, "Emissions (CO2)"), "co2_entwaldung_kt": kt(CO2_ENTWALDUNG, "Emissions (CO2)")}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=1))
     print(out)

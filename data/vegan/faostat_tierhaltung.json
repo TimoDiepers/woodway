@@ -5,5 +5,7 @@
  "n2o_tier_kt": 4066.2965,
  "n2o_acker_kt": 3020.6029000000003,
  "ch4_agrar_kt": 138863.2922,
- "n2o_agrar_kt": 7086.8994
+ "n2o_agrar_kt": 7086.8994,
+ "co2_hof_kt": 1475865.2686,
+ "co2_entwaldung_kt": 2814055.5454
 }
