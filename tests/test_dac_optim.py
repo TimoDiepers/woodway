@@ -324,3 +324,32 @@ def test_min_peak_then_earliest_stays_below_from_its_year():
     late = solve_min_peak(gap)                                          # 1.5 deg C only by 2100: less capacity
     assert late["status"] == "spitze_und_ziel" and late["ab_jahr"] == 2100
     assert late["kapazitaet_gt"] < r["kapazitaet_gt"]
+
+
+def test_path_cost_of_nothing_is_zero():
+    from nbs.dac_optim import path_cost
+    r = path_cost(np.zeros(len(YEARS)))
+    assert r["summe_bio"] == 0.0 and r["spitze_bio_a"] == 0.0
+
+
+def test_path_cost_constant_path_matches_cost_per_gt():
+    from nbs.dac_optim import COST, cost_per_gt, path_cost
+    w = np.ones(len(YEARS))  # 1 Gt/a every year
+    r = path_cost(w)
+    assert r["summe_bio"] == pytest.approx(float(cost_per_gt(0.0, COST).sum()), rel=1e-9)
+    # one Gt/a at the median: a few hundred EUR per tonne
+    assert 150 < r["eur_t"] < 600
+
+
+def test_path_cost_cases_are_ordered():
+    from nbs.dac_optim import COST_CASES, path_cost
+    w = np.linspace(0, 5, len(YEARS))
+    s = {k: path_cost(w, c)["summe_bio"] for k, c in COST_CASES.items()}
+    assert s["optimistisch"] < s["median"] < s["pessimistisch"]
+
+
+def test_comparison_values_have_sources():
+    from nbs.dac_optim import EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, VERGLEICH_QUELLEN
+    assert 15 < EU27_BIP_BIO_EUR < 21
+    assert 0.3 < FOSSIL_SUBV_BIO_EUR < 1.5
+    assert set(VERGLEICH_QUELLEN) == {"eu27_bip", "fossil_subv"}

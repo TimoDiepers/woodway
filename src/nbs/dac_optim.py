@@ -257,6 +257,28 @@ def cost_per_gt(rate: float = 0.0, c: dict = COST, life: int | None = LIFETIME) 
     return (c["capex"] * build + (c["fom"] + c["sorbent"] + c["energy"]) * d) * 1e9 / 1e12
 
 
+# what the costs are set against on the slide (real EUR 2024): the EU-27 economy and what the world pays today
+# in explicit fossil-fuel subsidies (consumption subsidies; the IMF's 7 trillion USD incl. unpaid damages is
+# only in the notes)
+EU27_BIP_BIO_EUR = 18.1        # Eurostat nama_10_gdp, EU-27 GDP 2024, current prices (18 101 bn EUR, 2026-10-09)
+FOSSIL_SUBV_BIO_EUR = 0.620 / 1.0824  # IEA fossil-fuel subsidies database, 2023, USD -> EUR at the ECB mean 2024
+VERGLEICH_QUELLEN = {"eu27_bip": "Eurostat nama_10_gdp (2024)",
+                     "fossil_subv": "IEA Fossil Fuel Subsidies Database (2023), EZB-Jahresmittel 2024"}
+
+
+def path_cost(w: NDArray, c: dict = COST, rate: float = 0.0) -> dict:
+    """Cost of a world DAC path w [Gt/a per year of YEARS] after the fact (not optimised for): investment in the
+    years capacity is built (new or rebuilt after LIFETIME), operation, sorbent and energy each year it runs.
+    Per year [trillion EUR], highest year, sum 2026-2100 and EUR per tonne removed (gross)."""
+    w = np.asarray(w, dtype=float)
+    d = (1.0 + rate) ** -(YEARS - YEARS[0]).astype(float)
+    build = builds_matrix(N_Y, LIFETIME) @ w
+    per_year = (c["capex"] * build + (c["fom"] + c["sorbent"] + c["energy"]) * w) * d * 1e9 / 1e12
+    total = float(per_year.sum())
+    return {"je_jahr_bio": [float(v) for v in per_year], "spitze_bio_a": float(per_year.max(initial=0.0)),
+            "summe_bio": total, "eur_t": total * 1e3 / float(w.sum()) if w.sum() > 0 else 0.0}
+
+
 PATHWAYS = ("SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650")  # electricity: current policies, pledges, 650 Gt budget
 
 
