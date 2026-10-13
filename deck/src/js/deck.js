@@ -517,7 +517,7 @@ function ecDacTempo(title, key, yMax, yFmt, trees) {
     };
   } };
 }
-const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 8, v => String(v), false);
+const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 20, v => String(v), false);
 const EC_DACTEMPO_T = ecDacTempo('Erwärmung über 1,5 °C [K]', 'temp', 400, kOf, true);
 const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T };
 

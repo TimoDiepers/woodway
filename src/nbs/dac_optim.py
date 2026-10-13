@@ -89,12 +89,14 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
                     growth: float, start_2030: float | None = START_2030_GT, objective: str = "min_total",
                     years: NDArray | None = None, keep_running: bool = False,
                     co2_target: float | None = None, then_total: bool = False,
-                    cap: float | None = None, start_year: int = 2030) -> tuple[bool, NDArray | None]:
+                    cap: float | None = None, start_year: int = 2030, cost: NDArray | None = None) -> tuple[bool, NDArray | None]:
     """The LP on plain arrays. x is flattened country-major: x[c * n + y].
 
     objective "min_total": cooling >= gap for t >= x_from, minimise sum x.
     objective "min_peak": cooling >= gap for t >= x_from, minimise the largest yearly world removal, then at
     that peak (+1e-6 relative) minimise sum x.
+    objective "min_cost": cooling >= gap for t >= x_from, minimise sum cost[y] * x[c, y] (cost per Gt/a in year y,
+    see cost_per_gt; plants must keep running).
     objective "max_net": no target; maximise the net removal, each tonne weighted by the years it is out of the air
     until the last year -- as much DAC as early as the growth limit and the storage allow.
     objective "min_shortfall": extra slack s[t] >= gap - cooling, s >= 0, minimise sum of s[t] for t >= x_from
@@ -189,6 +191,8 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
             raise RuntimeError(f"LP stage 1: {res.message}")
         A = np.vstack([A, c1[None, :]]); B = np.r_[B, res.fun * (1 + 1e-6) + 1e-9]
         c_obj = np.r_[np.ones(nx), np.zeros(n)]
+    elif objective == "min_cost":
+        c_obj = np.r_[np.tile(np.asarray(cost, dtype=float), n_c), np.zeros(nv - nx)]
     elif objective == "max_net":
         c_obj = np.r_[-(eta * (n - np.arange(n))[None, :]).reshape(-1), np.zeros(nv - nx)]
     elif slack:
@@ -204,6 +208,34 @@ def build_and_solve(eta: NDArray, kernel: NDArray, gap: NDArray, storage: NDArra
 
 
 TARGET_YEAR = 2100
+
+# DAC costs, solid sorbent, 2050 (Okosun et al. 2026, Table 1, medians; real 2024 EUR): investment per t/a of
+# capacity, fixed operation per t/a and year, sorbent per t; lifetime 25 a. The energy per t is not in the table
+# (the paper optimises its own renewable supply); it is set so that the levelised cost at their 10 % WACC meets
+# their global median for S-DAC, 254 EUR/t (hybrid heat supply).
+COST = {"capex": 705.0, "fom": 30.0, "sorbent": 39.0, "life": 25, "lcod": 254.0, "wacc": 0.10}
+
+
+def _with_energy(c: dict) -> dict:
+    return dict(c, energy=c["lcod"] - c["capex"] * c["wacc"] / (1 - (1 + c["wacc"]) ** -c["life"]) - c["fom"] - c["sorbent"])
+
+
+COST = _with_energy(COST)
+# their optimistic and pessimistic cases: lower and upper quartiles of the literature, global median 144 / 390 EUR/t
+COST_CASES = {"optimistisch": _with_energy(dict(COST, capex=273.0, fom=12.0, sorbent=39.0, lcod=144.0)),
+              "median": COST,
+              "pessimistisch": _with_energy(dict(COST, capex=1137.0, fom=68.0, sorbent=74.0, lcod=390.0))}
+
+
+def cost_per_gt(rate: float = 0.0, c: dict = COST) -> NDArray:
+    """Cost [trillion EUR] of one Gt/a of DAC running in year y, for a path x[y] whose plants keep running: the
+    investment when the capacity is built (and again every *life* years until 2100), operation, sorbent and energy
+    each year it runs; discounted to 2026 at *rate*. Written per year of x: investment sum_y (x[y] - x[y-1]) m[y]
+    = sum_y x[y] (m[y] - m[y+1]), m[y] = discount factors of the build year and its replacements."""
+    d = (1.0 + rate) ** -(YEARS - YEARS[0]).astype(float)
+    m = np.array([sum(d[i + k] for k in range(0, N_Y - i, c["life"])) for i in range(N_Y)])
+    build = m - np.r_[m[1:], 0.0]
+    return (c["capex"] * build + (c["fom"] + c["sorbent"] + c["energy"]) * d) * 1e9 / 1e12
 
 
 PATHWAYS = ("SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650")  # electricity: current policies, pledges, 650 Gt budget
@@ -318,12 +350,13 @@ def solve_naive(gap_k: NDArray, ziel_jahr: int = TARGET_YEAR, growth: float = GR
 
 
 def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = True, ziel_jahr: int | None = TARGET_YEAR,
-                   stufe: str = "prudent", quantil: float = 0.9, pathway: str = "SSP2-NDC", danach: str = "ziel") -> dict:
+                   stufe: str = "prudent", quantil: float = 0.9, pathway: str = "SSP2-NDC", danach: str = "ziel",
+                   menge_gt: float | None = None) -> dict:
     """The least highest warming above 1.5 deg C after trees and DAC (*gap_k* [K] per year without DAC). Then, at
     that peak: danach="schnell" back down to 1.5 deg C as fast as possible (least summed warming above 1.5 deg C),
     then the least total DAC at that; danach="ziel": the least DAC that brings the world to 1.5 deg C from
     *ziel_jahr* on (if it can; otherwise the least total DAC at the peak). Plants run on, storage per country,
-    growth limit as everywhere."""
+    growth limit as everywhere. menge_gt: at most this much DAC in all (gross removal 2026-2100 [Gt])."""
     from scipy.optimize import linprog
 
     countries, eta, storage = _setup(stufe, quantil, pathway)
@@ -367,6 +400,8 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
             kr[c * (n - 1) + t_ - 1, c * n + t_ - 1] = 1.0
             kr[c * (n - 1) + t_ - 1, c * n + t_] = -1.0
     a.append(kr); b.append(np.zeros(len(kr)))
+    if menge_gt is not None:
+        a.append(np.ones((1, nx))); b.append(np.array([float(menge_gt)]))
     A = np.hstack([np.vstack(a), np.zeros((sum(m.shape[0] for m in a), 1))])
     B = np.concatenate(b)
     # stage 1: M >= gap - cooling in every year, minimise M
@@ -403,6 +438,27 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
     cooling = cool @ x.reshape(-1)
     return {"jahre": years.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(), "kuehlung_k": cooling.tolist(),
             "spitze_k": peak, "status": status, "kapazitaet_gt": float(x.sum(axis=0).max()), "netto_gt": float((x * eta).sum())}
+
+
+def solve_cost(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = True, ziel_jahr: int = TARGET_YEAR,
+               c: dict = COST, rate: float = 0.0, stufe: str = "prudent", quantil: float = 0.9,
+               pathway: str = "SSP2-NDC") -> dict:
+    """The cost-optimal path (backup of the deck): 1.5 deg C from *ziel_jahr* on at the least cost (cost_per_gt),
+    plants running on, growth limit and storage as everywhere. Status "unmoeglich" if no path reaches the target."""
+    countries, eta, storage = _setup(stufe, quantil, pathway)
+    k = removal_kernel_matrix()
+    gap = np.maximum(0.0, np.asarray(gap_k, dtype=float))
+    cv = cost_per_gt(rate, c)
+    ok, x = build_and_solve(eta, k, gap, storage, int(ziel_jahr - YEARS[0]), growth,
+                            start_2030=START_2030_GT if limit_start else None, objective="min_cost", years=YEARS,
+                            keep_running=True, cost=cv)
+    if not ok:
+        return {"status": "unmoeglich"}
+    w = x.sum(axis=0)
+    over = gap + np.einsum("yt,cy,cy->t", k, eta, x)
+    return {"status": "geschlossen", "kosten_bio": float((cv * w).sum()), "eur_t": float((cv * w).sum() * 1e3 / w.sum()),
+            "kapazitaet_gt": float(w.max()), "brutto_gt": float(w.sum()), "spitze_k": float(over.max()),
+            "ueber_ka": float(np.maximum(over, 0).sum())}
 
 
 def capacity_by_target(ziel_jahre=(2085, 2090, 2095, 2100), growth: float = GROWTH, ziel: str = "co2") -> list[dict]:

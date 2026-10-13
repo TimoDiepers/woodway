@@ -1122,3 +1122,6 @@ svg.mo .m-sway.back { animation: none; }
 .dbar span.rest { background: #3a4447; color: #b9c0bb; font-weight: 500; }
 .dcharts { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .dcharts .chart { flex: 1; min-height: 0; }
+/* backup: costs of the DAC path, three small tables */
+.kost { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; flex: 1; align-items: center; }
+.kost > div { display: flex; flex-direction: column; gap: 28px; }
