@@ -165,24 +165,37 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
 - **Einordnung:** 6,9 Gt/a liegen über den vorsichtigen Schätzungen (3–4 Gt/a, Chiquier et al. 2025) und im Bereich der optimistischen Modelle. Mit rund 1,5 MWh/t braucht das etwa 10 000 TWh Strom, ein Drittel der heutigen Weltstromerzeugung.
 - **Nicht enthalten:** Kosten, Strom- und Wasserverfügbarkeit, Injektionsraten je Becken, Anlagenlebensdauer, Basalt-Mineralisierung.
 
-### Deck-Fassung (Stand 2026-10-13): niedrigste Spitze, dann 1,5 °C
+### Deck-Fassung (Stand 2026-10-13, Umbau): niedrigste Spitze, dann so früh wie möglich zurück
 
-Die Folien nutzen `solve_min_peak` (`scripts/build_zeitpfade_data.py`, `scripts/build_dacfilm_data.py`), Lücke nach den Bäumen als Forst:
+Die Folien nutzen `solve_min_peak(…, danach="frueh")` (`scripts/build_zeitpfade_data.py`, `scripts/build_dacfilm_data.py`), Lücke nach den Bäumen als Forst, alle Bäume 2026 gepflanzt. Die LPs löst Gurobi, wenn installiert und lizenziert, sonst HiGHS (`_lp`, `NBS_LP=highs` erzwingt HiGHS).
 
 1. Niedrigste Spitze der Erwärmung über 1,5 °C.
-2. Bei dieser Spitze ab dem Zieljahr bis 2100 höchstens 1,5 °C, mit möglichst wenig Kapazität (größte Jahresentnahme weltweit).
-3. Bei dieser Kapazität möglichst wenig Entnahme insgesamt. (Bis 2026-10-12 fehlte Stufe 2; die Kapazität war dann nicht eindeutig, 6,3 statt 6,6 Gt/a.)
+2. Bei dieser Spitze das früheste Jahr, ab dem bis 2100 höchstens 1,5 °C gilt (Bisektion: ist ein Jahr möglich, dann jedes spätere).
+3. In diesem Jahr möglichst wenig Kapazität (größte Jahresentnahme weltweit), dann bei dieser Kapazität möglichst wenig Entnahme insgesamt.
 
-| | Kapazität | Spitze |
-|---|---|---|
-| ≤ 20 %/a, 1,5 °C 2100 | 6,6 Gt/a ab 2067 | 0,32 K |
-| ≤ 30 %/a | 5,2 Gt/a | 0,32 K |
-| ≤ 50 %/a | 8,7 Gt/a, bis 2100 wieder stillgelegt | 0,31 K |
-| ohne Grenze | 56 Gt/a 2026–2045, dann nichts | 0,05 K |
+| | Spitze | 1,5 °C ab | Kapazität |
+|---|---|---|---|
+| ≤ 20 %/a (Hauptfall) | 0,31 K | 2083 | 49 Gt/a |
+| ≤ 30 %/a | 0,31 K | 2072 | 63 Gt/a |
+| ≤ 50 %/a | 0,30 K | 2063 | 61 Gt/a |
+| ohne Grenze | 0,04 K | 2041 | 72 Gt/a 2026–2045 |
 
-- **Was Tempo kostet** (≤ 20 %/a, gleiche Spitze, 1,5 °C ab …): 2100: 6,6 Gt/a (262 Gt); 2095: 9,6 (357 Gt); 2090: 16,7 (534 Gt); 2085: 33 (763 Gt); frühestens 2083: 54 Gt/a, 1 158 Gt, rund 80 % der sicheren Speicher, 2100 dann 0,3 K unter 1,5 °C. Deshalb bleibt 2100 das Zieljahr des Hauptfalls.
-- **Wo:** Entnahme 2026–2100: USA 54 %, Algerien 17 %, Libyen 16 %, Ägypten 6 %. Die Kapazität im Jahr 2100 (USA 76 %, Italien 14 %, Spanien 6 %) zeigt nur, wo die zuletzt ersetzten Anlagen stehen; die Karte zeigt deshalb die Entnahme.
-- **Kosten** (Okosun et al. 2026, Median): 52 Bio. €, 212 €/t; kostenoptimal spät und kurz, bis 12 Gt/a in den 2070ern, vor 2095 stillgelegt.
+- **Zieljahr statt frühestens** (≤ 20 %/a, gleiche Spitze): 2085: 31 Gt/a; 2090: 16; 2095: 8,8; 2100: 6,0 Gt/a.
+- **Wo:** 1 050 Gt bis 2100, 72 % der sicheren Speicher; die Speicher je Land binden, darum 110 Länder: USA 13 %, Australien 11 %, Kanada 7 %, China 5 %, Algerien 4 %.
+- **Spitze:** ohne DAC 311,3 mK, mit DAC 310,9 mK; um 2048 sind erst 0,2 Gt/a gebaut.
+
+### Kosten im Nachgang
+
+`path_cost` rechnet die Kosten des optimierten Pfads, ohne sie mitzuoptimieren: Investition bei jedem Bau und Ersatz, Betrieb, Sorbens und Energie je Jahr, Kostenannahmen nach Okosun et al. 2026 (optimistisch/Median/pessimistisch, reale EUR 2024, unverzinst).
+
+| Kosten | €/t | teuerstes Jahr (2077) | Summe bis 2100 |
+|---|---|---|---|
+| optimistisch | 128 | 7,4 Bio. € | 134 Bio. € |
+| Median | 212 | 13,8 Bio. € | 223 Bio. € |
+| pessimistisch | 322 | 21,3 Bio. € | 339 Bio. € |
+
+- **Vergleich:** BIP der EU-27 2024: 18,1 Bio. € (Eurostat `nama_10_gdp`, 18 101 412 Mio. €). Explizite Subventionen fossiler Energie weltweit 2023: 620 Mrd. USD (IEA Fossil Fuel Subsidies Database), mit dem EZB-Jahresmittel 2024 (1,0824 USD/€) 0,57 Bio. €. Das teuerste Jahr kostet im Median 76 % des EU-BIP, das 24-Fache der Subventionen; die Summe sind gut zwölf Jahre EU-BIP. Die IMF-Zahl mit nicht bezahlten Schäden (rund 7 Bio. USD 2022) ist kein ausgegebenes Geld und steht nur in den Notizen.
+- **Kostenoptimal mit Zieljahr 2100** (`solve_cost`, Backup): rund 225 Gt, 29–72 Bio. €, Median 48 Bio. €; 1,5 °C ab 2090 kostet rund 70 % mehr.
 
 ## Quellen
 

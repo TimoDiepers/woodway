@@ -16,7 +16,7 @@ function dacFilm(sec) {
     p.cell = D.cells.map((_, i) => p.cc[D.owner[i]].map(v => v / D.n[D.owner[i]]));
     p.col = col; p.light = light; return p; };
   const P = { a: mk(sec.dataset.dacfilm, '#f0b04a', '#f0b04a') };
-  const PH = [0, 1].map(() => ({ p: P.a, ym: 7.6, tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }));
+  const PH = [0, 1].map(() => ({ p: P.a, ym: Math.ceil(Math.max(...P.a.tot) * 1.1), tmin: 0, chip: 'Wachstum ≤ 20 %/a', cls: '' }));
   const lerp = (arr, t) => { const i = Math.min(arr.length - 2, Math.floor(t)), f = t - i; return arr[i] + f * (arr[i + 1] - arr[i]); };
   const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/\./g, '\u202f');
 
@@ -102,7 +102,8 @@ function dacFilm(sec) {
   const STOPS = [[122, 38, 52], [205, 78, 45], [240, 176, 74], [255, 240, 190]];
   const ramp = (f) => { const x = Math.max(0, Math.min(1, f)) * (STOPS.length - 1), i = Math.min(STOPS.length - 2, Math.floor(x)), u = x - i;
     return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * u)).join(',')})`; };
-  for (const q of Object.values(P)) q.bmax = Math.max(...HEX.map(h => h.m.reduce((n, i) => n + q.cell[i][NY - 1], 0)));   // plants run on: the last year is the largest
+  // the colour scale runs to the largest capacity any block reaches in any year
+  for (const q of Object.values(P)) q.bmax = Math.max(...Array.from({ length: NY }, (_, t) => Math.max(...HEX.map(h => h.m.reduce((n, i) => n + q.cell[i][t], 0)))));
   const leg = document.createElement('div'); leg.className = 'leg';
   leg.innerHTML = `<span>Kapazität je 2°-Block</span><i style="background:linear-gradient(90deg,${[0, .25, .5, .75, 1].map(f => ramp(Math.sqrt(f))).join(',')})"></i><span>0</span><span>${fmt(P.a.bmax, 1)} Gt/a</span>`;
   sec.querySelector('.hud').append(leg);
