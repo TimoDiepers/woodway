@@ -191,7 +191,8 @@ def run_fair_perturbed(
 
 def run_fair_emission_delta(delta: dict[str, NDArray], scenario: str = "cmip7-VL") -> NDArray:
     """FaIR with changed emissions of some species over the study period (e.g. {"CH4": -x [Mt CH4/a],
-    "N2O": -y [kt N2O/a]}), in the units of the scenario's emission file. Surface temperature as run_fair_baseline."""
+    "N2O": -y [Mt N2O/a]}), in FaIR's own units (it converts the file's kt N2O to Mt on reading). Surface
+    temperature as run_fair_baseline."""
     f = _create_fair(scenario)
     for specie, d in delta.items():
         vals = f.emissions.sel(specie=specie).values.copy()
