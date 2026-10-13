@@ -78,7 +78,7 @@
 <section class="slide dark" data-ch="dac" data-title="Optimierung von DAC">
   <header class="sh"><h2>Optimierung des DAC-Ausbaus</h2></header>
   <div class="body">
-    <svg class="schema mo" data-export="s_dac_optimierung" viewBox="0 0 1424 560" style="width:100%; height:540px; flex:none" aria-label="Ausgangspunkt: Erwärmung über 1,5 °C nach den Bäumen, Spitze 0,32 K 2048, 0,08 K im Jahr 2100. Vorgehen: eine Optimierung wählt Ort und Zeitpunkt, die Kapazität je Land und Jahr. Ziel: zuerst die niedrigste Spitze, dann 1,5 °C im Jahr 2100 mit möglichst wenig DAC-Kapazität. Rahmenbedingungen: Netto-Anteil, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
+    <svg class="schema mo" data-export="s_dac_optimierung" viewBox="0 0 1424 560" style="width:100%; height:540px; flex:none" aria-label="Ausgangspunkt: Erwärmung über 1,5 °C nach den Bäumen, Spitze 0,31 K 2048, 0,08 K im Jahr 2100. Vorgehen: eine Optimierung wählt Ort und Zeitpunkt, die Kapazität je Land und Jahr. Ziel: zuerst die niedrigste Spitze, dann so früh wie möglich zurück auf 1,5 °C, mit möglichst wenig DAC-Kapazität. Rahmenbedingungen: Netto-Anteil, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
       <defs><marker id="ah-dk2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
       <!-- the curve: baeume_rest from deck/chart_data/zeitpfade.json (scratchpad slide28.py) -->
       <g font-family="IBM Plex Sans">
@@ -87,10 +87,10 @@
           <rect x="0" y="56" width="450" height="340" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/>
           <text x="20" y="92" font-size="21" font-weight="600" fill="var(--ink)">Erwärmung über 1,5 °C [K]</text>
           <line x1="70" x2="420" y1="269.4" y2="269.4" stroke="#2c3437" stroke-width="1.5"/><text x="60" y="275.4" text-anchor="end" font-size="19" fill="var(--muted)">0,1</text><line x1="70" x2="420" y1="208.9" y2="208.9" stroke="#2c3437" stroke-width="1.5"/><text x="60" y="214.9" text-anchor="end" font-size="19" fill="var(--muted)">0,2</text><line x1="70" x2="420" y1="148.3" y2="148.3" stroke="#2c3437" stroke-width="1.5"/><text x="60" y="154.3" text-anchor="end" font-size="19" fill="var(--muted)">0,3</text><line x1="70" x2="420" y1="330" y2="330" stroke="#4a524d" stroke-width="1.5"/><text x="70.0" y="360" text-anchor="middle" font-size="19" fill="var(--muted)">2026</text><text x="183.5" y="360" text-anchor="middle" font-size="19" fill="var(--muted)">2050</text><text x="301.8" y="360" text-anchor="middle" font-size="19" fill="var(--muted)">2075</text><text x="420.0" y="360" text-anchor="middle" font-size="19" fill="var(--muted)">2100</text>
-          <path d="M70.0,330.0 L74.7,325.7 L79.5,318.1 L84.2,309.7 L88.9,293.5 L93.6,278.4 L98.4,264.0 L103.1,249.0 L107.8,236.0 L112.6,222.4 L117.3,211.1 L122.0,201.5 L126.8,191.1 L131.5,182.1 L136.2,174.6 L140.9,167.4 L145.7,160.5 L150.4,155.5 L155.1,149.9 L159.9,146.1 L164.6,141.8 L169.3,138.9 L174.1,137.7 L178.8,138.5 L183.5,138.1 L188.2,140.9 L193.0,142.5 L197.7,146.1 L202.4,150.5 L207.2,153.3 L211.9,155.8 L216.6,159.1 L221.4,160.5 L226.1,163.7 L230.8,165.6 L235.5,166.1 L240.3,168.8 L245.0,172.3 L249.7,175.5 L254.5,177.7 L259.2,179.9 L263.9,183.1 L268.6,185.6 L273.4,186.0 L278.1,188.7 L282.8,191.0 L287.6,194.3 L292.3,197.2 L297.0,199.3 L301.8,201.2 L306.5,205.0 L311.2,207.5 L315.9,209.7 L320.7,213.4 L325.4,216.9 L330.1,221.8 L334.9,227.9 L339.6,232.8 L344.3,236.3 L349.1,240.0 L353.8,243.8 L358.5,246.8 L363.2,249.8 L368.0,252.5 L372.7,255.2 L377.4,258.4 L382.2,263.7 L386.9,266.1 L391.6,269.3 L396.4,272.1 L401.1,274.9 L405.8,278.1 L410.5,280.2 L415.3,279.8 L420.0,281.2 L420.0,330 L70.0,330 Z" fill="#ff5a4f" fill-opacity=".22"/>
-          <path d="M70.0,330.0 L74.7,325.7 L79.5,318.1 L84.2,309.7 L88.9,293.5 L93.6,278.4 L98.4,264.0 L103.1,249.0 L107.8,236.0 L112.6,222.4 L117.3,211.1 L122.0,201.5 L126.8,191.1 L131.5,182.1 L136.2,174.6 L140.9,167.4 L145.7,160.5 L150.4,155.5 L155.1,149.9 L159.9,146.1 L164.6,141.8 L169.3,138.9 L174.1,137.7 L178.8,138.5 L183.5,138.1 L188.2,140.9 L193.0,142.5 L197.7,146.1 L202.4,150.5 L207.2,153.3 L211.9,155.8 L216.6,159.1 L221.4,160.5 L226.1,163.7 L230.8,165.6 L235.5,166.1 L240.3,168.8 L245.0,172.3 L249.7,175.5 L254.5,177.7 L259.2,179.9 L263.9,183.1 L268.6,185.6 L273.4,186.0 L278.1,188.7 L282.8,191.0 L287.6,194.3 L292.3,197.2 L297.0,199.3 L301.8,201.2 L306.5,205.0 L311.2,207.5 L315.9,209.7 L320.7,213.4 L325.4,216.9 L330.1,221.8 L334.9,227.9 L339.6,232.8 L344.3,236.3 L349.1,240.0 L353.8,243.8 L358.5,246.8 L363.2,249.8 L368.0,252.5 L372.7,255.2 L377.4,258.4 L382.2,263.7 L386.9,266.1 L391.6,269.3 L396.4,272.1 L401.1,274.9 L405.8,278.1 L410.5,280.2 L415.3,279.8 L420.0,281.2" fill="none" stroke="#6cc28a" stroke-width="3.4"/>
-          <circle cx="174.1" cy="137.7" r="6.5" fill="#6cc28a" stroke="var(--paper-deep)" stroke-width="2.5"/>
-          <text x="188.1" y="143.7" font-size="19" font-weight="600" fill="var(--ink)">Spitze 2048: 0,32 K</text>
+          <path d="M70.0,330.0 L74.7,325.7 L79.5,318.2 L84.2,309.9 L88.9,293.9 L93.6,279.0 L98.4,264.8 L103.1,250.1 L107.8,237.4 L112.6,224.1 L117.3,213.1 L122.0,203.8 L126.8,193.7 L131.5,185.0 L136.2,177.8 L140.9,170.8 L145.7,164.2 L150.4,159.4 L155.1,154.0 L159.9,150.4 L164.6,146.3 L169.3,143.1 L174.1,141.6 L178.8,142.2 L183.5,141.8 L188.2,144.5 L193.0,146.0 L197.7,149.6 L202.4,153.9 L207.2,156.7 L211.9,159.2 L216.6,162.4 L221.4,163.7 L226.1,166.9 L230.8,168.7 L235.5,169.2 L240.3,171.9 L245.0,175.5 L249.7,178.7 L254.5,180.9 L259.2,183.2 L263.9,186.0 L268.6,188.1 L273.4,188.4 L278.1,191.0 L282.8,193.2 L287.6,196.4 L292.3,199.4 L297.0,201.4 L301.8,203.3 L306.5,207.1 L311.2,209.6 L315.9,211.8 L320.7,215.5 L325.4,219.1 L330.1,224.1 L334.9,230.2 L339.6,235.2 L344.3,238.6 L349.1,242.4 L353.8,246.8 L358.5,249.1 L363.2,251.7 L368.0,254.3 L372.7,256.9 L377.4,260.1 L382.2,265.4 L386.9,267.9 L391.6,271.1 L396.4,274.0 L401.1,276.9 L405.8,280.3 L410.5,282.5 L415.3,282.3 L420.0,283.6 L420.0,330 L70.0,330 Z" fill="#ff5a4f" fill-opacity=".22"/>
+          <path d="M70.0,330.0 L74.7,325.7 L79.5,318.2 L84.2,309.9 L88.9,293.9 L93.6,279.0 L98.4,264.8 L103.1,250.1 L107.8,237.4 L112.6,224.1 L117.3,213.1 L122.0,203.8 L126.8,193.7 L131.5,185.0 L136.2,177.8 L140.9,170.8 L145.7,164.2 L150.4,159.4 L155.1,154.0 L159.9,150.4 L164.6,146.3 L169.3,143.1 L174.1,141.6 L178.8,142.2 L183.5,141.8 L188.2,144.5 L193.0,146.0 L197.7,149.6 L202.4,153.9 L207.2,156.7 L211.9,159.2 L216.6,162.4 L221.4,163.7 L226.1,166.9 L230.8,168.7 L235.5,169.2 L240.3,171.9 L245.0,175.5 L249.7,178.7 L254.5,180.9 L259.2,183.2 L263.9,186.0 L268.6,188.1 L273.4,188.4 L278.1,191.0 L282.8,193.2 L287.6,196.4 L292.3,199.4 L297.0,201.4 L301.8,203.3 L306.5,207.1 L311.2,209.6 L315.9,211.8 L320.7,215.5 L325.4,219.1 L330.1,224.1 L334.9,230.2 L339.6,235.2 L344.3,238.6 L349.1,242.4 L353.8,246.8 L358.5,249.1 L363.2,251.7 L368.0,254.3 L372.7,256.9 L377.4,260.1 L382.2,265.4 L386.9,267.9 L391.6,271.1 L396.4,274.0 L401.1,276.9 L405.8,280.3 L410.5,282.5 L415.3,282.3 L420.0,283.6" fill="none" stroke="#6cc28a" stroke-width="3.4"/>
+          <circle cx="174.1" cy="141.6" r="6.5" fill="#6cc28a" stroke="var(--paper-deep)" stroke-width="2.5"/>
+          <text x="188.1" y="147.6" font-size="19" font-weight="600" fill="var(--ink)">Spitze 2048: 0,31 K</text>
           <text x="416.0" y="307" text-anchor="end" font-size="19" font-weight="600" fill="var(--ink)">2100: 0,08 K</text>
         </g>
         <g class="pop" data-step="1">
@@ -108,9 +108,9 @@
           <text x="1036" y="148" font-size="21" font-weight="600" fill="var(--paper)">Spitze der Erwärmung</text>
           <text x="1036" y="176" font-size="21" font-weight="600" fill="var(--paper)">so niedrig wie möglich</text>
           <circle cx="1006" cy="236" r="16" fill="var(--paper)"/><text x="1006" y="243" text-anchor="middle" font-size="19" font-weight="600" fill="var(--fjord)">2</text>
-          <text x="1036" y="234" font-size="21" font-weight="600" fill="var(--paper)">dann 1,5 °C im Jahr 2100</text>
-          <text x="1036" y="262" font-size="21" font-weight="600" fill="var(--paper)">mit möglichst wenig</text>
-          <text x="1036" y="290" font-size="21" font-weight="600" fill="var(--paper)">DAC-Kapazität</text>
+          <text x="1036" y="234" font-size="21" font-weight="600" fill="var(--paper)">dann so früh wie möglich</text>
+          <text x="1036" y="262" font-size="21" font-weight="600" fill="var(--paper)">zurück auf 1,5 °C, mit</text>
+          <text x="1036" y="290" font-size="21" font-weight="600" fill="var(--paper)">möglichst wenig Kapazität</text>
         </g>
         <g class="pop" data-step="2">
           <path class="m-flow" d="M714 436 V324" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk2)"/>
@@ -124,10 +124,10 @@
     </svg>
     <p class="takeaway" data-step="3" style="--d:0">Bäume pflanzt man ohnehin sofort, sie wachsen langsam. DAC entnimmt sofort, hängt aber an Strom und Energiebedarf, und die sind je Ort und Jahr anders: Wo und wann bauen?</p>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (Ausgangspunkt: Very Low)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a für 2030 geplant, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm: Kapazität je Land und Jahr 2026–2100, 148 Länder mit Speicher; Bäume als Forst im Bonn-Tempo, Holz gebunden, Kapitel Potenzial; Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Klimawirkung je t mit FaIR wie bei den Bäumen)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (Ausgangspunkt: Very Low)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a für 2030 geplant, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm: Kapazität je Land und Jahr 2026–2100, 148 Länder mit Speicher; Bäume als Forst, alle 2026 gepflanzt, Holz gebunden, Kapitel Potenzial; Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Klimawirkung je t mit FaIR wie bei den Bäumen)</span></p>
   <aside class="notes" data-n="28">
-    <p>Wo die Bäume uns lassen: grün die Erwärmung über 1,5 °C mit Very Low und den Bäumen als Forst. Die Spitze liegt 2048 bei 0,32 Kelvin, 2100 sind es noch 0,08. Rot darunter: das, was DAC schließen soll.</p>
-    <p>Klick: Wie viel DAC, wo und wann? Das entscheidet eine Optimierung, ein lineares Programm: Es wählt die Kapazität je Land und Jahr, von heute bis 2100. Was eine Tonne an Temperatur bewirkt, kommt aus FaIR, wie bei den Bäumen. Das Ziel in zwei Stufen: zuerst die Spitze der Erwärmung so niedrig wie möglich; dann, bei dieser Spitze, 1,5 °C im Jahr 2100 mit möglichst wenig Anlagen. 1,5 °C im Jahr 2100 ist die Lesart der 1,5-°C-Szenarien (IPCC, Kategorie C1): Überschreiten erlaubt, bis 2100 zurück.</p>
+    <p>Wo die Bäume uns lassen: grün die Erwärmung über 1,5 °C mit Very Low und den Bäumen als Forst. Die Spitze liegt 2048 bei 0,31 Kelvin, 2100 sind es noch 0,08. Rot darunter: das, was DAC schließen soll.</p>
+    <p>Klick: Wie viel DAC, wo und wann? Das entscheidet eine Optimierung, ein lineares Programm: Es wählt die Kapazität je Land und Jahr, von heute bis 2100. Was eine Tonne an Temperatur bewirkt, kommt aus FaIR, wie bei den Bäumen. Das Ziel in Stufen: zuerst die Spitze der Erwärmung so niedrig wie möglich; dann, bei dieser Spitze, so früh wie möglich zurück auf 1,5 °C und dort bleiben; das früheste Jahr sucht eine Bisektion. In diesem Jahr dann möglichst wenig Kapazität, also die kleinste größte Entnahme im Jahr, und bei dieser Kapazität möglichst wenig DAC insgesamt.</p>
     <p>Klick: Die Rahmenbedingungen: der Netto-Anteil je Land und Jahr aus dem DAC-Modell; der Speicher je Land, sicher nutzbar nach Gidden et al., weltweit 1 460 Gigatonnen, Deutschland nur 1,3; und das Wachstum: höchstens 20 Prozent im Jahr, so schnell wie einst die Windkraft, ab den 8,8 Megatonnen, die für 2030 geplant sind. Jede Anlage läuft 20 Jahre; danach wird sie ersetzt oder stillgelegt.</p>
     <p>Klick: Warum überhaupt optimieren? Bei den Bäumen stellt sich die Frage nicht: Ein Baum braucht Jahrzehnte, bis er viel CO₂ aufgenommen hat, und braucht keinen Strom; also pflanzt man ihn sofort. DAC dagegen entnimmt sofort, aber was netto bleibt, hängt am Strom und am Energiebedarf, und beide sind je Ort und Jahr anders. Wo und wann man baut, könnte also viel ausmachen.</p>
     <p class="q">Falls Fragen kommen — 148 Länder mit Speicher. Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km, aus 45 183 Zellen. Kein Transport über Landesgrenzen; Basalt-Mineralisierung (Island) ist bei Gidden nicht enthalten.</p>
@@ -138,22 +138,22 @@
   <header class="sh"><h2>Wo und wann DAC gebaut wird</h2></header>
   <div class="body">
     <div class="dsim">
-      <div class="dmapcol"><div class="dmap" data-path="opt" data-scale="opt" data-w="918"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DAC 2026 bis 2100 je 2°-Block, fast alles in den USA und in Nordafrika"></canvas></div><div class="dleg"></div></div>
+      <div class="dmapcol"><div class="dmap" data-path="opt" data-scale="opt" data-w="918"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DAC 2026 bis 2100 je 2°-Block, verteilt über 110 Länder mit Speicher"></canvas></div><div class="dleg"></div></div>
       <div class="dside">
         <p class="dk">Optimierung · Wachstum ≤ 20 %/a</p>
-        <p class="dnum">6,6 <small>Gt CO₂/a ab 2067</small></p>
-        <div class="dbar" role="img" aria-label="Anteile der Länder an der Entnahme 2026 bis 2100"><span style="width:53.8%" title="USA 54 %">USA</span><span style="width:17.2%" title="Algerien 17 %">Algerien</span><span style="width:16.4%" title="Libyen 16 %">Libyen</span><span style="width:6.4%" title="Ägypten 6 %"></span><span style="width:2.1%" title="Sudan 2 %"></span><span class="rest" style="width:4.1%" title="8 weitere Länder"></span></div>
-        <p class="dsub">Entnahme bis 2100: USA 54 %, Algerien 17 %, Libyen 16 %, Ägypten 6 %: erst Nordafrika, wo der Strom früh sauber ist, ab den 2070ern die USA</p>
+        <p class="dnum">49 <small>Gt CO₂/a · 1,5&nbsp;°C ab 2083</small></p>
+        <div class="dbar" role="img" aria-label="Anteile der Länder an der Entnahme 2026 bis 2100"><span style="width:13.4%" title="USA 13 %">USA</span><span style="width:10.7%" title="Australien 11 %">AUS</span><span style="width:6.6%" title="Kanada 7 %"></span><span style="width:5.4%" title="China 5 %"></span><span style="width:4.3%" title="Algerien 4 %"></span><span class="rest" style="width:59.6%" title="105 weitere Länder">105 weitere</span></div>
+        <p class="dsub">Entnahme bis 2100: 1&nbsp;050 Gt, 72 % der sicheren Speicher, verteilt auf 110 Länder: USA 13 %, Australien 11 %, Kanada 7 %, China 5 %</p>
         <div class="chart" data-ec="dactemp" data-label="Erwärmung über 1,5 °C 2026 bis 2100: nur Bäume und mit optimiertem DAC"></div>
-        <p class="takeaway" data-step="1" style="--d:0">1,5&nbsp;°C im Jahr 2100, aber die Spitze 2048 bleibt: Bis dahin sind erst 0,2&nbsp;Gt/a gebaut.</p>
+        <p class="takeaway" data-step="1" style="--d:0">1,5&nbsp;°C ab 2083, aber die Spitze 2048 bleibt: Bis dahin sind erst 0,2&nbsp;Gt/a gebaut.</p>
       </div>
     </div>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie: niedrigste Spitze, dann 1,5&nbsp;°C im Jahr 2100 mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Entnahme des Landes gleich auf diese Zellen verteilt)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie: niedrigste Spitze, dann so früh wie möglich zurück auf 1,5&nbsp;°C mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Entnahme des Landes gleich auf diese Zellen verteilt)</span></p>
   <aside class="notes" data-n="29">
-    <p>Das Ergebnis der Optimierung: links, wo bis 2100 entnommen wird. Fast alles in den USA und in Nordafrika, in Algerien, Libyen und Ägypten. Dort ist der Netto-Anteil hoch, Strom und Klima passen, und es gibt Speicher. Und die Reihenfolge: zuerst Nordafrika, wo der Strom früh sauber wird; ab den 2070ern die USA, wenn die ersten Anlagen nach 20 Jahren ersetzt werden. Insgesamt läuft der Ausbau an der Wachstumsgrenze: 1 Gigatonne im Jahr erst 2056, 6,6 ab 2067.</p>
-    <p>Klick: Das bringt 1,5 °C im Jahr 2100. Die Spitze 2048 aber bleibt bei 0,32 Kelvin, obwohl die Optimierung zuerst genau auf sie zielt: Bis dahin sind erst 0,2 Gigatonnen im Jahr gebaut.</p>
-    <p class="q">Falls Fragen kommen — Verteilt man die Kapazität einfach nach Speicher auf die Länder, braucht es 6,8 statt 6,6 Gt/a: Wo genau gebaut wird, ändert die Menge kaum; solange DAC klein ist, zählt der Ort global kaum, und wenn DAC groß ist, ist der Strom fast überall sauber. Spitze ohne DAC 316,9 mK, mit DAC 316,5 mK. Die Aufteilung auf Länder ist nicht ganz eindeutig; eindeutig sind die Menge und die großen Standorte. Wo die Anlagen 2100 stehen, ist noch weniger eindeutig: Dort stehen nur die zuletzt ersetzten (USA, Südeuropa); deshalb zeigt die Karte die Entnahme über die ganze Zeit.</p>
+    <p>Das Ergebnis der Optimierung: links, wo bis 2100 entnommen wird. Früh zurück auf 1,5 °C heißt: sehr viel DAC, 1 050 Gigatonnen bis 2100, fast drei Viertel der sicheren Speicher. Die Speicher je Land werden knapp, darum verteilt sich DAC über 110 Länder; vorne die USA, Australien, Kanada und China. Der Ausbau läuft an der Wachstumsgrenze: 1 Gigatonne im Jahr erst 2056, dann 49 Gigatonnen im Jahr ab Ende der 2070er.</p>
+    <p>Klick: Das bringt 1,5 °C ab 2083, früher geht es mit 20 Prozent Wachstum nicht. Die Spitze 2048 aber bleibt bei 0,31 Kelvin, obwohl die Optimierung zuerst genau auf sie zielt: Bis dahin sind erst 0,2 Gigatonnen im Jahr gebaut.</p>
+    <p class="q">Falls Fragen kommen — Spitze ohne DAC 311,3 mK, mit DAC 310,9 mK. Nur 1,5 °C im Jahr 2100 (statt so früh wie möglich) bräuchte 6,0 Gt/a. Die Aufteilung auf Länder ist nicht ganz eindeutig; eindeutig sind die Menge und die großen Standorte. Wo die Anlagen 2100 stehen, ist noch weniger eindeutig: Dort stehen nur die zuletzt ersetzten; deshalb zeigt die Karte die Entnahme über die ganze Zeit.</p>
   </aside>
 </section>
 
@@ -162,35 +162,75 @@
   <div class="body">
     <div class="warten">
       <div class="dcharts">
-        <div class="chart" data-ec="dactempo" data-label="Weltweite DAC-Kapazität 2026 bis 2100, niedrigste Spitze und dann 1,5 °C im Jahr 2100, optimiert bei höchstens 20, 30 und 50 Prozent Wachstum im Jahr und ohne Wachstumsgrenze"></div>
+        <div class="chart" data-ec="dactempo" data-label="Weltweite DAC-Kapazität 2026 bis 2100, niedrigste Spitze und dann so früh wie möglich zurück auf 1,5 °C, optimiert bei höchstens 20, 30 und 50 Prozent Wachstum im Jahr und ohne Wachstumsgrenze"></div>
         <div class="chart" data-ec="dactempot" data-label="Erwärmung über 1,5 °C 2026 bis 2100: nur Bäume und mit DAC bei höchstens 20, 30 und 50 Prozent Wachstum im Jahr und ohne Wachstumsgrenze"></div>
       </div>
       <div class="side">
-        <div class="vt" role="table" aria-label="DAC-Kapazität für 1,5 °C im Jahr 2100 und Spitze der Erwärmung über 1,5 °C je Wachstumsgrenze">
-          <div class="r head" role="row"><span role="columnheader">Wachstum</span><span role="columnheader">Spitze</span><span role="columnheader">DAC für 2100</span></div>
-          <div class="r main" role="row"><span role="cell"><i class="ln g20"></i>≤ 20 %/a</span><span role="cell">0,32 K</span><span role="cell">6,6 Gt/a</span></div>
-          <div class="r" role="row"><span role="cell"><i class="ln g30"></i>≤ 30 %/a</span><span role="cell">0,32 K</span><span role="cell">5,2 Gt/a</span></div>
-          <div class="r" role="row"><span role="cell"><i class="ln g50"></i>≤ 50 %/a</span><span role="cell">0,31 K</span><span role="cell">8,7 Gt/a</span></div>
-          <div class="r hi" role="row"><span role="cell"><i class="ln frei"></i>ohne Grenze</span><span role="cell"><b>0,05 K</b></span><span role="cell"><b>56 Gt/a</b></span></div>
+        <div class="vt v4" role="table" aria-label="Spitze der Erwärmung über 1,5 °C, frühestes Jahr zurück auf 1,5 °C und DAC-Kapazität je Wachstumsgrenze">
+          <div class="r head" role="row"><span role="columnheader">Wachstum</span><span role="columnheader">Spitze</span><span role="columnheader">1,5&nbsp;°C ab</span><span role="columnheader">DAC</span></div>
+          <div class="r main" role="row"><span role="cell"><i class="ln g20"></i>≤ 20 %/a</span><span role="cell">0,31 K</span><span role="cell">2083</span><span role="cell">49 Gt/a</span></div>
+          <div class="r" role="row"><span role="cell"><i class="ln g30"></i>≤ 30 %/a</span><span role="cell">0,31 K</span><span role="cell">2072</span><span role="cell">63 Gt/a</span></div>
+          <div class="r" role="row"><span role="cell"><i class="ln g50"></i>≤ 50 %/a</span><span role="cell">0,30 K</span><span role="cell">2063</span><span role="cell">61 Gt/a</span></div>
+          <div class="r hi" role="row"><span role="cell"><i class="ln frei"></i>ohne Grenze</span><span role="cell"><b>0,04 K</b></span><span role="cell"><b>2041</b></span><span role="cell"><b>72 Gt/a</b></span></div>
         </div>
         <div class="vt rise" data-step="1" role="table" aria-label="DAC-Kapazität bei 20 Prozent Wachstum im Jahr, je nachdem, ab wann wieder 1,5 °C gelten sollen">
-          <div class="r head" role="row"><span role="columnheader">≤ 20 %/a, 1,5 °C ab</span><span role="columnheader"></span><span role="columnheader">DAC</span></div>
-          <div class="r main" role="row"><span role="cell">2100</span><span role="cell"></span><span role="cell">6,6 Gt/a</span></div>
-          <div class="r" role="row"><span role="cell">2095</span><span role="cell"></span><span role="cell">9,6 Gt/a</span></div>
-          <div class="r" role="row"><span role="cell">2090</span><span role="cell"></span><span role="cell">17 Gt/a</span></div>
-          <div class="r" role="row"><span role="cell">2085</span><span role="cell"></span><span role="cell">33 Gt/a</span></div>
+          <div class="r head" role="row"><span role="columnheader">≤ 20 %/a, 1,5&nbsp;°C ab</span><span role="columnheader"></span><span role="columnheader">DAC</span></div>
+          <div class="r main" role="row"><span role="cell">2083 <small>(frühestens)</small></span><span role="cell"></span><span role="cell">49 Gt/a</span></div>
+          <div class="r" role="row"><span role="cell">2090</span><span role="cell"></span><span role="cell">16 Gt/a</span></div>
+          <div class="r" role="row"><span role="cell">2100</span><span role="cell"></span><span role="cell">6,0 Gt/a</span></div>
         </div>
-        <p class="takeaway" data-step="2" style="--d:0">Die Spitze senkt nur ein Ausbau ohne jede Grenze. Und früher zurück auf 1,5&nbsp;°C: alle fünf Jahre etwa doppelt so viel DAC.</p>
+        <p class="dsub rise" data-step="2">Warum die Spitze zählt: Kipppunkte und Extreme werden mit jedem Zehntelgrad höchster Erwärmung wahrscheinlicher.</p>
+        <p class="takeaway" data-step="2" style="--d:300">Nur schnellerer Ausbau senkt die Spitze: 0,31&nbsp;K bei 20&nbsp;%/a, 0,04&nbsp;K ohne Grenze.</p>
       </div>
     </div>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie: niedrigste Spitze, dann 1,5&nbsp;°C im Jahr 2100 mit möglichst wenig Kapazität, je Wachstumsgrenze; „ohne Grenze“: keine Grenze und kein Startwert; „1,5&nbsp;°C ab“: bei derselben Spitze ab diesem Jahr bis 2100 höchstens 1,5&nbsp;°C, mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Kapazität des Landes gleich auf diese Zellen verteilt)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><a href="https://doi.org/10.1126/science.abn7950" target="_blank" rel="noopener">Armstrong McKay et al. 2022</a> (Kipppunkte)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie: niedrigste Spitze, dann so früh wie möglich zurück auf 1,5&nbsp;°C mit möglichst wenig Kapazität, je Wachstumsgrenze; „ohne Grenze“: keine Grenze und kein Startwert; „1,5&nbsp;°C ab“: bei derselben Spitze ab diesem Jahr bis 2100 höchstens 1,5&nbsp;°C, mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Kapazität des Landes gleich auf diese Zellen verteilt)</span></p>
   <aside class="notes" data-n="30">
-    <p>Wenn Ort und Zeitpunkt nicht der Hebel sind: Was ist es dann? Dieselbe Optimierung, nur darf DAC schneller wachsen. Links oben die Kapazität weltweit, darunter die Erwärmung über 1,5 °C; rechts die Spitze und was es für 1,5 °C im Jahr 2100 braucht.</p>
-    <p>Mit 20 Prozent im Jahr bleibt die Spitze bei 0,32 Kelvin, mit 30 auch, mit 50 Prozent sinkt sie auf 0,31; dafür baut die Optimierung früh viel, 8,7 Gigatonnen im Jahr. Erst ganz ohne Grenze sinkt sie spürbar, auf 0,05 Kelvin, aber mit 56 Gigatonnen im Jahr ab sofort, 20 Jahre lang.</p>
-    <p>Klick: Und wenn 1,5 °C nicht erst 2100, sondern früher wieder gelten sollen? Bei 20 Prozent Wachstum und derselben Spitze: 1,5 °C ab 2095 braucht 9,6 Gigatonnen im Jahr, ab 2090 17, ab 2085 33. Alle fünf Jahre früher etwa das Doppelte.</p>
-    <p>Klick: Für die Spitze zählt also nur das Tempo, und so schnell ist noch keine Technik gewachsen; die Spitze um 2050 muss weniger Ausstoß leisten. Und jedes Jahr, das 1,5 °C früher gelten soll, kostet viel mehr Anlagen.</p>
-    <p class="q">Falls Fragen kommen — Ein späterer Start kostet: Sind die 8,8 Mt/a erst 2035 erreicht, braucht es 7,8, ab 2040 9,7 Gt/a für 1,5 °C im Jahr 2100. Mit 10 %/a gibt es keinen Pfad zu 1,5 °C im Jahr 2100. Frühestens geht es bei 20 %/a ab 2083, mit 54 Gt/a und rund 80 % der sicheren Speicher. Ohne Grenze kann die Kapazität nach 20 Jahren auslaufen, weil das CO₂ gespeichert bleibt. Kosten nach Okosun et al. 2026: rund 52 Bio. € bis 2100 (Backup).</p>
+    <p>Wenn der Ort nicht der Hebel ist: Was ist es dann? Dieselbe Optimierung, nur darf DAC schneller wachsen. Links oben die Kapazität weltweit, darunter die Erwärmung über 1,5 °C; rechts die Spitze, das früheste Jahr zurück auf 1,5 °C und die Kapazität dafür.</p>
+    <p>Mit 20 Prozent im Jahr bleibt die Spitze bei 0,31 Kelvin, mit 30 auch, mit 50 Prozent sinkt sie auf 0,30. Schnelleres Wachstum holt vor allem das Jahr zurück: 2083, 2072, 2063. Erst ganz ohne Grenze sinkt die Spitze spürbar, auf 0,04 Kelvin, und 1,5 °C gilt ab 2041, aber mit 72 Gigatonnen im Jahr ab sofort.</p>
+    <p>Klick: Was kostet das frühe Zurück? Bei 20 Prozent Wachstum und derselben Spitze: frühestens 2083, mit 49 Gigatonnen im Jahr; 1,5 °C erst ab 2090 bräuchte 16, erst 2100 nur 6. Jedes frühere Jahr kostet viel mehr Anlagen.</p>
+    <p>Klick: Für die Spitze zählt also nur das Tempo, und so schnell ist noch keine Technik gewachsen. Und die Spitze ist nicht egal: Je höher die Erwärmung steigt, desto wahrscheinlicher kippen Teile des Klimasystems, Eisschilde, Korallenriffe, Permafrost, und desto häufiger werden Extreme.</p>
+    <p class="q">Falls Fragen kommen — Ein späterer Start: Sind die 8,8 Mt/a erst 2035 erreicht, braucht es 7,0, ab 2040 8,7 Gt/a für 1,5 °C im Jahr 2100. Armstrong McKay et al. 2022: mehrere Kipppunkte schon zwischen 1,5 und 2 °C wahrscheinlich, die Gefahr steigt mit jedem Zehntelgrad Spitze. Ohne Grenze kann die Kapazität nach 20 Jahren auslaufen, weil das CO₂ gespeichert bleibt.</p>
+</aside>
+</section>
+
+<section class="slide dark" data-ch="dac" data-title="Kosten">
+  <header class="sh"><h2>Was der DAC-Pfad kostet</h2></header>
+  <div class="body">
+    <div class="warten">
+      <div class="chart" data-ec="kosten" data-label="Jährliche Kosten des DAC-Pfads 2026 bis 2100, Median mit Spanne, verglichen mit den fossilen Subventionen weltweit und dem BIP der EU-27"></div>
+      <div class="side">
+        <div class="vt v4" role="table" aria-label="Kosten des DAC-Pfads je Kostenannahme: Euro je Tonne, teuerstes Jahr und Summe 2026 bis 2100">
+          <div class="r head" role="row"><span role="columnheader">Kosten</span><span role="columnheader">€/t</span><span role="columnheader">Spitze</span><span role="columnheader">Summe</span></div>
+          <div class="r" role="row"><span role="cell">optimistisch</span><span role="cell">128</span><span role="cell">7,4</span><span role="cell">134</span></div>
+          <div class="r main" role="row"><span role="cell"><i class="ln dac"></i>Median</span><span role="cell">212</span><span role="cell">13,8</span><span role="cell">223</span></div>
+          <div class="r" role="row"><span role="cell">pessimistisch</span><span role="cell">322</span><span role="cell">21,3</span><span role="cell">339</span></div>
+        </div>
+        <p class="dsub">Spitze in Bio. € im teuersten Jahr (2077), Summe in Bio. € bis 2100</p>
+        <p class="takeaway" data-step="2" style="--d:600">Im teuersten Jahr 13,8&nbsp;Bio.&nbsp;€: 76&nbsp;% des EU-BIP, 24-mal die fossilen Subventionen weltweit.</p>
+      </div>
+    </div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (Kosten je Tonne: Median, Spanne optimistisch bis pessimistisch; reale EUR 2024, unverzinst)</span><span><a href="https://ec.europa.eu/eurostat/databrowser/view/nama_10_gdp/default/table" target="_blank" rel="noopener">Eurostat nama_10_gdp</a> (BIP EU-27 2024)</span><span><a href="https://www.iea.org/data-and-statistics/data-product/fossil-fuel-subsidies-database" target="_blank" rel="noopener">IEA Fossil Fuel Subsidies Database</a> (2023, explizite Subventionen)</span><span><i>Eigene Rechnung</i> (Kosten im Nachgang auf den optimierten Pfad mit 20 %/a gerechnet, nicht mitoptimiert)</span></p>
+  <aside class="notes" data-n="31">
+    <p>Was kostet dieser Pfad? Die Kosten sind nicht mitoptimiert, sondern im Nachgang auf den Pfad gerechnet, der die Spitze minimiert und dann so früh wie möglich zurückholt. Kosten je Tonne nach Okosun et al., die rote Linie ist der Median, das Band reicht von optimistisch bis pessimistisch. Im teuersten Jahr, 2077, sind es 13,8 Billionen Euro.</p>
+    <p>Klick: Zum Vergleich die fossilen Subventionen weltweit, die direkt gezahlt werden: rund 0,6 Billionen Euro im Jahr. Der DAC-Pfad kostet in der Spitze das 24-Fache.</p>
+    <p>Klick: Und die ganze Wirtschaftsleistung der EU-27: 18,1 Billionen Euro im Jahr. Der Median braucht drei Viertel davon, pessimistisch mehr als alles. Bis 2100 zusammen 223 Billionen, zwölf Jahre EU-BIP.</p>
+    <p class="q">Falls Fragen kommen — Der IMF zählt bei den fossilen Subventionen auch nicht bezahlte Umwelt- und Gesundheitsschäden mit, rund 7 Billionen USD 2022; das ist kein Geld, das ausgegeben wird, darum nicht auf der Folie. Nur 1,5 °C im Jahr 2100 statt so früh wie möglich bräuchte 6 Gt/a und kostet einen Bruchteil.</p>
+  </aside>
+</section>
+
+<section class="slide dark" data-ch="dac" data-title="Zwischenfazit Tempo">
+  <header class="sh"><h2>Die Spitze hängt am Tempo</h2></header>
+  <div class="body">
+    <div class="cols3 zf"><div class="col rise"><h4 aria-level="3"><span class="big-n">1</span>Der Ort verteilt, senkt aber nicht</h4><p class="dnum">110 <small>Länder</small></p><p>72&nbsp;% der sicheren Speicher<br>→ die Spitze bleibt bei 0,31&nbsp;K</p></div><div class="col rise" data-step="1"><h4 aria-level="3"><span class="big-n">2</span>Früher zurück kostet viel</h4><p class="dnum">49 <small>Gt/a ab 2083</small></p><p>statt 6&nbsp;Gt/a ab 2100<br>→ im teuersten Jahr drei Viertel des EU-BIP</p></div><div class="col rise" data-step="2"><h4 aria-level="3"><span class="big-n">3</span>Nur Tempo senkt die Spitze</h4><p class="dnum">0,04 <small>K ohne Grenze</small></p><p>statt 0,31&nbsp;K bei 20&nbsp;%/a<br>→ so schnell ist noch keine Technik gewachsen</p></div></div>
+    <p class="takeaway" data-step="3" style="--d:300">DAC holt zurück, aber spät und teuer. Was senkt die Spitze sofort?</p>
+  </div>
+  <aside class="notes" data-n="32">
+    <p>Kurz zusammen, was DAC kann. Erstens: Der Ort verteilt die Anlagen, über 110 Länder und fast drei Viertel der sicheren Speicher, aber er senkt die Spitze nicht; sie bleibt bei 0,31 Kelvin.</p>
+    <p>Klick: Zweitens: Früher zurück auf 1,5 °C kostet viel. 2100 reichen 6 Gigatonnen im Jahr, frühestens 2083 braucht es 49, und im teuersten Jahr drei Viertel der Wirtschaftsleistung der EU.</p>
+    <p>Klick: Drittens: Die Spitze senkt nur Tempo, und dieses Tempo hatte noch keine Technik.</p>
+    <p>Klick: DAC holt also zurück, aber spät und teuer. Gibt es etwas, das die Spitze sofort senkt?</p>
   </aside>
 </section>
 

@@ -502,19 +502,16 @@ function ecDacTempo(title, key, yMax, yFmt, trees) {
       endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' } });
     const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4), L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'),
                     L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'), L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4)];
-    const top = series[3];   // without a limit the capacity runs off the chart (56 Gt/a for 20 years): named at the top edge
-    if (!trees && Math.max(...C.opt_frei[key]) > yMax) {
-      top.endLabel.show = false;
-      top.markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2046, yMax] }],
-        label: { show: true, position: 'right', distance: 8, color: '#3fd0b0', fontFamily: EC.font, fontSize: 18, fontWeight: 600,
-                 formatter: `ohne Grenze: ${ecNum(Math.max(...C.opt_frei[key]), 0)} Gt/a bis ${D.jahre[C.opt_frei[key].findIndex(v => v < 1) - 1]}` } };
-    }
+    // the capacity paths all fall back towards zero by 2100: named in a legend in the right margin instead
+    if (!trees) for (const x of series) x.endLabel.show = false;
     if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
       for (const x of series) x.endLabel.show = false;
       series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));
     }
     return {
       title: { text: title, left: 60, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      legend: trees ? undefined : { orient: 'vertical', right: 0, top: 44, itemGap: 10, itemWidth: 26, icon: 'path://M0,4 H28 V7 H0 Z',
+                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 }, data: series.map(s => s.name) },
       grid: { left: 60, right: 150, top: 40, bottom: 34 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
@@ -524,9 +521,40 @@ function ecDacTempo(title, key, yMax, yFmt, trees) {
     };
   } };
 }
-const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 20, v => String(v), false);
+const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 80, v => String(v), false);
 const EC_DACTEMPO_T = ecDacTempo('Erwärmung über 1,5 °C [K]', 'temp', 400, kOf, true);
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T };
+/* costs of the DAC path after the fact (key kosten_pfad): median per year with the optimistic-pessimistic band;
+   then the explicit fossil subsidies and the EU-27 GDP as reference lines, in trillion EUR per year */
+const EC_KOSTEN = {
+  steps: 2,
+  option(k) {
+    const D = window.ZEIT, K = D.kosten_pfad, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const lo = K.optimistisch.je_jahr_bio, hi = K.pessimistisch.je_jahr_bio;
+    const ref = (v, name, color, show) => ({ yAxis: v, lineStyle: { color, width: 2.6, type: [8, 6], opacity: show ? 1 : 0 },
+      label: { show, position: 'insideStartTop', distance: 6, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, formatter: name } });
+    const series = [
+      { id: 'lo', type: 'line', stack: 'band', data: P(lo), showSymbol: false, lineStyle: { opacity: 0 }, silent: true, animationDuration: 1600 },
+      { id: 'band', type: 'line', stack: 'band', data: P(hi.map((v, i) => v - lo[i])), showSymbol: false, silent: true,
+        lineStyle: { opacity: 0 }, areaStyle: { color: '#ff5a4f', opacity: .22 }, animationDuration: 1600 },
+      { id: 'med', type: 'line', data: P(K.median.je_jahr_bio), showSymbol: false, z: 5, animationDuration: 1600,
+        lineStyle: { color: '#ff5a4f', width: 3.4 }, itemStyle: { color: '#ff5a4f' },
+        endLabel: { show: true, formatter: 'DAC', color: '#ff5a4f', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 },
+        markLine: { silent: true, symbol: 'none', animationDuration: 700, data: [
+          ref(K.fossil_subv_bio, `fossile Subventionen: ${ecNum(K.fossil_subv_bio, 2)}`, '#f0b04a', k >= 1),
+          ref(K.eu27_bip_bio, `BIP der EU-27: ${ecNum(K.eu27_bip_bio, 1)}`, '#9fc4e8', k >= 2)] } }];
+    return {
+      animationDurationUpdate: 700,
+      title: { text: 'Kosten des DAC-Pfads [Bio. € pro Jahr]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      grid: { left: 70, right: 70, top: 56, bottom: 40 },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: 25, interval: 5, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => String(v) }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      series
+    };
+  }
+};
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN };
 
 class EChart {
   constructor(host) {
