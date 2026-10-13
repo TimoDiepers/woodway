@@ -94,7 +94,7 @@ export const de: Record<keyof typeof en, string> = {
   "strip.afterDac": "mit Bäumen und DAC",
   "strip.capacity": "DAC-Kapazität {gt} Gt/a",
   "strip.unit": "mK",
-  "strip.source": "Mit den Bäumen: bewirtschafteter Wald auf den {area} Gha, die kühlen, gepflanzt im Tempo der Bonn Challenge ({rate} Mha/a), Holz bleibt gebunden; DAC: niedrigste Spitze der Erwärmung, +{growth} %/a.",
+  "strip.source": "Mit den Bäumen: bewirtschafteter Wald auf den {area} Gha, die kühlen, alle {year} gepflanzt, Holz bleibt gebunden; DAC: niedrigste Spitze der Erwärmung, +{growth} %/a.",
   "hover.value": "{value} {unit}",
   "tools.label": "Kartenwerkzeuge",
   "tools.recenter": "Zurück zur ganzen Welt",

@@ -1,4 +1,4 @@
-"""Planting paths over time: the trees are planted at a stated rate, not all in the start year.
+"""Planting paths over time: three ways to use the reforestable land, all planted in the start year.
 
 Three ways to use the reforestable land, each as one full FaIR run (removals as negative CO2 emissions,
 albedo as a forcing; the same chain as ``nbs.potential.fair_global_delta_t``):
@@ -10,8 +10,8 @@ albedo as a forcing; the same chain as ``nbs.potential.fair_global_delta_t``):
   leaves the forest as timber and stays bound -- the optimistic case; the residues go back to the air at
   felling. ``release=True`` sends the timber back to the air too (the comparison case).
 
-Planting rate: the Bonn Challenge pace, 350 Mha restored 2011-2030, i.e. 17.5 Mha a year. Every cell of a
-path gets the same share each year, so a path is the start-year planting spread over its years.
+Planting: every path is planted at once in the start year (T_START), a stated simplification; schedule() can
+still spread a path at a given rate.
 
 Approximations, stated: each cohort grows with the trajectory of its own planting year (calendar-dependent
 disturbance hazard); later rotations reuse that trajectory shifted by the rotation age.
@@ -32,7 +32,6 @@ from nbs.fair_module import run_fair_baseline, run_fair_perturbed
 from nbs.landscape import assign_species, plantable_area_m2, tree_count
 from nbs.species import SPECIES, get_species, reference_site
 
-BONN_RATE_GHA = 0.35 / 20.0     # Bonn Challenge: 350 Mha restored 2011-2030 [Gha/a]
 # managed forest: clear-cut at a rotation age by climate zone (the zone is the suffix of the forest-type key)
 ROTATION_BY_ZONE = {"boreal": 80, "gemaessigt": 60, "subtropisch": 30, "tropisch": 20}  # [a]
 STEM_SHARE = 0.7                # share of the stand's carbon that leaves as timber; the residues decay
@@ -49,7 +48,7 @@ def masks() -> dict[str, NDArray]:
     return {"alle": plant, "kuehlt": cool}
 
 
-def schedule(area_gha: float, start: int = T_START, rate_gha: float | None = BONN_RATE_GHA) -> NDArray:
+def schedule(area_gha: float, start: int = T_START, rate_gha: float | None = None) -> NDArray:
     """Share of the area planted in each year of YEARS (sums to 1): *rate_gha* a year from *start*;
     rate None plants everything in the start year."""
     f = np.zeros(N_Y)
@@ -88,7 +87,7 @@ def _cells(key: str, mask: NDArray) -> tuple[float, float, float]:
             float(plantable_area_m2()[m].sum()) / 1e13)
 
 
-def forcing(path: str, start: int = T_START, rate_gha: float | None = BONN_RATE_GHA,
+def forcing(path: str, start: int = T_START, rate_gha: float | None = None,
             release: bool = False) -> tuple[NDArray, NDArray, float]:
     """(net CO2 exchange [Gt CO2/a, < 0 = removal], albedo forcing [W/m^2], planted area [Gha]) of a path."""
     if path not in PATHS:
@@ -119,7 +118,7 @@ def forcing(path: str, start: int = T_START, rate_gha: float | None = BONN_RATE_
 
 
 @lru_cache(maxsize=None)
-def delta_t(path: str, start: int = T_START, rate_gha: float | None = BONN_RATE_GHA, release: bool = False) -> NDArray:
+def delta_t(path: str, start: int = T_START, rate_gha: float | None = None, release: bool = False) -> NDArray:
     """Global temperature change [K] of a path, one full FaIR run (SSP2-4.5 background)."""
     nee, rf, _ = forcing(path, start, rate_gha, release)
     base = run_fair_baseline("ssp245")

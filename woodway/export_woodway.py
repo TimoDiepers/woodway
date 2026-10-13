@@ -30,7 +30,6 @@ from nbs.pipeline import run_single_tree
 from nbs import albedo_grid
 from nbs.response import convolve_response, green_temperature
 from nbs.species import SPECIES, get_species, reference_site
-from nbs.tree_paths import BONN_RATE_GHA
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "woodway" / "public" / "data"
@@ -95,7 +94,7 @@ def global_paths() -> dict:
             "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst")},
             "areasGha": {k: z["flaechen_gha"][k] for k in ("alle", "kuehlt")},
             # the rules behind the two curves, for the strip's source line
-            "bonnRateMha": round(BONN_RATE_GHA * 1000, 3), "dacGrowthPct": round((GROWTH - 1) * 100, 3)}
+            "plantYear": int(T_START), "dacGrowthPct": round((GROWTH - 1) * 100, 3)}
 
 
 def main() -> None:

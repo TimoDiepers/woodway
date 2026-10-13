@@ -220,9 +220,9 @@ def test_build_table_and_global_paths_equal_the_deck_data():
 
 def test_global_strip_rule_numbers_come_from_the_model():
     from nbs.dac_optim import GROWTH
-    from nbs.tree_paths import BONN_RATE_GHA
+    from nbs.constants import T_START
 
     g, _ = _load()
     g = g["global"]
-    assert g["bonnRateMha"] == pytest.approx(BONN_RATE_GHA * 1000)
+    assert g["plantYear"] == T_START and "bonnRateMha" not in g
     assert g["dacGrowthPct"] == pytest.approx((GROWTH - 1) * 100)

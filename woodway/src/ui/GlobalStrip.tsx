@@ -38,7 +38,7 @@ export function GlobalStrip({ atlas, year }: { atlas: Atlas; year: number }) {
           <li key={c.key}><span className="mr-1 inline-block h-0.5 w-3 align-middle" style={{ background: c.color }} />{t(c.key)}</li>
         ))}
       </ul>
-      <div className="mt-1"><SourceLine>{t("strip.source", { area: num(g.areasGha.kuehlt, 2), rate: num(g.bonnRateMha, 1), growth: num(g.dacGrowthPct) })}</SourceLine></div>
+      <div className="mt-1"><SourceLine>{t("strip.source", { area: num(g.areasGha.kuehlt, 2), year: g.plantYear, growth: num(g.dacGrowthPct) })}</SourceLine></div>
     </section>
   );
 }
