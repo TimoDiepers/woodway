@@ -520,12 +520,12 @@ function ecDacTempo(title, key, yMax, yFmt, trees) {
     if (!trees) for (const x of series) x.endLabel.show = false;
     if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
       for (const x of series) x.endLabel.show = false;
-      const peak = (x, ys, pos) => { const i = ys.indexOf(Math.max(...ys));
+      const peak = (x, ys, pos, off) => { const i = ys.indexOf(Math.max(...ys));
         x.markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: x.lineStyle.color, borderColor: '#14181a', borderWidth: 2 },
-          label: { show: true, position: pos, distance: 8, color: x.lineStyle.color, fontFamily: EC.font, fontSize: 18, fontWeight: 600,
+          label: { show: true, position: pos, distance: 8, offset: off || [0, 0], color: x.lineStyle.color, fontFamily: EC.font, fontSize: 18, fontWeight: 600,
                    formatter: `Spitze ${ecNum(ys[i] / 1000, 2)} K` }, data: [{ coord: [D.jahre[i], ys[i]] }] }; };
       peak(series[0], C.opt_20[key], 'top');
-      if (k >= 1) peak(series[3], C.opt_frei[key], 'top');
+      if (k >= 1) peak(series[3], C.opt_frei[key], 'right', [2, -16]);   // in the gap between the cyan and the orange paths
       series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));
     }
     return {
@@ -1602,7 +1602,7 @@ class Deck {
     // Where the talk stands: the chapters as on the overview slide, each its icon in its own colour, the current
     // one named. Content slides carry it top right, the chapter openers top left (on their colour, inverted).
     const chapters0 = ['baeume', 'klima', 'vergleich'];
-    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial', dac: 'DAC' };
+    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial', dac: 'Optionen' };   // chapter 5: DAC and the vegan world
     const path = ch => {
       const el = document.createElement('div'); el.className = 'path'; el.setAttribute('aria-hidden', 'true');
       el.innerHTML = (ch === 'dac' ? [...chapters0, 'dac'] : chapters0).map(c =>
