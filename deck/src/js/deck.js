@@ -495,22 +495,37 @@ function ecDacSmall(title, yMax, yFmt, lines) {
 }
 const kOf = v => v ? ecNum(v / 1000, 1) : '0';   // data in mK, read in K
 /* result of the optimisation: warming above 1.5 °C, trees alone and with DAC */
-const EC_DACTEMP = ecDacSmall('Erwärmung über 1,5 °C [K]', 400, kOf, D => [
+const EC_DACTEMP_BASE = ecDacSmall('Erwärmung über 1,5 °C [K]', 400, kOf, D => [
   ['b', D.baeume_rest, '#7fbf8c', 'nur Bäume', [8, 6]], ['d', D.dac.opt_20.temp, '#ff5a4f', '+ DAC', null, true]]);
+// the two numbers of the slide named in the chart: the peak that stays, the year back at 1.5 °C
+const EC_DACTEMP = { steps: 0, option() {
+  const o = EC_DACTEMP_BASE.option(), D = window.ZEIT, d = D.dac.opt_20, t = d.temp, ip = t.indexOf(Math.max(...t));
+  o.series[1].markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: '#ff5a4f', borderColor: '#14181a', borderWidth: 2 },
+    label: { show: true, color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 },
+    data: [{ coord: [D.jahre[ip], t[ip]], label: { position: 'top', formatter: `Spitze ${D.jahre[ip]}: ${ecNum(t[ip] / 1000, 2)} K` } },
+           { coord: [d.ab, 0], label: { show: false } }] };   // the year stands large above the chart
+  return o; } };
 /* the lever: world capacity of the optimisation at faster growth limits and without one, and the warming above
    1.5 °C that follows (two charts, one above the other) */
 function ecDacTempo(title, key, yMax, yFmt, trees) {
-  return { steps: 0, option() {
+  return { steps: 1, option(k) {   // click 0: the 20 %/a case alone; click 1: the faster ones beside it
     const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const L = (id, ys, color, name, w, dash) => ({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5, lineStyle: { color, width: w || 3, type: dash || 'solid' },
       itemStyle: { color }, animationDuration: 1600,
       endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' } });
-    const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4), L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'),
-                    L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'), L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4)];
+    const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4)];
+    if (k >= 1) series.push(L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'), L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'),
+                            L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4));
     // the capacity paths all fall back towards zero by 2100: named in a legend in the right margin instead
     if (!trees) for (const x of series) x.endLabel.show = false;
     if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
       for (const x of series) x.endLabel.show = false;
+      const peak = (x, ys, pos) => { const i = ys.indexOf(Math.max(...ys));
+        x.markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: x.lineStyle.color, borderColor: '#14181a', borderWidth: 2 },
+          label: { show: true, position: pos, distance: 8, color: x.lineStyle.color, fontFamily: EC.font, fontSize: 18, fontWeight: 600,
+                   formatter: `Spitze ${ecNum(ys[i] / 1000, 2)} K` }, data: [{ coord: [D.jahre[i], ys[i]] }] }; };
+      peak(series[0], C.opt_20[key], 'top');
+      if (k >= 1) peak(series[3], C.opt_frei[key], 'top');
       series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));
     }
     return {
@@ -576,11 +591,19 @@ const EC_VEGAN = {
       A('ers', B.ersatz, '#e0903e', 'Ersatzprodukte', 'waerm', k >= 2),
       A('alb', B.wald_albedo, '#d0644a', 'Wald auf freier Fläche: Albedo', 'waerm', k >= 2),
       { id: 'net', name: 'netto', type: 'line', data: P(B.netto), showSymbol: false, z: 6,
-        lineStyle: { color: '#f2ede2', width: 3.4, opacity: k >= 3 ? 1 : 0 }, itemStyle: { color: '#f2ede2' }, animationDuration: 1200 }];
+        lineStyle: { color: '#f2ede2', width: 3.4, opacity: k >= 3 ? 1 : 0 }, itemStyle: { color: '#f2ede2' }, animationDuration: 1200,
+        endLabel: { show: k >= 3, formatter: 'netto', color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 8 } }];
+    // the two large bands named inside them, where they are widest
+    const band = (x, base, ys, year, text) => { const i = D.jahre.indexOf(year);
+      x.markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [year, base[i] - ys[i] / 2] }],
+        label: { show: true, position: 'inside', color: '#0f2430', fontFamily: EC.font, fontSize: 19, fontWeight: 600, formatter: text } }; };
+    const zero = B.ch4_tier.map(() => 0);
+    band(series[0], zero, B.ch4_tier, 2072, 'Methan der Tierhaltung');
+    if (k >= 1) band(series[1], B.ch4_tier.map(v => -v), B.n2o_vermieden, 2090, 'Lachgas');
     return {
       animationDurationUpdate: 900,
       title: { text: 'Kühlung gegenüber Very Low [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      grid: { left: 70, right: 24, top: 56, bottom: 40 },
+      grid: { left: 70, right: 84, top: 56, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
       yAxis: ecAxis({ type: 'value', min: -50, max: 300, interval: 50, axisLine: { lineStyle: { color: '#4a524d' } },
