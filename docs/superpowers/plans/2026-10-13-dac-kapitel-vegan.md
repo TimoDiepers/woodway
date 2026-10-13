@@ -30,7 +30,7 @@
 
 ## Review Focus
 
-1. **Doppelzählung Agrar-Methan:** Very Low senkt CH₄ selbst (363 → 161 Mt/a 2025→2050). Das Delta darf nie größer sein als der Tierhaltungsanteil am Very-Low-Pfad – Test in Task 5 (`test_delta_never_exceeds_share_of_scenario`).
+1. **Doppelzählung Agrar-Methan:** Very Low senkt CH₄ selbst (361 → 161 Mt/a 2022→2050). Das Delta bezieht sich auf den Agrar-Pfad von Very Low (Sektordaten des Markers), sonst auf den Anteil an der Gesamtemission; nie mehr als Very Lows CH₄ – Test in Task 5 (`test_delta_never_exceeds_share_of_scenario`).
 2. **Überlappung der Flächen:** Frei werdende Flächen dürfen nicht mit Walkers Aufforstungsflächen (R/L+R/H außerhalb der Nutzungsklassen) überlappen – Test in Task 6 (`test_freed_land_disjoint_from_reforestable`).
 3. **Lücke schließt sich ganz:** Wenn `gap_vegan` überall ≤ 0 ist, muss die Optimierung einen Null-Pfad mit Status melden statt zu scheitern – Test in Task 8 (`test_min_peak_with_closed_gap_builds_nothing`).
 4. **Kosten eines leeren Pfads und Einheiten:** `path_cost` mit Null-Pfad → 0; Einheit Bio. EUR – Test in Task 3.
@@ -303,7 +303,8 @@ git commit -m "feat(fair): run with changed emissions of any species"
 - Consumes: `run_fair_baseline`, `run_fair_emission_delta`, `_START_IDX`, `_END_IDX` (Task 4); CMIP7-Emissionsdatei `data/cmip7/fair-inputs/emissions_1750-2500.csv` (Spalten `"2022.5"` …).
 - Produces:
   - `ACKER_NETTO_FREI = 0.19` (Poore & Nemecek 2018: Ackerfläche −19 % bei veganer Ernährung, netto nach Ersatz).
-  - `livestock_shares() -> dict[str, float]` – Anteil der Tierhaltung an CH₄ und N₂O des Szenarios im Bezugsjahr (`{"CH4": s, "N2O": s}`).
+  - `livestock_shares() -> dict[str, float]` – Anteil der Tierhaltung im Bezugsjahr 2022 (`{"CH4": s, "N2O": s}`): bezogen auf den **Agrar-Pfad** von Very Low, wenn `data/vegan/vl_agrar.json` existiert, sonst auf die Gesamtemission (Rückfall).
+  - `quelle_bezug() -> str` – `"agrar"` oder `"gesamt"` (für Doku und Folien-Fußnote).
   - `emission_delta() -> dict[str, NDArray]` – negative Deltas je Jahr in `YEARS` (Mt CH₄/a, kt N₂O/a).
   - `dt_gase() -> NDArray` [K] auf `YEARS`, < 0 = kühler.
 
@@ -347,7 +348,10 @@ def main() -> None:
         return float(sel["Value"].sum())
     out = {"jahr": JAHR, "quelle": "FAOSTAT Emissions Totals (GT), World, FAO TIER 1",
            "ch4_kt": kt(CH4_ITEMS, "Emissions (CH4)"), "n2o_tier_kt": kt(N2O_ITEMS, "Emissions (N2O)"),
-           "n2o_acker_kt": kt(N2O_ACKER, "Emissions (N2O)")}
+           "n2o_acker_kt": kt(N2O_ACKER, "Emissions (N2O)"),
+           # farm totals, the denominator when Very Low's farm path is known (Step 1b decides the items)
+           "ch4_agrar_kt": kt(CH4_ITEMS + ("Rice Cultivation",), "Emissions (CH4)"),
+           "n2o_agrar_kt": kt(N2O_ITEMS + N2O_ACKER, "Emissions (N2O)")}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=1))
     print(out)
@@ -370,6 +374,23 @@ Expected: CH₄ der Tierhaltung ≈ 110–130 Mt (also 110 000–130 000 kt), N�
 
 `data/vegan/QUELLE.md`: Quelle, Download-URL, Datum, Filter (World, 2022, FAO TIER 1, Items wie oben), Poore & Nemecek 2018 (doi:10.1126/science.aaq0216) für 19 %.
 
+- [ ] **Step 1b: Agrar-Pfad von Very Low suchen**
+
+Very Low ist der Marker REMIND-MAgPIE 3.5-4.11, Szenario „SSP1 - Very Low Emissions“. Das Zenodo-Archiv (20713982) hat nur Gesamtsummen. Die Quellen in dieser Reihenfolge versuchen, bei der ersten erfolgreichen aufhören:
+
+1. IIASA-Datenbank der ScenarioMIP-CMIP7-Szenarien über `pyam` (`pyam.iiasa.Connection().valid_connections` listen; passende Datenbank wählen), Variablen `Emissions|CH4|AFOLU|Agriculture` und `Emissions|N2O|AFOLU|Agriculture` (oder die nächstliegenden Namen, `conn.variables()` durchsuchen), Modell und Szenario wie oben, Region `World`.
+2. input4MIPs, anthropogene CH₄/N₂O-Emissionen des VL-Markers nach CEDS-Sektoren (Sektor Landwirtschaft `AGR`), global summiert (ESGF, Quelle `IAMC-REMIND-MAgPIE-…`).
+3. Rückfall: keine Datei schreiben; `nbs.vegan` rechnet dann mit dem Anteil an der Gesamtemission.
+
+Bei Erfolg `data/vegan/vl_agrar.json` schreiben (Skript `scripts/prepare_vegan_data.py`, Funktion `vl_agrar()`):
+
+```json
+{"quelle": "<Datenbank/Datei, Abrufdatum>", "modell": "REMIND-MAgPIE 3.5-4.11", "szenario": "SSP1 - Very Low Emissions",
+ "jahre": [2020, 2025, ...], "ch4_mt": [...], "n2o_kt": [...]}
+```
+
+Prüfen: `ch4_mt` 2020/2025 im Bereich 130–170 Mt (Landwirtschaft inkl. Reis); wenn nicht, Variable/Einheit prüfen. Ergebnis (welche Quelle, welche Werte) in `data/vegan/QUELLE.md` notieren. Den FAOSTAT-Anteil zusätzlich um das Reis-CH₄ ergänzen: in `prepare_vegan_data.py` ein Feld `ch4_agrar_kt` mit den Items `Enteric Fermentation`, `Manure Management`, `Rice Cultivation`, `Burning - Crop residues`, `Savanna fires` nur soweit sie im Agrar-Sektor des IAM liegen – mindestens die ersten drei; welche, in QUELLE.md festhalten.
+
 - [ ] **Step 2: Failing tests**
 
 `tests/test_vegan.py`:
@@ -384,22 +405,26 @@ from nbs.constants import YEARS
 
 
 def test_livestock_shares_are_plausible():
-    from nbs.vegan import livestock_shares
+    from nbs.vegan import livestock_shares, quelle_bezug
     s = livestock_shares()
-    assert 0.25 < s["CH4"] < 0.40     # livestock: about a third of anthropogenic methane
-    assert 0.05 < s["N2O"] < 0.35
+    if quelle_bezug() == "agrar":
+        assert 0.6 < s["CH4"] < 0.9   # livestock: most of farm methane (rest: rice, burning)
+    else:
+        assert 0.25 < s["CH4"] < 0.40  # livestock: about a third of all anthropogenic methane
+    assert 0.05 < s["N2O"] < 0.8
 
 
 def test_delta_never_exceeds_share_of_scenario():
     import pandas as pd
-    from nbs.vegan import emission_delta, livestock_shares
+    from nbs.vegan import emission_delta, livestock_shares, quelle_bezug
     em = pd.read_csv("data/cmip7/fair-inputs/emissions_1750-2500.csv")
     vl = em[(em.scenario == "VL") & (em.variable == "CH4")]
     ch4 = np.array([float(vl[f"{y}.5"].iloc[0]) for y in YEARS])
     d = emission_delta()["CH4"]
     assert d.shape == (len(YEARS),)
     assert np.all(d <= 0)
-    assert np.all(-d <= livestock_shares()["CH4"] * ch4 + 1e-9)
+    assert np.all(-d <= ch4 + 1e-9)              # never more than all of Very Low's methane
+    assert np.all(-d <= livestock_shares()["CH4"] * ch4 + 1e-9) or quelle_bezug() == "agrar"  # fallback: share of total
 
 
 def test_vegan_gases_cool_fast():
@@ -423,9 +448,10 @@ Expected: FAIL (`ModuleNotFoundError: nbs.vegan`).
 Two parts, as on the slides:
 
 - gases: methane and nitrous oxide of livestock disappear. Taken as the livestock share of the CMIP7 Very Low
-  emissions, so that what Very Low already cuts in agriculture is not counted twice; the share is that of
-  FAOSTAT 2022 (world, livestock) in Very Low's 2022 value, held constant (Very Low cuts energy methane faster
-  than farm methane, so the true share rises -- constant is the cautious choice). N2O of cropland
+  emissions, so that what Very Low already cuts in agriculture is not counted twice: livestock's share of farm
+  emissions (FAOSTAT 2022) applied to Very Low's farm path (data/vegan/vl_agrar.json, from the marker's
+  sectoral data). Without that file the share of Very Low's total is used, held constant -- cautious, since
+  Very Low cuts energy methane faster than farm methane. N2O of cropland
   (synthetic fertiliser, crop residues) falls by the net cropland a vegan diet frees (Poore & Nemecek 2018: -19 %).
 - land: grazing land and the freed cropland grow forest (see dt_flaeche), the larger and more uncertain part.
 """
@@ -456,20 +482,38 @@ def _vl(specie: str) -> pd.Series:
     return row
 
 
+VL_AGRAR = ROOT / "data/vegan/vl_agrar.json"   # Very Low's farm emissions by year, if found (QUELLE.md)
+
+
+def quelle_bezug() -> str:
+    """"agrar": the shares refer to Very Low's farm path; "gesamt": to its total (fallback, cautious)."""
+    return "agrar" if VL_AGRAR.exists() else "gesamt"
+
+
+def _bezug_pfad(specie: str) -> NDArray:
+    """What the livestock share is taken of, per year of YEARS: Very Low's farm path, else its total."""
+    if quelle_bezug() == "agrar":
+        a = json.loads(VL_AGRAR.read_text())
+        return np.interp(YEARS, a["jahre"], a["ch4_mt" if specie == "CH4" else "n2o_kt"])
+    return np.array([float(_vl(specie)[f"{y}.5"]) for y in YEARS])
+
+
 @lru_cache(maxsize=1)
 def livestock_shares() -> dict[str, float]:
-    """Livestock share of Very Low's CH4 and N2O in FAOSTAT's year."""
+    """Livestock share in FAOSTAT's year: of farm CH4/N2O (FAOSTAT's own farm total) when Very Low's farm path is
+    known, else of Very Low's total CH4/N2O. Held constant over time."""
     fao = json.loads(FAO.read_text())
+    n2o_tier = fao["n2o_tier_kt"] + ACKER_NETTO_FREI * fao["n2o_acker_kt"]
+    if quelle_bezug() == "agrar":
+        return {"CH4": fao["ch4_kt"] / fao["ch4_agrar_kt"], "N2O": n2o_tier / fao["n2o_agrar_kt"]}
     y = f"{fao['jahr']}.5"
-    ch4 = fao["ch4_kt"] / 1e3 / float(_vl("CH4")[y])                    # kt -> Mt CH4
-    n2o = (fao["n2o_tier_kt"] + ACKER_NETTO_FREI * fao["n2o_acker_kt"]) / float(_vl("N2O")[y])  # kt N2O
-    return {"CH4": ch4, "N2O": n2o}
+    return {"CH4": fao["ch4_kt"] / 1e3 / float(_vl("CH4")[y]), "N2O": n2o_tier / float(_vl("N2O")[y])}
 
 
 def emission_delta() -> dict[str, NDArray]:
     """Change of emissions per year of YEARS (negative): CH4 [Mt/a], N2O [kt/a]."""
     s = livestock_shares()
-    return {sp: -s[sp] * np.array([float(_vl(sp)[f"{y}.5"]) for y in YEARS]) for sp in ("CH4", "N2O")}
+    return {sp: -s[sp] * _bezug_pfad(sp) for sp in ("CH4", "N2O")}
 
 
 @lru_cache(maxsize=1)
@@ -501,6 +545,7 @@ Ivanovich et al. 2023 (Nat. Clim. Change 13, 297): Ernährung trägt bis 2100 fa
 
 ```bash
 git add scripts/prepare_vegan_data.py data/vegan/faostat_tierhaltung.json data/vegan/QUELLE.md src/nbs/vegan.py tests/test_vegan.py
+git add data/vegan/vl_agrar.json 2>/dev/null || true   # only if Step 1b found the sectoral data
 git commit -m "feat(vegan): methane and nitrous oxide of a vegan world on Very Low"
 ```
 
