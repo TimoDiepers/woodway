@@ -353,3 +353,11 @@ def test_comparison_values_have_sources():
     assert 15 < EU27_BIP_BIO_EUR < 21
     assert 0.3 < FOSSIL_SUBV_BIO_EUR < 1.5
     assert set(VERGLEICH_QUELLEN) == {"eu27_bip", "fossil_subv"}
+
+
+def test_min_peak_with_closed_gap_builds_nothing():
+    from nbs.dac_optim import solve_min_peak
+    r = solve_min_peak(np.zeros(len(YEARS)), danach="frueh")
+    assert r["spitze_k"] == pytest.approx(0.0, abs=1e-9)
+    assert r["kapazitaet_gt"] == pytest.approx(0.0, abs=1e-6)
+    assert r["ab_jahr"] == int(YEARS[0])
