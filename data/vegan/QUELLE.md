@@ -15,6 +15,16 @@
   CH₄ = Enteric Fermentation + Manure Management + Rice Cultivation → 138,9 Mt (ohne Verbrennung von
   Ernteresten und Savannenfeuer, die im IAM unter `Agricultural Waste Burning` bzw. `Land|Fires` liegen);
   N₂O = alle fünf Items oben → 7,09 Mt.
+- Aufteilung nach Ursache (`vegan.emission_parts`): Brutto fällt das Acker-N₂O des Futteranbaus weg, 38 % des
+  Ackers (Poore & Nemecek 2018, Tabelle S10, über Our World in Data, https://ourworldindata.org/global-land-for-agriculture);
+  die Ersatzprodukte brauchen davon 19 Prozentpunkte wieder, netto bleiben die 19 %.
+- CO₂ bis zum Hoftor (Element „Emissions (CO2)“): On-farm energy use, Fertilizers Manufacturing, Pesticides
+  Manufacturing → 1,48 Gt; davon Futter 38 %, Ersatzprodukte 19 %. Folgt dem fossilen CO₂ von Very Low (`CO2 FFI`).
+- CO₂ aus Entwaldung: Net Forest conversion → 2,81 Gt; davon Rindfleisch 41 % (Singh & Persson 2026, globale
+  Entwaldung durch Landwirtschaft 2001–2023, über Our World in Data,
+  https://ourworldindata.org/what-has-driven-deforestation-in-the-21st-century). Folgt dem positiven Teil des
+  Landnutzungs-CO₂ von Very Low (`CO2 AFOLU`), das ab etwa 2035 zur Senke wird: danach keine vermiedene Entwaldung mehr.
+- CO₂ nach dem Hoftor (Verarbeitung, Transport, Handel) gilt für die Ersatzprodukte als gleich.
 
 ## Agrar-Pfad von Very Low – `vl_agrar.json`
 
