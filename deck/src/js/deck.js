@@ -502,6 +502,13 @@ function ecDacTempo(title, key, yMax, yFmt, trees) {
       endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' } });
     const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4), L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'),
                     L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'), L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4)];
+    const top = series[3];   // without a limit the capacity runs off the chart (56 Gt/a for 20 years): named at the top edge
+    if (!trees && Math.max(...C.opt_frei[key]) > yMax) {
+      top.endLabel.show = false;
+      top.markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2046, yMax] }],
+        label: { show: true, position: 'right', distance: 8, color: '#3fd0b0', fontFamily: EC.font, fontSize: 18, fontWeight: 600,
+                 formatter: `ohne Grenze: ${ecNum(Math.max(...C.opt_frei[key]), 0)} Gt/a bis ${D.jahre[C.opt_frei[key].findIndex(v => v < 1) - 1]}` } };
+    }
     if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
       for (const x of series) x.endLabel.show = false;
       series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));

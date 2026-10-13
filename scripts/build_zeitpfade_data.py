@@ -4,8 +4,8 @@ Chapter 3: three planting paths at the Bonn Challenge rate (every reforestable c
 cooling cells as managed forest with the timber bound; the timber released as the dashed comparison), each one
 full FaIR run, and the warming of Very Low above 1.5 deg C.
 Chapter 4: with the managed forest as the trees' contribution, DAC that keeps the highest warming above 1.5 deg C
-as low as possible (then 1.5 deg C by 2100 with the least DAC), at growth limits of 10, 20 and 30 %/a and without
-any limit; and the simple case (capacity spread by storage) against the optimised one.
+as low as possible (then 1.5 deg C in 2100 with the least capacity; plants run 20 years), at growth limits of 10,
+20 and 30 %/a and without any limit; what an earlier return to 1.5 deg C costs in capacity; and the simple case (capacity spread by storage) against the optimised one.
 
     uv run python scripts/build_zeitpfade_data.py
 """
@@ -37,7 +37,7 @@ def main() -> None:
     paths["forst_frei"] = _mk(-delta_t("forst", release=True))
     areas = {p: round(forcing(p)[2], 3) for p in ("alle", "kuehlt", "forst")}
     gap = need + delta_t("forst")
-    # how fast DAC may grow: the least highest warming above 1.5 deg C, then at that peak the least DAC for
+    # how fast DAC may grow: the least highest warming above 1.5 deg C, then at that peak the least capacity for
     # 1.5 deg C by 2100; growth limits of 10, 20, 30 %/a and none at all
     cases = {"ohne": {"spitze": round(1000 * float(gap.max()), 1)}}
     for key, kw in (("g20", {}), ("g30", {"growth": 1.3}), ("g10", {"growth": 1.1}),
@@ -58,14 +58,20 @@ def main() -> None:
     # (30, 50 %/a, no limit) and a later start (solve: with the growth limit the peak stage changes nothing)
     def _case(r):
         x = np.array(r["x"]); over = 1000 * (gap - np.array(r["kuehlung_k"]))
-        return {"kap": round(float(r["kapazitaet_gt"]), 2), "w": [round(float(v), 3) for v in x.sum(axis=0)],
+        return {"kap": round(float(r["kapazitaet_gt"]), 2), "ab": r.get("ab_jahr"), "w": [round(float(v), 3) for v in x.sum(axis=0)],
                 "temp": [round(float(v), 1) for v in np.maximum(over, 0)], "spitze": round(float(over.max()), 1),
                 "laender": r["laender"], "x_2100": [round(float(v), 4) for v in x[:, -1]]}
     dac = {"opt_20": _case(solve_min_peak(gap)),
            "opt_30": _case(solve_min_peak(gap, growth=1.3)), "opt_50": _case(solve_min_peak(gap, growth=1.5)),
            "opt_frei": _case(solve_min_peak(gap, growth=1e6, limit_start=False)),
            "opt_2035": _case(solve(gap_k=gap, start_jahr=2035)), "opt_2040": _case(solve(gap_k=gap, start_jahr=2040))}
-    print({k: (v["kap"], v["spitze"]) for k, v in dac.items()})
+    # what speed costs: the same lowest peak, back to 1.5 deg C from an earlier year on (and staying there), each
+    # with the least capacity; and the earliest year at all
+    dac["ab_jahr"] = {str(z): _case(solve_min_peak(gap, ziel_jahr=z)) for z in (2085, 2090, 2095)}
+    dac["ab_jahr"]["2100"] = dac["opt_20"]
+    dac["fruehestens"] = _case(solve_min_peak(gap, danach="frueh"))
+    print({k: (v["kap"], v["spitze"], v["ab"]) for k, v in dac.items() if "kap" in v},
+          {k: v["kap"] for k, v in dac["ab_jahr"].items()})
     # backup: the cost-optimal path (Okosun et al. 2026 costs): cost cases, growth limits, an earlier target year
     def _cost(r):
         return {k: (round(v, 2) if isinstance(v, float) else v) for k, v in r.items()}

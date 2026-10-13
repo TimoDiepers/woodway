@@ -146,8 +146,8 @@ function dacFilm(sec) {
 }
 window.DECK_DATA.then(() => document.querySelectorAll('section[data-dacfilm]').forEach(dacFilm));
 
-/* A still DAC map (result of the optimisation): the film's dark world, hexagons on 2° blocks, each the capacity of
-   2100 in that block. <div class="dmap" data-path="<path>" data-scale="<paths>">: the colour scale runs to the
+/* A still DAC map (result of the optimisation): the film's dark world, hexagons on 2° blocks, each the CO₂ removed
+   2026-2100 in that block (plants run 20 years, so the capacity of one year shows only where the last ones stand). <div class="dmap" data-path="<path>" data-scale="<paths>">: the colour scale runs to the
    largest block of all paths in data-scale (maps side by side compare). */
 function dacMap(host) {
   const D = window.DACFILM, p = D && D.paths[host.dataset.path];
@@ -162,7 +162,8 @@ function dacMap(host) {
   const blockOf = (x, y) => Math.floor(x / (2 * PX)) + ':' + Math.floor(y / (2 * PX));
   const members = new Map();
   XY.forEach(([x, y], i) => { const k = blockOf(x, y); if (!members.has(k)) members.set(k, []); members.get(k).push(i); });
-  const cellv = q => D.cells.map((_, i) => q.cc[D.owner[i]][NY - 1] / D.n[D.owner[i]]);
+  const sum = a => a.reduce((s, v) => s + v, 0);
+  const cellv = q => D.cells.map((_, i) => sum(q.cc[D.owner[i]]) / D.n[D.owner[i]]);
   const HEX = [];
   for (let j = 0, py = 0; py <= H + R; j++, py = j * 1.5 * R)
     for (let px = j % 2 ? HW / 2 : 0; px <= W + HW; px += HW) { const m = members.get(blockOf(px, py)); if (m) HEX.push({ x: px, y: py, m }); }
@@ -180,8 +181,8 @@ function dacMap(host) {
   });
   const leg = host.closest('.slide').querySelector('.dleg');   // one legend per slide, the scale is shared
   if (leg && !leg.childElementCount) {
-    const fmt = v => v.toLocaleString('de-DE', { maximumFractionDigits: 2 });
-    leg.innerHTML = `<span>Kapazität je 2°-Block 2100</span><i style="background:linear-gradient(90deg,${[0, .25, .5, .75, 1].map(f => ramp(Math.sqrt(f))).join(',')})"></i><span>0</span><span>${fmt(vmax)} Gt/a</span>`;
+    const fmt = v => v.toLocaleString('de-DE', { maximumFractionDigits: 1 });
+    leg.innerHTML = `<span>Entnahme je 2°-Block 2026–2100</span><i style="background:linear-gradient(90deg,${[0, .25, .5, .75, 1].map(f => ramp(Math.sqrt(f))).join(',')})"></i><span>0</span><span>${fmt(vmax)} Gt</span>`;
   }
 }
 window.DECK_DATA.then(() => document.querySelectorAll('.dmap').forEach(dacMap));

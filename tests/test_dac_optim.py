@@ -184,14 +184,39 @@ def test_mini_keep_running_never_shuts_down():
     gap = np.zeros(10)
     gap[-1] = 9e-3
     ok, x = build_and_solve(eta[:1], k, gap, storage=np.array([50.0]), x_from=9, growth=10.0, start_2030=None,
-                            objective="min_peak", keep_running=True)
+                            objective="min_peak", keep_running=True, life=None)
     assert ok
     assert np.all(np.diff(x[0]) >= -1e-9)
 
 
-def test_main_case_plants_keep_running(main_case):
+def test_builds_matrix_rebuilds_after_the_lifetime():
+    from nbs.dac_optim import builds_matrix
+
+    x = np.array([1.0, 2, 2, 2, 2, 0])
+    assert builds_matrix(6, 3) @ x == pytest.approx([1, 1, 0, 1, 1, -2])   # shutting down at 5 would need b < 0
+    assert builds_matrix(6, None) @ x == pytest.approx(np.r_[x[0], np.diff(x)])
+
+
+def test_mini_plants_run_their_lifetime_then_may_retire():
+    # removal needed only in years 0-2 (cooling counted per year): with a 3-year life plants may stop after year 2,
+    # with a 2-year life a plant built in year 0 must not run into year 2 alone
+    k = -1e-3 * np.eye(10)
+    eta = np.array([[1.0] * 10])
+    gap = np.r_[np.ones(3), np.zeros(7)] * 1e-3
+    ok, x = build_and_solve(eta, k, gap, storage=np.array([50.0]), x_from=0, growth=10.0, start_2030=None,
+                            objective="min_total", keep_running=True, life=3)
+    assert ok
+    assert x[0] == pytest.approx([1, 1, 1, 0, 0, 0, 0, 0, 0, 0], abs=1e-7)
+    ok, x = build_and_solve(eta, k, gap, storage=np.array([50.0]), x_from=0, growth=10.0, start_2030=None,
+                            objective="min_total", keep_running=True, life=None)
+    assert x[0] == pytest.approx(np.ones(10), abs=1e-7)                 # never retiring: runs to the end
+
+
+def test_main_case_plants_run_their_lifetime(main_case):
+    from nbs.dac_optim import builds_matrix
+
     x = np.array(main_case["x"])
-    assert np.all(np.diff(x, axis=1) >= -1e-7)
+    assert np.all(builds_matrix(x.shape[1]) @ x.T >= -1e-7)
 
 
 def test_pathway_changes_eta():
@@ -251,7 +276,6 @@ def test_co2_case_reaches_target(co2_case):
     net = (np.array(r["x"]) * np.array(r["eta"])).sum()
     assert net == pytest.approx(co2_target_gt(), rel=1e-4)
     assert r["co2_ziel_gt"] == pytest.approx(co2_target_gt())
-    assert np.all(np.diff(np.array(r["x"]), axis=1) >= -1e-7)
 
 
 def test_slow_growth_co2_target_approaches():
@@ -283,3 +307,20 @@ def test_min_peak_never_raises_the_peak_and_more_growth_lowers_it():
     assert abs(rest.max() - slow["spitze_k"]) < 1e-6                 # the reported peak is the path's peak
     assert slow["spitze_k"] <= gap.max() + 1e-9
     assert free["spitze_k"] < slow["spitze_k"] - 0.05                 # without a growth limit far lower
+
+
+def test_min_peak_then_earliest_stays_below_from_its_year():
+    from nbs.dac_optim import solve_min_peak
+    from nbs.tree_paths import delta_t
+    from nbs.vergleich_figures import overshoot_series
+
+    gap = np.array(overshoot_series()["noetig_k"]) + delta_t("forst")   # the deck's gap: after the trees
+    r = solve_min_peak(gap, danach="frueh")
+    assert r["status"] == "spitze_dann_frueh"
+    over = gap - np.array(r["kuehlung_k"])
+    i = r["jahre"].index(r["ab_jahr"])
+    assert np.all(over[i:] <= 1e-7)
+    assert over[i - 1] > 0                                              # not below a year earlier
+    late = solve_min_peak(gap)                                          # 1.5 deg C only by 2100: less capacity
+    assert late["status"] == "spitze_und_ziel" and late["ab_jahr"] == 2100
+    assert late["kapazitaet_gt"] < r["kapazitaet_gt"]

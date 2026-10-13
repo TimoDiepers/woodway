@@ -1,6 +1,6 @@
 # DAC-Modell und Vergleich mit Aufforstung
 
-Stand: 2026-10-06
+Stand: 2026-10-13
 
 - **Code:** `src/nbs/dac_climate.py`, `src/nbs/dac.py`, `src/nbs/dac_compare.py`, `src/nbs/dac_figures.py`.
 - **LCA-Vorberechnung:** `scripts/dac_lca_precompute.py`, läuft in einer Brightway-Umgebung.
@@ -136,7 +136,7 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
 - **Nebenbedingungen:**
   - **Speicher:** Gidden et al. 2025, prudent limit je Land (Welt 1 460 Gt; Deutschland 1,3, Norwegen 6,9, UK 8,9, Russland 244, USA 141 Gt). Kein Transport über Grenzen. Länder ohne Gitterzelle (z. B. Kaspisches Meer, 14,9 Gt) fallen heraus.
   - **Wachstum:** 8,8 Mt/a in 2030 (geplante Kapazität), danach ≤ +20 %/a (Wind-Analogie), beides Zurbriggen et al. 2026.
-  - **Anlagen laufen weiter:** Die Entnahme eines Landes sinkt nicht mehr, sobald dort gebaut ist. Ohne diese Bedingung legt das LP nicht eindeutig fest, welches Land in welchem Jahr entnimmt; die Regionen sprangen hin und her.
+  - **Lebensdauer 20 Jahre (seit 2026-10-13):** Jede Anlage läuft 20 Jahre ab ihrem Baujahr, danach wird sie ersetzt oder stillgelegt. Im LP: Zubau b = R·x ≥ 0 je Land (`builds_matrix`, b[t] = x[t] − x[t−1] + b[t−20]); vorher galt „Anlagen laufen bis 2100“ (x nie fallend). Die Bedingung legt zugleich fest, welches Land wann entnimmt, sonst sprängen die Regionen hin und her. Die Emissionen je Tonne (Bau eingeschlossen) zählen weiter im Jahr der Entnahme.
 - **Klima:** FaIR-Kernel derselben Kette wie beim Baum (1 t marginal, linear auf Gt skaliert; 1 Gt entnommen 2026 → −0,34 mK in 2100).
   - Gegenprobe mit vollem FaIR auf derselben Jahresachse (FaIR-Zeitgrenze j+1 = LP-Jahr j): 2098 kühlt der Pfad um 7,7 % stärker als im LP gerechnet. Die Linearisierung ist also konservativ.
   - Eine frühere Fassung verglich die Achsen um ein Jahr versetzt und meldete 4,7 %.
@@ -164,6 +164,25 @@ Code: `src/nbs/dac_storage.py`, `src/nbs/dac_optim.py`, `scripts/fetch_storage_g
   - Median statt bestes Dezil: 6,9 Gt/a.
 - **Einordnung:** 6,9 Gt/a liegen über den vorsichtigen Schätzungen (3–4 Gt/a, Chiquier et al. 2025) und im Bereich der optimistischen Modelle. Mit rund 1,5 MWh/t braucht das etwa 10 000 TWh Strom, ein Drittel der heutigen Weltstromerzeugung.
 - **Nicht enthalten:** Kosten, Strom- und Wasserverfügbarkeit, Injektionsraten je Becken, Anlagenlebensdauer, Basalt-Mineralisierung.
+
+### Deck-Fassung (Stand 2026-10-13): niedrigste Spitze, dann 1,5 °C
+
+Die Folien nutzen `solve_min_peak` (`scripts/build_zeitpfade_data.py`, `scripts/build_dacfilm_data.py`), Lücke nach den Bäumen als Forst:
+
+1. Niedrigste Spitze der Erwärmung über 1,5 °C.
+2. Bei dieser Spitze ab dem Zieljahr bis 2100 höchstens 1,5 °C, mit möglichst wenig Kapazität (größte Jahresentnahme weltweit).
+3. Bei dieser Kapazität möglichst wenig Entnahme insgesamt. (Bis 2026-10-12 fehlte Stufe 2; die Kapazität war dann nicht eindeutig, 6,3 statt 6,6 Gt/a.)
+
+| | Kapazität | Spitze |
+|---|---|---|
+| ≤ 20 %/a, 1,5 °C 2100 | 6,6 Gt/a ab 2067 | 0,32 K |
+| ≤ 30 %/a | 5,2 Gt/a | 0,32 K |
+| ≤ 50 %/a | 8,7 Gt/a, bis 2100 wieder stillgelegt | 0,31 K |
+| ohne Grenze | 56 Gt/a 2026–2045, dann nichts | 0,05 K |
+
+- **Was Tempo kostet** (≤ 20 %/a, gleiche Spitze, 1,5 °C ab …): 2100: 6,6 Gt/a (262 Gt); 2095: 9,6 (357 Gt); 2090: 16,7 (534 Gt); 2085: 33 (763 Gt); frühestens 2083: 54 Gt/a, 1 158 Gt, rund 80 % der sicheren Speicher, 2100 dann 0,3 K unter 1,5 °C. Deshalb bleibt 2100 das Zieljahr des Hauptfalls.
+- **Wo:** Entnahme 2026–2100: USA 54 %, Algerien 17 %, Libyen 16 %, Ägypten 6 %. Die Kapazität im Jahr 2100 (USA 76 %, Italien 14 %, Spanien 6 %) zeigt nur, wo die zuletzt ersetzten Anlagen stehen; die Karte zeigt deshalb die Entnahme.
+- **Kosten** (Okosun et al. 2026, Median): 52 Bio. €, 212 €/t; kostenoptimal spät und kurz, bis 12 Gt/a in den 2070ern, vor 2095 stillgelegt.
 
 ## Quellen
 
