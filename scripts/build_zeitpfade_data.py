@@ -75,7 +75,7 @@ def main() -> None:
     # what speed costs: the same lowest peak, back to 1.5 deg C from an earlier year on (and staying there), each
     # with the least capacity; and the earliest year at all
     dac["ab_jahr"] = {str(z): _case(solve_min_peak(gap, ziel_jahr=z)) for z in (2085, 2090, 2095)}
-    dac["ab_jahr"]["2100"] = dac["opt_20"]
+    dac["ab_jahr"]["2100"] = _case(solve_min_peak(gap))   # 1.5 deg C only by 2100; opt_20 now returns early
     dac["fruehestens"] = _case(solve_min_peak(gap, danach="frueh"))
     print({k: (v["kap"], v["spitze"], v["ab"]) for k, v in dac.items() if "kap" in v},
           {k: v["kap"] for k, v in dac["ab_jahr"].items()})
