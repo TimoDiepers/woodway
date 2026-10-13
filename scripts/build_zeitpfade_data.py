@@ -21,7 +21,7 @@ from nbs.constants import YEARS
 from nbs import vegan
 from nbs.dac_optim import (COST_CASES, EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, VERGLEICH_QUELLEN, path_cost, solve,
                            solve_cost, solve_min_peak, solve_naive)
-from nbs.tree_paths import delta_t, forcing
+from nbs.tree_paths import delta_t, delta_t_parts, forcing
 from nbs.vergleich_figures import overshoot_series
 
 REPO = Path(__file__).resolve().parents[1]
@@ -40,6 +40,9 @@ def main() -> None:
     need = np.array(overshoot_series()["noetig_k"])
     paths = {p: _mk(-delta_t(p)) for p in ("alle", "kuehlt", "forst")}
     paths["forst_frei"] = _mk(-delta_t("forst", release=True))
+    # the same paths by cause (cooling > 0): CO2 uptake of the standing trees, CO2 released at felling, albedo
+    teile = {p: {k: _mk(-v) for k, v in delta_t_parts(p).items()} for p in ("alle", "kuehlt", "forst")}
+    teile["forst_frei"] = {k: _mk(-v) for k, v in delta_t_parts("forst", release=True).items()}
     areas = {p: round(forcing(p)[2], 3) for p in ("alle", "kuehlt", "forst")}
     gap = need + delta_t("forst")
     # how fast DAC may grow: the least highest warming above 1.5 deg C, then at that peak the least capacity for
@@ -100,13 +103,17 @@ def main() -> None:
     vcase = _case(solve_min_peak(gap_v, **frueh), gap_v)
     wv = np.array(vcase["w"])
     vk = {k: _rk(path_cost(wv, c)) for k, c in COST_CASES.items()}
+    over = np.where(gap_v > 1e-9)[0]   # without any DAC: the vegan world's own peak and return below 1.5 deg C
+    ohne_dac = {"spitze": round(float(gap_v.max()) * 1e3, 1),
+                "ab": int(YEARS[over[-1] + 1]) if len(over) and over[-1] + 1 < len(YEARS) else (None if len(over) else int(YEARS[0]))}
     veg = {"dt_gase": _mk(dg), "dt_flaeche": _mk(df), **{k: round(v, 3) for k, v in vegan.flaeche_info().items()},
-           "gap": _mk(np.maximum(gap_v, 0.0)), "opt_20": vcase, "kosten": vk,
+           "gap": _mk(np.maximum(gap_v, 0.0)), "opt_20": vcase, "kosten": vk, "ohne_dac": ohne_dac,
+           "beitraege": {k: _mk(v) for k, v in vegan.contributions().items()},
            "ersparnis": {"kap_gt": round(dac["opt_20"]["kap"] - vcase["kap"], 2),
                          "brutto_gt": round(float(w20.sum() - wv.sum()), 1),
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
-    print("vegan", veg["ersparnis"], vegan.flaeche_info())
-    out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths,
+    print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())
+    out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile,
            "flaechen_gha": areas, "tempo": cases, "ort": ort, "dac": dac, "kosten": kosten,
            "kosten_pfad": kosten_pfad, "vegan": veg}
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")

@@ -90,6 +90,14 @@ def _cells(key: str, mask: NDArray) -> tuple[float, float, float]:
 def forcing(path: str, start: int = T_START, rate_gha: float | None = None,
             release: bool = False) -> tuple[NDArray, NDArray, float]:
     """(net CO2 exchange [Gt CO2/a, < 0 = removal], albedo forcing [W/m^2], planted area [Gha]) of a path."""
+    up, loss, rf, area = forcing_split(path, start, rate_gha, release)
+    return up + loss, rf, area
+
+
+def forcing_split(path: str, start: int = T_START, rate_gha: float | None = None,
+                  release: bool = False) -> tuple[NDArray, NDArray, NDArray, float]:
+    """forcing with the CO2 exchange split: (uptake of the standing trees [Gt CO2/a, < 0], release at felling
+    [Gt CO2/a, >= 0], albedo forcing [W/m^2], planted area [Gha])."""
     if path not in PATHS:
         raise ValueError(f"unknown path {path!r}")
     mask = masks()["alle" if path == "alle" else "kuehlt"]
@@ -97,7 +105,7 @@ def forcing(path: str, start: int = T_START, rate_gha: float | None = None,
     sums = {k: v for k, v in sums.items() if v[2] > 0}
     area = sum(v[2] for v in sums.values())
     f = schedule(area, start, rate_gha)
-    nee, rf = np.zeros(N_Y), np.zeros(N_Y)
+    nee, loss, rf = np.zeros(N_Y), np.zeros(N_Y), np.zeros(N_Y)
     for key, (n_sum, np_sum, _) in sums.items():
         sp = get_species(key)
         rotation = ROTATION_BY_ZONE[key.split("_", 1)[1]] if path == "forst" else N_Y
@@ -113,8 +121,8 @@ def forcing(path: str, start: int = T_START, rate_gha: float | None = None,
                 if span.stop < N_Y:
                     # felled: the residues go back to the air, the timber too only if release
                     share = 1.0 if release else 1.0 - STEM_SHARE
-                    nee[span.stop] += share * M_CO2_PER_C * st[src.stop - 1] * n_sum * w / 1e12
-    return nee, rf, area
+                    loss[span.stop] += share * M_CO2_PER_C * st[src.stop - 1] * n_sum * w / 1e12
+    return nee, loss, rf, area
 
 
 def _site_factor(keys: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
@@ -180,3 +188,19 @@ def delta_t(path: str, start: int = T_START, rate_gha: float | None = None, rele
     out = np.append(pert - base, (pert - base)[-1])[:N_Y]
     out.setflags(write=False)
     return out
+
+
+@lru_cache(maxsize=None)
+def delta_t_parts(path: str, start: int = T_START, release: bool = False) -> dict[str, NDArray]:
+    """delta_t of a path by cause, each its own FaIR run: CO2 uptake of the standing trees, CO2 released at
+    felling (residues, the timber too if *release*), albedo. They add up to delta_t only nearly (FaIR)."""
+    up, loss, rf, _ = forcing_split(path, start, None, release)
+    base = run_fair_baseline("ssp245")
+    z = np.zeros(len(base))
+
+    def run(nee, f):
+        d = run_fair_perturbed(nee[: len(base)], f[: len(base)], "ssp245") - base
+        out = np.append(d, d[-1])[:N_Y]
+        out.setflags(write=False)
+        return out
+    return {"co2_aufnahme": run(up, z), "co2_verlust": run(loss, z) if loss.any() else np.zeros(N_Y), "albedo": run(z, rf)}

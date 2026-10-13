@@ -58,3 +58,17 @@ def test_only_cooling_cells_count():
     cool = cooling_cells(a, carbon_gain_mgc_ha())
     assert cool.sum() < (a > 0).sum()          # some reforestable cells warm
     assert not np.any(cool & (a <= 0))
+
+
+def test_parts_split_uptake_loss_and_albedo():
+    # uptake cools, the release at felling and the albedo warm; the parts add up to the path's own run
+    from nbs.tree_paths import delta_t, delta_t_parts
+    for path, release in (("kuehlt", False), ("forst", False), ("forst", True)):
+        p = delta_t_parts(path, release=release)
+        assert set(p) == {"co2_aufnahme", "co2_verlust", "albedo"}
+        assert p["co2_aufnahme"][-1] < 0 and p["albedo"][-1] > 0
+        assert np.all(p["co2_verlust"] >= -1e-9)
+        tot = delta_t(path, release=release)
+        assert np.max(np.abs(sum(p.values()) - tot)) < 0.05 * np.max(np.abs(tot)) + 1e-4
+    assert np.allclose(delta_t_parts("kuehlt")["co2_verlust"], 0)          # never felled
+    assert delta_t_parts("forst", release=True)["co2_verlust"][-1] > delta_t_parts("forst")["co2_verlust"][-1]

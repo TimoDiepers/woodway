@@ -1,8 +1,8 @@
 """Data for the DAC result film and its still pictures (deck/chart_data/dacfilm.json).
 
 One DAC path against the warming that remains after the trees (managed forest, timber bound; nbs.tree_paths):
-the lowest peak of the warming above 1.5 deg C, then the least DAC capacity for 1.5 deg C by 2100, growth limit
-20 %/a (nbs.dac_optim.solve_min_peak).
+the lowest peak of the warming above 1.5 deg C, then back to 1.5 deg C as early as possible with the least DAC
+capacity, growth limit 20 %/a (nbs.dac_optim.solve_min_peak, danach="frueh"; the deck's main case dac.opt_20).
 Each country's capacity is spread evenly over the cells the optimisation counts for it (cells near a sediment basin, at or above the
 90 % quantile of the net share; here fixed by the year 2050), plus dark map backgrounds (land, basins).
 
@@ -41,8 +41,8 @@ def main() -> None:
     need = np.array(overshoot_series()["noetig_k"]) * 1000
     tree = -delta_t("forst") * 1000
     paths, cool = {}, {}
-    r = solve_min_peak((need - tree) / 1000)   # the lowest peak, then 1.5 deg C by 2100 with the least capacity
-    assert r["status"] == "spitze_und_ziel"
+    r = solve_min_peak((need - tree) / 1000, danach="frueh")   # the lowest peak, then back to 1.5 deg C early
+    assert r["status"] == "spitze_dann_frueh"
     paths["opt"] = (r["laender"], np.array(r["x"]), np.array(r["eta"]))
     cool["opt"] = np.array(r["kuehlung_k"])
 
