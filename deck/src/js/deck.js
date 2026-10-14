@@ -665,19 +665,19 @@ function ecAnker(phase) {
     const series = [L('b', b, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
       markPoint: dot('#7fbf8c', [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }]) })];
     const dacOn = still || k >= 2, freiOn = still || k >= 4;
-    if (dacOn) series.push(L('d', d, '#ff5a4f', 'DAC, 20 %/a', Object.assign({
+    if (dacOn) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', Object.assign({
       markPoint: dot('#ff5a4f', [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }]) }, still ? { lineStyle: { color: '#ff5a4f', width: 3.2, opacity: .35 }, markPoint: undefined } : {})));
-    if (freiOn) series.push(L('f', f, '#ff9a8f', 'DAC ohne Grenze', Object.assign({ lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5] },
+    if (freiOn) series.push(L('f', f, '#ff9a8f', 'DAC unbegrenzt', Object.assign({ lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5] },
       markPoint: dot('#ff9a8f', [{ coord: [D.jahre[iff], f[iff]], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(f[iff] / 1000, 2)} K` } }]) },
       still ? { lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5], opacity: .35 }, markPoint: undefined } : {})));
-    if (still && k >= 2) series.push(L('v', v, '#7fd0e0', 'vegan, ohne DAC', { animationDuration: 1600, lineStyle: { color: '#7fd0e0', width: 3.4 },
+    if (still && k >= 2) series.push(L('v', v, '#7fd0e0', 'vegan', { animationDuration: 1600, lineStyle: { color: '#7fd0e0', width: 3.4 },
       areaStyle: { color: '#7fd0e0', opacity: .22 },
       markPoint: dot('#7fd0e0', [{ coord: [D.jahre[iv], v[iv]], label: { position: 'top', formatter: `Spitze ${ecNum(v[iv] / 1000, 2)} K` } },
                                  { coord: [D.vegan.ohne_dac.ab, 0], label: { position: 'top', offset: [16, 0], formatter: `ab ${D.vegan.ohne_dac.ab}` } }]) }));
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      legend: { left: 66, top: 34, itemGap: 22, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
+      legend: { left: 66, top: 34, itemGap: 14, itemWidth: 24, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
                 data: series.map(x => x.name) },
       grid: { left: 70, right: 24, top: 92, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
