@@ -668,9 +668,9 @@ function ecAnker(phase) {
     series.push(L('vl', vl, 'Very Low', { line: { width: 2.4, type: [8, 6] },
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
-        label: { show: true, position: 'insideEndTop', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
+        label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
         markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
-    series.push(L('b', b, '+ Bäume'));
+    series.push(L('b', b, 'Bäume'));
     if (has('d20')) series.push(L('d20', on('dac_20'), 'DAC 20 %/a', { mark: [{ coord: [D.dac.opt_20.ab, 1.5], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }] }));
     if (has('d50')) series.push(L('d50', on('dac_50'), '50 %/a'), L('d100', on('dac_100'), '100 %/a'));
     if (has('frei')) { const f = on('dac_frei'), [pf, tf] = peak(f);
@@ -678,13 +678,13 @@ function ecAnker(phase) {
     if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
       series.push(L('v', v, 'vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'top', offset: [34, 0], formatter: `vegan: ${ecNum(tw, 2)} °C` } }] })); }
     // y range from all curves of the last phase, so that it stays the same on every slide
-    const ext = ['dac_frei', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+    const ext = ['dac_20', 'dac_50', 'dac_100', 'dac_frei', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: light ? EC.ink : '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
                 data: series.map(x => x.name) },
-      grid: { left: 70, right: 24, top: 92, bottom: 40 },
+      grid: { left: 70, right: 24, top: 118, bottom: 40 },   // room for a legend of two rows on every slide
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
                       axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
       yAxis: ecAxis({ type: 'value', min: lo, max: hi, interval: .1, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
