@@ -10,7 +10,7 @@ let at: Atlas;
 beforeAll(async () => { at = await loadAtlas("data/", diskFetch); });
 
 describe("talk stats", () => {
-  it("cooling share in 2100 is the talk's 0.39 of 0.83 Gha", () => {
+  it("cooling share in 2100 is the talk's 0.42 of 0.83 Gha", () => {
     const g = at.meta.global.areasGha;
     expect(coolingShare(at, 2100)).toBeCloseTo(g.kuehlt / g.alle, 2);
   });
