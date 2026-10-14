@@ -67,6 +67,17 @@ SOURCES: dict[str, Source] = {
         "v2.0 (JRC open data repository)",
         filename="swr_det.nc",
     ),
+    "duveiller_clouds": Source(
+        key="duveiller_clouds",
+        title="lulcc-bph-clouds: forest effect on low cloud cover (data_for_figures)",
+        doi="10.5281/zenodo.4727774",
+        url="https://zenodo.org/records/4727774/files/data_for_figures.zip?download=1",
+        sha256="26b23dd230cec1d91f154a917dcec4157d1b474d0e054e9e45cf27f0138cef83",
+        license="CC-BY-4.0",
+        size_mb=20.1,
+        citation="Duveiller, G. et al. (2021), Nat. Commun. 12, 4337",
+        filename="duveiller2021_data_for_figures.zip",
+    ),
 }
 
 
