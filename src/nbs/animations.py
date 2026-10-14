@@ -648,6 +648,51 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
     return out_path
 
 
+C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Was Bäume tun" drawing
+
+
+def cloud_season_series(site: Site) -> tuple[NDArray, NDArray, NDArray]:
+    """(albedo, clouds, net) per month in W per full-grown tree at *site*; positive = the
+    Earth absorbs more light (warming), so the clouds come out mostly negative."""
+    from nbs.albedo_grid import monthly_product
+    from nbs.cloud_grid import monthly_cloud_product
+
+    key, cell = site_key(site), (slice(None), *site_cell(site))
+    alb = -monthly_product(key)[cell] * _STAND_AREA_M2
+    cld = -monthly_cloud_product(key)[cell] * _STAND_AREA_M2
+    return alb, cld, alb + cld
+
+
+def cloud_season_figure(out_path: str) -> str:
+    """B8w: month by month at the three sites, albedo up, clouds down, the sum as a line."""
+    _heading_font, body_font = _register_fonts()
+    _style(body_font)
+    fig, axes = plt.subplots(1, 3, figsize=(12.0, 3.6), dpi=FIG_DPI, sharey=True)
+    fig.subplots_adjust(left=0.07, right=0.99, top=0.85, bottom=0.12, wspace=0.08)
+    x = np.arange(12)
+    series = [cloud_season_series(s) for s in SITES]
+    lo = min(float(c.min()) for _, c, _ in series)
+    hi = max(float(a.max()) for a, _, _ in series)
+    for ax, s, (alb, cld, net) in zip(axes, SITES, series):
+        _clean_axes(ax)
+        ax.bar(x, alb, width=0.72, color=RAMP_ALBEDO[1], label="Albedo")
+        # where the clouds warm too (fewer clouds over the forest), their bar sits on top of the albedo
+        ax.bar(x, cld, bottom=np.where(cld > 0, alb, 0.0), width=0.72, color=C_CLOUD, label="Wolken")
+        ax.plot(x, net, color=C_INK, linewidth=2.4, marker=s.marker, ms=6, mfc=s.color, mec="white", label="Summe")
+        ax.axhline(0, color=C_INK_MUTED, linewidth=0.9)
+        ax.set_xticks(x)
+        ax.set_xticklabels([m[0] for m in MONTHS_DE])
+        ax.set_xlim(-0.6, 11.6)
+        ax.set_ylim(min(0.0, lo) * 1.25 - 4, hi * 1.15)
+        ax.set_title(s.label, loc="left", fontsize=14, fontweight="bold", color=s.color)
+    axes[0].set_ylabel("W je Baum")
+    axes[-1].legend(loc="lower right", frameon=False, fontsize=12, ncol=3, bbox_to_anchor=(1.0, 1.08))
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=FIG_DPI)
+    plt.close(fig)
+    return out_path
+
+
 def albedo_ingredients_figure(out_path: str) -> str:
     """B8a: the two ingredients of the extra absorbed light, as two maps.
 

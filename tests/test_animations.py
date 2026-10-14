@@ -106,3 +106,13 @@ def test_static_figures_render(tmp_path):
     b8 = albedo_annual_map_figure(str(tmp_path / "b8.png"))
     for path in (b6, b8):
         assert (tmp_path / path.split("/")[-1]).stat().st_size > 10_000
+
+
+def test_cloud_season_net_is_albedo_plus_clouds():
+    from nbs.animations import cloud_season_series
+
+    for s in SITES:
+        alb, cld, net = cloud_season_series(s)
+        assert alb.shape == cld.shape == net.shape == (12,)
+        np.testing.assert_allclose(net, alb + cld)
+        assert alb.mean() > 0                       # darker canopy: Earth absorbs more

@@ -205,6 +205,7 @@ def chart_jobs() -> list[tuple[str, object]]:
         ("b6s", sf.uptake_panel_figure),
         ("b8a", an.albedo_ingredients_figure),
         ("b8", an.albedo_annual_map_figure),
+        ("b8w", an.cloud_season_figure),
         ("b10", sf.common_currency_bars_figure),
         ("k3s", sf.irf_side_figure),
         ("k5", sf.missing_air_bars_figure),
