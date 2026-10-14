@@ -20,7 +20,7 @@ import numpy as np
 from nbs.constants import YEARS
 from nbs import vegan
 from nbs.dac_optim import (COST_CASES, EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, GROWTH, START_2030_GT, VERGLEICH_QUELLEN,
-                           price_plan, solve_cost_offset)
+                           max_buildout, price_plan, solve_cost_offset)
 from nbs.tree_paths import delta_t, delta_t_parts, forcing
 from nbs.vergleich_figures import overshoot_series, vl_series
 
@@ -67,6 +67,13 @@ def main() -> None:
     for g in (20, 50, 100):
         dac[f"g{g}"]["kosten"] = {k: _rk(price_plan(np.array(dac[f"g{g}"]["bau"]), np.array(dac[f"g{g}"]["u"]), c)) for k, c in COST_CASES.items()}
     w, u, bau = np.array(dac["g20"]["w"]), np.array(dac["g20"]["u"]), np.array(dac["g20"]["bau"])
+    # the main slide: DACCS at the fastest build-out (linear to 8.8 Mt/a in 2030, then +20 %/a), no optimisation, shown
+    # up to the peak; its cost up to 2050 with the optimistic, median and pessimistic costs
+    r_max = max_buildout()
+    dac["max"] = {"w": [round(float(v), 4) for v in r_max["w"]], "netto": [round(float(v), 4) for v in r_max["netto"]],
+                  "entnahme": [round(float(v), 4) for v in r_max["entnahme"]], "speicher_voll": r_max["speicher_voll"],
+                  "brutto_bis_2050": round(r_max["brutto_bis_gt"], 2),
+                  "kosten_bis_2050": {k: round(max_buildout(c=c)["kosten_bis_2050"]["summe_bio"], 3) for k, c in COST_CASES.items()}}
     kosten_pfad = {k: _rk(price_plan(bau, u, c)) for k, c in COST_CASES.items()}
     kosten_pfad.update(eu27_bip_bio=EU27_BIP_BIO_EUR, fossil_subv_bio=round(FOSSIL_SUBV_BIO_EUR, 3), quellen=VERGLEICH_QUELLEN)
     print("dac", {g: {k: v for k, v in c.items() if not isinstance(v, (list, dict))} for g, c in dac.items()}, "kosten", {k: kosten_pfad[k]["summe_bio"] for k in COST_CASES})
@@ -88,7 +95,7 @@ def main() -> None:
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
     # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
     wirkung = {"baeume": _mk(delta_t("forst")), "vegan": _mk(dg + df),
-               **{f"dac_{g}": _mk(-np.array(r["kuehlung_k"])) for g, r in runs.items()},
+               **{f"dac_{g}": _mk(-np.array(r["kuehlung_k"])) for g, r in runs.items()}, "dac_max": _mk(-np.array(r_max["kuehlung_k"])),
                "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
     vl_c = [round(v, 3) for v in vl_series()["median_c"]]
     print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())

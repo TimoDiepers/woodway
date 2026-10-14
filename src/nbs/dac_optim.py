@@ -391,6 +391,37 @@ def growth_limit(growth: float = GROWTH) -> NDArray:
     return out
 
 
+def max_buildout(growth: float = GROWTH, bis: int = 2050, c: dict | None = None, stufe: str = "prudent",
+                 quantil: float = 0.9, pathway: str = "SSP2-NDC") -> dict:
+    """DACCS at the fastest build-out, no optimisation and no target: the world removal follows growth_limit (linear to
+    8.8 Mt/a in 2030, then x *growth* a year), every plant running, each year placed in the countries with the highest
+    eta_C that still have safe storage. Cooling [K] per year (FaIR kernel, as the trees), and the cost of that build-out
+    up to *bis* (price_plan, optimistic costs unless *c*), plants rebuilt after LIFETIME."""
+    c = COST_CASES["optimistisch"] if c is None else c
+    countries, eta, storage = _setup(stufe, quantil, pathway)
+    k = removal_kernel_matrix()
+    w = growth_limit(growth)
+    n_c, n = eta.shape
+    x, left = np.zeros((n_c, n)), storage.astype(float).copy()
+    for t in range(n):
+        need = w[t]
+        for ci in np.argsort(-eta[:, t]):
+            if need <= 0 or eta[ci, t] <= 0:
+                break
+            take = min(need, left[ci])
+            x[ci, t] += take; left[ci] -= take; need -= take
+    cooling = np.einsum("yt,cy,cy->t", -k, eta, x)
+    run = x.sum(axis=0) * (YEARS <= bis)
+    build = np.zeros(n)
+    for t in range(n):
+        build[t] = max(0.0, run[t] - build[max(0, t - LIFETIME + 1):t].sum())
+    return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "w": w.tolist(), "kuehlung_k": cooling.tolist(),
+            "netto": (x * eta).sum(axis=0).tolist(), "entnahme": x.sum(axis=0).tolist(),
+            "speicher_voll": next((int(YEARS[t]) for t in range(n) if x[:, t].sum() < w[t] * (1 - 1e-9)), None),
+            "kosten_bis_2050": price_plan(build, run, c),
+            "brutto_bis_gt": float(run.sum())}
+
+
 def solve_max(growth: float = GROWTH, stufe: str = "prudent", quantil: float = 0.9, pathway: str = "SSP2-NDC",
               keep_running: bool = True) -> dict:
     """As much DAC as possible: the growth limit from 8.8 Mt/a in 2030 and the storage of each country are the

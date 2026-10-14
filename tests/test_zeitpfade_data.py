@@ -14,7 +14,7 @@ def _c(key):
 def test_anchor_series_exist_and_have_the_years():
     n = len(Z["jahre"])
     assert len(Z["vl_c"]) == n
-    assert set(Z["wirkung"]) == {"baeume", "dac_20", "dac_50", "dac_100", "vegan", "dac_vegan"}
+    assert set(Z["wirkung"]) == {"baeume", "dac_20", "dac_50", "dac_100", "dac_max", "vegan", "dac_vegan"}
     assert all(len(v) == n for v in Z["wirkung"].values())
 
 
@@ -46,3 +46,9 @@ def test_vegan_plus_daccs_holds_1p5_from_its_return_year():
     i = Z["jahre"].index(Z["vegan"]["g20"]["ab"])
     assert t[i:].max() <= 1.5 + 1e-3
     assert Z["vegan"]["g20"]["ab"] < Z["dac"]["g20"]["ab"]
+
+
+def test_fastest_daccs_barely_touches_the_peak():
+    i = Z["jahre"].index(2050)
+    assert -1.0 < Z["wirkung"]["dac_max"][i] < 0          # well under 1 mK against a gap of 320 mK
+    assert 0 < Z["dac"]["max"]["kosten_bis_2050"]["optimistisch"] < Z["dac"]["max"]["kosten_bis_2050"]["median"]

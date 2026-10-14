@@ -1212,3 +1212,13 @@ svg.mo .m-sway.back { animation: none; }
 /* backup: costs of the DAC path, three small tables */
 .kost { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; flex: 1; align-items: center; }
 .kost > div { display: flex; flex-direction: column; gap: 28px; }
+
+/* slide "Warum Ernährung?": three picture tiles instead of text blocks */
+.tiles3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; flex: none; height: 548px; margin-bottom: 18px; align-content: center; }
+.tiles3 .tile { text-align: center; }
+.tiles3 .tile svg { width: 100%; height: 190px; margin-bottom: 26px; }
+.tiles3 .tk { font: 600 32px/1.2 var(--serif); color: #f2ede2; margin-bottom: 12px; }
+.tiles3 .tile p:not(.tk) { font: 400 22px/1.4 var(--sans); color: #b9c0ba; }
+.tiles3.mini { height: auto; gap: 18px; margin: 4px 0 0; align-content: start; }
+.tiles3.mini .tile svg { height: 92px; margin-bottom: 6px; }
+.tiles3.mini .tk { font: 600 20px/1.25 var(--sans); color: #f2ede2; margin: 0; }
