@@ -1,0 +1,452 @@
+{
+  "klima": {
+    "fair_mitglied": 787474,
+    "lambda_w_m2_k": 1.19807827,
+    "erwaermung_2025_K": 1.338109648374106,
+    "erwaermung_2081_2100_K": 2.616992126222944,
+    "erwaermung_2150_K": 2.706710728241352
+  },
+  "orte": {
+    "Aachen": {
+      "t_star": 2026,
+      "phi_negativ_ab": 2026,
+      "delta_t_2150_K": -3.422268034252669e-14,
+      "anteil_pflanzjahr_2085": 0.33109199364707864,
+      "leiter": [
+        2026,
+        2026,
+        2026,
+        2026,
+        2026
+      ],
+      "leiter_dt_2150_K": [
+        -1.5661445558022546e-13,
+        -1.3377230617220313e-13,
+        -6.157395773552791e-14,
+        -3.277932127892827e-14,
+        -3.422268034252669e-14
+      ]
+    },
+    "Joensuu": {
+      "t_star": 2026,
+      "phi_negativ_ab": 2026,
+      "delta_t_2150_K": -1.0422752222810047e-14,
+      "anteil_pflanzjahr_2085": 0.7384597828250311,
+      "leiter": [
+        2026,
+        2026,
+        2026,
+        2026,
+        2026
+      ],
+      "leiter_dt_2150_K": [
+        -1.0711359656772928e-13,
+        -7.684682648619666e-14,
+        -2.7179863924465107e-14,
+        -7.651737257901854e-15,
+        -1.0422752222810047e-14
+      ]
+    },
+    "Marabá": {
+      "t_star": 2026,
+      "phi_negativ_ab": 2026,
+      "delta_t_2150_K": -6.378494165364841e-14,
+      "anteil_pflanzjahr_2085": 0.28570858024811113,
+      "leiter": [
+        2026,
+        2026,
+        2026,
+        2026,
+        2026
+      ],
+      "leiter_dt_2150_K": [
+        -2.242881374702973e-13,
+        -2.094111281114158e-13,
+        -1.0520425220154731e-13,
+        -6.442489292609992e-14,
+        -6.378494165364841e-14
+      ]
+    }
+  },
+  "licht_ueberwiegt_bis": {
+    "Aachen": null,
+    "Joensuu": null,
+    "Marabá": null
+  },
+  "a_co2": {
+    "start": 1.642465225490514,
+    "ende": 1.3132503282942958,
+    "g_c_fair_2100": 0.42286574909462615,
+    "g_c_joos_2100": 0.4402474221315914
+  },
+  "kaskade": {
+    "flaeche_land_gha": 0.8281117960364125,
+    "kohlenstoff_land_gtc": 42.23806707164764,
+    "flaeche_nutzbar_gha": 0.39333920028517655,
+    "kohlenstoff_nach_albedo_gtc": 28.7301480003708,
+    "kohlenstoff_gtc": 27.794016302050924,
+    "band_gtc": [
+      21.91750923089585,
+      38.08902771761449
+    ],
+    "delta_t_2150_K": -0.018519823594746472,
+    "anteil_bastin": 0.13558056732707768,
+    "albedo_filter_anteil_flaeche": 0.5250167885932624
+  },
+  "umkehr": {
+    "vielfaches": 51.36017282755859,
+    "flaeche_gha": 20.201969306500352,
+    "anteil_eisfrei": 1.5539976389615655,
+    "kritisches_jahr": 2099
+  },
+  "karten": {
+    "boreal_nie_anteil": 0.6087862263341707,
+    "median_t_star_ausserhalb_boreal": 2026.0,
+    "artenwahl_gewinn": 0.4881303681862711,
+    "empfohlen_gha": {
+      "enf_boreal": 0.1175173806935125,
+      "enf_gemaessigt": 0.037736844477765624,
+      "enf_subtropisch": 0.025602039440667187,
+      "enf_tropisch": 0.0026878056390125,
+      "ebf_boreal": 1.12910459e-05,
+      "ebf_gemaessigt": 0.00169593230416875,
+      "ebf_subtropisch": 0.0230796712497125,
+      "ebf_tropisch": 0.1429881562582297,
+      "dnf_boreal": 0.1269339843433328,
+      "dnf_gemaessigt": 0.002390267246028125,
+      "dbf_boreal": 0.020216897276226563,
+      "dbf_gemaessigt": 0.09690184065289843,
+      "dbf_subtropisch": 0.03312642695700156,
+      "dbf_tropisch": 0.06616035749182969,
+      "mf_boreal": 0.07286786140269531,
+      "mf_gemaessigt": 0.0240214217135375,
+      "mf_subtropisch": 0.010681716121004688,
+      "mf_tropisch": 0.023491901722889064
+    }
+  },
+  "hasler": {
+    "trockengebiet_netto_negativ": 0.3646805455850682,
+    "median_offset_pct": 105.48180904152544,
+    "ueber_50": 0.7729045200376077,
+    "ueber_100": 0.5250167885932623,
+    "tropen_ueber_50": 0.38930821179274727,
+    "boreal_ueber_50": 0.9593940936863544
+  },
+  "boreal_referenz": {
+    "art": "mf_boreal",
+    "breite": 62.6,
+    "t_star": 2026,
+    "stoerung_50_jahre": 0.5044111336848085
+  },
+  "baeume": {
+    "orte": {
+      "Aachen": {
+        "art": "mf_gemaessigt",
+        "name": "Mischwald (gemäßigt)",
+        "zuwachs_mgc_ha": 98.18354797363281,
+        "saettigung_kgc": 49.091773986816406,
+        "saettigung_kg_co2": 180.0031712849935,
+        "aufnahme_2150_kg_co2": 163.0075079881991,
+        "k": 0.04309054753162702,
+        "licht_w": 34.201835530499615
+      },
+      "Joensuu": {
+        "art": "mf_boreal",
+        "name": "Mischwald (boreal)",
+        "zuwachs_mgc_ha": 65.96551513671875,
+        "saettigung_kgc": 32.982757568359375,
+        "saettigung_kg_co2": 120.93677775065105,
+        "aufnahme_2150_kg_co2": 111.0866599924444,
+        "k": 0.045110777463851295,
+        "licht_w": 45.2931771959313
+      },
+      "Marabá": {
+        "art": "ebf_tropisch",
+        "name": "Immergrüner Laubwald (tropisch)",
+        "zuwachs_mgc_ha": 138.56781005859375,
+        "saettigung_kgc": 69.28390502929688,
+        "saettigung_kg_co2": 254.04098510742188,
+        "aufnahme_2150_kg_co2": 232.25687667141918,
+        "k": 0.045110777463851295,
+        "licht_w": 20.65516512315036
+      }
+    },
+    "typen_gha": {
+      "Immergrüner Nadelwald": 0.2012109727586422,
+      "Sommergrüner Laubwald": 0.20691168442317656,
+      "Immergrüner Laubwald": 0.16418254481066874,
+      "Lärchenwald": 0.13073509572416095,
+      "Mischwald": 0.12507149831976405
+    },
+    "flaeche_wiederbewaldbar_gha": 0.9311032456805938,
+    "flaeche_mit_typ_gha": 0.8281117960364125,
+    "baeume_je_ha": 2000.0,
+    "k_je_art": {
+      "enf_boreal": 0.045110777463851295,
+      "enf_gemaessigt": 0.045110777463851295,
+      "enf_subtropisch": 0.04066618206037458,
+      "enf_tropisch": 0.045110777463851295,
+      "ebf_boreal": 0.045110777463851295,
+      "ebf_gemaessigt": 0.045110777463851295,
+      "ebf_subtropisch": 0.045110777463851295,
+      "ebf_tropisch": 0.045110777463851295,
+      "dnf_boreal": 0.045110777463851295,
+      "dnf_gemaessigt": 0.045110777463851295,
+      "dbf_boreal": 0.045110777463851295,
+      "dbf_gemaessigt": 0.045110777463851295,
+      "dbf_subtropisch": 0.045110777463851295,
+      "dbf_tropisch": 0.045110777463851295,
+      "mf_boreal": 0.045110777463851295,
+      "mf_gemaessigt": 0.04309054753162702,
+      "mf_subtropisch": 0.045110777463851295,
+      "mf_tropisch": 0.045110777463851295
+    }
+  },
+  "literatur": {
+    "dieses_modell": {
+      "alle": 0.1360281490615221,
+      "flaeche_alle_gha": 0.8281117960364125,
+      "kuehlend": 0.5611479839698497,
+      "flaeche_kuehlend_gha": 0.39333920028517655,
+      "statisch": 0.14213388191566667
+    },
+    "studien": {
+      "Riley et al. 2025": 0.8200000000000001,
+      "Weber et al. 2024": 0.6666666666666666,
+      "Fahrenbach et al. 2026": 0.5909090909090909,
+      "Hasler et al. 2024": 0.4719626168224299,
+      "Liang et al. 2025": 0.3,
+      "Rohatyn et al. 2022": 0.30030959752321973
+    }
+  },
+  "dac": {
+    "premise_strom_mwh": 0.5,
+    "premise_waerme_mwh": 1.5,
+    "strom_mwh": {
+      "min": 1.0754480518736753,
+      "median": 1.5237934725895608,
+      "max": 1.910286703174001
+    },
+    "zu_kalt_anteil_land": 0.20401779606654313,
+    "fit": {
+      "a_t_pro_10k": 0.09364456311541429,
+      "a_rh_pro_10pp": 0.12569382079772773,
+      "max_fehler_mwh": 0.011812871537968395
+    },
+    "strom_kg_pro_kwh_2020_2030_2050": {
+      "DE": [
+        0.4167097501968736,
+        0.0923273403230519,
+        0.01280326006702123
+      ],
+      "FR": [
+        0.05948995131072866,
+        0.020790942841043453,
+        0.010181133277380216
+      ],
+      "NO": [
+        0.018577636024513917,
+        0.014641204585508303,
+        0.011970156486958495
+      ],
+      "PL": [
+        0.9203670552771513,
+        0.16205118984123398,
+        0.01139077242829374
+      ],
+      "US": [
+        0.46031664984665793,
+        0.17006068130308377,
+        0.009840309946555527
+      ],
+      "CN": [
+        0.7211809245307953,
+        0.36576047080775365,
+        0.03057589563427413
+      ],
+      "IN": [
+        0.9793447231012089,
+        0.48976600659771574,
+        0.023759478821998387
+      ],
+      "BR": [
+        0.2738618148968104,
+        0.1058350587590527,
+        0.03018924035148584
+      ]
+    },
+    "wirkungsgrad_median": {
+      "2026": 0.4646516574383136,
+      "2030": 0.6505340389732914,
+      "2040": 0.9160131414163779,
+      "2050": 0.939366171738672,
+      "2070": 0.9460803305992811
+    },
+    "wirkungsgrad_median_dampf": {
+      "2026": 0.6425533859967367,
+      "2050": 0.9594212860651861
+    },
+    "wirkungsgrad_median_climeworks": {
+      "2026": 0.032683121602167686,
+      "2050": 0.9044542237355416
+    },
+    "baum_wirkungsgrad_median_2025": 0.1908120535752254,
+    "dac_besser_anteil": {
+      "2026": 0.3439394185221442,
+      "2030": 0.4322400705990926,
+      "2040": 0.556875896793115,
+      "2050": 0.5837112962860116,
+      "2070": 0.560152810101221
+    },
+    "keins_kuehlt_anteil": {
+      "2026": 0.3235601737242215,
+      "2030": 0.3086493200617743,
+      "2040": 0.291984464879121,
+      "2050": 0.25994862418956943,
+      "2070": 0.13921675139228742
+    },
+    "zu_kalt_anteil_bepflanzbar": 0.3955005736211239,
+    "umstieg": {
+      "NO": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.02080528763951292
+      },
+      "SE": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.08115533582812819
+      },
+      "FI": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.28585359919756675
+      },
+      "FR": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.011889323378844676
+      },
+      "ES": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.0
+      },
+      "DE": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.0
+      },
+      "PL": {
+        "median_jahr": 2029,
+        "nie_anteil": 0.0
+      },
+      "US": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.18214181398161294
+      },
+      "BR": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.07135934968983819
+      },
+      "CN": {
+        "median_jahr": 2028,
+        "nie_anteil": 0.25276967381975957
+      },
+      "IN": {
+        "median_jahr": 2033,
+        "nie_anteil": 0.06604060016739953
+      },
+      "ID": {
+        "median_jahr": 2040,
+        "nie_anteil": 0.45294184959353107
+      },
+      "CD": {
+        "median_jahr": 2042,
+        "nie_anteil": 0.13898425763205063
+      },
+      "RU": {
+        "median_jahr": 2035,
+        "nie_anteil": 0.8765908207227295
+      },
+      "CA": {
+        "median_jahr": 2026,
+        "nie_anteil": 0.8166583056771671
+      }
+    }
+  },
+  "vergleich": {
+    "baeume_brutto_gtco2": 101.91139310752006,
+    "baeume_netto_gtco2": 59.1635979086307,
+    "vl_gesamt_gtco2": 335.1711,
+    "vl_land_gtco2": 226.1249,
+    "vl_technisch_gtco2": 109.0462,
+    "anteil_netto_an_vl": 0.17651759924596927,
+    "bepflanzbar_kuehlt_gha": 0.39333920028517655,
+    "bepflanzbar_waermt_gha": 0.43477259575123595,
+    "dac_2020_besser_anteil": 0.22147161152055148,
+    "dac_2020_netto_emittierend_land": 0.3537613704269305,
+    "orte": {
+      "Joensuu": {
+        "art": "mf_boreal",
+        "baum_2025": 0.27887293127826684,
+        "dac_2020": 0.7665721850555838,
+        "umstieg": 2020
+      },
+      "Aachen": {
+        "art": "mf_gemaessigt",
+        "baum_2025": 0.6255054522657768,
+        "dac_2020": 0.23762541382103874,
+        "umstieg": 2027
+      },
+      "Krakau": {
+        "art": "mf_gemaessigt",
+        "baum_2025": 0.6099113302702552,
+        "dac_2020": -0.600300849921533,
+        "umstieg": 2030
+      },
+      "Peking": {
+        "art": "dbf_gemaessigt",
+        "baum_2025": -1.0571864754434044,
+        "dac_2020": -0.08450466499193587,
+        "umstieg": 2020
+      },
+      "Manaus": {
+        "art": "ebf_tropisch",
+        "baum_2025": 0.9084128680012238,
+        "dac_2020": 0.4640599630031488,
+        "umstieg": 2045
+      },
+      "Marabá": {
+        "art": "ebf_tropisch",
+        "baum_2025": 0.8187090663995908,
+        "dac_2020": 0.4658314246756238,
+        "umstieg": 2034
+      },
+      "Kinshasa": {
+        "art": "ebf_tropisch",
+        "baum_2025": 0.8818966898555721,
+        "dac_2020": -0.20257400120044022,
+        "umstieg": 2045
+      }
+    },
+    "gt_pro_jahr_baeume_gha": 0.48245243771492513
+  },
+  "wolken": {
+    "orte": {
+      "Aachen": {
+        "albedo_w": 34.2,
+        "wolken_w": -5.2,
+        "netto_w": 29.0,
+        "anteil": 0.152
+      },
+      "Joensuu": {
+        "albedo_w": 45.3,
+        "wolken_w": -1.1,
+        "netto_w": 44.2,
+        "anteil": 0.025
+      },
+      "Marabá": {
+        "albedo_w": 20.7,
+        "wolken_w": 0.7,
+        "netto_w": 21.4,
+        "anteil": -0.035
+      }
+    },
+    "anteil_global": 0.074
+  }
+}
