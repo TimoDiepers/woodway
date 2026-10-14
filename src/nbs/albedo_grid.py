@@ -362,6 +362,42 @@ def _insolation_grid_cached(species_key: str, baseline: str, extended: bool) -> 
     return _regrid(annual)
 
 
+@lru_cache(maxsize=None)
+def _monthly_insolation_native_cached(species_key: str) -> NDArray:
+    parts = []
+    for b in _OPEN_PARTS:
+        a = _load_monthly("albedo", species_key, b, True)
+        s = _load_monthly("swr", species_key, b, True)
+        lat = _native_lat_for(species_key, b)
+        parts.append(None if a is None or s is None else _quotient_with_zonal_fill(a, s, lat))
+    q = _combine_open(parts)
+    if q is None:
+        _, qsw = _fallback_row_values()
+        return np.repeat(np.repeat(qsw[::2][:, None], 360, axis=1)[None], 12, axis=0)
+    # the quotient exists only in co-occurrence cells; every other cell gets its
+    # 10-degree band's median of the same month (insolation is set by latitude)
+    out = q.copy()
+    edges = np.arange(-90.0, 90.0 + ZONAL_BIN_WIDTH_DEG, ZONAL_BIN_WIDTH_DEG)
+    band = np.clip(np.digitize(lat, edges) - 1, 0, len(edges) - 2)
+    for bi in np.unique(band):
+        rows = np.where(band == bi)[0]
+        for m in range(12):
+            block = q[m, rows, :]
+            ok = np.isfinite(block)
+            if ok.any():
+                fill = out[m, rows, :]
+                fill[~ok] = float(np.median(block[ok]))
+                out[m, rows, :] = fill
+    return out
+
+
+def monthly_insolation_native(species_key: str) -> NDArray:
+    """(12, 180, 360) surface insolation [W/m^2] on the native 1-degree grid,
+    open-land baseline, local quotient where measured, else the month's
+    10-degree band median. Used by nbs.cloud_grid."""
+    return _monthly_insolation_native_cached(species_key).copy()
+
+
 def _native_lat_for(species_key: str, baseline: str) -> NDArray | None:
     """Native 1-degree lat coordinate for the given species/baseline, or None
     if the raster is unavailable. Validates species/baseline first, same as

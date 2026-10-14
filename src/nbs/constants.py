@@ -56,3 +56,12 @@ TAU_ATM = 0.854
 surface reflection that reaches the top of the atmosphere. Global annual clear-sky mean,
 T_a = sqrt(f_a) with the two-way transmittance f_a = 0.730 (Lacis and Hansen 1974), as used by
 Lenton and Vaughan (2009, ACP 9, 5539) and Cherubini et al. (2012)."""
+
+R_CLOUD = 0.5
+"""Extra reflectance of a low cloud over the surface (Cerasoli et al. 2021, PNAS 118,
+e2026241118: f_C = 0.5, 'an average value of cloud albedo')."""
+
+D_AFTERNOON = 0.5
+"""Share of the day's sunlight after the boundary-layer cumulus forms. Duveiller et al.
+(2021) see the clouds at their 13:30 peak; Cerasoli et al. (2021) let them persist from
+onset until sunset."""
