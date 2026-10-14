@@ -638,7 +638,7 @@ const EC_VEGAN_LUECKE = {
     };
   }
 };
-/* the anchor of chapters 4 and 5: Very Low in deg C with the 1.5 deg C line, and a curve per measure (Very Low plus
+/* the anchor of chapters 4 and 5: Very Low without its own CO2 removal (vl_series) in deg C with the 1.5 deg C line, and a curve per measure (Very Low plus
    the trees plus the measure), never clipped. Phases: 'k4' chapter 4 (light, Very Low and trees), 0 the DAC model,
    1 DAC as fast as allowed (click 1 adds 50 and 100 %/a and no limit), 2 the vegan world (click 1; DAC lines step
    back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
@@ -665,7 +665,7 @@ function ecAnker(phase) {
     const peak = ys => { const i = ys.indexOf(Math.max(...ys)); return [D.jahre[i], ys[i]]; };
     const series = [];
     const [pv, tv] = peak(vl);
-    series.push(L('vl', vl, 'Very Low', { line: { width: 2.4, type: [8, 6] },
+    series.push(L('vl', vl, 'Very Low ohne Entnahme', { line: { width: 2.4, type: [8, 6] },
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },

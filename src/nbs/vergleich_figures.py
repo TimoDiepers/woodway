@@ -304,13 +304,36 @@ def need_temperature_series() -> dict:
     return _cached_json("bedarf_temperatur.json", compute)
 
 
-def vl_series() -> dict:
-    """CMIP7 Very Low (median, 7-year mean) in deg C above pre-industrial, 2026-2100, not clipped."""
+@lru_cache(maxsize=1)
+def _vl_ohne_entnahme_k() -> np.ndarray:
+    """Warming [K] on YEARS that Very Low's own CO2 removal avoids: its novel removal (BECCS, DAC, weathering,
+    ocean) and its land sink (negative net AFOLU CO2), data/cmip7/entnahme.csv, added back as emissions in
+    FaIR on Very Low. A counterfactual, not an IAM scenario: without removal the model would choose other paths."""
+    from nbs.cmip7_figures import removal
+    from nbs.constants import YEARS
+    from nbs.fair_module import _END_IDX, _START_IDX, run_fair_baseline, run_fair_emission_delta
+
+    e = removal()
+    e = e[e.szenario == "VL"].set_index("jahr")
+    n = _END_IDX - _START_IDX
+    nov = np.array([float(e.neuartig_gt.get(y, 0.0)) for y in YEARS])[:n]
+    land = np.array([float(e.land_gt.get(y, 0.0)) for y in YEARS])[:n]
+    d = run_fair_emission_delta({"CO2 FFI": nov, "CO2 AFOLU": land}, "cmip7-VL") - run_fair_baseline("cmip7-VL")
+    return np.append(d, d[-1])[: len(YEARS)]
+
+
+def vl_series(mit_entnahme: bool = False) -> dict:
+    """CMIP7 Very Low (median, 7-year mean) in deg C above pre-industrial, 2026-2100, not clipped. By default
+    without the CO2 removal Very Low assumes (_vl_ohne_entnahme_k): that removal is what trees and DAC would
+    have to deliver, so counting it in the reference would count them twice. mit_entnahme=True: as published."""
     from nbs.cmip7_figures import temperature
+    from nbs.constants import YEARS
 
     t = temperature()
     v = t[(t.szenario == "VL") & (t.jahr >= T_START) & (t.jahr <= 2100)].sort_values("jahr")
-    med = v["median"].rolling(7, center=True, min_periods=1).mean()  # the median still carries the ensemble's year-to-year noise
+    med = v["median"].rolling(7, center=True, min_periods=1).mean().to_numpy()  # the median still carries the ensemble's year-to-year noise
+    if not mit_entnahme:
+        med = med + np.interp(v.jahr.to_numpy(), YEARS, _vl_ohne_entnahme_k())
     return {"jahre": [int(y) for y in v.jahr], "median_c": [float(x) for x in med]}
 
 
