@@ -650,21 +650,23 @@ const EC_VEGAN_LUECKE = {
   }
 };
 /* chapter 5 anchor: the warming above 1.5 °C after the trees, the same chart on both slides at the same place.
-   Slide 1 adds DAC at 20 %/a (click 2) and without a growth limit (click 4); slide 2 starts there, the DAC lines
+   Phase 0 (DAC model) shows the trees alone; phase 1 adds DAC at 20 %/a (click 1) and without a limit (click 3); phase 2 starts there, the DAC lines
    step back, and the vegan world without DAC comes in (click 2). Key numbers stand at the curves. */
 function ecAnker(phase) {
   return { steps: 4, option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), still = phase === 2;
+    const first = phase === 0;   // only slide 1 of the three draws the trees' line in; then it stands
     const dot = (color, data) => ({ silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color, borderColor: '#14181a', borderWidth: 2 },
       label: { show: true, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 9 }, data });
     const L = (id, ys, color, name, o) => Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5,
       lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: still ? 0 : 1600 }, o || {});
+    const T = (id, ys, color, name, o) => L(id, ys, color, name, Object.assign({ animationDuration: first ? 1600 : 0 }, o));
     const b = D.baeume_rest, d = D.dac.opt_20.temp, f = D.dac.opt_frei.temp, v = D.vegan.gap;
     const ib = b.indexOf(Math.max(...b)), iff = f.indexOf(Math.max(...f)), iv = v.indexOf(Math.max(...v));
     const back = still ? { lineStyle: { opacity: .35 } } : {};
-    const series = [L('b', b, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
+    const series = [T('b', b, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
       markPoint: dot('#7fbf8c', [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }]) })];
-    const dacOn = still || k >= 2, freiOn = still || k >= 4;
+    const dacOn = still || (phase === 1 && k >= 1), freiOn = still || (phase === 1 && k >= 3);
     if (dacOn) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', Object.assign({
       markPoint: dot('#ff5a4f', [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }]) }, still ? { lineStyle: { color: '#ff5a4f', width: 3.2, opacity: .35 }, markPoint: undefined } : {})));
     if (freiOn) series.push(L('f', f, '#ff9a8f', 'DAC unbegrenzt', Object.assign({ lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5] },
@@ -688,7 +690,7 @@ function ecAnker(phase) {
     };
   } };
 }
-const EC_ANKER1 = ecAnker(1), EC_ANKER2 = ecAnker(2);
+const EC_ANKER0 = ecAnker(0), EC_ANKER1 = ecAnker(1), EC_ANKER2 = ecAnker(2);
 /* why the peak stays: world capacity at 20 %/a, the year of the peak marked */
 const EC_ANKERKAP = { steps: 0, option() {
   const o = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 60, v => String(v), D => [['w', D.dac.opt_20.w, '#ff5a4f', '20 %/a', null, true]]).option();
@@ -697,7 +699,7 @@ const EC_ANKERKAP = { steps: 0, option() {
     label: { show: true, position: 'top', distance: 10, offset: [10, -58], color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, formatter: `Spitze 2048: erst ${ecNum(w[i], 1)} Gt/a` },
     data: [{ coord: [2048, w[i]] }] };
   return o; } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker1: EC_ANKER1, anker2: EC_ANKER2, ankerkap: EC_ANKERKAP };
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, ankerkap: EC_ANKERKAP };
 
 class EChart {
   constructor(host) {

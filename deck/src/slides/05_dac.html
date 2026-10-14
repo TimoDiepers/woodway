@@ -11,66 +11,27 @@
 <section class="slide dark" data-ch="dac" data-title="DAC-Modell">
   <header class="sh"><h2>DAC-Modell: je Ort und je Jahr</h2></header>
   <div class="body">
-    <svg class="schema mo" data-export="s_dac_modell" viewBox="0 0 1424 560" style="width:100%; flex:1; min-height:0" aria-label="DAC-Anlage; Rechenweg: Wetter je Ort ergibt den Energiebedarf je Tonne, der Strommix je Region und Jahr die Emissionen je kWh; die zeitexplizite Ökobilanz ergibt den Netto-Anteil je Zelle und Jahr">
-      <defs><marker id="ah-dk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
-      <g font-family="IBM Plex Sans">
-        <g class="pop" style="--d:100"><g transform="translate(-612 -50) scale(.9)">
-          <rect x="780" y="430" width="380" height="40" fill="#d9cfb9"/>
-          <path d="M780 450 H1160" stroke="#c3b79c" stroke-width="2"/>
-          <line x1="780" y1="430" x2="1160" y2="430" stroke="#8c7a58" stroke-width="3" stroke-linecap="round"/>
-          <rect x="912" y="330" width="30" height="100" fill="#5d665f"/>
-          <rect x="800" y="220" width="200" height="110" rx="10" fill="var(--fjord)"/>
-          <g fill="var(--paper)"><circle cx="840" cy="275" r="26"/><circle cx="900" cy="275" r="26"/><circle cx="960" cy="275" r="26"/></g>
-          <g stroke="var(--fjord)" stroke-width="4" stroke-linecap="round"><path class="m-fan" d="M840 256 V294 M821 275 H859"/><path class="m-fan" d="M900 256 V294 M881 275 H919"/><path class="m-fan" d="M960 256 V294 M941 275 H979"/></g>
-          <g stroke="var(--alb)" stroke-width="3.5" fill="none" stroke-linecap="round">
-            <path class="m-steam" d="M826 370 q7 -7 0 -14 q-7 -7 0 -14"/><path class="m-steam" d="M856 370 q7 -7 0 -14 q-7 -7 0 -14"/><path class="m-steam" d="M886 370 q7 -7 0 -14 q-7 -7 0 -14"/>
-          </g>
-          <path d="M1000 300 H1060 V346" stroke="#5d665f" stroke-width="8" fill="none"/>
-          <rect x="1036" y="346" width="58" height="44" rx="6" fill="#5d665f"/>
-          <path d="M1065 390 V466" stroke="#5d665f" stroke-width="8"/>
-          <path d="M1036 126 L1020 160 H1036 L1022 194 L1056 150 H1040 L1052 126Z" fill="var(--sun-ray)"/>
-          <path class="m-flowd" d="M1036 196 L1004 222" stroke="var(--sun-ray)" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>
-          <g font-size="19" fill="var(--muted)">
-            <text x="800" y="206">Gebläse</text>
-            <text x="1064" y="160">Strom</text>
-            <text x="1100" y="380">Verdichter</text>
-            <text x="780" y="398">Dampf, 100 °C</text>
-            <text x="1080" y="498" text-anchor="middle">Speicher im Gestein</text>
-          </g><path d="M690 262 H792" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 6" fill="none" marker-end="url(#ah-dk)"/><circle cx="716" cy="252" r="6" fill="#2e7d4f"/><circle cx="744" cy="268" r="6" fill="#2e7d4f"/><circle cx="770" cy="250" r="6" fill="#2e7d4f"/><text x="690" y="232" font-size="19" fill="var(--muted)">Luft</text><circle cx="1030" cy="300" r="5" fill="#2e7d4f"/><circle cx="1062" cy="322" r="5" fill="#2e7d4f"/><circle cx="1065" cy="420" r="5" fill="#2e7d4f"/><circle cx="1065" cy="446" r="5" fill="#2e7d4f"/><ellipse cx="1065" cy="474" rx="26" ry="8" fill="#2e7d4f" opacity=".75"/></g>
-          <text x="20" y="430" font-size="21" font-weight="600" fill="var(--fjord-soft)">Sorbens-DAC</text>
-          <text x="20" y="458" font-size="19" fill="var(--ink-2)">Sorbens bindet CO₂, Dampf löst es,</text>
-          <text x="20" y="484" font-size="19" fill="var(--ink-2)">verdichten, im Gestein speichern</text>
-        </g>
-        <g class="pop" data-step="1">
-          <text x="470" y="40" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE ORT · 0,5°-ZELLE</text>
-          <rect x="470" y="56" width="250" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="488" y="92" font-size="23" font-weight="600" fill="var(--ink)">Wetter</text><text x="488" y="124" font-size="19" fill="var(--ink-2)">Temperatur, Feuchte</text><text x="488" y="151" font-size="19" fill="var(--muted)">CRU TS 4.09</text>
-          <path class="m-flow" d="M724 118 H760" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
-          <rect x="768" y="56" width="280" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="786" y="92" font-size="23" font-weight="600" fill="var(--ink)">Energie je Tonne</text><text x="786" y="124" font-size="19" fill="var(--ink-2)">1,1 bis 1,9 MWh Strom</text><text x="786" y="151" font-size="19" fill="var(--muted)">Prozessmodell, Sendi 2022</text>
-        </g>
-        <g class="pop" data-step="2">
-          <text x="470" y="250" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE JAHR · 2026–2100</text>
-          <rect x="470" y="266" width="250" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="488" y="302" font-size="23" font-weight="600" fill="var(--ink)">Strommix</text><text x="488" y="334" font-size="19" fill="var(--ink-2)">je Region und Jahr</text><text x="488" y="361" font-size="19" fill="var(--muted)">REMIND-EU über premise</text>
-        </g>
-        <g class="pop" data-step="3">
-          <path class="m-flow" d="M724 328 H760" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
-          <path class="m-flow" d="M908 184 V258" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
-          <rect x="768" y="266" width="280" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="786" y="302" font-size="23" font-weight="600" fill="var(--ink)">Zeitexplizite Ökobilanz</text><text x="786" y="334" font-size="19" fill="var(--ink-2)">Strom je t × Mix des Jahres</text><text x="786" y="361" font-size="19" fill="var(--muted)">+ Anlage, Sorbens, Lager</text>
-          <path class="m-flow" d="M1052 328 H1084" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
-          <rect x="1092" y="250" width="332" height="156" rx="10" fill="var(--fjord)"/><text x="1110" y="286" font-size="23" font-weight="600" fill="var(--paper)">Netto-Anteil η</text><text x="1110" y="318" font-size="19" fill="var(--paper)">je Zelle und Jahr</text><text x="1110" y="345" font-size="19" fill="var(--paper)">η = 1 − Emissionen je t</text><text x="1110" y="372" font-size="19" fill="var(--fjord-soft)">Median: 46 % 2026, 91 % 2040</text>
-        </g>
-      </g>
-    </svg>
-    <p class="takeaway" data-step="4" style="--d:0">Mit heutigem Strom bleibt von einer entnommenen Tonne netto knapp die Hälfte (46&nbsp;%), 2040 schon 91&nbsp;%. <span class="tq">Wie viel DAC braucht es also, wo und wann?</span></p>
+    <p class="lq">Kann DAC die Lücke nach den Bäumen schließen? Erst: Was bringt eine Tonne?</p>
+    <div class="anker">
+      <div class="chart" data-step="0" data-ec="anker0" data-label="Erwärmung über 1,5 °C 2026 bis 2100 nach den Bäumen: Spitze 0,31 K um 2048"></div>
+      <div class="flow">
+        <div class="fb" data-step="0"><p class="pk">Prozess</p><div><p>Sorbens-DAC: Luft durch ein Amin, Dampf um 100&nbsp;°C löst das CO₂, verdichtet und im Gestein gespeichert</p></div></div>
+        <div class="fb" data-step="1"><p class="pk">je Ort</p><div><p>Wetter der 0,5°-Zelle (CRU TS) → Energie je Tonne: <b>1,1 bis 1,9&nbsp;MWh</b> Strom (Prozessmodell, Sendi 2022)</p></div></div>
+        <div class="fb" data-step="2"><p class="pk">je Jahr</p><div><p>Strommix je Region und Jahr aus REMIND-EU, über premise in ecoinvent</p></div></div>
+        <div class="fb res" data-step="3"><p class="pk">Ergebnis</p><div><p>Zeitexplizite Ökobilanz: Strom je t × Mix des Jahres, + Anlage, Sorbens, Lager</p><p class="eta">CO₂-Entnahmeeffizienz η<sub>C</sub> = 1 − Emissionen je entnommener t</p><p class="dnum">46&nbsp;% <small>2026 · 91&nbsp;% 2040 (Median)</small></p></div></div>
+      </div>
+    </div>
+    <p class="takeaway" data-step="4" style="--d:0">Mit heutigem Strom bleibt von einer entnommenen Tonne netto knapp die Hälfte, 2040 schon 91&nbsp;%. <span class="tq">Wie viel DAC braucht es also, wo und wann?</span></p>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozess: Sorbens-DAC mit dampfunterstützter Temperatur-Vakuum-Wechseladsorption, Wärme aus Wärmepumpe, Klimaabhängigkeit)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klima: CRU TS 4.09, Mittel 2011–2020)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (premise: Energiebedarf der Anlage und Strommix aus REMIND-EU, SSP2-NDC, mit ecoinvent 3.12)</span><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (GWP100)</span></p>
   <aside class="notes" data-n="27">
-    <p>Die Maschine: Gebläse drücken Luft durch ein Sorbens, ein Amin, an dem das CO₂ haften bleibt. Dann wird die Kammer geschlossen, Dampf um 100 °C löst das CO₂ wieder ab; es wird verdichtet und in tiefe Gesteinsschichten gepresst. Mit Wärmepumpe braucht das rund 1,5 Megawattstunden Strom je Tonne.</p>
-    <p>Klick: Wie viel genau, hängt vom Ort ab. Aus dem Wetter jeder Zelle, Temperatur und Feuchte, rechnet das Prozessmodell den Energiebedarf: 1,1 bis 1,9 MWh. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme, weil Wasser mitadsorbiert wird.</p>
-    <p>Klick: Und vom Jahr. Woher der Strom kommt, ändert sich: Strommix je Region und Jahr aus REMIND-EU, über premise in ecoinvent eingebaut.</p>
-    <p>Klick: Beides zusammen in einer zeitexpliziten Ökobilanz: Strom je Tonne mal Emissionen je kWh im jeweiligen Jahr, dazu Anlage, Sorbens und Lager. Was von einer entnommenen Tonne netto bleibt, ist der Netto-Anteil, je Zelle und Jahr: im Median 46 % heute, 91 % 2040, wenn der Strom sauberer wird.</p>
-    <p>Klick: Mit heutigem Strom bleibt also knapp die Hälfte einer entnommenen Tonne netto übrig; je sauberer der Strom, desto mehr. Und weil das je Ort und Jahr anders ist, die Frage: Wie viel DAC braucht es, wo und wann?</p>
+    <p>Links der Anker für den Rest: die Erwärmung über 1,5 °C, nachdem die Bäume gepflanzt sind; Spitze 0,31 Kelvin um 2048. Kann DAC diese Lücke schließen? Erst: Was bringt eine Tonne? Rechts, wie ich DAC modelliere. Die Maschine: Gebläse drücken Luft durch ein Sorbens, ein Amin, an dem das CO₂ haften bleibt; Dampf um 100 °C löst es wieder ab, es wird verdichtet und in tiefe Gesteinsschichten gepresst.</p>
+    <p>Klick: Wie viel Energie das braucht, hängt vom Ort ab: Aus dem Wetter jeder Zelle rechnet das Prozessmodell 1,1 bis 1,9 Megawattstunden Strom je Tonne. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme.</p>
+    <p>Klick: Und vom Jahr: Woher der Strom kommt, ändert sich, Strommix je Region und Jahr aus REMIND-EU.</p>
+    <p>Klick: Beides zusammen in einer zeitexpliziten Ökobilanz. Was von einer entnommenen Tonne netto bleibt, nenne ich die CO₂-Entnahmeeffizienz eta C, je Zelle und Jahr: im Median 46 Prozent heute, 91 Prozent 2040, wenn der Strom sauberer wird.</p>
+    <p>Klick: Mit heutigem Strom bleibt also knapp die Hälfte; je sauberer der Strom, desto mehr. Und weil das je Ort und Jahr anders ist: Wie viel DAC braucht es, wo und wann?</p>
     <p class="q">Falls Fragen kommen — Gerechnet mit Brightway und premise: ecoinvent 3.12 mit REMIND-EU-Strompfaden, sechs Stützjahre, dazwischen interpoliert; 45 183 Landzellen mal 75 Jahre. Die Ökobilanzen löst ein iterativer Löser mit Warmstart, rund 80-mal schneller als der direkte.</p>
-    <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte des Netto-Anteils im Anhang.</p>
+    <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte der CO₂-Entnahmeeffizienz im Anhang.</p>
   </aside>
 </section>
 
@@ -81,61 +42,28 @@
     <p class="lq">Wie viel DAC braucht es, wo und wann?</p>
     <div class="anker">
       <div class="chart" data-step="0" data-ec="anker1" data-label="Erwärmung über 1,5 °C 2026 bis 2100: nur Bäume, dann mit DAC bei 20 Prozent Wachstum im Jahr, dann mit DAC ohne Wachstumsgrenze"></div>
-      <div class="panes">
-        <div class="pane" data-step="0">
-          <p class="dk">Ausgangspunkt · nach den Bäumen</p>
-          <p class="dnum">0,31 <small>K über 1,5&nbsp;°C um 2048</small></p>
-          <p class="dsub">Die Bäume als Forst bringen bis 2100 29&nbsp;mK. Die Lücke links soll DAC schließen.</p>
-        </div>
-        <div class="pane" data-step="1" aria-label="Was die Optimierung tut">
-          <p class="dk">Optimierung · lineares Programm</p>
-          <div class="pz"><p class="pk">wählt</p><p>DAC-Kapazität je Land und Jahr, 2026 bis 2100</p></div>
-          <div class="pz ziel"><p class="pk">Ziel</p><ol><li>Spitze der Erwärmung so niedrig wie möglich</li><li>dann so früh wie möglich zurück auf 1,5&nbsp;°C</li><li>dabei möglichst wenig Kapazität</li></ol></div>
-          <div class="pz"><p class="pk">Grenzen</p><p>Netto-Anteil je Ort und Jahr (46&nbsp;% heute, 91&nbsp;% 2040) · Speicher je Land · Wachstum ≤&nbsp;20&nbsp;%/a</p></div>
-        </div>
-        <div class="pane" data-step="2">
-          <p class="dk">Ergebnis · Wachstum ≤ 20 %/a</p>
-          <p class="dnum">49 <small>Gt CO₂/a · 1,5&nbsp;°C ab 2083</small></p>
-          <div class="dmap" data-path="opt" data-scale="opt" data-w="560"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DAC 2026 bis 2100 je 2°-Block, verteilt über 110 Länder"></canvas></div><div class="dleg"></div>
-          <p class="dsub">1&nbsp;050 Gt bis 2100: 72&nbsp;% der sicheren Speicher, in 110 Ländern. Aber die Spitze bleibt.</p>
-        </div>
-        <div class="pane" data-step="3">
-          <p class="dk">Warum die Spitze bleibt</p>
-          <div class="chart" data-step="3" data-ec="ankerkap" data-label="Weltweite DAC-Kapazität 2026 bis 2100 bei 20 Prozent Wachstum: 2048 erst 0,2 Gigatonnen im Jahr"></div>
-          <p class="dsub">DAC wächst höchstens 20&nbsp;% im Jahr: 1&nbsp;Gt/a erst 2056, 49&nbsp;Gt/a Ende der 2070er.</p>
-        </div>
-        <div class="pane" data-step="4">
-          <p class="dk">Schneller bauen?</p>
-          <div class="vt v4" role="table" aria-label="Spitze, frühestes Jahr zurück auf 1,5 °C und Kapazität je Wachstumsgrenze">
-            <div class="r head" role="row"><span role="columnheader">Wachstum</span><span role="columnheader">Spitze</span><span role="columnheader">1,5&nbsp;°C ab</span><span role="columnheader">Kapazität</span></div>
-            <div class="r main" role="row"><span role="cell"><i class="ln dac"></i>≤ 20 %/a</span><span role="cell">0,31 K</span><span role="cell">2083</span><span role="cell">49 Gt/a</span></div>
-            <div class="r" role="row"><span role="cell"><i class="ln none"></i>≤ 30 %/a</span><span role="cell">0,31 K</span><span role="cell">2072</span><span role="cell">63 Gt/a</span></div>
-            <div class="r" role="row"><span role="cell"><i class="ln none"></i>≤ 50 %/a</span><span role="cell">0,30 K</span><span role="cell">2063</span><span role="cell">61 Gt/a</span></div>
-            <div class="r hi" role="row"><span role="cell"><i class="ln frei2"></i>ohne Grenze</span><span role="cell"><b>0,04 K</b></span><span role="cell"><b>2041</b></span><span role="cell"><b>72 Gt/a</b></span></div>
-          </div>
-          <p class="dsub">Erst ohne jede Grenze sinkt die Spitze. Und sie zählt: Kipppunkte werden mit jedem Zehntelgrad wahrscheinlicher.</p>
-        </div>
-        <div class="pane cmp" data-step="5" role="img" aria-label="Kosten des DAC-Pfads mit 20 Prozent Wachstum im teuersten Jahr 2077, Median 13,8 Billionen Euro; BIP der EU-27 18,1; fossile Subventionen weltweit 0,57 Billionen Euro im Jahr">
-          <p class="dk">Was kostet das? · 2077, Bio. € pro Jahr</p>
-          <div class="row main" style="--w:76.0%; --c:#ff5a4f; --d2:0"><span>DAC, 20 %/a (Median)</span><div class="track"><i></i></div><b>13,8</b></div>
+      <div class="flow">
+        <div class="fb" data-step="0"><p class="pk">Optimierung</p><div><p><b>wählt</b> Kapazität je Land und Jahr</p><p><b>Ziel</b> ① Spitze minimal ② früh zurück auf 1,5&nbsp;°C ③ wenig Kapazität</p><p><b>Grenzen</b> η<sub>C</sub> · Speicher je Land · ≤&nbsp;20&nbsp;%/a</p></div></div>
+        <div class="fb" data-step="1"><p class="pk">Ergebnis</p><div><div class="fmap"><div class="dmap" data-path="opt" data-scale="opt" data-w="230"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DAC 2026 bis 2100, verteilt über 110 Länder"></canvas></div><p><b class="big">49&nbsp;Gt/a</b>, 1,5&nbsp;°C ab 2083<br>1&nbsp;050&nbsp;Gt in 110 Ländern</p></div></div></div>
+        <div class="fb" data-step="2"><p class="pk">Spitze bleibt</p><div><p>DAC wächst höchstens 20&nbsp;% im Jahr: zur Spitze 2048 erst <b>0,2&nbsp;Gt/a</b>, 1&nbsp;Gt/a erst 2056</p></div></div>
+        <div class="fb" data-step="3"><p class="pk">Schneller?</p><div><p>30 oder 50&nbsp;%/a: Spitze 0,31 / 0,30&nbsp;K. <b>Unbegrenzt: 0,04&nbsp;K</b>, mit 72&nbsp;Gt/a ab sofort.</p></div></div>
+        <div class="fb cmp" data-step="4" role="img" aria-label="Kosten des DAC-Pfads mit 20 Prozent Wachstum im teuersten Jahr 2077, Median 13,8 Billionen Euro; BIP der EU-27 18,1; fossile Subventionen weltweit 0,57 Billionen Euro im Jahr"><p class="pk">Kosten</p><div>
+          <div class="row main" style="--w:76.0%; --c:#ff5a4f; --d2:0"><span>DAC 2077, Bio. €/a</span><div class="track"><i></i></div><b>13,8</b></div>
           <div class="row" style="--w:100%; --c:#9fc4e8; --d2:250"><span>BIP der EU-27</span><div class="track"><i></i></div><b>18,1</b></div>
-          <div class="row" style="--w:3.15%; --c:#f0b04a; --d2:500"><span>fossile Subventionen</span><div class="track"><i></i></div><b>0,57</b></div>
-          <p class="dsub">Bis 2100 zusammen 223 Bio. € (Spanne 134–339).</p>
-        </div>
+          <div class="row" style="--w:3.15%; --c:#f0b04a; --d2:500"><span>fossile Subventionen</span><div class="track"><i></i></div><b>0,57</b></div></div></div>
       </div>
     </div>
-    <p class="takeaway" data-step="6" style="--d:0">Nur Tempo senkt die Spitze, und früh zurück kostet drei Viertel des EU-BIP im Jahr. <span class="tq">Was wirkt sofort?</span></p>
+    <p class="takeaway" data-step="5" style="--d:0">Nur Tempo senkt die Spitze, und früh zurück kostet drei Viertel des EU-BIP im Jahr. <span class="tq">Was wirkt sofort?</span></p>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (Wachstum)</span><span><a href="https://doi.org/10.1126/science.abn7950" target="_blank" rel="noopener">Armstrong McKay et al. 2022</a> (Kipppunkte)</span><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (Kosten)</span><span>Eurostat (BIP EU-27 2024)</span><span>IEA (fossile Subventionen 2023)</span><span><i>Eigene Rechnung</i> (lineares Programm je Land und Jahr; Erwärmung über 1,5&nbsp;°C mit Very Low und den Bäumen als Forst; Kosten im Nachgang)</span></p>
   <aside class="notes" data-n="28">
-    <p>Links unser Anker für den Rest des Vortrags: die Erwärmung über 1,5 °C, nachdem die Bäume gepflanzt sind. Die Spitze liegt um 2048 bei 0,31 Kelvin. Die soll DAC schließen.</p>
-    <p>Klick: Wie viel DAC, wo und wann, entscheidet eine Optimierung: Sie wählt die Kapazität je Land und Jahr. Das Ziel: zuerst die Spitze so niedrig wie möglich, dann so früh wie möglich zurück auf 1,5 °C, mit möglichst wenig Anlagen. Die Grenzen: der Netto-Anteil je Ort und Jahr aus dem DAC-Modell, der Speicher je Land, höchstens 20 Prozent Wachstum im Jahr, so schnell wie einst die Windkraft.</p>
-    <p>Klick: Das Ergebnis, rot im Anker: 1,5 °C ab 2083, mit 49 Gigatonnen im Jahr. Rechts, wo bis 2100 entnommen wird: 1 050 Gigatonnen, fast drei Viertel der sicheren Speicher, über 110 Länder verteilt. Aber die Spitze bleibt.</p>
-    <p>Klick: Warum? Rechts die Kapazität: DAC darf nur 20 Prozent im Jahr wachsen. Zur Spitze 2048 laufen erst 0,2 Gigatonnen im Jahr; 1 Gigatonne erst 2056.</p>
-    <p>Klick: Also schneller bauen? Mit 30 oder 50 Prozent kommt 1,5 °C früher, die Spitze sinkt kaum. Erst ohne jede Grenze, gestrichelt im Anker, sinkt sie auf 0,04 Kelvin, mit 72 Gigatonnen im Jahr ab sofort. So schnell ist noch keine Technik gewachsen. Und die Spitze zählt: Je höher sie steigt, desto wahrscheinlicher kippen Teile des Klimasystems.</p>
+    <p>Wie viel DAC, wo und wann, entscheidet eine Optimierung: Sie wählt die Kapazität je Land und Jahr. Das Ziel: zuerst die Spitze so niedrig wie möglich, dann so früh wie möglich zurück auf 1,5 °C, mit möglichst wenig Anlagen. Die Grenzen: die CO₂-Entnahmeeffizienz je Ort und Jahr, der Speicher je Land, höchstens 20 Prozent Wachstum im Jahr, so schnell wie einst die Windkraft.</p>
+    <p>Klick: Das Ergebnis, rot im Anker: 1,5 °C ab 2083, mit 49 Gigatonnen im Jahr; 1 050 Gigatonnen bis 2100, fast drei Viertel der sicheren Speicher, über 110 Länder verteilt. Aber die Spitze bleibt.</p>
+    <p>Klick: Warum? DAC darf nur 20 Prozent im Jahr wachsen. Zur Spitze 2048 laufen erst 0,2 Gigatonnen im Jahr; 1 Gigatonne erst 2056.</p>
+    <p>Klick: Also schneller bauen? Mit 30 oder 50 Prozent sinkt die Spitze kaum. Erst ohne jede Grenze, gestrichelt im Anker, sinkt sie auf 0,04 Kelvin, mit 72 Gigatonnen im Jahr ab sofort. So schnell ist noch keine Technik gewachsen. Und die Spitze zählt: Je höher sie steigt, desto wahrscheinlicher kippen Teile des Klimasystems.</p>
     <p>Klick: Und was kostet der Pfad mit 20 Prozent? Im teuersten Jahr 13,8 Billionen Euro, drei Viertel der Wirtschaftsleistung der EU, das 24-Fache der fossilen Subventionen weltweit.</p>
     <p>Klick: Nur Tempo senkt die Spitze, und früh zurück ist teuer. Gibt es etwas, das sofort wirkt?</p>
-    <p class="q">Falls Fragen kommen — Nur 1,5 °C im Jahr 2100 statt so früh wie möglich: 6,0 Gt/a, kostenoptimal rund 48 Bio. €. Spitze ohne DAC 311,3, mit DAC 310,9 mK. Karte, Länder, Tempo-Charts und Kostenverlauf im Backup. IMF zählt bei fossilen Subventionen nicht bezahlte Schäden mit (rund 7 Bio. USD 2022), das ist kein ausgegebenes Geld.</p>
+    <p class="q">Falls Fragen kommen — Nur 1,5 °C im Jahr 2100 statt so früh wie möglich: 6,0 Gt/a, kostenoptimal rund 48 Bio. €. Frühestes Jahr bei 30/50 %/a: 2072/2063 (63/61 Gt/a). Spitze ohne DAC 311,3, mit DAC 310,9 mK. Große Karte, Länder, Tempo-Charts und Kostenverlauf im Backup. IMF zählt bei fossilen Subventionen nicht bezahlte Schäden mit (rund 7 Bio. USD 2022), das ist kein ausgegebenes Geld.</p>
   </aside>
 </section>
 
@@ -145,40 +73,24 @@
     <p class="lq">Gibt es etwas, das die Spitze sofort senkt?</p>
     <div class="anker">
       <div class="chart" data-step="0" data-ec="anker2" data-label="Erwärmung über 1,5 °C 2026 bis 2100: nur Bäume, mit DAC, und mit veganer Welt ohne DAC"></div>
-      <div class="panes">
-        <div class="pane" data-step="0">
-          <p class="dk">Grenzfall: alle essen ab 2026 vegan</p>
-          <ul class="dots"><li>Tierhaltung fällt weg: Methan, Lachgas, CO₂</li><li>Ersatzprodukte brauchen die Hälfte des Futterackers</li><li>Wald auf 0,54&nbsp;Gha frei werdender Fläche, 0,21&nbsp;Gha kühlen</li></ul>
-          <p class="dsub">Methan wirkt stark, aber kurz: Nach etwa zwölf Jahren ist es abgebaut. Fällt es weg, kühlt es schnell.</p>
-        </div>
-        <div class="pane cmp" data-step="1" role="img" aria-label="Kühlung der veganen Welt 2050 nach Ursache in Millikelvin: Methan 174, Lachgas 21, CO₂ aus Futteranbau und Entwaldung 4, Wald 8, Ersatzprodukte minus 4, Albedo minus 1, netto 203">
-          <p class="dk">Woher die Kühlung kommt · 2050, mK</p>
+      <div class="flow">
+        <div class="fb" data-step="0"><p class="pk">Grenzfall</p><div><p>Die ganze Welt isst ab 2026 vegan. Die Tierhaltung fällt weg, Ersatzprodukte brauchen die Hälfte des Futterackers, auf 0,54&nbsp;Gha frei werdender Fläche wächst Wald.</p></div></div>
+        <div class="fb cmp" data-step="1" role="img" aria-label="Kühlung der veganen Welt 2050 nach Ursache in Millikelvin: Methan 174, Lachgas 21, Wald 8, CO₂ aus Futter und Rodung 4, Ersatzprodukte minus 4, Albedo minus 1, netto 203"><p class="pk">Kühlung 2050</p><div>
           <div class="row main" style="--w:85.7%; --c:#4f9fc7; --d2:0"><span>Methan</span><div class="track"><i></i></div><b>174</b></div>
           <div class="row" style="--w:10.3%; --c:#86c6e4; --d2:150"><span>Lachgas</span><div class="track"><i></i></div><b>21</b></div>
-          <div class="row" style="--w:3.9%; --c:#5fae76; --d2:300"><span>Wald auf freier Fläche</span><div class="track"><i></i></div><b>8</b></div>
-          <div class="row" style="--w:2.0%; --c:#c3e3f2; --d2:450"><span>CO₂ Futter, Rodung</span><div class="track"><i></i></div><b>4</b></div>
-          <div class="row" style="--w:2.0%; --c:#e0903e; --d2:600"><span>Ersatzprodukte</span><div class="track"><i></i></div><b>−4</b></div>
-          <div class="row" style="--w:0.5%; --c:#d0644a; --d2:750"><span>Albedo des Waldes</span><div class="track"><i></i></div><b>−1</b></div>
-          <p class="dsub">Netto 203&nbsp;mK, also 0,2&nbsp;K kühler schon 2050.</p>
-        </div>
-        <div class="pane" data-step="2">
-          <p class="dk">Vegane Welt, ganz ohne DAC</p>
-          <p class="dnum">0,13 <small>K Spitze statt 0,31</small></p>
-          <p class="dsub">Zurück auf 1,5&nbsp;°C ab 2065, 18 Jahre früher als mit 49&nbsp;Gt/a DAC.</p>
-        </div>
-        <div class="pane" data-step="3">
-          <p class="dk">DAC zusätzlich zur veganen Welt</p>
-          <p class="dnum">0,1 <small>statt 49 Gt CO₂/a</small></p>
-          <p class="dsub">Gespart bis 2100: 222 Bio. € (134–338) und 1&nbsp;050&nbsp;Gt Entnahme.</p>
-        </div>
+          <div class="row" style="--w:5.9%; --c:#5fae76; --d2:300"><span>Wald und CO₂</span><div class="track"><i></i></div><b>12</b></div>
+          <div class="row" style="--w:2.5%; --c:#e0903e; --d2:450"><span>Ersatz, Albedo</span><div class="track"><i></i></div><b>−5</b></div>
+          <p class="unit">mK · netto 203&nbsp;mK. Methan wirkt stark, aber kurz: Fällt es weg, kühlt es schnell.</p></div></div>
+        <div class="cue" data-step="2"></div>
+        <div class="fb" data-step="3"><p class="pk">DAC dazu?</p><div><p>Zusätzlich zur veganen Welt baut dieselbe Optimierung nur <b class="big">0,1&nbsp;Gt/a</b> statt 49. Gespart bis 2100: <b>222&nbsp;Bio.&nbsp;€</b> (134–338) und 1&nbsp;050&nbsp;Gt.</p></div></div>
       </div>
     </div>
     <p class="takeaway" data-step="4" style="--d:0">Für die Spitze zählt, was vor 2050 wirkt: weniger Methan senkt sie sofort, DAC kommt dafür zu spät.</p>
   </div>
   <p class="src"><span><a href="https://www.fao.org/faostat/en/#data/GT" target="_blank" rel="noopener">FAOSTAT 2022</a> (Tierhaltung)</span><span><a href="https://doi.org/10.1126/science.aaq0216" target="_blank" rel="noopener">Poore &amp; Nemecek 2018</a> (Acker)</span><span><a href="https://ourworldindata.org/what-has-driven-deforestation-in-the-21st-century" target="_blank" rel="noopener">Singh &amp; Persson 2026</a> (Entwaldung)</span><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (frei werdende Flächen)</span><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (Kosten)</span><span><i>Eigene Rechnung</i> (FaIR auf Very Low je Ursache; DAC mit derselben Optimierung, 20&nbsp;%/a)</span></p>
   <aside class="notes" data-n="29">
-    <p>Gibt es etwas, das die Spitze sofort senkt? Ein Gedankenexperiment, ein Grenzfall: Die ganze Welt isst ab 2026 vegan. Die Tierhaltung fällt weg; Ersatzprodukte brauchen etwa die Hälfte des Ackers, der heute Futter trägt; auf frei werdenden Weiden und Äckern wächst Wald. Und Methan wirkt stark, aber kurz: Fällt es weg, kühlt es schnell.</p>
-    <p>Klick: Woher die Kühlung kommt, 2050: fast alles Methan, 174 Millikelvin; Lachgas 21; Wald und CO₂ wenig; Ersatzprodukte und die Albedo des neuen Waldes wirken leicht dagegen. Netto 0,2 Kelvin kühler schon 2050.</p>
+    <p>Gibt es etwas, das die Spitze sofort senkt? Ein Gedankenexperiment, ein Grenzfall: Die ganze Welt isst ab 2026 vegan. Die Tierhaltung fällt weg; Ersatzprodukte brauchen etwa die Hälfte des Ackers, der heute Futter trägt; auf frei werdenden Weiden und Äckern wächst Wald.</p>
+    <p>Klick: Woher die Kühlung kommt, 2050: fast alles Methan, 174 Millikelvin; Lachgas 21; Wald und CO₂ wenig; Ersatzprodukte und die Albedo des neuen Waldes wirken leicht dagegen. Methan wirkt stark, aber kurz: Nach etwa zwölf Jahren ist es abgebaut; fällt es weg, kühlt es schnell.</p>
     <p>Klick: Im Anker: die vegane Welt, ganz ohne DAC. Die Spitze sinkt auf 0,13 Kelvin, um 2044, und ab 2065 gilt wieder 1,5 °C, 18 Jahre früher als mit 49 Gigatonnen DAC.</p>
     <p>Klick: Und DAC zusätzlich? Dieselbe Optimierung baut nur noch gut 0,1 Gigatonnen im Jahr. Gespart bis 2100: 222 Billionen Euro und 1 050 Gigatonnen.</p>
     <p>Klick: Für die Spitze zählt, was vor 2050 wirkt. Weniger Methan senkt sie sofort; DAC kommt dafür zu spät.</p>

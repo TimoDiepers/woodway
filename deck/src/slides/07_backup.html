@@ -203,6 +203,72 @@
 </section>
 
 <!-- Grundlagen: DAC -->
+<section class="slide dark backup" data-ch="dac" data-title="DAC-Modell: Schema">
+  <header class="sh"><h2>DAC-Modell: je Ort und je Jahr</h2></header>
+  <div class="body">
+    <svg class="schema mo" data-export="s_dac_modell" viewBox="0 0 1424 560" style="width:100%; flex:1; min-height:0" aria-label="DAC-Anlage; Rechenweg: Wetter je Ort ergibt den Energiebedarf je Tonne, der Strommix je Region und Jahr die Emissionen je kWh; die zeitexplizite Ökobilanz ergibt den CO₂-Entnahmeeffizienz je Zelle und Jahr">
+      <defs><marker id="ah-dk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
+      <g font-family="IBM Plex Sans">
+        <g class="pop" style="--d:100"><g transform="translate(-612 -50) scale(.9)">
+          <rect x="780" y="430" width="380" height="40" fill="#d9cfb9"/>
+          <path d="M780 450 H1160" stroke="#c3b79c" stroke-width="2"/>
+          <line x1="780" y1="430" x2="1160" y2="430" stroke="#8c7a58" stroke-width="3" stroke-linecap="round"/>
+          <rect x="912" y="330" width="30" height="100" fill="#5d665f"/>
+          <rect x="800" y="220" width="200" height="110" rx="10" fill="var(--fjord)"/>
+          <g fill="var(--paper)"><circle cx="840" cy="275" r="26"/><circle cx="900" cy="275" r="26"/><circle cx="960" cy="275" r="26"/></g>
+          <g stroke="var(--fjord)" stroke-width="4" stroke-linecap="round"><path class="m-fan" d="M840 256 V294 M821 275 H859"/><path class="m-fan" d="M900 256 V294 M881 275 H919"/><path class="m-fan" d="M960 256 V294 M941 275 H979"/></g>
+          <g stroke="var(--alb)" stroke-width="3.5" fill="none" stroke-linecap="round">
+            <path class="m-steam" d="M826 370 q7 -7 0 -14 q-7 -7 0 -14"/><path class="m-steam" d="M856 370 q7 -7 0 -14 q-7 -7 0 -14"/><path class="m-steam" d="M886 370 q7 -7 0 -14 q-7 -7 0 -14"/>
+          </g>
+          <path d="M1000 300 H1060 V346" stroke="#5d665f" stroke-width="8" fill="none"/>
+          <rect x="1036" y="346" width="58" height="44" rx="6" fill="#5d665f"/>
+          <path d="M1065 390 V466" stroke="#5d665f" stroke-width="8"/>
+          <path d="M1036 126 L1020 160 H1036 L1022 194 L1056 150 H1040 L1052 126Z" fill="var(--sun-ray)"/>
+          <path class="m-flowd" d="M1036 196 L1004 222" stroke="var(--sun-ray)" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>
+          <g font-size="19" fill="var(--muted)">
+            <text x="800" y="206">Gebläse</text>
+            <text x="1064" y="160">Strom</text>
+            <text x="1100" y="380">Verdichter</text>
+            <text x="780" y="398">Dampf, 100 °C</text>
+            <text x="1080" y="498" text-anchor="middle">Speicher im Gestein</text>
+          </g><path d="M690 262 H792" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 6" fill="none" marker-end="url(#ah-dk)"/><circle cx="716" cy="252" r="6" fill="#2e7d4f"/><circle cx="744" cy="268" r="6" fill="#2e7d4f"/><circle cx="770" cy="250" r="6" fill="#2e7d4f"/><text x="690" y="232" font-size="19" fill="var(--muted)">Luft</text><circle cx="1030" cy="300" r="5" fill="#2e7d4f"/><circle cx="1062" cy="322" r="5" fill="#2e7d4f"/><circle cx="1065" cy="420" r="5" fill="#2e7d4f"/><circle cx="1065" cy="446" r="5" fill="#2e7d4f"/><ellipse cx="1065" cy="474" rx="26" ry="8" fill="#2e7d4f" opacity=".75"/></g>
+          <text x="20" y="430" font-size="21" font-weight="600" fill="var(--fjord-soft)">Sorbens-DAC</text>
+          <text x="20" y="458" font-size="19" fill="var(--ink-2)">Sorbens bindet CO₂, Dampf löst es,</text>
+          <text x="20" y="484" font-size="19" fill="var(--ink-2)">verdichten, im Gestein speichern</text>
+        </g>
+        <g class="pop" data-step="1">
+          <text x="470" y="40" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE ORT · 0,5°-ZELLE</text>
+          <rect x="470" y="56" width="250" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="488" y="92" font-size="23" font-weight="600" fill="var(--ink)">Wetter</text><text x="488" y="124" font-size="19" fill="var(--ink-2)">Temperatur, Feuchte</text><text x="488" y="151" font-size="19" fill="var(--muted)">CRU TS 4.09</text>
+          <path class="m-flow" d="M724 118 H760" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
+          <rect x="768" y="56" width="280" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="786" y="92" font-size="23" font-weight="600" fill="var(--ink)">Energie je Tonne</text><text x="786" y="124" font-size="19" fill="var(--ink-2)">1,1 bis 1,9 MWh Strom</text><text x="786" y="151" font-size="19" fill="var(--muted)">Prozessmodell, Sendi 2022</text>
+        </g>
+        <g class="pop" data-step="2">
+          <text x="470" y="250" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE JAHR · 2026–2100</text>
+          <rect x="470" y="266" width="250" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="488" y="302" font-size="23" font-weight="600" fill="var(--ink)">Strommix</text><text x="488" y="334" font-size="19" fill="var(--ink-2)">je Region und Jahr</text><text x="488" y="361" font-size="19" fill="var(--muted)">REMIND-EU über premise</text>
+        </g>
+        <g class="pop" data-step="3">
+          <path class="m-flow" d="M724 328 H760" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
+          <path class="m-flow" d="M908 184 V258" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
+          <rect x="768" y="266" width="280" height="124" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="786" y="302" font-size="23" font-weight="600" fill="var(--ink)">Zeitexplizite Ökobilanz</text><text x="786" y="334" font-size="19" fill="var(--ink-2)">Strom je t × Mix des Jahres</text><text x="786" y="361" font-size="19" fill="var(--muted)">+ Anlage, Sorbens, Lager</text>
+          <path class="m-flow" d="M1052 328 H1084" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk)"/>
+          <rect x="1092" y="250" width="332" height="156" rx="10" fill="var(--fjord)"/><text x="1110" y="286" font-size="23" font-weight="600" fill="var(--paper)">CO₂-Entnahmeeffizienz η<tspan font-size="15" baseline-shift="sub">C</tspan></text><text x="1110" y="318" font-size="19" fill="var(--paper)">je Zelle und Jahr</text><text x="1110" y="345" font-size="19" fill="var(--paper)">η = 1 − Emissionen je t</text><text x="1110" y="372" font-size="19" fill="var(--fjord-soft)">Median: 46 % 2026, 91 % 2040</text>
+        </g>
+      </g>
+    </svg>
+    <p class="takeaway" data-step="4" style="--d:0">Mit heutigem Strom bleibt von einer entnommenen Tonne netto knapp die Hälfte (46&nbsp;%), 2040 schon 91&nbsp;%. <span class="tq">Wie viel DAC braucht es also, wo und wann?</span></p>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozess: Sorbens-DAC mit dampfunterstützter Temperatur-Vakuum-Wechseladsorption, Wärme aus Wärmepumpe, Klimaabhängigkeit)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klima: CRU TS 4.09, Mittel 2011–2020)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (premise: Energiebedarf der Anlage und Strommix aus REMIND-EU, SSP2-NDC, mit ecoinvent 3.12)</span><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (GWP100)</span></p>
+  <aside class="notes" data-n="B">
+    <p>Die Maschine: Gebläse drücken Luft durch ein Sorbens, ein Amin, an dem das CO₂ haften bleibt. Dann wird die Kammer geschlossen, Dampf um 100 °C löst das CO₂ wieder ab; es wird verdichtet und in tiefe Gesteinsschichten gepresst. Mit Wärmepumpe braucht das rund 1,5 Megawattstunden Strom je Tonne.</p>
+    <p>Klick: Wie viel genau, hängt vom Ort ab. Aus dem Wetter jeder Zelle, Temperatur und Feuchte, rechnet das Prozessmodell den Energiebedarf: 1,1 bis 1,9 MWh. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme, weil Wasser mitadsorbiert wird.</p>
+    <p>Klick: Und vom Jahr. Woher der Strom kommt, ändert sich: Strommix je Region und Jahr aus REMIND-EU, über premise in ecoinvent eingebaut.</p>
+    <p>Klick: Beides zusammen in einer zeitexpliziten Ökobilanz: Strom je Tonne mal Emissionen je kWh im jeweiligen Jahr, dazu Anlage, Sorbens und Lager. Was von einer entnommenen Tonne netto bleibt, ist die CO₂-Entnahmeeffizienz, je Zelle und Jahr: im Median 46 % heute, 91 % 2040, wenn der Strom sauberer wird.</p>
+    <p>Klick: Mit heutigem Strom bleibt also knapp die Hälfte einer entnommenen Tonne netto übrig; je sauberer der Strom, desto mehr. Und weil das je Ort und Jahr anders ist, die Frage: Wie viel DAC braucht es, wo und wann?</p>
+    <p class="q">Falls Fragen kommen — Gerechnet mit Brightway und premise: ecoinvent 3.12 mit REMIND-EU-Strompfaden, sechs Stützjahre, dazwischen interpoliert; 45 183 Landzellen mal 75 Jahre. Die Ökobilanzen löst ein iterativer Löser mit Warmstart, rund 80-mal schneller als der direkte.</p>
+    <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte des CO₂-Entnahmeeffizienz im Anhang.</p>
+  </aside>
+</section>
+
 <section class="slide backup" data-ch="dac" data-title="Sorbens-DAC: Prozess und Energiebedarf">
   <header class="sh"><h2>Sorbens-DAC: Prozess und Energiebedarf</h2></header>
   <div class="body">
@@ -285,7 +351,7 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozess: Sorbens-DAC mit dampfunterstützter Temperatur-Vakuum-Wechseladsorption; Wärmepumpe und Wetterabhängigkeit)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Energie: premise-Datensatz Sorbens-DAC 100 kt/a, aus ecoinvent 3.12)</span></p>
   <aside class="notes">
-    <p class="q">Ausführlich: Für die Lücke kommt vor allem Direct Air Capture in Frage. Der Prozess ist energieintensiv. Mit Wärmepumpe wird der gesamte Bedarf elektrisch: rund 1,5 MWh je Tonne CO₂. Der Netto-Anteil hängt damit von der Emissionsintensität des Stroms ab, der Strombedarf vom lokalen Klima.</p>
+    <p class="q">Ausführlich: Für die Lücke kommt vor allem Direct Air Capture in Frage. Der Prozess ist energieintensiv. Mit Wärmepumpe wird der gesamte Bedarf elektrisch: rund 1,5 MWh je Tonne CO₂. Die CO₂-Entnahmeeffizienz hängt damit von der Emissionsintensität des Stroms ab, der Strombedarf vom lokalen Klima.</p>
     <p>Die Lücke muss technische Entnahme schließen. Am weitesten entwickelt ist Direct Air Capture, hier das Sorbens-Verfahren. Wie funktioniert es? Erstens: Gebläse drücken Luft durch ein Sorbens, ein Material mit Aminen, an dem das CO₂ haften bleibt. Zweitens: Ist es voll, wird die Kammer geschlossen; Vakuum und Dampf um 100 °C lösen das CO₂ wieder ab. Drittens: Das CO₂ wird verdichtet und in tiefen Gesteinsschichten eingelagert. Das kostet vor allem Energie, rechts je Tonne: anderthalb Megawattstunden Wärme und eine halbe Strom. Mit einer Wärmepumpe wird aus der Wärme Strom — dann hängt alles am Strom. Und wie viel Strom, hängt am Wetter.</p>
     <p class="q">Falls Fragen kommen — Energie aus dem premise-Datensatz (Sorbens-DAC, 100 kt/a, ecoinvent 3.12): 0,5 MWh Strom und 5,4 GJ Wärme je t. Wärmepumpe nach Sendi et al. 2022: 50 % des Carnot-Werts, Senke 120 °C, COP 1,5–2,0. Climeworks meldet für Hinwil 3,3 MWh Wärme und 0,7 MWh Strom je t, etwa doppelt so viel Wärme — das ist eine Sensitivität (Backup). Flüssig-DAC (Kalilauge, Hochtemperatur) ist nicht enthalten.</p>
   </aside>
@@ -308,12 +374,12 @@
   <header class="sh"><h2>Netto-Entnahme von DAC, 2026 bis 2100</h2></header>
   <div class="body">
     <div class="chart" data-chart="d5" data-label="Weltkarte: Anteil einer entnommenen Tonne, der nach den Emissionen von Strom und Anlage netto bleibt, Jahr für Jahr von 2026 bis 2100"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0">Netto-Anteil im Median: 46 % (2026), 91 % (2040). Bäume: 58 %.</p></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0">CO₂-Entnahmeeffizienz im Median: 46 % (2026), 91 % (2040). Bäume: 58 %.</p></div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Sorbens-DAC mit Wärmepumpe)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klima: CRU TS 4.09)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Strommix je Region und Jahr: REMIND-EU SSP2-NDC, heutige Zusagen, über premise, ecoinvent 3.12)</span><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (GWP100)</span><span><i>Eigene Rechnung</i> (Mittel je 2°-Block; Median über das Land, auf dem DAC möglich ist)</span></p>
   <aside class="notes">
     <p class="q">Ausführlich: Mit dem Strom von 2026 bleiben im Median 46 % der entnommenen Tonne netto; auf 2 % des Landes, vor allem in Indien, emittiert DAC mehr, als es entnimmt. Mit der Energiewende steigt der Median auf 65 % (2030), 79 % (2035) und 91 % (2040). Zum Vergleich: Bäume auf den kühlenden Flächen kommen auf 58 %. Im hohen Norden (20 % des Landes) ist es für Sorbens-DAC zu kalt.</p>
-    <p>Jetzt dieselbe Frage wie beim Baum: Welcher Anteil der entnommenen Tonne bleibt netto? Die Karte zeigt, welcher Anteil einer entnommenen Tonne netto übrig bleibt, wenn man die Emissionen des Stroms und der Anlage abzieht. Türkis heißt: viel bleibt. Mit dem Strom von heute im Median knapp die Hälfte. In Joensuu mit finnischem Strom schon 86 %, in Aachen gut die Hälfte, bei Marabá knapp zwei Drittel. Mit Kohlestrom bleibt wenig: Krakau 17 %, Kinshasa 23 %, Peking 24 %; wo es orange wird, vor allem in Indien, emittiert die Maschine mehr, als sie entnimmt. Grau: Im hohen Norden ist es für dieses Verfahren zu kalt. Zum Vergleich mit dem Baum, derselbe Netto-Anteil: Aachen 63 %, Joensuu 28 %, Marabá 82 %, über alle kühlenden Flächen 58 %. Heute ist der Baum also im Mittel die sauberere Tonne, ab etwa 2030 die Maschine.</p>
+    <p>Jetzt dieselbe Frage wie beim Baum: Welcher Anteil der entnommenen Tonne bleibt netto? Die Karte zeigt, welcher Anteil einer entnommenen Tonne netto übrig bleibt, wenn man die Emissionen des Stroms und der Anlage abzieht. Türkis heißt: viel bleibt. Mit dem Strom von heute im Median knapp die Hälfte. In Joensuu mit finnischem Strom schon 86 %, in Aachen gut die Hälfte, bei Marabá knapp zwei Drittel. Mit Kohlestrom bleibt wenig: Krakau 17 %, Kinshasa 23 %, Peking 24 %; wo es orange wird, vor allem in Indien, emittiert die Maschine mehr, als sie entnimmt. Grau: Im hohen Norden ist es für dieses Verfahren zu kalt. Zum Vergleich mit dem Baum, dieselbe CO₂-Entnahmeeffizienz: Aachen 63 %, Joensuu 28 %, Marabá 82 %, über alle kühlenden Flächen 58 %. Heute ist der Baum also im Mittel die sauberere Tonne, ab etwa 2030 die Maschine.</p>
     <p>Jetzt lasse ich die Jahre laufen [Play]. Mit dem Strom wird die Maschine besser, ohne dass sie selbst sich ändert: Aachen erreicht um 2030 gut 80 %, Krakau um 2035, Peking und Kinshasa um 2040. Ab etwa 2040 bleiben fast überall über 90 %. Das ist die Reihenfolge für die Maschine: zuerst dort, wo der Strom sauber ist; nicht mit fossilem Strom; nicht im hohen Norden.</p>
     <p class="q">Falls Fragen kommen — Annahme mit Gewicht: REMIND-EU SSP2-NDC dekarbonisiert schnell (Deutschland 0,42 → 0,09 kg CO₂e/kWh von 2020 bis 2030); mit langsamerer Energiewende verschieben sich die Jahre nach hinten. Gerechnet wird mit dem Netzmittel der Region, nicht mit zusätzlichem Ökostrom. Strom je Tonne 1,1–1,9 MWh; eine Gigatonne im Jahr bräuchte rund 1 500 TWh, etwa 5 % der heutigen Weltstromerzeugung. Mit den Climeworks-Energiewerten (doppelt so viel Wärme) wird es später (Methodendoku). Werte zwischen den Stützjahren der Ökobilanz (2020, 2030, 2040, 2050, 2075, 2100) linear interpoliert; die Karte gleitet zwischen den Jahren. Median 2050: 94 %. Ein Block zeigt das flächengewichtete Mittel seiner Zellen; die Anteile im Text sind aus den Zellen gerechnet.</p>
       <p>Wo und wann sollte man also bauen, damit es für 1,5 °C reicht? Das rechnen wir jetzt.</p>
@@ -325,10 +391,10 @@
   <div class="body">
     <p class="lq">Wie viel DAC braucht es, wo und wann?</p>
     <div class="dsim">
-      <div class="dmapcol"><div class="optbox fd" role="group" aria-label="Was die Optimierung tut: Sie wählt die DAC-Kapazität je Land und Jahr. Ziel: erstens die Spitze der Erwärmung so niedrig wie möglich, zweitens so früh wie möglich zurück auf 1,5 °C, drittens dabei möglichst wenig Kapazität. Grenzen: Netto-Anteil je Ort und Jahr, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
+      <div class="dmapcol"><div class="optbox fd" role="group" aria-label="Was die Optimierung tut: Sie wählt die DAC-Kapazität je Land und Jahr. Ziel: erstens die Spitze der Erwärmung so niedrig wie möglich, zweitens so früh wie möglich zurück auf 1,5 °C, drittens dabei möglichst wenig Kapazität. Grenzen: CO₂-Entnahmeeffizienz je Ort und Jahr, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
         <div><p class="dk">Optimierung wählt</p><p>DAC-Kapazität<br>je Land und Jahr</p></div>
         <div class="ziel rise" data-step="1"><p class="dk">Ziel</p><ol><li>Spitze der Erwärmung so niedrig wie möglich</li><li>dann so früh wie möglich zurück auf 1,5&nbsp;°C</li><li>dabei möglichst wenig Kapazität</li></ol></div>
-        <div class="rise" data-step="2"><p class="dk">Grenzen</p><p>Netto-Anteil je Ort und Jahr<br>Speicher je Land · Wachstum ≤&nbsp;20&nbsp;%/a</p></div>
+        <div class="rise" data-step="2"><p class="dk">Grenzen</p><p>CO₂-Entnahmeeffizienz je Ort und Jahr<br>Speicher je Land · Wachstum ≤&nbsp;20&nbsp;%/a</p></div>
       </div><p class="dk mapcap rise" data-step="3" style="--d:0">Ergebnis: wo bis 2100 entnommen wird</p><div class="dmap rise fs" data-step="3" style="--d:0" data-path="opt" data-scale="opt" data-w="918"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DAC 2026 bis 2100 je 2°-Block, verteilt über 110 Länder mit Speicher"></canvas></div><div class="dleg rise" data-step="3" style="--d:200"></div></div>
       <div class="dside rise" data-step="3" style="--d:400">
         <p class="dk">Ergebnis · Wachstum ≤ 20 %/a</p>
@@ -340,15 +406,15 @@
       </div>
     </div>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm je Land und Jahr: niedrigste Spitze, dann so früh wie möglich zurück auf 1,5&nbsp;°C mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Entnahme des Landes gleich auf diese Zellen verteilt)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a 2030, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm je Land und Jahr: niedrigste Spitze, dann so früh wie möglich zurück auf 1,5&nbsp;°C mit möglichst wenig Kapazität; Anlagen laufen 20 Jahre; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und der höchsten CO₂-Entnahmeeffizienz je Land, Entnahme des Landes gleich auf diese Zellen verteilt)</span></p>
   <aside class="notes" data-n="B">
     <p>Wo und wann wird DAC gebaut? Das entscheidet eine Optimierung, ein lineares Programm. Links, was sie wählt: die DAC-Kapazität je Land und Jahr, von heute bis 2100.</p>
     <p>Klick: Das Ziel, in drei Stufen: erstens die Spitze der Erwärmung so niedrig wie möglich; zweitens, bei dieser Spitze, so früh wie möglich zurück auf 1,5 °C; drittens dabei möglichst wenig Anlagen.</p>
-    <p>Klick: Die Grenzen: der Netto-Anteil je Ort und Jahr aus dem DAC-Modell, der sichere Speicher je Land, und höchstens 20 Prozent Wachstum im Jahr, so schnell wie einst die Windkraft.</p>
+    <p>Klick: Die Grenzen: die CO₂-Entnahmeeffizienz je Ort und Jahr aus dem DAC-Modell, der sichere Speicher je Land, und höchstens 20 Prozent Wachstum im Jahr, so schnell wie einst die Windkraft.</p>
     <p>Klick: Das Ergebnis. Die Karte zeigt, wo bis 2100 entnommen wird: 1 050 Gigatonnen, fast drei Viertel der sicheren Speicher; weil die Speicher je Land knapp werden, verteilt sich DAC über 110 Länder, vorne die USA, Australien, Kanada und China. Rechts die Kapazität: 49 Gigatonnen im Jahr.</p>
     <p>Klick: Was das für die Erwärmung heißt. Gestrichelt nur die Bäume, rot mit DAC: 1,5 °C gilt ab 2083, früher geht es mit 20 Prozent nicht. Die Spitze 2048 aber bleibt bei 0,31 Kelvin.</p>
     <p>Klick: Warum? Bis zur Spitze sind erst 0,2 Gigatonnen im Jahr gebaut; 1 Gigatonne erst 2056. DAC wächst zu langsam für die Spitze. Also die Frage: Hilft schneller bauen?</p>
-    <p class="q">Falls Fragen kommen — Spitze ohne DAC 311,3 mK, mit DAC 310,9 mK. Nur 1,5 °C im Jahr 2100 bräuchte 6,0 Gt/a. Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Schema der Optimierung im Backup. Die Aufteilung auf Länder ist nicht ganz eindeutig; eindeutig sind Menge und große Standorte.</p>
+    <p class="q">Falls Fragen kommen — Spitze ohne DAC 311,3 mK, mit DAC 310,9 mK. Nur 1,5 °C im Jahr 2100 bräuchte 6,0 Gt/a. CO₂-Entnahmeeffizienz je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Schema der Optimierung im Backup. Die Aufteilung auf Länder ist nicht ganz eindeutig; eindeutig sind Menge und große Standorte.</p>
   </aside>
 </section>
 
@@ -459,7 +525,7 @@
 <section class="slide dark backup" data-ch="dac" data-title="Optimierung von DAC">
   <header class="sh"><h2>Optimierung des DAC-Ausbaus</h2></header>
   <div class="body">
-    <svg class="schema mo" data-export="s_dac_optimierung" viewBox="0 0 1424 560" style="width:100%; height:540px; flex:none" aria-label="Ausgangspunkt: Erwärmung über 1,5 °C nach den Bäumen, Spitze 0,31 K 2048, 0,08 K im Jahr 2100. Vorgehen: eine Optimierung wählt Ort und Zeitpunkt, die Kapazität je Land und Jahr. Ziel: zuerst die niedrigste Spitze, dann so früh wie möglich zurück auf 1,5 °C, mit möglichst wenig DAC-Kapazität. Rahmenbedingungen: Netto-Anteil, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
+    <svg class="schema mo" data-export="s_dac_optimierung" viewBox="0 0 1424 560" style="width:100%; height:540px; flex:none" aria-label="Ausgangspunkt: Erwärmung über 1,5 °C nach den Bäumen, Spitze 0,31 K 2048, 0,08 K im Jahr 2100. Vorgehen: eine Optimierung wählt Ort und Zeitpunkt, die Kapazität je Land und Jahr. Ziel: zuerst die niedrigste Spitze, dann so früh wie möglich zurück auf 1,5 °C, mit möglichst wenig DAC-Kapazität. Rahmenbedingungen: CO₂-Entnahmeeffizienz, Speicher je Land, Wachstum höchstens 20 Prozent im Jahr">
       <defs><marker id="ah-dk2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
       <!-- the curve: baeume_rest from deck/chart_data/zeitpfade.json (scratchpad slide28.py) -->
       <g font-family="IBM Plex Sans">
@@ -497,7 +563,7 @@
           <path class="m-flow" d="M714 436 V324" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk2)"/>
           <rect x="0" y="440" width="1424" height="120" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/>
           <text x="24" y="470" font-size="17" letter-spacing="1.5" fill="var(--muted)">RAHMENBEDINGUNGEN</text>
-          <circle cx="31" cy="497" r="6" fill="var(--fjord-soft)"/><text x="48" y="504" font-size="21" font-weight="600" fill="var(--ink)">Netto-Anteil η</text><text x="48" y="532" font-size="19" fill="var(--ink-2)">je Land und Jahr <tspan fill="var(--muted)">· DAC-Modell</tspan></text>
+          <circle cx="31" cy="497" r="6" fill="var(--fjord-soft)"/><text x="48" y="504" font-size="21" font-weight="600" fill="var(--ink)">CO₂-Entnahmeeffizienz η<tspan font-size="15" baseline-shift="sub">C</tspan></text><text x="48" y="532" font-size="19" fill="var(--ink-2)">je Land und Jahr <tspan fill="var(--muted)">· DAC-Modell</tspan></text>
           <circle cx="497" cy="497" r="6" fill="var(--fjord-soft)"/><text x="514" y="504" font-size="21" font-weight="600" fill="var(--ink)">Speicher je Land</text><text x="514" y="532" font-size="19" fill="var(--ink-2)">1 460 Gt weltweit <tspan fill="var(--muted)">· Gidden et al. 2025</tspan></text>
           <circle cx="963" cy="497" r="6" fill="var(--fjord-soft)"/><text x="980" y="504" font-size="21" font-weight="600" fill="var(--ink)">Wachstum ≤ 20 %/a</text><text x="980" y="532" font-size="19" fill="var(--ink-2)">ab 8,8 Mt/a im Jahr 2030 <tspan fill="var(--muted)">· Zurbriggen et al. 2026</tspan></text>
         </g>
@@ -505,13 +571,13 @@
     </svg>
     <p class="takeaway" data-step="3" style="--d:0">Bäume pflanzt man ohnehin sofort, sie wachsen langsam. DAC entnimmt sofort, hängt aber an Strom und Energiebedarf, und die sind je Ort und Jahr anders: Wo und wann bauen?</p>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (Ausgangspunkt: Very Low)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a für 2030 geplant, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm: Kapazität je Land und Jahr 2026–2100, 148 Länder mit Speicher; Bäume als Forst, alle 2026 gepflanzt, Holz gebunden, Kapitel Potenzial; Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Klimawirkung je t mit FaIR wie bei den Bäumen)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (Ausgangspunkt: Very Low)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8 Mt/a für 2030 geplant, Wachstum ≤ 20 %/a)</span><span><i>Eigene Rechnung</i> (lineares Programm: Kapazität je Land und Jahr 2026–2100, 148 Länder mit Speicher; Bäume als Forst, alle 2026 gepflanzt, Holz gebunden, Kapitel Potenzial; CO₂-Entnahmeeffizienz je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km; Anlagen laufen 20 Jahre; Klimawirkung je t mit FaIR wie bei den Bäumen)</span></p>
   <aside class="notes" data-n="B">
     <p>Wo die Bäume uns lassen: grün die Erwärmung über 1,5 °C mit Very Low und den Bäumen als Forst. Die Spitze liegt 2048 bei 0,31 Kelvin, 2100 sind es noch 0,08. Rot darunter: das, was DAC schließen soll.</p>
     <p>Klick: Wie viel DAC, wo und wann? Das entscheidet eine Optimierung, ein lineares Programm: Es wählt die Kapazität je Land und Jahr, von heute bis 2100. Was eine Tonne an Temperatur bewirkt, kommt aus FaIR, wie bei den Bäumen. Das Ziel in Stufen: zuerst die Spitze der Erwärmung so niedrig wie möglich; dann, bei dieser Spitze, so früh wie möglich zurück auf 1,5 °C und dort bleiben; das früheste Jahr sucht eine Bisektion. In diesem Jahr dann möglichst wenig Kapazität, also die kleinste größte Entnahme im Jahr, und bei dieser Kapazität möglichst wenig DAC insgesamt.</p>
-    <p>Klick: Die Rahmenbedingungen: der Netto-Anteil je Land und Jahr aus dem DAC-Modell; der Speicher je Land, sicher nutzbar nach Gidden et al., weltweit 1 460 Gigatonnen, Deutschland nur 1,3; und das Wachstum: höchstens 20 Prozent im Jahr, so schnell wie einst die Windkraft, ab den 8,8 Megatonnen, die für 2030 geplant sind. Jede Anlage läuft 20 Jahre; danach wird sie ersetzt oder stillgelegt.</p>
+    <p>Klick: Die Rahmenbedingungen: die CO₂-Entnahmeeffizienz je Land und Jahr aus dem DAC-Modell; der Speicher je Land, sicher nutzbar nach Gidden et al., weltweit 1 460 Gigatonnen, Deutschland nur 1,3; und das Wachstum: höchstens 20 Prozent im Jahr, so schnell wie einst die Windkraft, ab den 8,8 Megatonnen, die für 2030 geplant sind. Jede Anlage läuft 20 Jahre; danach wird sie ersetzt oder stillgelegt.</p>
     <p>Klick: Warum überhaupt optimieren? Bei den Bäumen stellt sich die Frage nicht: Ein Baum braucht Jahrzehnte, bis er viel CO₂ aufgenommen hat, und braucht keinen Strom; also pflanzt man ihn sofort. DAC dagegen entnimmt sofort, aber was netto bleibt, hängt am Strom und am Energiebedarf, und beide sind je Ort und Jahr anders. Wo und wann man baut, könnte also viel ausmachen.</p>
-    <p class="q">Falls Fragen kommen — 148 Länder mit Speicher. Netto-Anteil je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km, aus 45 183 Zellen. Kein Transport über Landesgrenzen; Basalt-Mineralisierung (Island) ist bei Gidden nicht enthalten.</p>
+    <p class="q">Falls Fragen kommen — 148 Länder mit Speicher. CO₂-Entnahmeeffizienz je Land: beste 10 % der Zellen mit Sedimentbecken in höchstens 100 km, aus 45 183 Zellen. Kein Transport über Landesgrenzen; Basalt-Mineralisierung (Island) ist bei Gidden nicht enthalten.</p>
   </aside>
 </section>
 <section class="slide dark backup" data-ch="dac" data-title="DAC-Ausbau" data-dacfilm="opt">
@@ -526,7 +592,7 @@
       <div class="ftake"><p class="takeaway" data-step="2" style="--d:0">49&nbsp;Gt/a für 1,5&nbsp;°C ab 2083; zur Spitze 2048 erst 0,2&nbsp;Gt/a gebaut.</p></div>
     </div>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (Wachstum)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Strompfad heutige Zusagen: REMIND-EU SSP2-NDC über premise)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und dem höchsten Netto-Anteil je Land, Kapazität des Landes gleich auf diese Zellen verteilt, Farbe nach Kapazität im Block; Anlagen laufen 20 Jahre)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher, Sedimentbecken)</span><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (Wachstum)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Strompfad heutige Zusagen: REMIND-EU SSP2-NDC über premise)</span><span><i>Eigene Rechnung</i> (lineares Programm der Vorfolie; Sechsecke: 2°-Blöcke mit Zellen nahe Sedimentbecken und der höchsten CO₂-Entnahmeeffizienz je Land, Kapazität des Landes gleich auf diese Zellen verteilt, Farbe nach Kapazität im Block; Anlagen laufen 20 Jahre)</span></p>
   <aside class="notes" data-n="29">
     <p class="q">Ausführlich: DAC erreicht 1,5 °C frühestens 2083, mit 49 Gt/a. An der Spitze der Erwärmung 2048 sind erst 0,2 Gt/a gebaut.</p>
     <p>Das Ergebnis der Optimierung. Dunkel die Welt, schwach die Sedimentbecken, in denen CO₂ sicher gespeichert werden kann. Unten links die weltweite DAC-Kapazität, gestrichelt die Wachstumsgrenze von 20 Prozent im Jahr; unten rechts die Erwärmung über 1,5 °C: gestrichelt Very Low, grün mit den Bäumen als Forst.</p>
@@ -624,6 +690,6 @@
   <aside class="notes" data-n="B">
     <p>Für Fragen nach den Kosten: dieselbe Optimierung, aber mit den Kosten nach Okosun et al. als Ziel, 1,5 °C im Jahr 2100 zu möglichst geringen Kosten. Rund 225 Gigatonnen CO₂ müssen durch die Anlagen, dafür 29 bis 72 Billionen Euro bis 2100, je nach Kostenannahme; im Median 48 Billionen, 212 Euro je Tonne. Der Hauptteil rechnet dagegen den Pfad, der so früh wie möglich zurückholt: 223 Billionen im Median.</p>
     <p>Wie schnell gebaut wird, ändert die Rechnung kaum, die Menge steht fest. Kostenoptimal wird spät und kurz gebaut, bis zu 11 Gigatonnen im Jahr, mit saubererem Strom; das gespeicherte CO₂ wirkt weiter. Soll 1,5 °C früher erreicht sein, wird es teuer: 2090 statt 2100 kostet rund 70 Prozent mehr, 2080 ist mit 20 %/a gar nicht erreichbar.</p>
-    <p class="q">Annahmen: Kosten von 2050 (mit Lernkurve) für den ganzen Zeitraum, frühe Anlagen also eher teurer; Energie einheitlich je Tonne, so gesetzt, dass die Kosten je Tonne den Median des Papers treffen; das Paper rechnet mit eigener erneuerbarer Versorgung, unser Netto-Anteil mit Netzstrom.</p>
+    <p class="q">Annahmen: Kosten von 2050 (mit Lernkurve) für den ganzen Zeitraum, frühe Anlagen also eher teurer; Energie einheitlich je Tonne, so gesetzt, dass die Kosten je Tonne den Median des Papers treffen; das Paper rechnet mit eigener erneuerbarer Versorgung, unser CO₂-Entnahmeeffizienz mit Netzstrom.</p>
   </aside>
 </section>
