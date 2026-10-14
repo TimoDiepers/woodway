@@ -61,10 +61,10 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   display: flex; flex-direction: column;
   visibility: hidden; opacity: 0;
   transition: opacity .35s var(--ease), visibility 0s linear .35s;
+  background: var(--paper);   /* every slide opaque in its own colour: the next one fades in over it (see Deck.go) */
 }
 .slide.active { visibility: visible; opacity: 1; transition: opacity .35s var(--ease); z-index: 2; }
-/* slides on the chapter-5 anchor are opaque, and the one being left holds still under the next (see Deck.go) */
-.slide:has(.anker) { background: #14181a; }
+/* the slide being left holds still under the next while that one fades in: what both show does not dip (Deck.go) */
 .slide.hold { visibility: visible; opacity: 1; transition: none; }
 /* the browser skips style and layout of every slide that is not on screen (or fading out): laying out all of
    them at once held up the first slide's entrance; a chart that measures a hidden slide gets that slide laid out alone */
