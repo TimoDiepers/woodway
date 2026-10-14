@@ -649,57 +649,80 @@ const EC_VEGAN_LUECKE = {
     };
   }
 };
-/* chapter 5 anchor: the warming above 1.5 °C after the trees, the same chart at the same place on four slides
-   (phase 0 DAC model, 1 result, 3 pace, 2 vegan world, in this order). What stood on the slide before stands again
-   without any entrance (lines and their marks); only the lines a slide adds are drawn in. On the vegan slide the
-   DAC lines step back and the vegan curve is named at itself, so the legend stays as on the pace slide. */
-const TEMPO_COL = { g30: '#f5894a', g50: '#f2b04b', frei: '#ff9a8f' };   // growth limits, the same in the anchor and the capacity chart
+/* the anchor of chapters 4 and 5: Very Low in deg C with the 1.5 deg C line, and a curve per measure (Very Low plus
+   the trees plus the measure), never clipped. Phases: 'k4' chapter 4 (light, Very Low and trees), 0 the DAC model,
+   1 DAC as fast as allowed (click 1 adds 50 and 100 %/a and no limit), 2 the vegan world (click 1; DAC lines step
+   back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
+   own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
+const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d20: '#ff5a4f', d50: '#f5894a', d100: '#f2b04b', frei: '#ff9a8f', v: '#7fd0e0' };
 function ecAnker(phase) {
-  // clicks the chart itself uses: the faster growth limits come on click 1 (pace), the vegan curve on click 2
-  return { steps: { 0: 0, 1: 0, 2: 2, 3: 1 }[phase], option(k) {
-    const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const b = D.baeume_rest, d = D.dac.opt_20.temp, f = D.dac.opt_frei.temp, t30 = D.dac.opt_30.temp, t50 = D.dac.opt_50.temp, v = D.vegan.gap;
-    const ib = b.indexOf(Math.max(...b)), iff = f.indexOf(Math.max(...f)), iv = v.indexOf(Math.max(...v));
-    // the order of the slides: which lines a phase inherits (stand still) and which it draws in
-    const order = [0, 1, 3, 2], rank = order.indexOf(phase);
-    const born = { b: 0, d: 1, t30: 3, t50: 3, f: 3, v: 2 };                     // the phase a line first appears in
-    const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && (id === 'v' ? k >= 2 : ['t30', 't50', 'f'].includes(id) ? k >= 1 : true));
-    const isNew = id => born[id] === phase;
-    // inherited lines and marks: animation false; new ones leave it unset and follow the deck, which animates only
-    // the click that brings them (a series' own `animation: true` would override that and replay on every click)
-    const dot = (color, data, anim, dim) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: anim ? undefined : false,
-      itemStyle: { color, borderColor: '#14181a', borderWidth: 2, opacity: dim ? .35 : 1 },
-      label: { show: true, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 9, opacity: dim ? .45 : 1 }, data });
-    const L = (id, ys, color, name, o) => {
-      const dim = phase === 2 && !['b', 'v'].includes(id);
-      return Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5, animation: isNew(id) ? undefined : false, animationDuration: 1600,
-        lineStyle: Object.assign({ color, width: 3.2, opacity: dim ? .35 : 1 }, o.line || {}), itemStyle: { color },
-        markPoint: o.mark ? dot(color, o.mark, isNew(id), dim) : undefined }, o.extra || {}); };
+  const light = phase === 'k4';
+  return { steps: { k4: 0, 0: 0, 1: 1, 2: 1 }[phase], option(k) {
+    const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
+    const order = ['k4', 0, 1, 2], rank = order.indexOf(phase);
+    const born = { vl: 'k4', b: 'k4', d20: 1, d50: 1, d100: 1, frei: 1, v: 2 };
+    const later = { d50: 1, d100: 1, frei: 1, v: 1 };                          // the click within its phase
+    const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && k >= (later[id] || 0));
+    const isNew = id => born[id] === phase, dim = id => phase === 2 && (id.startsWith('d') || id === 'frei');
+    const ink = light ? EC.ink : '#f2ede2', mut = light ? EC.muted : '#9aa39d', grid = light ? EC.grid : '#2c3437';
+    const dot = (color, data, id) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: isNew(id) ? undefined : false,
+      itemStyle: { color, borderColor: light ? '#f2ede2' : '#14181a', borderWidth: 2, opacity: dim(id) ? .35 : 1 },
+      label: { show: true, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 9, opacity: dim(id) ? .45 : 1 }, data });
+    const L = (id, ys, name, o = {}) => Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5,
+      animation: isNew(id) ? undefined : false, animationDuration: 1600,
+      lineStyle: Object.assign({ color: ANKER_COL[id], width: 3, opacity: dim(id) ? .35 : 1 }, o.line || {}), itemStyle: { color: ANKER_COL[id] },
+      markPoint: o.mark ? dot(ANKER_COL[id], o.mark, id) : undefined }, o.extra || {});
+    const peak = ys => { const i = ys.indexOf(Math.max(...ys)); return [D.jahre[i], ys[i]]; };
     const series = [];
-    if (has('b')) series.push(L('b', b, '#7fbf8c', 'Bäume', { line: { width: 2.6, type: [8, 6] },
-      mark: [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }] }));
-    if (has('d')) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', {
-      mark: [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }] }));
-    if (has('t30')) series.push(L('t30', t30, TEMPO_COL.g30, '30 %/a', {}), L('t50', t50, TEMPO_COL.g50, '50 %/a', {}));
-    if (has('f')) series.push(L('f', f, TEMPO_COL.frei, 'unbegrenzt', { line: { width: 2.6, type: [4, 5] },
-      mark: [{ coord: [D.jahre[iff], f[iff]], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(f[iff] / 1000, 2)} K` } }] }));
-    if (has('v')) series.push(L('v', v, '#7fd0e0', 'vegan', { line: { width: 3.4 }, extra: { areaStyle: { color: '#7fd0e0', opacity: .22 } },
-      mark: [{ coord: [D.jahre[iv], v[iv]], label: { position: 'top', offset: [34, 0], formatter: `vegan: Spitze ${ecNum(v[iv] / 1000, 2)} K` } },
-             { coord: [D.vegan.ohne_dac.ab, 0], label: { position: 'top', offset: [16, 0], formatter: `ab ${D.vegan.ohne_dac.ab}` } }] }));
+    const [pv, tv] = peak(vl);
+    series.push(L('vl', vl, 'Very Low', { line: { width: 2.4, type: [8, 6] },
+      mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
+      extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
+        label: { show: true, position: 'insideEndTop', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
+        markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
+    series.push(L('b', b, '+ Bäume'));
+    if (has('d20')) series.push(L('d20', on('dac_20'), 'DAC 20 %/a', { mark: [{ coord: [D.dac.opt_20.ab, 1.5], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }] }));
+    if (has('d50')) series.push(L('d50', on('dac_50'), '50 %/a'), L('d100', on('dac_100'), '100 %/a'));
+    if (has('frei')) { const f = on('dac_frei'), [pf, tf] = peak(f);
+      series.push(L('frei', f, 'unbegrenzt', { line: { width: 2.6, type: [4, 5] }, mark: [{ coord: [pf, tf], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(tf, 2)} °C` } }] })); }
+    if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
+      series.push(L('v', v, 'vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'top', offset: [34, 0], formatter: `vegan: ${ecNum(tw, 2)} °C` } }] })); }
+    // y range from all curves of the last phase, so that it stays the same on every slide
+    const ext = ['dac_frei', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
     return {
       animationDurationUpdate: 800,
-      title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
-                data: series.filter(x => x.id !== 'v').map(x => x.name) },
+      title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: light ? EC.ink : '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
+                data: series.map(x => x.name) },
       grid: { left: 70, right: 24, top: 92, bottom: 40 },
-      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 400, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: kOf }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
+                      axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: lo, max: hi, interval: .1, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
+                      axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, formatter: v => ecNum(v, 1) }, splitLine: { show: true, lineStyle: { color: grid } } }),
       series
     };
   } };
 }
+const EC_ANKER4 = ecAnker('k4'), EC_ANKER0 = ecAnker(0), EC_ANKER1 = ecAnker(1), EC_ANKER2 = ecAnker(2);
+/* why food: what stays in the air of one emission, methane (lifetime 11.8 years, IPCC AR6 WG I) against CO2 (impulse
+   response of Joos et al. 2013, multi-model mean), over 100 years */
+const EC_ABBAU = { steps: 0, option() {
+  const t = Array.from({ length: 101 }, (_, i) => i);
+  const co2 = t.map(y => 100 * (0.2173 + 0.2240 * Math.exp(-y / 394.4) + 0.2824 * Math.exp(-y / 36.54) + 0.2763 * Math.exp(-y / 4.304)));
+  const ch4 = t.map(y => 100 * Math.exp(-y / 11.8));
+  const L = (id, ys, color, name) => ({ id, name, type: 'line', data: t.map((y, i) => [y, ys[i]]), showSymbol: false, lineStyle: { color, width: 3.2 }, itemStyle: { color },
+    endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 8 } });
+  return {
+    title: { text: 'Was von einer Emission in der Luft bleibt [%]', left: 60, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+    grid: { left: 60, right: 90, top: 46, bottom: 46 },
+    xAxis: ecAxis({ type: 'value', min: 0, max: 100, interval: 25, name: 'Jahre', nameLocation: 'middle', nameGap: 30, nameTextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 },
+                    axisLine: { lineStyle: { color: '#4a524d' } }, axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } }),
+    yAxis: ecAxis({ type: 'value', min: 0, max: 100, interval: 25, axisLine: { lineStyle: { color: '#4a524d' } },
+                    axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+    series: [L('co2', co2, '#5fae76', 'CO₂'), L('ch4', ch4, '#4f9fc7', 'Methan')]
+  };
+} };
 /* the vegan world by cause, all at once, as a block beside the anchor (EC_VEGAN builds it up over three clicks) */
 const EC_VEGAN_ALL = { steps: 0, option() {
   const o = EC_VEGAN.option(3);
@@ -712,23 +735,6 @@ const EC_VEGAN_ALL = { steps: 0, option() {
   o.xAxis.axisLabel.fontSize = 18; o.yAxis.axisLabel.fontSize = 18;
   return o;
 } };
-const EC_ANKER0 = ecAnker(0), EC_ANKER1 = ecAnker(1), EC_ANKER2 = ecAnker(2), EC_ANKER3 = ecAnker(3);
-/* the pace slide, right: world capacity per growth limit, in the anchor's colours; click 1 adds the faster ones */
-const EC_TEMPOKAP = { steps: 1, option(k) {
-  const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-  const L = (id, ys, color, name, dash) => ({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5, animationDuration: 1400,
-    lineStyle: { color, width: 3, type: dash || 'solid' }, itemStyle: { color } });
-  const series = [L('g20', C.opt_20.w, '#ff5a4f', '20 %/a')];
-  if (k >= 1) series.push(L('g30', C.opt_30.w, TEMPO_COL.g30, '30 %/a'), L('g50', C.opt_50.w, TEMPO_COL.g50, '50 %/a'), L('frei', C.opt_frei.w, TEMPO_COL.frei, 'unbegrenzt', [4, 5]));
-  return {
-    legend: { left: 56, top: 0, itemGap: 14, itemWidth: 24, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 }, data: series.map(x => x.name) },
-    grid: { left: 56, right: 16, top: 40, bottom: 32 },
-    xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
-                    axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-    yAxis: ecAxis({ type: 'value', min: 0, max: 80, interval: 20,
-                    axisLine: { lineStyle: { color: '#4a524d' } }, axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
-    series };
-} };
 /* why the peak stays: world capacity at 20 %/a, the year of the peak marked */
 const EC_ANKERKAP = { steps: 0, option() {
   const o = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 60, v => String(v), D => [['w', D.dac.opt_20.w, '#ff5a4f', '20 %/a', null, true]]).option();
@@ -737,7 +743,7 @@ const EC_ANKERKAP = { steps: 0, option() {
     label: { show: true, position: 'top', distance: 10, offset: [10, -58], color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, formatter: `Spitze 2048: erst ${ecNum(w[i], 1)} Gt/a` },
     data: [{ coord: [2048, w[i]] }] };
   return o; } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, anker3: EC_ANKER3, tempokap: EC_TEMPOKAP, veganall: EC_VEGAN_ALL, ankerkap: EC_ANKERKAP };
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, abbau: EC_ABBAU, veganall: EC_VEGAN_ALL, ankerkap: EC_ANKERKAP };
 
 class EChart {
   constructor(host) {
