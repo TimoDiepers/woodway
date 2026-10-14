@@ -649,46 +649,46 @@ const EC_VEGAN_LUECKE = {
     };
   }
 };
-/* chapter 5 anchor: the warming above 1.5 °C after the trees, the same chart on both slides at the same place.
-   Phase 0 (DAC model) shows the trees alone; phase 1 adds DAC at 20 %/a (on entry); phase 2 starts there, the DAC lines
-   step back, and the vegan world without DAC comes in (click 2). Key numbers stand at the curves. */
+/* chapter 5 anchor: the warming above 1.5 °C after the trees, the same chart at the same place on four slides
+   (phase 0 DAC model, 1 result, 3 pace, 2 vegan world, in this order). What stood on the slide before stands again
+   without any entrance (lines and their marks); only the lines a slide adds are drawn in. On the vegan slide the
+   DAC lines step back and the vegan curve is named at itself, so the legend stays as on the pace slide. */
 const TEMPO_COL = { g30: '#f5894a', g50: '#f2b04b', frei: '#ff9a8f' };   // growth limits, the same in the anchor and the capacity chart
 function ecAnker(phase) {
-  // clicks the chart itself uses: the vegan curve comes on click 2, the faster growth limits on click 1
+  // clicks the chart itself uses: the faster growth limits come on click 1 (pace), the vegan curve on click 2
   return { steps: { 0: 0, 1: 0, 2: 2, 3: 1 }[phase], option(k) {
-    const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), still = phase === 2;
-    const first = phase === 0;   // only slide 1 of the three draws the trees' line in; then it stands
-    const dot = (color, data) => ({ silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color, borderColor: '#14181a', borderWidth: 2 },
-      label: { show: true, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 9 }, data });
-    const L = (id, ys, color, name, o) => Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5,
-      lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: still ? 0 : 1600 }, o || {});
-    const T = (id, ys, color, name, o) => L(id, ys, color, name, Object.assign({ animationDuration: first ? 1600 : 0 }, o));
-    const b = D.baeume_rest, d = D.dac.opt_20.temp, f = D.dac.opt_frei.temp, v = D.vegan.gap;
+    const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const b = D.baeume_rest, d = D.dac.opt_20.temp, f = D.dac.opt_frei.temp, t30 = D.dac.opt_30.temp, t50 = D.dac.opt_50.temp, v = D.vegan.gap;
     const ib = b.indexOf(Math.max(...b)), iff = f.indexOf(Math.max(...f)), iv = v.indexOf(Math.max(...v));
-    const back = still ? { lineStyle: { opacity: .35 } } : {};
-    const series = [T('b', b, '#7fbf8c', 'Bäume', { lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
-      markPoint: dot('#7fbf8c', [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }]) })];
-    const dacOn = still || phase === 1 || phase === 3, freiOn = still;   // the unlimited case is introduced on the pace slide
-    if (dacOn) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', Object.assign({ animationDuration: phase === 3 ? 0 : 1600,
-      markPoint: dot('#ff5a4f', [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }]) }, still ? { lineStyle: { color: '#ff5a4f', width: 3.2, opacity: .35 }, markPoint: undefined } : {})));
-    if (freiOn) series.push(L('f', f, '#ff9a8f', 'DAC unbegrenzt', Object.assign({ lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5] },
-      markPoint: dot('#ff9a8f', [{ coord: [D.jahre[iff], f[iff]], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(f[iff] / 1000, 2)} K` } }]) },
-      still ? { lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5], opacity: .35 }, markPoint: undefined } : {})));
-    if (phase === 3 && k >= 1) {   // the pace slide: faster growth limits beside the 20 %/a case
-      const t30 = D.dac.opt_30.temp, t50 = D.dac.opt_50.temp;
-      series.push(L('t30', t30, TEMPO_COL.g30, '30 %/a'), L('t50', t50, TEMPO_COL.g50, '50 %/a'),
-        L('f', f, TEMPO_COL.frei, 'unbegrenzt', { lineStyle: { color: TEMPO_COL.frei, width: 2.6, type: [4, 5] },
-          markPoint: dot(TEMPO_COL.frei, [{ coord: [D.jahre[iff], f[iff]], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(f[iff] / 1000, 2)} K` } }]) }));
-    }
-    if (still && k >= 2) series.push(L('v', v, '#7fd0e0', 'vegan', { animationDuration: 1600, lineStyle: { color: '#7fd0e0', width: 3.4 },
-      areaStyle: { color: '#7fd0e0', opacity: .22 },
-      markPoint: dot('#7fd0e0', [{ coord: [D.jahre[iv], v[iv]], label: { position: 'top', formatter: `Spitze ${ecNum(v[iv] / 1000, 2)} K` } },
-                                 { coord: [D.vegan.ohne_dac.ab, 0], label: { position: 'top', offset: [16, 0], formatter: `ab ${D.vegan.ohne_dac.ab}` } }]) }));
+    // the order of the slides: which lines a phase inherits (stand still) and which it draws in
+    const order = [0, 1, 3, 2], rank = order.indexOf(phase);
+    const born = { b: 0, d: 1, t30: 3, t50: 3, f: 3, v: 2 };                     // the phase a line first appears in
+    const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && (id === 'v' ? k >= 2 : ['t30', 't50', 'f'].includes(id) ? k >= 1 : true));
+    const isNew = id => born[id] === phase;
+    const dot = (color, data, anim, dim) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: anim,
+      itemStyle: { color, borderColor: '#14181a', borderWidth: 2, opacity: dim ? .35 : 1 },
+      label: { show: true, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 9, opacity: dim ? .45 : 1 }, data });
+    const L = (id, ys, color, name, o) => {
+      const dim = phase === 2 && !['b', 'v'].includes(id);
+      return Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5, animation: isNew(id), animationDuration: 1600,
+        lineStyle: Object.assign({ color, width: 3.2, opacity: dim ? .35 : 1 }, o.line || {}), itemStyle: { color },
+        markPoint: o.mark ? dot(color, o.mark, isNew(id), dim) : undefined }, o.extra || {}); };
+    const series = [];
+    if (has('b')) series.push(L('b', b, '#7fbf8c', 'Bäume', { line: { width: 2.6, type: [8, 6] },
+      mark: [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }] }));
+    if (has('d')) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', {
+      mark: [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }] }));
+    if (has('t30')) series.push(L('t30', t30, TEMPO_COL.g30, '30 %/a', {}), L('t50', t50, TEMPO_COL.g50, '50 %/a', {}));
+    if (has('f')) series.push(L('f', f, TEMPO_COL.frei, 'unbegrenzt', { line: { width: 2.6, type: [4, 5] },
+      mark: [{ coord: [D.jahre[iff], f[iff]], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(f[iff] / 1000, 2)} K` } }] }));
+    if (has('v')) series.push(L('v', v, '#7fd0e0', 'vegan', { line: { width: 3.4 }, extra: { areaStyle: { color: '#7fd0e0', opacity: .22 } },
+      mark: [{ coord: [D.jahre[iv], v[iv]], label: { position: 'top', offset: [34, 0], formatter: `vegan: Spitze ${ecNum(v[iv] / 1000, 2)} K` } },
+             { coord: [D.vegan.ohne_dac.ab, 0], label: { position: 'top', offset: [16, 0], formatter: `ab ${D.vegan.ohne_dac.ab}` } }] }));
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
-                data: series.map(x => x.name) },
+                data: series.filter(x => x.id !== 'v').map(x => x.name) },
       grid: { left: 70, right: 24, top: 92, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
