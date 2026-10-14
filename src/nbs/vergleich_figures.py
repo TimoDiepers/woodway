@@ -304,15 +304,21 @@ def need_temperature_series() -> dict:
     return _cached_json("bedarf_temperatur.json", compute)
 
 
-def overshoot_series() -> dict:
-    """The limit, read off the scenario data: how far CMIP7 Very Low (median) lies above 1.5 deg C, year by
-    year -- the cooling that would be needed on top of Very Low to stay at 1.5 deg C."""
+def vl_series() -> dict:
+    """CMIP7 Very Low (median, 7-year mean) in deg C above pre-industrial, 2026-2100, not clipped."""
     from nbs.cmip7_figures import temperature
 
     t = temperature()
     v = t[(t.szenario == "VL") & (t.jahr >= T_START) & (t.jahr <= 2100)].sort_values("jahr")
     med = v["median"].rolling(7, center=True, min_periods=1).mean()  # the median still carries the ensemble's year-to-year noise
-    return {"jahre": [int(y) for y in v.jahr], "noetig_k": [float(max(0.0, x - 1.5)) for x in med]}
+    return {"jahre": [int(y) for y in v.jahr], "median_c": [float(x) for x in med]}
+
+
+def overshoot_series() -> dict:
+    """The limit, read off the scenario data: how far CMIP7 Very Low (median) lies above 1.5 deg C, year by
+    year -- the cooling that would be needed on top of Very Low to stay at 1.5 deg C."""
+    v = vl_series()
+    return {"jahre": v["jahre"], "noetig_k": [max(0.0, x - 1.5) for x in v["median_c"]]}
 
 
 def area_need_figure(out_path: str) -> str:

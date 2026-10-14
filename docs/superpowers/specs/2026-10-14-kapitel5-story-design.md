@@ -11,7 +11,7 @@ Das Publikum soll ohne Umweg verstehen, was gezeigt wird. Heute gibt es drei Sch
 ## Bezugsgröße: die echte Temperaturkurve
 
 - **Ein Anker-Chart:** Erwärmung gegenüber vorindustriell in °C mit einer Linie bei 1,5 °C, die Fläche darüber leicht rot.
-- **Ausgangskurve:** CMIP7 Very Low (Median, 7-Jahres-Mittel), wie in der Einleitung. Spitze etwa 1,82 °C um 2050.
+- **Ausgangskurve:** CMIP7 Very Low (Median, 7-Jahres-Mittel), wie in der Einleitung. Spitze 1,82 °C um 2050; 2100 noch 1,61 °C (Median), also bis zum Ende über 1,5 °C.
 - **Maßnahmen:** Jede Maßnahme ist eine eigene Kurve: Very Low plus die Temperaturwirkung der Maßnahme, **nicht** bei 1,5 °C oder null abgeschnitten. Fällt eine Kurve unter 1,5 °C, sieht man das.
 - **Gleicher Ort:** Der Chart steht in Kapitel 5 auf allen Folien an derselben Stelle. Übernommene Linien laufen nicht neu ein, nur neue Linien animieren. Die bestehenden Regeln aus `animation-nur-neues` bleiben.
 

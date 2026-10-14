@@ -22,7 +22,7 @@
 
 ## Review Focus
 
-1. Very Low liegt Ende des Jahrhunderts unter 1,5 °C: Dort muss die Kurve unter der Linie weiterlaufen (nicht bei 1,5 °C kleben); Test in Task 1.
+1. Very Low beginnt 2026 knapp unter 1,5 °C (1,49) und liegt 2100 noch bei 1,61 °C: die Kurve darf nirgends bei 1,5 °C abgeschnitten sein; Test in Task 1.
 2. DAC kühlt nur, solange die Lücke > 0 ist: Die DAC-Kurve darf nach dem Rückkehrjahr nicht über 1,5 °C steigen; Test in Task 2.
 3. Wechsel 27 → 28 → 30 mit dazwischenliegender Folie 29 (ohne Anker): Anker auf 30 darf nicht neu einlaufen; Prüfung in Task 8 (CDP).
 4. Rückwärts blättern (30 → 28): keine leeren Klicks, Kurven korrekt; Prüfung in Task 8.
