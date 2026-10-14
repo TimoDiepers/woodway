@@ -96,10 +96,16 @@ def removal_kernel_matrix(scenario: str = "ssp245") -> NDArray:
 
 
 def gap_series() -> NDArray:
-    """Cooling needed on top of Very Low and the trees on cooling areas [K], year by year (slide 25)."""
+    """Cooling needed on top of Very Low and the trees on cooling areas [K], year by year (slide 25).
+
+    The need is the frozen CMIP7 series in GAP_FILE; the trees come from the model's current area
+    series (nbs.vergleich_figures.area_series), so a model change reaches the gap."""
+    from nbs.vergleich_figures import area_series
+
     d = json.loads(GAP_FILE.read_text())
     assert d["y"] == YEARS.tolist()
-    return np.maximum(0.0, (np.array(d["need"]) - np.array(d["k"])) / 1000.0)
+    trees = -np.asarray(area_series()["kuehlt"], dtype=float)
+    return np.maximum(0.0, np.array(d["need"]) / 1000.0 - trees)
 def _infeasible(res) -> bool:
     """HiGHS infeasible -- also when presolve leaves the model status unknown but the primal status infeasible."""
     return res.status == 2 or (res.status == 4 and "primal_status is Infeasible" in res.message)

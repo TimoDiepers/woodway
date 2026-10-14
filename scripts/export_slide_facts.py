@@ -317,7 +317,33 @@ def vergleich_facts() -> dict:
     }
 
 
+def clouds() -> dict:
+    """Cloud brightening against the albedo per full-grown tree [W] at the sites, and the
+    area-weighted global share (nbs.cloud_grid; Duveiller et al. 2021, Cerasoli et al. 2021)."""
+    import numpy as np
+
+    from nbs.animations import SITES, _STAND_AREA_M2, site_cell, typical_alpha_q_product, typical_cloud_product
+    from nbs.landscape import plantable_area_m2
+
+    alb, cld = typical_alpha_q_product(), typical_cloud_product()
+    out = {"orte": {}}
+    for s in SITES:
+        c = site_cell(s)
+        a, w = -alb[c] * _STAND_AREA_M2, -cld[c] * _STAND_AREA_M2
+        out["orte"][s.name] = {"albedo_w": round(float(a), 1), "wolken_w": round(float(w), 1),
+                               "netto_w": round(float(a + w), 1), "anteil": round(float(-w / a), 3)}
+    area = plantable_area_m2()
+    ok = np.isfinite(alb) & (area > 0)
+    out["anteil_global"] = round(float(np.average(cld[ok], weights=area[ok]) / -np.average(alb[ok], weights=area[ok])), 3)
+    return out
+
+
 def main() -> None:
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", type=Path, default=OUT)
+    args = ap.parse_args()
     facts = {
         "klima": climate(),
         "orte": sites(),
@@ -332,8 +358,9 @@ def main() -> None:
         "literatur": literature(),
         "dac": dac_facts(),
         "vergleich": vergleich_facts(),
+        "wolken": clouds(),
     }
-    OUT.write_text(json.dumps(facts, indent=2, ensure_ascii=False) + "\n")
+    args.out.write_text(json.dumps(facts, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(facts, indent=2, ensure_ascii=False))
 
 

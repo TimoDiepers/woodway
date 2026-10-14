@@ -56,12 +56,12 @@ def test_unmeasured_colour_and_three_reference_sites():
     assert len(meta["reference"]) == 3
 
 
-def test_cooling_area_is_the_talks_039_gha():
+def test_cooling_area_is_the_talks_042_gha():
     meta, fields = _load()
     dt = _dt(meta, fields, 2100)
     cool = fields["area"][(fields["type"] > 0) & (dt < 0)].sum() / 1e13
     assert cool == pytest.approx(meta["global"]["areasGha"]["kuehlt"], abs=0.005)
-    assert cool == pytest.approx(0.393, abs=0.005)
+    assert cool == pytest.approx(0.423, abs=0.005)
 
 
 def test_dac_median_2026_is_46_percent():

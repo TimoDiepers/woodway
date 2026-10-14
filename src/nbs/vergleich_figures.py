@@ -139,7 +139,7 @@ def planting_choice() -> dict[str, dict[str, float]]:
     from nbs.potential import _masked_global_delta_t, cascade
 
     # four global FaIR runs take a while: cached next to the slide facts (delete to recompute)
-    cache = Path(__file__).resolve().parents[2] / "deck" / "chart_data" / "pflanzwahl.json"
+    cache = _cache_path("pflanzwahl.json")
     if cache.exists():
         return json.loads(cache.read_text())
     plant = assign_species() != None  # noqa: E711
@@ -159,11 +159,22 @@ def planting_choice() -> dict[str, dict[str, float]]:
     return out
 
 
-def _cached_json(name: str, compute):
-    import json
+def _cache_path(name: str):
+    """deck/chart_data/<name>, with an "_ohne_wolken" suffix when the clouds are switched off
+    (NBS_CLOUDS=0), so the two model variants never read each other's cache."""
     from pathlib import Path
 
-    cache = Path(__file__).resolve().parents[2] / "deck" / "chart_data" / name
+    from nbs.light import clouds_enabled
+
+    if not clouds_enabled():
+        name = name.replace(".json", "_ohne_wolken.json")
+    return Path(__file__).resolve().parents[2] / "deck" / "chart_data" / name
+
+
+def _cached_json(name: str, compute):
+    import json
+
+    cache = _cache_path(name)
     if cache.exists():
         return json.loads(cache.read_text())
     out = compute()

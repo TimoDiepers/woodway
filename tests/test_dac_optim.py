@@ -56,6 +56,19 @@ def test_gap_matches_slide_25():
     assert g[i] * 1000 == pytest.approx(323 - 14, abs=3)   # need minus trees, mK
 
 
+def test_gap_uses_the_current_tree_cooling():
+    """The trees' share comes from the model's area series, not a frozen copy, so a model
+    change (e.g. clouds) moves the gap."""
+    import json
+
+    from nbs.dac_optim import GAP_FILE
+    from nbs.vergleich_figures import area_series
+
+    need = np.array(json.loads(GAP_FILE.read_text())["need"]) / 1000.0
+    trees = -np.array(area_series()["kuehlt"])
+    np.testing.assert_allclose(gap_series(), np.maximum(0.0, need - trees))
+
+
 from nbs.dac_optim import build_and_solve, solve
 
 

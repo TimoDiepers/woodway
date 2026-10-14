@@ -69,16 +69,18 @@ HASLER_WALKER_OVER_50 = 0.65
 offset above 50 % (889 Mha). Since 2026-10-05 this model's area *is* that map."""
 
 
-def _static_offset():
+def _static_offset(clouds: bool = False):
     """Hasler's own static formula (400 ppm, mean 100-year airborne fraction
     0.52) on this model's cells: Delta-alpha*q of the typical forest against
-    Walker's carbon. Returns (offset %, area weights) on typed cells."""
-    from nbs import albedo_grid
+    Walker's carbon. Returns (offset %, area weights) on typed cells. clouds:
+    the model's light product (albedo + clouds, nbs.light) instead of the
+    albedo alone -- Hasler has no clouds, the dynamic model does."""
     from nbs.animations import _by_type
     from nbs.constants import A_EARTH_M2, TAU_ATM
     from nbs.forest_data import carbon_gain_mgc_ha, typical_type
+    from nbs.light import light_product
 
-    prod = _by_type(albedo_grid.alpha_q_product)
+    prod = _by_type(lambda k: light_product(k, clouds=clouds))
     a = plantable_area_m2()
     m = (a > 0) & (typical_type() != None) & np.isfinite(prod)  # noqa: E711
     per_tco2 = 5.35 / 400.0 / (2.13e9 * 44.0 / 12.0)
@@ -106,7 +108,7 @@ def test_dynamic_offset_is_stricter_than_the_static_one():
     the literature slide, pinned here so it cannot flip silently."""
     from nbs.aggregate import albedo_offset_summary
 
-    off, w = _static_offset()
+    off, w = _static_offset(clouds=True)
     o = np.argsort(off)
     static_median = float(off[o][np.searchsorted(np.cumsum(w[o]), 0.5 * w.sum())])
     assert albedo_offset_summary()["median"] > static_median
