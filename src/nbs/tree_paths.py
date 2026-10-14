@@ -149,7 +149,7 @@ def cooling_cells(area_m2: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
         if not m.any():
             continue
         co2, alb = unit_curves(key, "ssp245")
-        traj = f[m][:, None] * co2[None, :] + np.nan_to_num(alpha_q_product(key)[m])[:, None] * alb[None, :]
+        traj = f[m][:, None] * co2[None, :] + np.nan_to_num(light_product(key)[m])[:, None] * alb[None, :]
         out[m] = ~np.isinf(_t_star_batch(traj, YEARS))
     return out
 
@@ -172,7 +172,7 @@ def forcing_cells(area_m2: NDArray, carbon_mgc_ha: NDArray, start: int = T_START
         n_trees = area_m2[m] / sp.stand_area_m2       # as nbs.landscape.tree_count
         up, cl, _ = _trajectory(key, start)
         n_sum = float((n_trees * f[m]).sum())
-        np_sum = float((n_trees * np.nan_to_num(alpha_q_product(key)[m])).sum())
+        np_sum = float((n_trees * np.nan_to_num(light_product(key)[m])).sum())
         nee[i0:] -= M_CO2_PER_C * up[i0:] * n_sum / 1e12
         rf[i0:] += -TAU_ATM * cl[i0:] * sp.stand_area_m2 / A_EARTH_M2 * np_sum
         area += float(area_m2[m].sum()) / 1e13
