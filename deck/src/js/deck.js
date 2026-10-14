@@ -654,7 +654,8 @@ const EC_VEGAN_LUECKE = {
    step back, and the vegan world without DAC comes in (click 2). Key numbers stand at the curves. */
 const TEMPO_COL = { g30: '#f5894a', g50: '#f2b04b', frei: '#ff9a8f' };   // growth limits, the same in the anchor and the capacity chart
 function ecAnker(phase) {
-  return { steps: 4, option(k) {
+  // clicks the chart itself uses: the vegan curve comes on click 2, the faster growth limits on click 1
+  return { steps: { 0: 0, 1: 0, 2: 2, 3: 1 }[phase], option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), still = phase === 2;
     const first = phase === 0;   // only slide 1 of the three draws the trees' line in; then it stands
     const dot = (color, data) => ({ silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color, borderColor: '#14181a', borderWidth: 2 },
