@@ -1115,7 +1115,7 @@ svg.mo .m-sway.back { animation: none; }
 /* chapter 5 results: the question each slide answers, motivated by the slide before; under the title, no entrance */
 /* chapter 5 anchor: the warming chart stays left at the same place on all three slides; on the right the blocks
    grow downwards, one per click, and the ones before step back (focus moves on), until the takeaway */
-.anker { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; flex: 1; min-height: 0; margin-bottom: 18px; }
+.anker { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; flex: none; height: 548px; margin-bottom: 18px; }   /* fixed: the anchor stands at the same place with or without a takeaway */
 .anker > .chart { height: 100%; min-height: 0; }
 .flow { display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; padding-top: 22px; }
 .fb { display: grid; grid-template-columns: 132px 1fr; gap: 18px; padding: 10px 0; border-top: 1px solid #2c3437; transition: filter .6s var(--ease); }
@@ -1138,6 +1138,7 @@ svg.mo .m-sway.back { animation: none; }
 .fbw .dleg { margin: 6px 0 8px; }
 .fbw p { font: 400 20px/1.38 var(--sans); color: #d6dbd6; }
 .fbw b.big { font: 600 26px/1 var(--sans); color: #f0b04a; }
+.fbw .chart.tk { height: 330px; }
 .kz { padding-top: 12px; border-top: 1px solid #2c3437; }
 .kz p { font: 400 20px/1.4 var(--sans); color: #d6dbd6; }
 .kz p.dk { font: 600 16px/1.2 var(--sans); letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
