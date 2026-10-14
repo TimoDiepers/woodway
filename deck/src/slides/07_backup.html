@@ -202,6 +202,70 @@
   </aside>
 </section>
 
+<!-- DACCS: aus dem Hauptteil (Modell und schnellster Ausbau) -->
+<section class="slide dark backup" data-ch="dac" data-title="DAC-Modell">
+  <header class="sh"><h2>DAC-Modell: je Ort und je Jahr</h2></header>
+  <div class="body">
+    <p class="lq">Kann DACCS die Kurve unter 1,5&nbsp;°C drücken? Erst: Was bringt eine Tonne?</p>
+    <div class="anker">
+      <div class="chart" data-step="0" data-ec="anker0" data-label="Erwärmung gegenüber vorindustriell 2026 bis 2100, Very Low ohne seine CO₂-Entnahme und mit den Bäumen: Spitze um 2050 bei 1,82 °C, 0,32 über 1,5 °C"></div>
+      <svg class="schema flowsvg" viewBox="0 0 690 560" style="width:100%; height:100%; min-height:0" aria-label="Rechenweg des DAC-Modells: Wetter je Ort ergibt den Energiebedarf je Tonne; der Strommix je Region und Jahr; beides in einer zeitexpliziten Ökobilanz; daraus die CO₂-Entnahmeeffizienz je Zelle und Jahr, im Median 46 Prozent 2026 und 91 Prozent 2040">
+        <defs><marker id="ah-dk3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
+        <g font-family="IBM Plex Sans">
+          <g data-step="0"><text x="0" y="16" font-size="17" letter-spacing="1.5" fill="var(--muted)">SORBENS-DAC JE ORT · 0,5°-ZELLE</text>
+            <rect x="0" y="28" width="300" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="16" y="60" font-size="21" font-weight="600" fill="var(--ink)">Wetter</text><text x="16" y="88" font-size="19" fill="var(--ink-2)">Temperatur, Feuchte</text><path class="m-flow" d="M304 67 H372" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><rect x="380" y="28" width="310" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="396" y="60" font-size="21" font-weight="600" fill="var(--ink)">Energie je Tonne</text><text x="396" y="88" font-size="19" fill="var(--ink-2)">1,1 bis 1,9 MWh Strom</text></g>
+          <g data-step="1"><text x="0" y="140" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE JAHR · 2026–2100</text>
+            <rect x="0" y="152" width="300" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="16" y="184" font-size="21" font-weight="600" fill="var(--ink)">Strommix</text><text x="16" y="212" font-size="19" fill="var(--ink-2)">je Region und Jahr</text><path class="m-flow" d="M304 191 H372" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><path class="m-flow" d="M535 110 V144" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><rect x="380" y="152" width="310" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="396" y="184" font-size="21" font-weight="600" fill="var(--ink)">Zeitexpl. Ökobilanz</text><text x="396" y="212" font-size="19" fill="var(--ink-2)">Strom × Mix + Anlage</text></g>
+          <g data-step="2"><path class="m-flow" d="M535 234 V256" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/>
+            <rect x="0" y="262" width="690" height="96" rx="10" fill="var(--fjord)"/><text x="18" y="296" font-size="22" font-weight="600" fill="var(--paper)">CO₂-Entnahmeeffizienz η<tspan font-size="15" baseline-shift="sub">C</tspan> je Zelle und Jahr</text><text x="18" y="334" font-size="20" fill="var(--paper)">= 1 − Emissionen je entnommener t · Median <tspan font-size="24" font-weight="600" fill="#f0b04a">46 %</tspan> 2026, <tspan font-size="24" font-weight="600" fill="#f0b04a">91 %</tspan> 2040</text></g>
+          
+        </g>
+      </svg>
+    </div>
+    <p class="takeaway" data-step="3" style="--d:0">Netto bleibt heute die Hälfte, 2040 schon 91&nbsp;%. <span class="tq">Wie viel bringt DACCS bis zur Spitze?</span></p>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozess: Sorbens-DAC mit dampfunterstützter Temperatur-Vakuum-Wechseladsorption, Wärme aus Wärmepumpe, Klimaabhängigkeit)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klima: CRU TS 4.09, Mittel 2011–2020)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (premise: Energiebedarf der Anlage und Strommix aus REMIND-EU, SSP2-NDC, mit ecoinvent 3.12)</span><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (GWP100)</span></p>
+  <aside class="notes" data-n="B">
+    <p>Links der Anker für den Rest: die Erwärmung in Grad: gestrichelt Very Low ohne die 335 Gigatonnen Entnahme, die das Szenario annimmt, Spitze 2050 bei 1,84 °C; grün mit den Bäumen kaum darunter, 1,82 °C, also 0,32 Grad über 1,5 °C.</p>
+    <p>Kann DACCS die Kurve unter 1,5 °C drücken? Erst: Was bringt eine Tonne? Rechts, wie ich DAC modelliere: Sorbens-DAC, Gebläse drücken Luft durch ein Amin, Dampf um 100 °C löst das CO₂ wieder ab, es wird verdichtet und gespeichert.</p>
+    <p>Wie viel Energie das braucht, hängt vom Ort ab: Aus dem Wetter jeder Zelle rechnet das Prozessmodell 1,1 bis 1,9 Megawattstunden Strom je Tonne. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme.</p>
+    <p>Klick: Und vom Jahr: Woher der Strom kommt, ändert sich, Strommix je Region und Jahr aus REMIND-EU. Beides zusammen in einer zeitexpliziten Ökobilanz.</p>
+    <p>Klick: Was von einer entnommenen Tonne netto bleibt, nenne ich die CO₂-Entnahmeeffizienz eta C, je Zelle und Jahr: im Median 46 Prozent heute, 91 Prozent 2040, wenn der Strom sauberer wird.</p>
+    <p>Klick: Mit heutigem Strom bleibt also knapp die Hälfte; je sauberer der Strom, desto mehr. DACCS hängt damit an der Zeit, wie die Bäume. Wie viel bringt DACCS bis zur Spitze?</p>
+    <p class="q">Falls Fragen kommen — Gerechnet mit Brightway und premise: ecoinvent 3.12 mit REMIND-EU-Strompfaden, sechs Stützjahre, dazwischen interpoliert; 45 183 Landzellen mal 75 Jahre. Die Ökobilanzen löst ein iterativer Löser mit Warmstart, rund 80-mal schneller als der direkte.</p>
+    <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte der CO₂-Entnahmeeffizienz im Anhang.</p>
+  </aside>
+</section>
+
+
+<section class="slide dark backup" data-ch="dac" data-title="DACCS bis zur Spitze">
+  <header class="sh"><h2>DACCS bis zur Spitze</h2></header>
+  <div class="body">
+    <p class="lq">Wie viel bringt DACCS bis zur Spitze?</p>
+    <div class="anker">
+      <div class="chart" data-ec="anker1" data-label="Erwärmung gegenüber vorindustriell 2026 bis 2100: Very Low ohne seine CO₂-Entnahme, mit den Bäumen, und mit DACCS beim schnellsten Ausbau: bis zur Spitze 2050 kaum ein Unterschied, danach steil nach unten, bis 2087 der Speicher voll ist"></div>
+      <div class="flow">
+        <div class="fbw" data-step="0"><p class="pk">Ausbau, so schnell es geht</p>
+          <div class="chart dj" data-step="0" data-ec="daccsausbau" data-label="DACCS 2026 bis 2100: bis 2030 die geplante Kapazität von 8,8 Mt CO₂ im Jahr, danach 20 Prozent mehr im Jahr; 2050 erst 0,34 Gt CO₂ im Jahr, 2086 240 Gt CO₂ im Jahr, 2087 ist der sichere Speicher voll"></div>
+          <p>bis 2030 die geplante Kapazität, dann +20&nbsp;%/a wie einst die Windkraft, bis der Speicher voll ist; gebaut, wo η<sub>C</sub> am höchsten ist</p></div>
+        <div class="fb" data-step="1"><p class="pk">Bis 2050</p><div><p><b class="big">0,34&nbsp;Gt/a</b>, zusammen 2&nbsp;Gt: Die Spitze sinkt um 0,6&nbsp;mK, die Lücke ist 320&nbsp;mK.</p></div></div>
+        <div class="fb" data-step="2"><p class="pk">Kosten</p><div><p>Selbst das kostet bis 2050 <b class="big">380&nbsp;Mrd.&nbsp;€</b>, optimistisch gerechnet.</p></div></div>
+        <div class="fb" data-step="3"><p class="pk">Danach</p><div><p>Ab 2075 kühlt DACCS deutlich, bis 2087 der Speicher voll ist. Die Kurve vor der Spitze biegt es nicht.</p></div></div>
+      </div>
+    </div>
+    <p class="takeaway" data-step="4" style="--d:0">DACCS kommt für die Spitze zu spät. <span class="tq">Was wirkt kurzfristig?</span></p>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (8,8&nbsp;Mt/a 2030, Wachstum der Windkraft)</span><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (Kosten, optimistischer Fall)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land)</span><span><i>Eigene Rechnung</i> (je Jahr in die Länder mit dem höchsten η<sub>C</sub> und freiem Speicher; Klimawirkung mit FaIR wie bei den Bäumen)</span></p>
+  <aside class="notes" data-n="B">
+    <p>Wie viel bringt DACCS bis zur Spitze? Ich baue es so schnell aus, wie es überhaupt denkbar ist. Rechts der Ausbau: Bis 2030 nehme ich die Kapazität, die heute geplant ist, knapp 9 Megatonnen im Jahr, hinterlegt; danach wächst sie jedes Jahr um 20 Prozent, so schnell wie einst die Windkraft. Gebaut wird dort, wo die CO₂-Entnahmeeffizienz am höchsten ist; gestrichelt, was netto entnommen wird, fast alles. Keine Optimierung, kein Ziel, einfach so viel wie möglich. Und selbst 2050 sind es erst 0,34 Gigatonnen im Jahr.</p>
+    <p>Klick: Rot gestrichelt im Anker, bis zur Spitze 2050: Man sieht sie kaum, sie liegt auf den Bäumen. 2050 laufen 0,34 Gigatonnen im Jahr, zusammen sind 2 Gigatonnen entnommen. Die Spitze sinkt um gut ein halbes Millikelvin; die Lücke ist 320.</p>
+    <p>Klick: Und selbst dieser Ausbau kostet bis 2050 rund 380 Milliarden Euro, mit den optimistischen Kosten aus der Literatur.</p>
+    <p>Klick: Danach wächst DACCS weiter, im Anker nach 2050: Ab etwa 2075 kühlt es deutlich, kurz vor 2090 laufen 240 Gigatonnen im Jahr, und 2087 ist der sichere Speicher voll, markiert; ab da knickt die Kurve, es kann nichts mehr gespeichert werden. Langfristig senkt DACCS also die Erwärmung. Aber die Kurve vor der Spitze biegt es nicht: Bis die Anlagen stehen, ist die Spitze vorbei, und was entnommen wird, kühlt erst über Jahre.</p>
+    <p>Klick: DACCS kommt für die Spitze zu spät. Was wirkt kurzfristig?</p>
+    <p class="q">Falls Fragen kommen — Kosten bis 2050: optimistisch 0,38, Median 0,74, pessimistisch 1,26 Bio. € (Okosun et al. 2026; Investition, Fixkosten, Sorbens, Energie; nicht abgezinst). Um die Spitze auf 1,5 °C zu drücken, müssten bis 2050 rund 900 Gt heraus: 1 000 Gt um 2030 entnommen kühlen 2050 um 0,4 K. Selbst mit 50 %/a wären es bis 2050 nur 88 Gt. Was es bräuchte, um mit DACCS später zurück auf 1,5 °C zu kommen, rechnet eine Kostenoptimierung im Backup.</p>
+  </aside>
+</section>
+
 <!-- Grundlagen: DAC -->
 <section class="slide dark backup" data-ch="dac" data-title="DAC-Modell: Schema">
   <header class="sh"><h2>DACCS-Modell: je Ort und je Jahr</h2></header>

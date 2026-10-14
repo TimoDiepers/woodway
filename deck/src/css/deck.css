@@ -707,9 +707,12 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
   transition: opacity .5s var(--ease), transform .6s var(--ease); }
 .overlay.shown { opacity: 1; transform: none; }
 .overlay .chart { flex: 1; min-height: 0; }
-/* last clicks: the chapter-5 anchor (light) takes the place of the cooling chart in the same card */
-.overlay .chart.ankerk4:not(.shown) { display: none; }
-.slide:has(.ankerk4.shown) .overlay .chart[data-ec="zeit"], .slide:has(.ankerk4.shown) .forstpos { display: none; }
+/* "Kühlende Wirkung globaler Aufforstung": the trees' Delta T on the left, then the warming it leaves on the right */
+.aufforst { display: grid; grid-template-columns: 1fr 620px; gap: 40px; flex: 1; min-height: 0; margin-bottom: 18px; }
+.aufforst > div { position: relative; min-height: 0; display: flex; }
+.aufforst .chart { flex: 1; min-height: 0; }
+.aufforst .rechts { opacity: 0; transition: opacity .6s var(--ease); }
+.aufforst .rechts.shown { opacity: 1; }
 .overlay .takeaway { margin-top: 4px; }
 .body:has(.overlay.shown) > .foot { opacity: 0; transition: opacity .3s; }
 
@@ -1015,6 +1018,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 
 /* chapter 3: the managed forest in two lines, beside its curve */
 .forstpos { position: absolute; left: 112px; top: 74px; width: 330px; pointer-events: none; }
+.aufforst .forstpos { top: auto; bottom: 74px; left: 112px; }   /* the Delta T curves start at the top; the box sits in the free lower left */
 .forstbox { position: relative; display: grid; grid-template-columns: 92px 1fr; gap: 14px;
             align-items: center; padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,.75); border: 1.5px solid #c9d8bf;
             transition: opacity .5s; }
@@ -1219,6 +1223,77 @@ svg.mo .m-sway.back { animation: none; }
 .tiles3 .tile svg { width: 100%; height: 190px; margin-bottom: 26px; }
 .tiles3 .tk { font: 600 32px/1.2 var(--serif); color: #f2ede2; margin-bottom: 12px; }
 .tiles3 .tile p:not(.tk) { font: 400 22px/1.4 var(--sans); color: #b9c0ba; }
+.tiles3.mini.two { grid-template-columns: repeat(2, 1fr); }
 .tiles3.mini { height: auto; gap: 18px; margin: 4px 0 0; align-content: start; }
 .tiles3.mini .tile svg { height: 92px; margin-bottom: 6px; }
 .tiles3.mini .tk { font: 600 20px/1.25 var(--sans); color: #f2ede2; margin: 0; }
+
+/* chapter 5 opener: dark, the question large; then it moves up and the problem comes in two panels (too little land,
+   CO2 too slow), then the vegan answer changes both */
+.slide.holzweg .ctext { transition: top .9s var(--ease); }
+.slide.holzweg h1 { transition: font-size .9s var(--ease); }
+.slide.holzweg:has(.hwp.shown) .ctext { top: 56px; }
+.slide.holzweg:has(.hwp.shown) h1 { font-size: 60px; }
+.slide.holzweg svg.deco { transition: opacity .9s var(--ease); }
+.slide.holzweg:has(.hwp.shown) svg.deco { opacity: .16; }
+.slide.holzweg .hwq { position: absolute; left: 0; right: 0; bottom: 34px; margin: 0; text-align: center; font: italic 600 40px/1.25 var(--serif); color: var(--amber); }
+.slide.holzweg .hw { position: absolute; left: 110px; right: 110px; top: 160px; bottom: 110px; display: grid; grid-template-columns: 1fr 1fr; gap: 70px; }
+.slide.holzweg .hwp { display: flex; flex-direction: column; min-height: 0; }
+.slide.holzweg .hwp .pk { font: 600 18px/1.6 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ch-soft); }
+.slide.holzweg .hwp .chart { flex: 1; min-height: 0; }
+.slide.holzweg .hwc { font: 400 21px/1.4 var(--sans); color: #d6dbd6; margin-top: 6px; }
+.slide.holzweg .hwc b { color: #f2ede2; font-weight: 600; }
+.slide.holzweg .hwc.neu { color: #a6e3b4; }
+.slide.holzweg .hwc.neu b { color: #a6e3b4; }
+.slide.holzweg .hwt { font: 600 19px/1.3 var(--sans); color: #f2ede2; margin-top: 4px; }
+.slide.holzweg .hwleg { display: flex; flex-direction: column; gap: 2px; font: 400 19px/1.3 var(--sans); color: #d6dbd6; margin-top: 6px; flex-wrap: wrap; }
+.slide.holzweg .hweps { display: grid; grid-template-columns: 1fr 1fr; column-gap: 26px; margin-top: 8px; }
+.slide.holzweg .hweps .hwk { grid-column: 1 / -1; }
+.slide.holzweg .hweps p { font: 400 21px/1.35 var(--sans); color: #d6dbd6; }
+.slide.holzweg .hweps .hwk { font: 600 16px/1.5 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: #9aa39d; }
+.slide.holzweg .hweps .hwx { color: #6fb7e0; font-weight: 600; }
+/* the CO2 green and methane blue of the formulas, lighter on the dark slide */
+.slide.holzweg .katex [style*="27, 120, 55"] { color: #7fd09a !important; }
+.slide.holzweg .katex [style*="43, 123, 186"] { color: #6fb7e0 !important; }
+.slide.holzweg .hweps p { margin: 0; }
+.slide.holzweg .hweps { align-items: baseline; grid-template-columns: auto auto; justify-content: start; column-gap: 64px; }
+.slide.holzweg .hweps .e { font: 400 30px/1.3 var(--sans); color: #d6dbd6; }
+.slide.holzweg .hweps .e .katex { font-size: 1.15em; }
+.slide.holzweg .hweps .e b { font-size: 46px; font-weight: 700; padding: 0 10px; border-radius: 8px; }
+.slide.holzweg .hweps .co2 b { color: #7fd09a; background: rgba(127, 208, 154, .14); }
+.slide.holzweg .hweps .ch4 b { color: #6fb7e0; background: rgba(111, 183, 224, .16); }
+.slide.holzweg .hweps .hwx { font-size: 21px; margin-left: 6px; white-space: nowrap; }
+.fb b.big.wald { color: #e4d84a; }
+.slide.holzweg .hwc.fut, .slide.holzweg .hwc.fut b { color: #e2a95a; }
+.slide.holzweg .hwc.ch4, .slide.holzweg .hwc.ch4 b { color: #6fb7e0; }
+.slide.holzweg .hwq span { display: inline-block; }
+
+/* the vegan world beside the anchor: one row per click, an icon, a few words, the number */
+.vz { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; padding: 18px 0; border-top: 1px solid #2c3437; transition: filter .6s var(--ease); }
+.flow > .vz:first-child { border-top: 0; }
+.vz svg { width: 56px; height: 56px; }
+.vz .vk { font: 600 24px/1.25 var(--sans); color: #f2ede2; }
+.vz .vs { font: 400 19px/1.35 var(--sans); color: #9aa39d; margin-top: 2px; }
+.vz .vn { font: 700 40px/1 var(--sans); color: #f0b04a; white-space: nowrap; }
+.vz .vn.wald { color: #e4d84a; }
+.vz .vn.ch4 { color: #6fb7e0; }
+.vz.end .vn { font-size: 54px; }
+.vz .vn.ers { color: #e2665c; }
+.anker.tief { margin-top: 44px; height: 590px; }   /* the vegan world: no takeaway below, so the anchor sits lower and taller */
+
+/* the summary: limits of model and talk, where the Woodway pointer was (it moved to the last slide) */
+.grenzen { margin-top: 22px; padding: 14px 22px 14px; border-radius: 14px; background: rgba(255, 255, 255, .62); border: 1px solid #d8d0bb; }
+.grenzen .gk { font: 600 24px/1.2 var(--serif); color: var(--ch); margin: 0 0 6px; }
+.grenzen ul { margin: 0; padding-left: 1.1em; columns: 2; column-gap: 48px; }
+.grenzen li { font: 400 19px/1.38 var(--sans); color: var(--ink-2); break-inside: avoid; margin-bottom: 4px; }
+/* the last slide: Woodway as a dark tile two tiles wide, bottom left; the thanks centred under tiles three and four */
+.slide.ende .endrow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: center; margin-top: 26px; opacity: 0; transition: opacity .8s var(--ease); }
+.slide.ende .endrow.shown { opacity: 1; }
+.slide.ende .endrow .woodway-hint { grid-column: 1 / span 2; width: auto; margin-top: 0; grid-template-columns: 1fr 150px; gap: 18px;
+  background: #2f4a2c; border-color: #2f4a2c; color: #dfe7d6; padding: 16px 16px 16px 20px; }
+.slide.ende .endrow .woodway-hint .wpv { display: none; }
+.slide.ende .endrow .woodway-hint b { color: #f2ede2; }
+.slide.ende .endrow .woodway-hint b .wink { color: #b9c9ad; }
+.slide.ende .endrow .woodway-hint em { color: #ffe08a; }
+.slide.ende .endrow .woodway-hint .qr { width: 150px; height: 150px; border-color: #2f4a2c; }
+.slide.ende .endrow .thanks { grid-column: 3 / span 2; margin-top: 0; opacity: 1; text-align: center; }

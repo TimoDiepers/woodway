@@ -26,6 +26,10 @@ from nbs.vergleich_figures import overshoot_series, vl_series
 
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "deck/chart_data/zeitpfade.json"
+# land of the Earth without Antarctica [Gha]: FAOSTAT 13.0, forest FAO FRA 2020 4.06; farmland 4.1 after Poore &
+# Nemecek 2018, 83 % of it for animals (pasture and feed), vegan about 1.0 in all; reforestable after Walker et al. 2022
+# (as slide 25); freed and forest-capable in a vegan world from nbs.vegan.flaeche_info (Walker's rule)
+LAND_GHA = {"gesamt": 13.0, "wald": 4.06, "tiere": 3.4, "acker": 0.7, "acker_vegan": 1.0, "wiederbewaldbar": 0.83}
 
 
 def _mk(a) -> list[float]:
@@ -90,6 +94,12 @@ def main() -> None:
     veg = {"dt_gase": _mk(dg), "dt_flaeche": _mk(df), **{k: round(v, 3) for k, v in vegan.flaeche_info().items()},
            "gap": _mk(np.maximum(gap_v, 0.0)), "g20": vcase, "kosten": vk, "ohne_dac": ohne_dac,
            "beitraege": {k: _mk(v) for k, v in vegan.contributions().items()},
+           # the chapter-5 opener: 1 Gt CH4 not emitted against 1 Gt CO2 removed in 2026 [mK], and the land of the
+           # Earth today and in a vegan world [Gha]
+           "puls": {g.lower(): [round(1000 * float(v), 3) for v in vegan.dt_puls(g)] for g in ("CH4", "CO2")},
+           "masse": {g.lower(): [round(float(v), 4) for v in vegan.puls_masse(g)] for g in ("CH4", "CO2")},
+           "epsilon": {g.lower(): vegan.epsilon(g) for g in ("CH4", "CO2")},
+           "land": LAND_GHA,
            "ersparnis": {"kap_gt": round(dac["g20"]["kap"] - vcase["kap"], 2),
                          "brutto_gt": round(float(u.sum() - uv.sum()), 1),
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}

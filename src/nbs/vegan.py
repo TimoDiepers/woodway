@@ -126,6 +126,53 @@ def dt_gase() -> NDArray:
     return _dt_fair(emission_delta())
 
 
+@lru_cache(maxsize=2)
+def dt_puls(gas: str) -> NDArray:
+    """Temperature change [K] on YEARS of 1 Gt of a gas taken out in 2026: CH4 not emitted, or CO2 removed from
+    the air. FaIR on Very Low; the chapter-5 opener compares the two per tonne."""
+    sp = {"CH4": "CH4", "CO2": "CO2 AFOLU"}[gas]
+    p = np.zeros(len(YEARS))
+    p[0] = -1000.0   # Mt
+    return _dt_fair({sp: p})
+
+
+GT_JE_PPM = {"CO2": 7.82, "CH4": 2.84e-3}   # atmospheric mass per ppm (CO2) and per ppb (CH4) [Gt]
+
+
+@lru_cache(maxsize=2)
+def _puls_run(gas: str) -> tuple[NDArray, NDArray]:
+    """Change of the atmospheric mass [Gt] and of the forcing [W/m^2] of that gas on YEARS after 1 Gt taken out in
+    2026, FaIR on Very Low (the concentration of 2026 is before the pulse, so the first year shows 0)."""
+    from nbs.fair_module import _END_IDX, _START_IDX, _create_fair
+
+    def run(pulse: bool):
+        f = _create_fair(SCENARIO)
+        if pulse:
+            sp = {"CH4": "CH4", "CO2": "CO2 AFOLU"}[gas]
+            v = f.emissions.sel(specie=sp).values.copy()
+            v[_START_IDX, 0, 0] -= {"CH4": 1000.0, "CO2": 1.0}[gas]   # FaIR: CH4 in Mt, CO2 in Gt
+            f.emissions.loc[dict(specie=sp)] = v
+        f.run()
+        sel = dict(scenario=SCENARIO, config="central", specie=gas)
+        return (np.asarray(f.concentration.sel(**sel).values, dtype=float)[_START_IDX:_END_IDX + 1],
+                np.asarray(f.forcing.sel(**sel).values, dtype=float)[_START_IDX:_END_IDX + 1])
+    (c1, f1), (c0, f0) = run(True), run(False)
+    n = len(YEARS)
+    return (c1 - c0)[:n] * GT_JE_PPM[gas], (f1 - f0)[:n]
+
+
+def puls_masse(gas: str) -> NDArray:
+    """Delta m [Gt] of CH4 or CO2 in the atmosphere on YEARS after 1 Gt taken out in 2026."""
+    return _puls_run(gas)[0]
+
+
+def epsilon(gas: str) -> float:
+    """Strength of the forcing [W/m^2 per kg] of CH4 or CO2 in the atmosphere in 2027 (FaIR, direct forcing of the
+    gas only): forcing change per mass change one year after the pulse."""
+    dm, df = _puls_run(gas)
+    return float(df[1] / (dm[1] * 1e12))
+
+
 FREI = ROOT / "data/vegan/frei_0p5.npz"   # scripts/prepare_forest_data.py --only-freed
 
 

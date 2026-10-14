@@ -14,6 +14,7 @@ const TEX_MACROS = {
   "\\bq":  "\\textcolor{6b4a2b}{\\boldsymbol{#1}}",   // from the tree chapter
   "\\rq":  "\\textcolor{1f7a8c}{\\boldsymbol{#1}}",   // response functions g_C, g_T
   "\\cq":  "\\textcolor{1b7837}{\\boldsymbol{#1}}",   // CO2 path
+  "\\mq":  "\\textcolor{2b7bba}{\\boldsymbol{#1}}",   // methane
   "\\aq":  "\\textcolor{d95f02}{\\boldsymbol{#1}}",   // albedo
   "\\tq":  "\\textcolor{b2182b}{\\boldsymbol{#1}}",   // temperature
   "\\gq":  "\\textcolor{5f7f48}{\\boldsymbol{#1}}",   // canopy closure
@@ -399,16 +400,17 @@ const EC_ZEIT = {
   steps: 1,
   option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), n = D.jahre.length - 1;
-    // second label line: the path by cause in 2100 (cooling > 0): CO2 uptake, release at felling, albedo
-    const sg = v => (v < 0 ? '−' : '') + ecNum(Math.abs(v), 0);
+    // shown as the temperature change Delta T (cooling < 0, downwards), as for the single tree on slide 21; second
+    // label line: the path by cause in 2100: CO2 uptake, release at felling, albedo (data: cooling > 0, so negated)
+    const sg = v => (v > 0 ? '−' : v < 0 ? '+' : '') + ecNum(Math.abs(v), 0);
     const parts = key => { const T = D.pfade_teile[key];
       return `CO₂ ${sg(T.co2_aufnahme[n])}` + (Math.abs(T.co2_verlust[n]) >= .5 ? ` · Fällen ${sg(T.co2_verlust[n])}` : '') + ` · Albedo ${sg(T.albedo[n])}`; };
     const end = (text, color, key) => ({ show: true, formatter: key ? `{a|${text}}\n{b|${parts(key)}}` : text, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10,
       rich: { a: { color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 24 }, b: { color: EC.muted, fontFamily: EC.font, fontSize: 17, fontWeight: 400, lineHeight: 22 } } });
-    const line = (id, ys, color, text, key, extra) => Object.assign({ id, type: 'line', showSymbol: false, data: P(ys), z: 5,
+    const line = (id, ys, color, text, key, extra) => Object.assign({ id, type: 'line', showSymbol: false, data: P(ys.map(v => -v)), z: 5,
       lineStyle: { color, width: 3.4 }, itemStyle: { color }, endLabel: end(text, color, key), labelLayout: { moveOverlap: 'shiftY' },
       animationDuration: 1800 }, extra || {});
-    const p = D.pfade, f = v => ecNum(v, 0);
+    const p = D.pfade, f = v => (v > 0 ? '−' : '') + ecNum(Math.abs(v), 0);
     const series = [
       line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle'),
       line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200 })];
@@ -419,13 +421,13 @@ const EC_ZEIT = {
     }
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
-      title: { text: 'Kühlung Jahr für Jahr, alle Bäume 2026 gepflanzt', left: 74, top: 0,
+      title: { text: 'ΔT der Erde, alle Bäume 2026 gepflanzt', left: 74, top: 0,
                textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
-      grid: { left: 74, right: 330, top: 50, bottom: 46 },
+      grid: { left: 74, right: 300, top: 50, bottom: 46 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 35, interval: 5, name: 'Kühlung der Erde [mK]', nameLocation: 'middle', nameGap: 52,
-                      axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19 }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
+      yAxis: ecAxis({ type: 'value', min: -35, max: 0, interval: 5, name: 'ΔT(t) [mK]', nameLocation: 'middle', nameGap: 52,
+                      axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => v < 0 ? `−${ecNum(-v, 0)}` : String(v) }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
       series
     };
   }
@@ -562,10 +564,10 @@ const EC_VEGAN_LUECKE = {
    1 DACCS at the fastest build-out (linear to 8.8 Mt/a in 2030, then +20 %/a), shown up to the peak (click 1),
    2 the vegan world (click 1; the DACCS line steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
    own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
-const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#7fd0e0' };
+const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#f0b04a' };
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 1, 2: 2 }[phase], option(k) {
+  return { steps: { k4: 0, 0: 0, 1: 1, 2: 3 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const iPeak = D.jahre.indexOf(2050);
@@ -585,35 +587,40 @@ function ecAnker(phase) {
     const peak = ys => { const i = ys.indexOf(Math.max(...ys)); return [D.jahre[i], ys[i]]; };
     const series = [];
     const [pv, tv] = peak(vl);
-    series.push(L('vl', vl, 'Very Low ohne Entnahme', { line: { width: 2.4, type: [8, 6] },
+    series.push(L('vl', vl, 'CMIP7 Very Low, Verlauf ohne Entnahme', { line: { width: 2.4, type: [8, 6] },
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
-        label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
-        markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
-    series.push(L('b', b, 'Bäume'));
+        label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } } }));
+    series.push(L('b', b, 'Globale Aufforstung', light ? { mark: [{ coord: [pv, b[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 92, offset: [70, 0], color: '#2f7a45', fontSize: 20,
+      formatter: `Aufforstung an der Spitze: −${ecNum(-W.baeume[D.jahre.indexOf(pv)] / 1000, 2)} K` } }] } : {}));
     if (has('d') && phase === 1) { const d = on('dac_max'), iv = D.jahre.indexOf(D.dac.max.speicher_voll);   // slide 28 only
       series.push(L('d', d, 'DACCS, +20 %/a', { line: { width: 3, type: [10, 5] },
         mark: [{ coord: [2050, d[iPeak]], label: { position: 'bottom', distance: 40, offset: [90, 0], formatter: `bis 2050: −${ecNum(-W.dac_max[iPeak], 1)} mK` } },
                { coord: [D.dac.max.speicher_voll, d[iv]], label: { position: 'left', distance: 10, formatter: `Speicher voll ${D.dac.max.speicher_voll}` } }] })); }
-    if (has('v')) {   // the vegan world by cause: cooling bands from the trees' curve down, warming ones (orange) back up to the net curve
+    if (phase === 2 && k >= 1) {   // the vegan world by cause: first the new forest alone (net of its albedo), then the
+      // gases and the rest from the trees' curve down, the replacement crops (orange) back up; then the net curve
       const B = D.vegan.beitraege, parts = ['ch4_tier', 'n2o_vermieden', 'co2_hof', 'co2_entwaldung', 'wald_co2', 'ersatz', 'wald_albedo'];
-      const co2 = B.netto.map((x, i) => B.co2_hof[i] + B.co2_entwaldung[i] + B.wald_co2[i]
-        + x - parts.reduce((a, p) => a + B[p][i], 0));   // what FaIR does not add up exactly goes with the small CO2 band
-      const band = (id, ys, color, name, op = .85) => ({ id, name, type: 'line', stack: 'veg', stackStrategy: 'all', data: P(ys.map(x => x / 1000)), showSymbol: false, z: 3,
-        animation: isNew('v') ? undefined : false, animationDuration: 1600, lineStyle: { width: 0 }, itemStyle: { color }, areaStyle: { color, opacity: op } });
+      const wald = B.wald_co2.map((x, i) => x + B.wald_albedo[i]);
+      const co2 = B.netto.map((x, i) => B.co2_hof[i] + B.co2_entwaldung[i] + x - parts.reduce((a, p) => a + B[p][i], 0));   // what FaIR does not add up exactly goes with the small CO2 band
+      const band = (id, ys, color, name, op = .5, extra = {}) => Object.assign({ id, name, type: 'line', stack: 'veg', stackStrategy: 'all', data: P(ys.map(x => x / 1000)), showSymbol: false, z: 3,
+        animationDuration: 1400, lineStyle: { width: 1.4, color, opacity: .9 }, itemStyle: { color }, areaStyle: { color, opacity: op } }, extra);
       series.push({ id: 'vb', type: 'line', stack: 'veg', stackStrategy: 'all', data: P(b), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
-        band('vm', B.ch4_tier, '#4f9fc7', 'Methan'), band('vn', B.n2o_vermieden, '#86c6e4', 'Lachgas'), band('vc', co2, '#c3e3f2', 'CO₂, Wald'),
-        band('ve', B.ersatz, '#e0903e', 'Ersatz (wärmt)', 1), band('va', B.wald_albedo, '#d0644a', 'Albedo (wärmt)', 1)); }
-    if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
-      series.push(L('v', v, 'netto: vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'bottom', distance: 34, offset: [-30, 0], formatter: `netto: ${ecNum(tw, 2)} °C` } }] })); }
-    // y range from all curves of the last phase, so that it stays the same on every slide
-    const ext = ['vegan', 'dac_max'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+        band('vw', wald, '#e4d84a', 'zusätzlicher Wald', .45, { animation: k === 1 }));
+      if (k >= 2) series.push(...[band('vm', B.ch4_tier, '#4f9fc7', 'Methan'), band('vn', B.n2o_vermieden, '#86c6e4', 'Lachgas'),
+        band('vc', co2, '#c3e3f2', 'CO₂'), band('ve', B.ersatz, '#d0443a', 'Ersatz (wärmt)', .7)].map(x => Object.assign(x, { animation: k === 2 })));
+    }
+    if (phase === 2 && k >= 3) { const v = on('vegan'), [pw, tw] = peak(v);
+      series.push(L('v', v, 'netto: vegan', { line: { width: 3 }, mark: [{ coord: [pw, tw], label: { position: 'bottom', distance: 30, offset: [-20, 0], fontSize: 24,
+        formatter: `netto: ${ecNum(tw, 2)} °C` } }] })); }
+    // y range from all curves of the main part, so that it stays the same on every slide
+    // DACCS (phase 1) is a backup slide; the main part keeps its own range
+    const ext = (phase === 1 ? ['vegan', 'dac_max'] : ['vegan']).map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: light ? EC.ink : '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
                 data: series.filter(x => x.id !== 'vb').map(x => x.name) },
-      grid: { left: 70, right: 24, top: 118, bottom: 40 },   // room for a legend of two rows on every slide
+      grid: { left: 70, right: 24, top: 150, bottom: 40 },   // room for a legend of three rows on every slide
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
                       axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
       yAxis: ecAxis({ type: 'value', min: lo, max: hi, interval: .1, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
@@ -657,7 +664,77 @@ const EC_DACCS_AUSBAU = { steps: 0, option() {
       { id: 'n', name: 'netto', type: 'line', data: P(M.netto), showSymbol: false, lineStyle: { color: '#f2ede2', width: 2, type: [6, 5] }, itemStyle: { color: '#f2ede2' } }]
   };
 } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
+/* chapter 5 opener, left: the land of the Earth as a donut; click 2 adds an outer ring over the animal land only,
+   what it would become in a vegan world (forest-capable, too dry, replacement cropland), so both stay to be seen.
+   Fixed series ids: a click merges and only the new ring enters. */
+const EC_LANDDONUT = {
+  steps: 2,
+  option(k) {
+    const V = window.ZEIT.vegan, L = V.land, frei = L.tiere + L.acker - L.acker_vegan, ersatz = L.acker_vegan - L.acker;
+    const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
+    const gha = v => `${ecNum(v, v < 1 ? 2 : 1)} Gha`;
+    const rich = (c, op = 1) => ({ n: { color: c, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 22, opacity: op },
+                         v: { color: c, fontFamily: EC.font, fontSize: 18, lineHeight: 20, opacity: .85 * op } });
+    // click 1 points at the feed land: the rest of today's ring steps back (and stays back while the outer ring comes)
+    const dimmed = name => k >= 1 && ['Wald', 'Acker für uns', 'übriges Land'].includes(name);
+    const item = (name, value, color, lab, ink) => ({ name, value, itemStyle: { color, opacity: dimmed(name) ? .3 : 1 },
+            label: lab === 'in' ? { position: 'inside', formatter: `{n|${name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dimmed(name) ? .4 : 1) }
+           : lab === 'out' ? { position: 'outside', formatter: `{n|${name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dimmed(name) ? .4 : 1) } : { show: false },
+      labelLine: { show: lab === 'out', lineStyle: { color: '#6d756f' } } });
+    const blank = value => ({ value, itemStyle: { color: 'transparent' }, label: { show: false }, labelLine: { show: false }, tooltip: { show: false } });
+    const base = { type: 'pie', center: ['50%', '47%'], startAngle: 90, padAngle: 1.2, itemStyle: { borderRadius: 7 }, emphasis: { disabled: true },
+                   labelLine: { length: 12, length2: 14 }, label: { overflow: 'none' }, animationDuration: 1100 };
+    const series = [Object.assign({}, base, { id: 'heute', radius: ['38%', '66%'], animation: k <= 1, data: [
+      item('Wald', L.wald, '#2f6b45', 'in'),
+      item('wiederbewaldbar', L.wiederbewaldbar, '#5fae76', 'out', '#a6e3b4'),
+      item('Tierfutter', L.tiere, '#c98a2b', 'in', '#14181a'),
+      item('Acker für uns', L.acker, '#e3c46e', 'out'),
+      item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
+    if (k >= 2) series.push(Object.assign({}, base, { id: 'vegan', radius: ['70%', '82%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900, data: [
+      blank(L.wald + L.wiederbewaldbar),
+      item('frei, waldfähig', V.frei_gha, '#8fe0a0', 'out', '#a6e3b4'),
+      item('frei, zu trocken', frei - V.frei_gha, '#6b5d45', 'out', '#c9bfae'),
+      item('Ersatz', ersatz, '#e3c46e', 'none'),
+      blank(L.acker + rest)] }));
+    return {
+      animationDurationUpdate: 0,
+      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '40%',
+               textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 28, fontWeight: 600 },
+               subtextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } },
+      series
+    };
+  }
+};
+
+/* chapter 5 opener, right: Delta m of the gas in the atmosphere after 1 Gt taken out in 2026: CO2 removed stays
+   partly away; (click 2) methane not emitted is gone within decades. Same axis for both, so nothing rescales. */
+const EC_PULS = {
+  steps: 1,
+  option(k) {
+    const D = window.ZEIT, M = D.vegan.masse, P2 = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    // the label at the end of each curve: the formula symbol as on the climate slides (bold, in the gas colour)
+    const sym = (color, sub) => ({ show: true, distance: 10, formatter: `{d|Δ}{m|m}{s|${sub}}{t|(t)}`, rich: {
+      d: { color, fontFamily: 'KaTeX_Main', fontWeight: 'bold', fontSize: 26, lineHeight: 30, verticalAlign: 'middle' }, m: { color, fontFamily: 'KaTeX_Math', fontStyle: 'italic', fontWeight: 'bold', fontSize: 26, lineHeight: 30, verticalAlign: 'middle' },
+      s: { color, fontFamily: 'KaTeX_Main', fontSize: 17, lineHeight: 30, verticalAlign: 'bottom', padding: [0, 0, 0, 1] }, t: { color: '#d6dbd6', fontFamily: 'KaTeX_Main', fontSize: 24, lineHeight: 30, verticalAlign: 'middle', padding: [0, 0, 0, 3] } } });
+    const line = (id, ys, color, sub) => ({ id, type: 'line', showSymbol: false, data: P2(ys), lineStyle: { color, width: 3.8 }, itemStyle: { color },
+      endLabel: sym(color, sub), animationDuration: 1500 });
+    const series = [Object.assign(line('co2', M.co2, '#7fd09a', 'CO₂'), { animation: k === 0 })];
+    if (k >= 1) series.push(line('ch4', M.ch4, '#6fb7e0', 'CH₄'));
+    return {
+      animationDurationUpdate: 0,
+      grid: { left: 70, right: 130, top: 16, bottom: 40 },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#6d756f' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: -1, max: 0, interval: 0.25, name: 'Δm [kg]', nameLocation: 'middle', nameGap: 54, nameTextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19 },
+                      axisLine: { lineStyle: { color: '#6d756f' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v < 0 ? `−${ecNum(-v, 2)}` : '0' },
+                      splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      series
+    };
+  }
+};
+
+const EC_CHARTS = { landdonut: EC_LANDDONUT, puls: EC_PULS, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
 
 class EChart {
   constructor(host) {
@@ -683,6 +760,10 @@ class EChart {
     k = Math.max(0, Math.min(k, this.nSteps));
     if (fresh) this.chart.clear();
     const opt = this.spec.option(k);
+    // a click that changes nothing in this chart leaves it alone: setting the same option again would fade its labels in anew
+    const same = JSON.stringify(opt);
+    if (!fresh && same === this.last) { this.k = k; return; }
+    this.last = same;
     opt.animation = animate && !this.spec.still;
     this.chart.setOption(opt, { replaceMerge: ['series'] });
     this.k = k;
@@ -1610,10 +1691,11 @@ class Deck {
     // Where the talk stands: the chapters as on the overview slide, each its icon in its own colour, the current
     // one named. Content slides carry it top right, the chapter openers top left (on their colour, inverted).
     const chapters0 = ['baeume', 'klima', 'vergleich'];
-    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial', dac: 'Optionen' };   // chapter 5: DAC and the vegan world
-    const path = ch => {
+    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
+    const path = ch0 => {
+      const ch = ch0 === 'dac' ? 'vergleich' : ch0;   // the Holzweg part (dark, amber) still belongs to the chapter Potenzial
       const el = document.createElement('div'); el.className = 'path'; el.setAttribute('aria-hidden', 'true');
-      el.innerHTML = (ch === 'dac' ? [...chapters0, 'dac'] : chapters0).map(c =>
+      el.innerHTML = chapters0.map(c =>
         `<span class="pc${c === ch ? ' on' : ''}" data-ch="${c}"><svg><use href="#i-${c}"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</span>`).join('');
       return el;
     };
