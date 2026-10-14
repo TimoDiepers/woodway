@@ -39,8 +39,9 @@ Gemeinsame Einheit: Anteil des reinen Kohlenstoffnutzens, der nach der Albedo bl
 * **Abnehmende Schneedecke** (Hasler 2024, Diskussion): Die boreale
   Albedo-Strafe sinkt in einer wärmeren Welt. Δα·q̇ ist hier statisch → boreal
   eher zu streng.
-* **Luftchemie und Wolken** (Weber 2024: BVOC, Aerosole): nicht abgebildet,
-  Vorzeichen je nach Region.
+* **Luftchemie und Wolken** (Weber 2024: BVOC, Aerosole): Seit 2026-10-14 sind
+  die lokalen niedrigen Wolken über Wald abgebildet (Duveiller et al. 2021,
+  docs/methods/wolken.md); großräumige Wolkenantworten und Aerosole nicht.
 * **Tempo je Typ** (Williams 2026): langsamer in Außertropen und Laubwald,
   schneller in Tropen und Nadel-/Mischwald — hier eine globale Regel.
 * **Störung außerhalb Europas**: Anderegg et al. 2022 (USA) erwarten bis 2090

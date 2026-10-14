@@ -13,7 +13,7 @@ The talk widens the system boundary step by step. It starts with one tree, which
           →  f(t)                                          →  φ_α = τ_atm·ΔQ̇_Baum / A_Erde
                                                            →  ΔT = g_T ∗ (φ_CO₂ + φ_α)
 
-FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C and g_T. Area-wide numbers come from a direct FaIR run instead, with the removal as a negative emission and the albedo as a forcing, so filling sinks and the weaker effect per kg at higher CO₂ are part of the result. Evapotranspiration is not a term in φ: it does not cross the top of the atmosphere.
+FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C and g_T. Area-wide numbers come from a direct FaIR run instead, with the removal as a negative emission and the albedo as a forcing, so filling sinks and the weaker effect per kg at higher CO₂ are part of the result. Evapotranspiration itself is not a term in φ: it does not cross the top of the atmosphere. What it does there, through more low clouds over forest, is part of ΔQ̇_Baum (Duveiller et al. 2021, see docs/methods/wolken.md).
 
 ```python
 from nbs.pipeline import run_single_tree
@@ -51,6 +51,8 @@ Python 3.11+ and [uv](https://docs.astral.sh/uv/):
 ```bash
 uv sync
 uv run python scripts/fetch_data.py duveiller_bph   # albedo rasters (Duveiller et al. 2018, CC-BY-4.0)
+# clouds over forest: data/clouds/ is committed; to rebuild it from Duveiller et al. 2021:
+#   uv run python scripts/fetch_data.py duveiller_clouds && uv run --with pyreadr python scripts/prepare_clouds.py
 ```
 
 The other raw inputs (Walker, Hasler, Cook-Patton, CRU, Gidden, CMIP7) go to `data/raw/`. `scripts/prepare_*.py`, `scripts/fetch_*.py` and the method notes say where each comes from. Without the rasters, the affected functions fall back to latitude tables visibly and say so through `provenance()`.
