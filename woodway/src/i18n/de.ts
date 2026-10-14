@@ -94,7 +94,7 @@ export const de: Record<keyof typeof en, string> = {
   "strip.afterDac": "mit Bäumen und DACCS",
   "strip.capacity": "DACCS-Kapazität {gt} Gt/a",
   "strip.unit": "mK",
-  "strip.source": "Mit den Bäumen: bewirtschafteter Wald auf den {area} Gha, die kühlen, alle {year} gepflanzt, Holz bleibt gebunden; DACCS: ohne Wachstumsgrenze, so viel wie nötig, um ab 2027 höchstens 1,5 °C zu halten.",
+  "strip.source": "Mit den Bäumen: bewirtschafteter Wald auf den {area} Gha, die kühlen, alle {year} gepflanzt, Holz bleibt gebunden; DACCS: kostenoptimal, gleicht ab 2027 die Erwärmung über 1,5 °C aus, ohne Wachstumsgrenze.",
   "hover.value": "{value} {unit}",
   "tools.label": "Kartenwerkzeuge",
   "tools.recenter": "Zurück zur ganzen Welt",

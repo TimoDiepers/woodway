@@ -1,5 +1,6 @@
-"""DAC without a growth limit, as much as it takes to hold the warming at 1.5 deg C (nbs.dac_optim.solve_offset):
-the least yearly capacity that keeps every year from 2027 on at or below 1.5 deg C, then the least total."""
+"""DACCS as a cost optimisation (nbs.dac_optim.solve_cost_offset): the cheapest builds and runs per country and year,
+optimistic costs of Okosun et al. 2026, such that the cooling offsets the warming above 1.5 deg C that the trees
+leave, in every year from 2027 on. No growth limit; plants run at most LIFETIME years and may idle."""
 import numpy as np
 import pytest
 
@@ -9,55 +10,56 @@ from nbs.constants import YEARS
 @pytest.fixture(scope="module")
 def runs():
     from nbs import vegan
-    from nbs.dac_optim import solve_offset
+    from nbs.dac_optim import solve_cost_offset
     from nbs.tree_paths import delta_t
     from nbs.vergleich_figures import vl_series
 
     gap = np.array(vl_series()["median_c"]) - 1.5 + delta_t("forst")
     gv = gap + vegan.dt_gase() + vegan.dt_flaeche()
-    return gap, solve_offset(gap), gv, solve_offset(gv)
+    return gap, solve_cost_offset(gap), gv, solve_cost_offset(gv)
 
 
-def test_holds_1p5_from_2027(runs):
+def test_offsets_the_warming_from_2027(runs):
     gap, r, gv, rv = runs
     for g, x in ((gap, r), (gv, rv)):
-        over = g - np.array(x["kuehlung_k"])
-        assert over[1:].max() <= 1e-6
+        assert (g - np.array(x["kuehlung_k"]))[1:].max() <= 1e-6
+
+
+def test_runs_only_on_standing_plants(runs):
+    from nbs.dac_optim import LIFETIME
+    _, r, _, _ = runs
+    b, u, cap = np.array(r["bau"]), np.array(r["u"]), np.array(r["kap_land"])
+    assert b.min() >= -1e-9
+    for t in range(len(YEARS)):
+        assert np.allclose(cap[:, t], b[:, max(0, t - LIFETIME + 1):t + 1].sum(axis=1), atol=1e-6)
+    assert np.all(u <= cap + 1e-6)
 
 
 def test_storage_and_eta(runs):
     from nbs.dac_storage import storage_by_country
     _, r, _, _ = runs
-    x, eta = np.array(r["x"]), np.array(r["eta"])
+    u, eta = np.array(r["u"]), np.array(r["eta"])
     st = storage_by_country("prudent")
-    assert np.all(x.sum(axis=1) <= np.array([st[c] for c in r["laender"]]) + 1e-6)
-    assert np.all(x[eta <= 0] == 0)
+    assert np.all(u.sum(axis=1) <= np.array([st[c] for c in r["laender"]]) + 1e-6)
+    assert np.all(u[eta <= 0] <= 1e-9)
 
 
-def test_vegan_needs_less(runs):
-    _, r, _, rv = runs
-    assert rv["kapazitaet_gt"] < r["kapazitaet_gt"] and rv["brutto_gt"] < r["brutto_gt"]
-
-
-def test_the_capacity_runs_now_not_late(runs):
+def test_reported_cost_is_the_objective(runs):
+    from nbs.dac_optim import COST_CASES, price_plan
     _, r, _, _ = runs
-    w = np.array(r["x"]).sum(axis=0)
-    assert w[0] > 0.9 * r["kapazitaet_gt"]          # the work is now: the peak is close
-    assert w[list(YEARS).index(2060):].max() < 1e-6
+    p = price_plan(np.array(r["bau"]).sum(axis=0), np.array(r["u"]).sum(axis=0), COST_CASES["optimistisch"])
+    assert p["summe_bio"] == pytest.approx(r["kosten_bio"], rel=1e-6)
 
 
-def test_capacity_stands_while_plants_idle_and_goes_at_shutdown():
-    from nbs.dac_optim import capacity_from_run
+def test_vegan_is_cheaper(runs):
+    _, r, _, rv = runs
+    assert rv["kosten_bio"] < r["kosten_bio"] and rv["kapazitaet_gt"] < r["kapazitaet_gt"]
+
+
+def test_price_plan_pays_build_and_fixed_cost_per_plant_and_energy_per_tonne():
+    from nbs.dac_optim import COST, LIFETIME, price_plan
+    b = np.zeros(len(YEARS)); b[0] = 60.0
     u = np.zeros(len(YEARS)); u[:16] = 60.0; u[10:13] = 30.0
-    c = capacity_from_run(u)
-    assert np.all(c[:16] == 60.0) and np.all(c[16:] == 0.0)
-
-
-def test_cost_of_a_run_pays_each_plant_once():
-    from nbs.dac_optim import COST, path_cost_run
-    u = np.zeros(len(YEARS)); u[:16] = 60.0; u[10:13] = 30.0
-    r = path_cost_run(u)
-    opex = COST["fom"] + COST["sorbent"] + COST["energy"]
-    want = (COST["capex"] * 60.0 + COST["fom"] * 60.0 * 16 + (COST["sorbent"] + COST["energy"]) * u.sum()) * 1e9 / 1e12
-    assert r["summe_bio"] == pytest.approx(want, rel=1e-9)
-    assert min(r["je_jahr_bio"]) >= 0 and all(v == 0 for v in r["je_jahr_bio"][16:])
+    p = price_plan(b, u, COST)
+    want = (COST["capex"] * 60.0 + COST["fom"] * 60.0 * LIFETIME + (COST["sorbent"] + COST["energy"]) * u.sum()) * 1e9 / 1e12
+    assert p["summe_bio"] == pytest.approx(want, rel=1e-9)

@@ -33,9 +33,9 @@ describe("GlobalStrip", () => {
     render(<GlobalStrip atlas={at} year={2080} />);
     const area = g.areasGha.kuehlt.toFixed(2), year = g.plantYear;
     expect(area).toBe("0.39");
-    expect(screen.getByText(`With the trees: managed forest on the ${area} Gha that cool, all planted in ${year}, timber kept; DACCS: no growth limit, as much as it takes to stay at or below 1.5 °C from 2027 on.`)).toBeInTheDocument();
+    expect(screen.getByText(`With the trees: managed forest on the ${area} Gha that cool, all planted in ${year}, timber kept; DACCS: cost-optimal, offsets the warming above 1.5 °C from 2027 on, no growth limit.`)).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("de"));
-    expect(screen.getByText(/^Mit den Bäumen: bewirtschafteter Wald auf den 0,39 Gha, die kühlen, alle 2026 gepflanzt, .*ab 2027 höchstens 1,5 °C zu halten\.$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Mit den Bäumen: bewirtschafteter Wald auf den 0,39 Gha, die kühlen, alle 2026 gepflanzt, .*ohne Wachstumsgrenze\.$/)).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("en"));
   });
 });

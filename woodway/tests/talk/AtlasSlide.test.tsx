@@ -44,7 +44,7 @@ describe("AtlasSlide", () => {
     expect(a.container.querySelector(".takeaway")!.textContent).toBe("2040: Im Median über die Landfläche bleiben 91 % jeder entnommenen Tonne netto.");
     a.unmount();
     const b = render(<AtlasSlide def={SLIDES.dacAusbau} atlas={at} step={1} />);
-    expect(b.container.querySelector(".takeaway")!.textContent).toMatch(/^[\d,.]+ Gt CO₂ pro Jahr ab sofort, ohne Wachstumsgrenze, um ab 2027 höchstens 1,5 °C zu halten; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt\.$/);
+    expect(b.container.querySelector(".takeaway")!.textContent).toMatch(/^[\d,.]+ Gt CO₂ pro Jahr ab sofort, kostenoptimal, um ab 2027 die Erwärmung über 1,5 °C auszugleichen; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt\.$/);
   });
   it("sources name the storage and the forest-type paper", () => {
     expect(SLIDES.dacAusbau.source).toContain("Speicher Gidden et al. 2025");

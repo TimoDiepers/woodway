@@ -3,11 +3,11 @@
 Chapter 3: three planting paths, each planted at once in 2026 (every reforestable cell, the cooling cells, the
 cooling cells as managed forest with the timber bound; the timber released as the dashed comparison), each one
 full FaIR run, and the warming of Very Low above 1.5 deg C.
-Chapter 5: with the managed forest as the trees' contribution, DAC without any growth limit, as much as it takes to
-hold the warming at 1.5 deg C from 2027 on (nbs.dac_optim.solve_offset). Costs after the fact: the path priced with
-Okosun et al. 2026 (three cases), set against the EU-27 GDP and the explicit fossil-fuel subsidies. The vegan world
-from 2026: methane and nitrous oxide of livestock gone and forest on the freed land (nbs.vegan) lower the warming;
-the same DAC rule again, with what it saves.
+Chapter 5: with the managed forest as the trees' contribution, DACCS as a cost optimisation (optimistic costs of
+Okosun et al. 2026) that offsets the remaining warming above 1.5 deg C from 2027 on, without a growth limit
+(nbs.dac_optim.solve_cost_offset); the plan also priced with the median and pessimistic costs, set against the EU-27
+GDP and the explicit fossil-fuel subsidies. The vegan world from 2026: methane and nitrous oxide of livestock gone
+and forest on the freed land (nbs.vegan) lower the warming; the same cost optimisation for the rest.
 
     uv run python scripts/build_zeitpfade_data.py
 """
@@ -19,7 +19,7 @@ import numpy as np
 from nbs.constants import YEARS
 from nbs import vegan
 from nbs.dac_optim import (COST_CASES, EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, GROWTH, START_2030_GT, VERGLEICH_QUELLEN,
-                           capacity_from_run, path_cost_run, solve_offset)
+                           price_plan, solve_cost_offset)
 from nbs.tree_paths import delta_t, delta_t_parts, forcing
 from nbs.vergleich_figures import overshoot_series, vl_series
 
@@ -47,33 +47,35 @@ def main() -> None:
     gap_c = np.array(vl_series()["median_c"]) - 1.5 + delta_t("forst")   # unclipped: below 1.5 deg C counts too
 
     def _case(r, g):
-        x = np.array(r["x"]); over = 1000 * (g - np.array(r["kuehlung_k"]))
+        x = np.array(r["u"]); over = 1000 * (g - np.array(r["kuehlung_k"]))
         return {"kap": round(float(r["kapazitaet_gt"]), 2), "ab": r["ab_jahr"], "bis": r["bis_jahr"],
                 "brutto": round(float(r["brutto_gt"]), 1), "u": [round(float(v), 3) for v in x.sum(axis=0)],
-                "w": [round(float(v), 3) for v in capacity_from_run(x.sum(axis=0))],
+                "w": [round(float(v), 3) for v in np.array(r["kap_land"]).sum(axis=0)],
+                "bau": [round(float(v), 3) for v in np.array(r["bau"]).sum(axis=0)],
                 "temp": [round(float(v), 1) for v in np.maximum(over, 0)], "spitze": round(float(over.max()), 1),
                 "laender": r["laender"], "anteil": [round(float(v), 4) for v in x.sum(axis=1) / max(x.sum(), 1e-12)]}
-    # chapter 5: DAC without any growth limit, as much as it takes to hold 1.5 deg C from 2027 on (least yearly
-    # capacity, then least total; nbs.dac_optim.solve_offset); that no technology ever grew this fast is said on
-    # the slide. Costs after the fact (Okosun et al. 2026), against the EU-27 economy and fossil subsidies.
-    r_dac = solve_offset(gap_c)
+    # chapter 5: DACCS as a cost optimisation (optimistic costs of Okosun et al. 2026): the cheapest builds and runs
+    # per country and year that offset the warming the trees leave, from 2027 on (nbs.dac_optim.solve_cost_offset);
+    # no growth limit, that no technology ever grew this fast is said on the slide. The same plan priced with the
+    # median and pessimistic costs, against the EU-27 economy and fossil subsidies.
+    r_dac = solve_cost_offset(gap_c)
     dac = {"offset": _case(r_dac, gap_c)}
-    w, u = np.array(dac["offset"]["w"]), np.array(dac["offset"]["u"])
+    w, u, bau = np.array(dac["offset"]["w"]), np.array(dac["offset"]["u"]), np.array(dac["offset"]["bau"])
     # how long the planned build-out (8.8 Mt/a in 2030) would need at 20 %/a, like wind power once, to get there
     dac["offset"]["jahr_bei_20"] = int(2030 + np.ceil(np.log(w.max() / START_2030_GT) / np.log(GROWTH)))
 
     def _rk(d):
         return {k: (round(v, 4) if isinstance(v, float) else [round(x, 4) for x in v]) for k, v in d.items()}
-    kosten_pfad = {k: _rk(path_cost_run(u, c)) for k, c in COST_CASES.items()}
+    kosten_pfad = {k: _rk(price_plan(bau, u, c)) for k, c in COST_CASES.items()}
     kosten_pfad.update(eu27_bip_bio=EU27_BIP_BIO_EUR, fossil_subv_bio=round(FOSSIL_SUBV_BIO_EUR, 3), quellen=VERGLEICH_QUELLEN)
     print("dac", {k: v for k, v in dac["offset"].items() if not isinstance(v, list)}, "kosten", {k: kosten_pfad[k]["summe_bio"] for k in COST_CASES})
     # the vegan world from 2026: gases and forest on the freed land lower the warming, then the same DAC rule
     dg, df = vegan.dt_gase(), vegan.dt_flaeche()
     gap_v = gap + dg + df
-    r_v = solve_offset(gap_c + dg + df)
+    r_v = solve_cost_offset(gap_c + dg + df)
     vcase = _case(r_v, gap_c + dg + df)
     uv = np.array(vcase["u"])
-    vk = {k: _rk(path_cost_run(uv, c)) for k, c in COST_CASES.items()}
+    vk = {k: _rk(price_plan(np.array(vcase["bau"]), uv, c)) for k, c in COST_CASES.items()}
     over = np.where(gap_v > 1e-9)[0]   # without any DAC: the vegan world's own peak and return below 1.5 deg C
     ohne_dac = {"spitze": round(float(gap_v.max()) * 1e3, 1),
                 "ab": int(YEARS[over[-1] + 1]) if len(over) and over[-1] + 1 < len(YEARS) else (None if len(over) else int(YEARS[0]))}

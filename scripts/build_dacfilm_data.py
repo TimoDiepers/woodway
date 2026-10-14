@@ -1,8 +1,8 @@
 """Data for the DAC result film and its still pictures (deck/chart_data/dacfilm.json).
 
 One DAC path against the warming that remains after the trees (managed forest, timber bound; nbs.tree_paths):
-without any growth limit, as much as it takes to hold 1.5 deg C from 2027 on, the least yearly capacity
-(nbs.dac_optim.solve_offset; the deck's dac.offset).
+DACCS as a cost optimisation that offsets the warming above 1.5 deg C from 2027 on, without a growth limit
+(nbs.dac_optim.solve_cost_offset; the deck's dac.offset).
 Each country's capacity is spread evenly over the cells the optimisation counts for it (cells near a sediment basin, at or above the
 90 % quantile of the net share; here fixed by the year 2050), plus dark map backgrounds (land, basins).
 
@@ -18,7 +18,7 @@ from PIL import Image
 
 from nbs.dac import dac_possible, efficiency_grid
 from nbs.dac_climate import climate_grid
-from nbs.dac_optim import capacity_from_run, growth_limit, solve_offset
+from nbs.dac_optim import growth_limit, solve_cost_offset
 from nbs.tree_paths import delta_t
 from nbs.vergleich_figures import overshoot_series, vl_series
 from nbs.dac_storage import iso3_grid, storage_mask
@@ -41,7 +41,8 @@ def main() -> None:
     need = np.array(overshoot_series()["noetig_k"]) * 1000
     tree = -delta_t("forst") * 1000
     paths, cool = {}, {}
-    r = solve_offset(np.array(vl_series()["median_c"]) - 1.5 - tree / 1000)   # hold 1.5 deg C, no growth limit
+    r = solve_cost_offset(np.array(vl_series()["median_c"]) - 1.5 - tree / 1000)   # cheapest offset, no growth limit
+    r["x"] = r["u"]                                                   # the map shows what is removed
     paths["opt"] = (r["laender"], np.array(r["x"]), np.array(r["eta"]))
     cool["opt"] = np.array(r["kuehlung_k"])
 
@@ -70,9 +71,9 @@ def main() -> None:
                 cap[used.index(c)] = x[i]
         net = (x * eta).sum(axis=0)
         out_paths[key] = {"cc": [[round(float(v), 4) for v in row] for row in cap],
-                          "tot": [round(float(v), 4) for v in capacity_from_run(x.sum(axis=0))],
+                          "tot": [round(float(v), 4) for v in np.array(r["kap_land"]).sum(axis=0)],
                           "cum": [round(float(v), 2) for v in np.cumsum(net)],
-                          "peak": round(float(capacity_from_run(x.sum(axis=0)).max()), 1),
+                          "peak": round(float(np.array(r["kap_land"]).sum(axis=0).max()), 1),
                           "dac": [round(float(v if key == "max" else max(v, 0)), 1) for v in need - tree - 1000 * cool[key]]}
         over = np.array(out_paths[key]["dac"])
         out_paths[key]["below"] = next((int(2026 + i) for i in range(30, len(over)) if over[i:].max() <= 0.5), None)

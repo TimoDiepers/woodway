@@ -4,7 +4,7 @@
 
 Gedankenexperiment für Kapitel 5: Die ganze Welt isst ab 2026 vegan, ohne Übergang. Das ist ein Grenzfall, eine obere Schranke. Gerechnet wird gegen CMIP7 Very Low ohne seine eigene CO₂-Entnahme (neuartig und Land-Senke, 335 Gt bis 2100; die sollen Bäume und DAC erst liefern), die Erwärmung über 1,5 °C nach den Bäumen (als Forst, Holz gebunden) ist die Lücke. Code: `src/nbs/vegan.py`, Daten: `data/vegan/` (Quellen in `data/vegan/QUELLE.md`), Zahlen im Deck: `deck/chart_data/zeitpfade.json`, Schlüssel `vegan`.
 
-Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DACCS sinkt die Spitze über 1,5 °C von 0,32 auf 0,13 K (2046), ab 2082 gilt wieder 1,5 °C. DACCS ohne Wachstumsgrenze, so viel wie nötig, um ab 2027 bei höchstens 1,5 °C zu bleiben: mit veganer Welt 35 statt 67 Gt/a, bis 2036 statt 2041, 390 statt 970 Gt, 93 statt 221 Bio. € (Median).
+Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DACCS sinkt die Spitze über 1,5 °C von 0,32 auf 0,13 K (2046), ab 2082 gilt wieder 1,5 °C. DACCS als Kostenoptimierung (optimistische Kosten nach Okosun et al. 2026), die ab 2027 die verbleibende Erwärmung über 1,5 °C ausgleicht: mit veganer Welt 37 statt 75 Gt/a, Betrieb bis 2037 statt 2047, 390 statt 1 020 Gt, 59 statt 143 Bio. €.
 
 ## 1  Emissionen nach Ursache (`emission_parts`)
 
@@ -47,7 +47,7 @@ Jeder Teil läuft als eigener FaIR-Lauf (`contributions`); netto ist `dt_gase + 
 
 ## 4  DACCS mit veganer Welt
 
-Dieselbe Rechnung wie im Hauptteil (`nbs.dac_optim.solve_offset`: ohne Wachstumsgrenze die kleinste Weltkapazität, die ab 2027 jedes Jahr höchstens 1,5 °C hält): 35,3 statt 66,6 Gt/a, 2026–2036 statt 2026–2041, 386 statt 972 Gt. Kosten im Nachgang (`path_cost_run`): 93 statt 221 Bio. € (Median; 54–142 statt 130–339). Beide Fälle haben dasselbe Ziel, die Ersparnis vergleicht also Gleiches.
+Dieselbe Kostenoptimierung wie im Hauptteil (`nbs.dac_optim.solve_cost_offset`: Bau und Betrieb je Land und Jahr zu geringsten Kosten, optimistisch nach Okosun et al. 2026; Kühlung ab 2027 mindestens die Erwärmung über 1,5 °C; ohne Wachstumsgrenze; Anlagen höchstens 20 Jahre, dürfen stillstehen): 36,6 statt 75,0 Gt/a, Betrieb bis 2037 statt 2047, 391 statt 1 021 Gt, 59 statt 143 Bio. € (Median 105 statt 247). Beide Fälle haben dasselbe Ziel.
 
 ## 5  Was nicht enthalten ist
 

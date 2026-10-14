@@ -7,7 +7,7 @@ export const ANCHORS: { id: AtlasSlideId; after: string }[] = [
   { id: "jedeZelle", after: "Temperaturwirkung eines Baums je Ort" },
   { id: "albedo", after: "Temperaturwirkung eines Baums je Ort" },
   { id: "dacStrom", after: "DAC-Modell" },
-  { id: "dacAusbau", after: "DACCS ohne Grenze: wo" },
+  { id: "dacAusbau", after: "DACCS kostenoptimal: wo" },
   { id: "atlas", after: "Woodway: alle Ergebnisse interaktiv" },
 ];
 

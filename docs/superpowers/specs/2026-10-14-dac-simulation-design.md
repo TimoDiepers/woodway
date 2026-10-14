@@ -1,4 +1,4 @@
-# DACCS ohne Grenze statt dreistufiger Optimierung
+# DACCS als Kostenoptimierung statt dreistufiger Optimierung
 
 Stand 2026-10-14, mit Timo besprochen.
 
@@ -12,13 +12,17 @@ Die dreistufige Optimierung (niedrigste Spitze → so früh wie möglich zurück
 
 Eine reine Simulation („an der Wachstumsgrenze wachsen, bis es reicht“) funktioniert nicht: Exponentielles Wachstum baut die größten Mengen in den letzten Jahren (20 %/a: 138 Gt/a, 50 %/a: 444 Gt/a). Ohne Vorausschau gibt es keinen sinnvollen Stopp.
 
-Timo: „können wir die wachstumsgrenze einfach weglassen und so tun als könnten wir so viel dac machen wie wir wollen um den rest zu offsetten, und dann nachträglich nur qualitativ sagen ‚so schnell könnten wir nie upscalen‘, und die kosten natürlich weiterhin ausrechnen“.
+Danach „DACCS ohne Grenze, kleinste Weltkapazität“ (`solve_offset`). Timo: „ergibt keinen Sinn … was ist da das Ziel?“ und „bau es als Kostenoptimierung auf mit constraint cooling mindestens so dass die remaining Kurve vom Baum geoffsettet wird … nimm die optimistischen Kosten“.
 
 ## Rechnung
 
-`nbs.dac_optim.solve_offset`: ohne Wachstumsgrenze die kleinste Weltkapazität, die die Kurve ab 2027 in jedem Jahr bei höchstens 1,5 °C hält, dann bei dieser Kapazität möglichst wenig insgesamt. Länder nach η_C mit sicherem Speicher (Gidden et al. 2025). Anlagen dürfen stillstehen; die Kapazität ist der bisherige Höchststand bis zum Abschalten (`capacity_from_run`). Kosten im Nachgang mit `path_cost_run`: Investition einmal je gebauter Anlage, Fixkosten auf die stehende Kapazität, Sorbens und Energie auf die Entnahme.
+`nbs.dac_optim.solve_cost_offset`: Bau b[c, y] und Betrieb u[c, y] je Land und Jahr. Ziel: geringste Kosten (optimistischer Fall Okosun et al. 2026: Investition und Fixkosten je Anlage, Sorbens und Energie je Tonne). Bedingung: Kühlung ≥ Erwärmung über 1,5 °C nach den Bäumen, ab 2027. Anlagen höchstens 20 Jahre, Betrieb ≤ Kapazität, Speicher je Land, η_C je Land und Jahr, keine Wachstumsgrenze. `price_plan` bewertet denselben Plan mit Median und pessimistisch.
 
-Ergebnis (Very Low ohne seine Entnahme, mit Bäumen): 67 Gt/a von 2026 bis 2041, 970 Gt, 221 Bio. € (130–339); 2026 allein 59 Bio. € für den Bau. Mit veganer Welt: 35 Gt/a bis 2036, 390 Gt, 93 Bio. €. Mit 20 %/a ab 8,8 Mt/a 2030 wären 67 Gt/a erst 2079 erreicht (nur als Satz auf der Folie).
+Ergebnis: 75 Gt/a, fast alles 2026–2028 gebaut, Betrieb bis 2047, 1 020 Gt (70 % der Speicher), 143 Bio. € (Median 247, pessimistisch 388), 2026 allein 26 Bio. €. Mit 20 %/a wären 75 Gt/a erst 2080 erreicht (nur als Satz auf der Folie). Vegan: 37 Gt/a bis 2037, 59 Bio. €. Nach 2050 sinkt die Kurve unter 1,5 °C: Very Low sinkt von selbst, entnommenes CO₂ bleibt entnommen.
+
+## Story
+
+Folie 28 „Die Lücke mit DACCS füllen“ (Rechnung, Ergebnis, Geht das?, Kosten) → „Was können wir anders machen?“ → 29 „Warum Ernährung?“ → 30 vegan, den Rest füllt dieselbe Kostenoptimierung.
 
 ## Begriffe
 

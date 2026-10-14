@@ -44,9 +44,9 @@ const dacStrom: AtlasSlideDef = {
 };
 const dacAusbau: AtlasSlideDef = {
   id: "dacAusbau", title: "DACCS-Ausbau je Zelle, 2026–2100", ch: "dac", layer: "dacBuild", years: [2026, 2100],
-  takeaway: (at) => `${Math.max(...at.meta.global.dacCapacityGt).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Gt CO₂ pro Jahr ab sofort, ohne Wachstumsgrenze, um ab 2027 höchstens 1,5 °C zu halten; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt.`,
-  source: "Eigene Rechnung: kleinste Weltkapazität für höchstens 1,5 °C ab 2027, ohne Wachstumsgrenze; Speicher Gidden et al. 2025.",
-  notes: ["Ein Klick lässt den Ausbau von 2026 bis 2100 durchlaufen: gebaut wird dort, wo der Netto-Anteil am höchsten ist, sofort in voller Größe; nach 2041 reicht es."],
+  takeaway: (at) => `${Math.max(...at.meta.global.dacCapacityGt).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Gt CO₂ pro Jahr ab sofort, kostenoptimal, um ab 2027 die Erwärmung über 1,5 °C auszugleichen; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt.`,
+  source: "Eigene Kostenoptimierung: Kosten optimistisch nach Okosun et al. 2026, ohne Wachstumsgrenze; Speicher Gidden et al. 2025.",
+  notes: ["Ein Klick lässt den Ausbau von 2026 bis 2100 durchlaufen: gebaut wird dort, wo der Netto-Anteil am höchsten ist, fast alles 2026 bis 2028; nach 2047 reicht es."],
 };
 const atlas: AtlasSlideDef = {
   id: "atlas", title: "Atlas", layer: "deltaT", years: [2100], free: true,

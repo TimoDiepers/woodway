@@ -559,18 +559,18 @@ const EC_VEGAN_LUECKE = {
 };
 /* the anchor of chapters 4 and 5: Very Low without its own CO2 removal (vl_series) in deg C with the 1.5 deg C line, and a curve per measure (Very Low plus
    the trees plus the measure), never clipped. Phases: 'k4' chapter 4 (light, Very Low and trees), 0 the DAC model,
-   1 DAC without a growth limit, as much as it takes to hold 1.5 deg C, 2 the vegan world (click 1; the DAC line
-   steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
+   1 DACCS, cost-optimal, offsetting the warming above 1.5 deg C (click 1), 2 the vegan world (click 1; the DACCS
+   line steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
    own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
 const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#7fd0e0' };
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 0, 2: 1 }[phase], option(k) {
+  return { steps: { k4: 0, 0: 0, 1: 1, 2: 1 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const order = ['k4', 0, 1, 2], rank = order.indexOf(phase);
     const born = { vl: 'k4', b: 'k4', d: 1, v: 2 };
-    const later = { v: 1 };                                                    // the click within its phase
+    const later = { d: 1, v: 1 };                                              // the click within its phase
     const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && k >= (later[id] || 0));
     const isNew = id => born[id] === phase, dim = id => phase === 2 && id === 'd';
     const ink = light ? EC.ink : '#f2ede2', mut = light ? EC.muted : '#9aa39d', grid = light ? EC.grid : '#2c3437';
@@ -590,7 +590,7 @@ function ecAnker(phase) {
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
         markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
     series.push(L('b', b, 'Bäume'));
-    if (has('d')) series.push(L('d', on('dac'), 'DACCS ohne Grenze'));
+    if (has('d')) series.push(L('d', on('dac'), 'DACCS'));
     if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
       series.push(L('v', v, 'vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'top', offset: [34, 0], formatter: `vegan: ${ecNum(tw, 2)} °C` } }] })); }
     // y range from all curves of the last phase, so that it stays the same on every slide
