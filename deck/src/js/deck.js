@@ -396,7 +396,7 @@ window.ZEIT = @@ZEIT@@;
 
 /* chapter 3: trees all planted in 2026, three ways; then the warming of Very Low above 1.5 deg C */
 const EC_ZEIT = {
-  steps: 2,
+  steps: 1,
   option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), n = D.jahre.length - 1;
     // second label line: the path by cause in 2100 (cooling > 0): CO2 uptake, release at felling, albedo
@@ -417,17 +417,6 @@ const EC_ZEIT = {
       series.push(line('ff', p.forst_frei, '#14532d', `Holz freigesetzt: ${f(p.forst_frei[n])} mK`, 'forst_frei',
                        { lineStyle: { color: '#14532d', width: 2.4, type: [8, 6] }, animationDelay: 600 }));
     }
-    if (k >= 2) {
-      for (const s of series) s.endLabel = Object.assign({}, s.endLabel, { show: s.id === 'fo', formatter: `{a|Bäume: ${f(p.forst_frei[n])}–${f(p.forst[n])} mK}` });
-      const ip = D.noetig.indexOf(Math.max(...D.noetig));
-      series.push({ id: 'need', type: 'line', showSymbol: false, data: P(D.noetig), z: 3, lineStyle: { color: '#8e0d16', width: 3 },
-        areaStyle: { color: 'rgba(196,18,31,.16)' }, itemStyle: { color: '#8e0d16' }, animationDuration: 1800, animationDelay: 500,
-        endLabel: end('Very Low über 1,5 °C', '#8e0d16'),
-        markPoint: { silent: true, symbol: 'circle', symbolSize: 12, itemStyle: { color: '#8e0d16', borderColor: '#fff', borderWidth: 2 },
-          label: { show: true, position: 'top', distance: 10, color: '#8e0d16', fontFamily: EC.font, fontSize: 19, fontWeight: 600,
-                   formatter: `um ${D.jahre[ip]}: ${ecNum(D.noetig[ip] / 1000, 2)} K zu warm` },
-          data: [{ coord: [D.jahre[ip], D.noetig[ip]] }] } });
-    }
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
       title: { text: 'Kühlung Jahr für Jahr, alle Bäume 2026 gepflanzt', left: 74, top: 0,
@@ -435,7 +424,7 @@ const EC_ZEIT = {
       grid: { left: 74, right: 330, top: 50, bottom: 46 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: k >= 2 ? 350 : 35, interval: k >= 2 ? 50 : 5, name: k >= 2 ? 'Kühlung bzw. Erwärmung [mK]' : 'Kühlung der Erde [mK]', nameLocation: 'middle', nameGap: 52,
+      yAxis: ecAxis({ type: 'value', min: 0, max: 35, interval: 5, name: 'Kühlung der Erde [mK]', nameLocation: 'middle', nameGap: 52,
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19 }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
       series
     };

@@ -707,6 +707,9 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
   transition: opacity .5s var(--ease), transform .6s var(--ease); }
 .overlay.shown { opacity: 1; transform: none; }
 .overlay .chart { flex: 1; min-height: 0; }
+/* last clicks: the chapter-5 anchor (light) takes the place of the cooling chart in the same card */
+.overlay .chart.ankerk4:not(.shown) { display: none; }
+.slide:has(.ankerk4.shown) .overlay .chart[data-ec="zeit"], .slide:has(.ankerk4.shown) .forstpos { display: none; }
 .overlay .takeaway { margin-top: 4px; }
 .body:has(.overlay.shown) > .foot { opacity: 0; transition: opacity .3s; }
 
@@ -1017,7 +1020,6 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
             transition: opacity .5s; }
 .forstbox p { font: 400 17px/1.35 var(--sans); color: var(--ink-2); margin: 0; }
 .forstbox p b { color: #14532d; }
-.slide:has(.zs4.shown) .forstpos { opacity: 0; transition: opacity .5s; }
 
 /* inside the React deck (?host): the shell draws menu, hint and progress */
 .host #menu-fab, .host .hint, .host .progress { display: none !important; }
