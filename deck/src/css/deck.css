@@ -1142,6 +1142,7 @@ svg.mo .m-sway.back { animation: none; }
 .fbw p { font: 400 20px/1.38 var(--sans); color: #d6dbd6; }
 .fbw b.big { font: 600 26px/1 var(--sans); color: #f0b04a; }
 .fbw .chart.tk { height: 330px; }
+.fbw .chart.vk { height: 272px; }
 .kz { padding-top: 12px; border-top: 1px solid #2c3437; }
 .kz p { font: 400 20px/1.4 var(--sans); color: #d6dbd6; }
 .kz p.dk { font: 600 16px/1.2 var(--sans); letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }

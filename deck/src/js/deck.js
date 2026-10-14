@@ -700,6 +700,18 @@ function ecAnker(phase) {
     };
   } };
 }
+/* the vegan world by cause, all at once, as a block beside the anchor (EC_VEGAN builds it up over three clicks) */
+const EC_VEGAN_ALL = { steps: 0, option() {
+  const o = EC_VEGAN.option(3);
+  delete o.title;
+  o.grid = { left: 64, right: 70, top: 12, bottom: 64 };
+  o.legend = { bottom: 0, left: 58, itemGap: 14, itemWidth: 14, itemHeight: 12, textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 17 },
+               data: ['Lachgas: Tierhaltung, Futteranbau', 'CO₂: Futteranbau, Entwaldung', 'Wald auf freier Fläche: CO₂', 'Ersatzprodukte', 'Wald auf freier Fläche: Albedo'] };
+  for (const x of o.series) x.name = ({ n2o: 'Lachgas', co2: 'CO₂ Futter, Rodung', wco2: 'Wald: CO₂', ers: 'Ersatz', alb: 'Albedo' })[x.id] || x.name;
+  o.legend.data = ['Lachgas', 'CO₂ Futter, Rodung', 'Wald: CO₂', 'Ersatz', 'Albedo'];
+  o.xAxis.axisLabel.fontSize = 18; o.yAxis.axisLabel.fontSize = 18;
+  return o;
+} };
 const EC_ANKER0 = ecAnker(0), EC_ANKER1 = ecAnker(1), EC_ANKER2 = ecAnker(2), EC_ANKER3 = ecAnker(3);
 /* the pace slide, right: world capacity per growth limit, in the anchor's colours; click 1 adds the faster ones */
 const EC_TEMPOKAP = { steps: 1, option(k) {
@@ -725,7 +737,7 @@ const EC_ANKERKAP = { steps: 0, option() {
     label: { show: true, position: 'top', distance: 10, offset: [10, -58], color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, formatter: `Spitze 2048: erst ${ecNum(w[i], 1)} Gt/a` },
     data: [{ coord: [2048, w[i]] }] };
   return o; } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, anker3: EC_ANKER3, tempokap: EC_TEMPOKAP, ankerkap: EC_ANKERKAP };
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, anker3: EC_ANKER3, tempokap: EC_TEMPOKAP, veganall: EC_VEGAN_ALL, ankerkap: EC_ANKERKAP };
 
 class EChart {
   constructor(host) {
