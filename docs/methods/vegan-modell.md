@@ -4,7 +4,7 @@
 
 Gedankenexperiment für Kapitel 5: Die ganze Welt isst ab 2026 vegan, ohne Übergang. Das ist ein Grenzfall, eine obere Schranke. Gerechnet wird gegen CMIP7 Very Low ohne seine eigene CO₂-Entnahme (neuartig und Land-Senke, 335 Gt bis 2100; die sollen Bäume und DAC erst liefern), die Erwärmung über 1,5 °C nach den Bäumen (als Forst, Holz gebunden) ist die Lücke. Code: `src/nbs/vegan.py`, Daten: `data/vegan/` (Quellen in `data/vegan/QUELLE.md`), Zahlen im Deck: `deck/chart_data/zeitpfade.json`, Schlüssel `vegan`.
 
-Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DAC sinkt die Spitze über 1,5 °C von 0,32 auf 0,13 K (2046), ab 2082 gilt wieder 1,5 °C. Mit DAC im Hauptfall (niedrigste Spitze, dann so früh wie möglich zurück, 20 %/a) bleiben 8,5 statt 66 Gt/a, zurück 2072 statt 2085; gespart bis 2100 im Median 262 Bio. € (158–398).
+Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DACCS sinkt die Spitze über 1,5 °C von 0,32 auf 0,13 K (2046), ab 2082 gilt wieder 1,5 °C. DACCS ohne Wachstumsgrenze, so viel wie nötig, um ab 2027 bei höchstens 1,5 °C zu bleiben: mit veganer Welt 35 statt 67 Gt/a, bis 2036 statt 2041, 390 statt 970 Gt, 93 statt 221 Bio. € (Median).
 
 ## 1  Emissionen nach Ursache (`emission_parts`)
 
@@ -45,9 +45,9 @@ Jeder Teil läuft als eigener FaIR-Lauf (`contributions`); netto ist `dt_gase + 
 | Wald: Albedo | −1 | −7 |
 | **netto** | **203** | **207** |
 
-## 4  DAC mit veganer Welt
+## 4  DACCS mit veganer Welt
 
-Dieselbe Optimierung wie im Hauptfall auf der Lücke mit veganer Welt: 8,5 Gt/a, 1,5 °C ab 2072 statt 2082 ohne DAC. Gespart gegenüber dem Hauptfall: 57,4 Gt/a Kapazität, 1 240 Gt Entnahme, 262 Bio. € (Median; 158 optimistisch, 398 pessimistisch). Die beiden Fälle haben verschiedene Rückkehrjahre (2072 gegen 2085); die Ersparnis für dasselbe Jahr wäre eher größer.
+Dieselbe Rechnung wie im Hauptteil (`nbs.dac_optim.solve_offset`: ohne Wachstumsgrenze die kleinste Weltkapazität, die ab 2027 jedes Jahr höchstens 1,5 °C hält): 35,3 statt 66,6 Gt/a, 2026–2036 statt 2026–2041, 386 statt 972 Gt. Kosten im Nachgang (`path_cost_run`): 93 statt 221 Bio. € (Median; 54–142 statt 130–339). Beide Fälle haben dasselbe Ziel, die Ersparnis vergleicht also Gleiches.
 
 ## 5  Was nicht enthalten ist
 

@@ -67,9 +67,9 @@ describe("model", () => {
     expect(Math.max(...total)).toBeGreaterThan(0);
   });
   it("an owner's cells add up to its capacity", () => {
-    const b = at.meta.build, owner = b.owner[0], t = b.years.indexOf(2080);
+    const b = at.meta.build, t = b.years.indexOf(2035), owner = b.capacityGt.findIndex((row) => row[t] > 0);
     let sum = 0;
-    b.cells.forEach(([i, j], k) => { if (b.owner[k] === owner) sum += dacBuildMt(at, i * 720 + j, 2080); });
+    b.cells.forEach(([i, j], k) => { if (b.owner[k] === owner) sum += dacBuildMt(at, i * 720 + j, 2035); });
     expect(sum).toBeCloseTo(1000 * b.capacityGt[owner][t], 6);
     expect(sum).toBeGreaterThan(0);
   });

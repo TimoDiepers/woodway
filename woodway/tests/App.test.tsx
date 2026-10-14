@@ -55,8 +55,8 @@ describe("App", () => {
     await pickLayer("Solar radiation at the ground");
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
-    await pickLayer("DAC build-out");
-    expect(screen.getByText("no DAC built here")).toBeInTheDocument();
+    await pickLayer("DACCS build-out");
+    expect(screen.getByText("no DACCS built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
     await pickLayer("Temperature effect of one tree");
   });

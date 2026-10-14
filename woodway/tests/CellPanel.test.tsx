@@ -57,12 +57,13 @@ describe("CellPanel", () => {
   });
   it("states the DAC build-out as the country's capacity spread over its best cells", async () => {
     const at = await loadAtlas("data/", diskFetch);
-    const [i, j] = at.meta.build.cells[0];
+    const k = at.meta.build.cells.findIndex(([i, j]) => dacBuildMt(at, i * 720 + j, 2035) > 0);
+    const [i, j] = at.meta.build.cells[k];
     const cell = i * 720 + j;
-    const mt = dacBuildMt(at, cell, 2080);
+    const mt = dacBuildMt(at, cell, 2035);
     expect(mt).toBeGreaterThan(0);
-    render(<CellPanel atlas={at} cell={cell} year={2080} onClose={() => {}} />);
-    expect(screen.getByText(`${mt.toFixed(1)} Mt CO₂/a capacity here in 2080 (the country's capacity spread over its best cells)`)).toBeInTheDocument();
+    render(<CellPanel atlas={at} cell={cell} year={2035} onClose={() => {}} />);
+    expect(screen.getByText(`${mt.toFixed(1)} Mt CO₂/a capacity here in 2035 (the country's capacity spread over its best cells)`)).toBeInTheDocument();
   });
 
   it("weighs CO₂ against albedo for the year: how much of the CO₂ effect the albedo takes back", async () => {

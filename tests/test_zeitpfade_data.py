@@ -14,20 +14,20 @@ def _c(key):
 def test_anchor_series_exist_and_have_the_years():
     n = len(Z["jahre"])
     assert len(Z["vl_c"]) == n
-    assert set(Z["wirkung"]) == {"baeume", "dac_20", "dac_50", "dac_100", "dac_frei", "vegan"}
+    assert set(Z["wirkung"]) == {"baeume", "dac", "vegan"}
     assert all(len(v) == n for v in Z["wirkung"].values())
 
 
-def test_dac_stays_at_or_below_1p5_after_its_return_year():
-    for key, case in (("dac_20", "opt_20"), ("dac_50", "opt_50"), ("dac_100", "opt_100"), ("dac_frei", "opt_frei")):
-        t = _c(key); i = Z["jahre"].index(Z["dac"][case]["ab"])
-        assert np.all(t[i:] <= 1.5 + 1e-3), key
+def test_daccs_holds_1p5_from_2027():
+    assert _c("dac")[1:].max() <= 1.5 + 1e-3          # vl_c is rounded to 0.001 deg C in the file
 
 
-def test_faster_growth_is_ordered():
-    d = Z["dac"]
-    assert d["opt_frei"]["spitze"] <= d["opt_100"]["spitze"] <= d["opt_50"]["spitze"] <= d["opt_20"]["spitze"] + 0.1
-    assert d["opt_frei"]["ab"] <= d["opt_100"]["ab"] <= d["opt_50"]["ab"] <= d["opt_20"]["ab"]
+def test_daccs_capacity_stands_until_shutdown_and_costs_hold():
+    o = Z["dac"]["offset"]
+    w, u = np.array(o["w"]), np.array(o["u"])
+    assert np.all(u <= w + 1e-6)
+    assert abs(w.max() - o["kap"]) < 0.01
+    assert Z["kosten_pfad"]["median"]["summe_bio"] > Z["vegan"]["kosten"]["median"]["summe_bio"] > 0
 
 
 def test_vegan_goes_below_1p5_and_is_not_clipped():

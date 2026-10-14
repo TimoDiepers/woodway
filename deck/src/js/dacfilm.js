@@ -46,7 +46,7 @@ function dacFilm(sec) {
   const ip = P.a.dac.indexOf(Math.max(...P.a.dac));
   const over = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#ffd2c8' }, F));
   // at the peak DAC is still tiny: that is why it cannot lower it
-  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K, DAC erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
+  over.textContent = `Spitze ${Y0 + ip}: ${fmt(P.a.dac[ip] / 1000, 2)} K, DACCS erst ${fmt(P.a.tot[ip], 1)} Gt/a`;
   const below = el('text', Object.assign({ 'font-size': 18, 'font-weight': 600, fill: '#6fe3c8', 'text-anchor': 'end' }, F));
   // capacity: the year the growth limit first allows 1 Gt/a, and the year the final capacity is reached
   const i1 = P.a.tot.findIndex(v => v >= 1), iMax = P.a.tot.findIndex(v => v >= Math.max(...P.a.tot) - 0.01);
@@ -81,7 +81,7 @@ function dacFilm(sec) {
     tGhost.setAttribute('d', ph.ghost ? full(P.a.dac, XB, YT) : '');
     lVL.setAttribute('y', YT(D.vl[NY - 1]) - 8); lTr.setAttribute('y', YT(D.tree[NY - 1]) + 14);
     const end = p.dac[NY - 1];
-    lDac.textContent = end < -5 ? `+ DAC: −${fmt(-end / 1000, 2)} K` : '+ DAC'; lDac.setAttribute('fill', p === P.c ? '#6fe3c8' : '#ff5a4f');
+    lDac.textContent = end < -5 ? `+ DACCS: −${fmt(-end / 1000, 2)} K` : '+ DACCS'; lDac.setAttribute('fill', p === P.c ? '#6fe3c8' : '#ff5a4f');
     lDac.setAttribute('y', YT(Math.min(0, end)) + (end < -5 ? 4 : 6)); lDac.style.opacity = upto >= NY - 1 ? 1 : 0;
     const low = tmin < -50; over.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); over.setAttribute('y', low ? YT(0) + 24 : YT(70)); over.style.opacity = upto > ip + 6 ? 1 : 0;
     below.setAttribute('x', low ? XB(2027) : XB(Y0 + ip) - 60); below.setAttribute('y', low ? YT(0) + 48 : YT(70) + 24); below.setAttribute('text-anchor', 'start');

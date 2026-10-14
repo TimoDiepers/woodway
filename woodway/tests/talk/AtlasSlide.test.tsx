@@ -32,7 +32,7 @@ describe("AtlasSlide", () => {
   it("titles describe the content", () => {
     expect(SLIDES.albedo.title).toBe("Netto-Anteil nach Albedo je Zelle, 2100");
     expect(SLIDES.dacStrom.title).toBe("Netto-Anteil von DAC je Zelle, 2026–2070");
-    expect(SLIDES.dacAusbau.title).toBe("DAC-Ausbau je Zelle, 2026–2100");
+    expect(SLIDES.dacAusbau.title).toBe("DACCS-Ausbau je Zelle, 2026–2100");
     expect(SLIDES.atlas.title).toBe("Atlas");
   });
   it("albedo slide states only the areas, as the deck does", () => {
@@ -44,17 +44,16 @@ describe("AtlasSlide", () => {
     expect(a.container.querySelector(".takeaway")!.textContent).toBe("2040: Im Median über die Landfläche bleiben 91 % jeder entnommenen Tonne netto.");
     a.unmount();
     const b = render(<AtlasSlide def={SLIDES.dacAusbau} atlas={at} step={1} />);
-    expect(b.container.querySelector(".takeaway")!.textContent).toMatch(/^[\d,.]+ Gt CO₂ pro Jahr im Jahr 2100; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt\.$/);
+    expect(b.container.querySelector(".takeaway")!.textContent).toMatch(/^[\d,.]+ Gt CO₂ pro Jahr ab sofort, ohne Wachstumsgrenze, um ab 2027 höchstens 1,5 °C zu halten; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt\.$/);
   });
-  it("sources name the ramp-up and the forest-type paper", () => {
-    expect(SLIDES.dacAusbau.source).toContain("Hochlauf: Zurbriggen et al. 2026");
+  it("sources name the storage and the forest-type paper", () => {
+    expect(SLIDES.dacAusbau.source).toContain("Speicher Gidden et al. 2025");
     expect(SLIDES.jedeZelle.source).toContain("Waldtyp: Hasler et al. 2024");
   });
   it("DAC build-out map uses a scale fitted to the built cells, with the greys kept apart", () => {
     const layer = talkLayer(SLIDES.dacAusbau, at);
     const sc = scaleOf(at, layer)!;
-    expect(sc.domain[1]).toBe(buildP95(at, 2100));
-    expect(sc.domain[1]).toBeLessThan(60);
+    expect(sc.domain[1]).toBe(buildP95(at, 2030));
     const lum = ([r, g, b]: number[]) => 0.3 * r + 0.59 * g + 0.11 * b;
     const low = lum(scaleColor(sc, 0.01 * sc.domain[1]));
     expect(lum(hexToRgba(at.meta.colors.tooCold)) - low).toBeGreaterThan(40);   // even the smallest capacity stands out from land and "too cold"

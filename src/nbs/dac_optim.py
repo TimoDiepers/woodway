@@ -315,6 +315,33 @@ def path_cost(w: NDArray, c: dict = COST, rate: float = 0.0) -> dict:
             "summe_bio": total, "eur_t": total * 1e3 / float(w.sum()) if w.sum() > 0 else 0.0}
 
 
+def capacity_from_run(u: NDArray) -> NDArray:
+    """World capacity [Gt/a] behind a removal run u [Gt/a per year of YEARS] whose plants may idle: what was
+    built stands (the highest run so far) until the last year that runs; then the plants are shut down."""
+    u = np.asarray(u, dtype=float)
+    on = np.nonzero(u > 1e-9)[0]
+    cap = np.maximum.accumulate(u)
+    if len(on):
+        cap[on[-1] + 1:] = 0.0
+    return cap
+
+
+def path_cost_run(u: NDArray, c: dict = COST, rate: float = 0.0) -> dict:
+    """Cost of a removal run u [Gt/a per year of YEARS] after the fact, plants allowed to idle (solve_offset):
+    investment once for every plant built (capacity_from_run; rebuilt only if it would run beyond LIFETIME),
+    fixed operation on the standing capacity, sorbent and energy on what is removed. As path_cost otherwise."""
+    u = np.asarray(u, dtype=float)
+    cap = capacity_from_run(u)
+    d = (1.0 + rate) ** -(YEARS - YEARS[0]).astype(float)
+    build = np.zeros(N_Y)
+    for t in range(N_Y):
+        build[t] = max(0.0, cap[t] - build[max(0, t - LIFETIME + 1):t].sum())
+    per_year = (c["capex"] * build + c["fom"] * cap + (c["sorbent"] + c["energy"]) * u) * d * 1e9 / 1e12
+    total = float(per_year.sum())
+    return {"je_jahr_bio": [float(v) for v in per_year], "spitze_bio_a": float(per_year.max(initial=0.0)),
+            "summe_bio": total, "eur_t": total * 1e3 / float(u.sum()) if u.sum() > 0 else 0.0}
+
+
 PATHWAYS = ("SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650")  # electricity: current policies, pledges, 650 Gt budget
 
 
@@ -550,6 +577,31 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
     cooling = cool @ x.reshape(-1)
     return {"jahre": years.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(), "kuehlung_k": cooling.tolist(),
             "spitze_k": peak, "status": status, "ab_jahr": ab, "kapazitaet_gt": float(x.sum(axis=0).max()), "netto_gt": float((x * eta).sum())}
+
+
+HOLD_FROM = 2027   # a removal cools only from the year after; 2027 is the first year DAC can hold
+
+
+def solve_offset(gap_k: NDArray, ab: int = HOLD_FROM, stufe: str = "prudent", quantil: float = 0.9,
+                 pathway: str = "SSP2-NDC") -> dict:
+    """As much DAC as it takes, without any growth limit: the least yearly world capacity that keeps the warming at
+    or below 1.5 deg C in every year from *ab* on (*gap_k* [K] above 1.5 deg C without DAC, unclipped), then at that
+    capacity the least total. Countries by eta_C with their safe storage; plants run while they are needed. That the
+    build-out could never be this fast is said on the slide, not modelled; the costs follow with path_cost."""
+    countries, eta, storage = _setup(stufe, quantil, pathway)
+    k = removal_kernel_matrix()
+    gap = np.maximum(0.0, np.asarray(gap_k, dtype=float))
+    ok, x = build_and_solve(eta, k, gap, storage, int(ab - YEARS[0]), growth=1e9, start_2030=None,
+                            objective="min_peak", keep_running=False)
+    if not ok:
+        raise RuntimeError("no DAC path holds 1.5 deg C")
+    cooling = np.einsum("yt,cy,cy->t", -k, eta, x)
+    w = x.sum(axis=0)
+    over = np.asarray(gap_k, dtype=float) - cooling
+    return {"jahre": YEARS.tolist(), "laender": countries, "x": x.tolist(), "eta": eta.tolist(),
+            "kuehlung_k": cooling.tolist(), "kapazitaet_gt": float(w.max()), "brutto_gt": float(w.sum()),
+            "netto_gt": float((x * eta).sum()), "spitze_k": float(over.max()), "ab_jahr": int(ab),
+            "bis_jahr": int(YEARS[np.nonzero(w > 1e-6)[0].max()]) if (w > 1e-6).any() else None}
 
 
 def solve_cost(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = True, ziel_jahr: int = TARGET_YEAR,

@@ -431,37 +431,6 @@ const EC_ZEIT = {
   }
 };
 
-/* variants of the optimisation: trees alone, DAC at the 20 %/a growth limit, DAC without a growth limit */
-const EC_TEMPO = {
-  steps: 2,
-  option(k) {
-    const D = window.ZEIT, T = D.tempo, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const peak = (ys, color, text, pos) => { const i = ys.indexOf(Math.max(...ys));
-      return { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color, borderColor: '#14181a', borderWidth: 2 },
-        label: { show: true, position: pos, distance: 10, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, formatter: text },
-        data: [{ coord: [D.jahre[i], ys[i]] }] }; };
-    const L = (id, ys, color, name, extra) => Object.assign({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5,
-      lineStyle: { color, width: 3.2 }, itemStyle: { color }, animationDuration: 1600 }, extra || {});
-    const series = [
-      L('base', D.baeume_rest, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.4, type: [8, 6] } }),
-      L('g20', T.g20.rest, '#f0b04a', 'Wachstum ≤ 20 %/a',
-        { markPoint: peak(T.g20.rest, '#f0b04a', `Spitze ${ecNum(Math.max(...T.g20.rest) / 1000, 2)} K`, 'top') })];
-    if (k >= 2) series.push(L('frei', T.frei.rest, '#3fd0b0', 'ohne Wachstumsgrenze',
-      { lineStyle: { color: '#3fd0b0', width: 3.4 }, markPoint: peak(T.frei.rest, '#3fd0b0', `${ecNum(Math.max(...T.frei.rest) / 1000, 2)} K`, 'top') }));
-    return {
-      animationDurationUpdate: 900,
-      title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      grid: { left: 70, right: 24, top: 64, bottom: 40 },
-      legend: { orient: 'vertical', right: 24, top: 60, itemGap: 12, itemWidth: 28, icon: 'path://M0,4 H28 V7 H0 Z',
-                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 19 }, data: series.map(s => s.name) },
-      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 350, interval: 100, axisLine: { lineStyle: { color: '#4a524d' } },   // data in mK, read in K
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v ? ecNum(v / 1000, 1) : '0' }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
-      series
-    };
-  }
-};
 /* a small dark chart beside the DAC map (result of the optimisation), from deck/chart_data/zeitpfade.json
    (key dac); line names at the line ends */
 function ecDacSmall(title, yMax, yFmt, lines) {
@@ -483,55 +452,8 @@ function ecDacSmall(title, yMax, yFmt, lines) {
   } };
 }
 const kOf = v => v ? ecNum(v / 1000, 1) : '0';   // data in mK, read in K
-/* result of the optimisation: warming above 1.5 °C, trees alone and with DAC */
-const EC_DACTEMP_BASE = ecDacSmall('Erwärmung über 1,5 °C [K]', 400, kOf, D => [
-  ['b', D.baeume_rest, '#7fbf8c', 'nur Bäume', [8, 6]], ['d', D.dac.opt_20.temp, '#ff5a4f', '+ DAC', null, true]]);
-// the two numbers of the slide named in the chart: the peak that stays, the year back at 1.5 °C
-const EC_DACTEMP = { steps: 0, option() {
-  const o = EC_DACTEMP_BASE.option(), D = window.ZEIT, d = D.dac.opt_20, t = d.temp, ip = t.indexOf(Math.max(...t));
-  o.series[1].markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: '#ff5a4f', borderColor: '#14181a', borderWidth: 2 },
-    label: { show: true, color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 },
-    data: [{ coord: [D.jahre[ip], t[ip]], label: { position: 'top', formatter: `Spitze ${D.jahre[ip]}: ${ecNum(t[ip] / 1000, 2)} K` } },
-           { coord: [d.ab, 0], label: { show: false } }] };   // the year stands large above the chart
-  return o; } };
-/* the lever: world capacity of the optimisation at faster growth limits and without one, and the warming above
-   1.5 °C that follows (two charts, one above the other) */
-function ecDacTempo(title, key, yMax, yFmt, trees) {
-  return { steps: 1, option(k) {   // click 0: the 20 %/a case alone; click 1: the faster ones beside it
-    const D = window.ZEIT, C = D.dac, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const L = (id, ys, color, name, w, dash) => ({ id, name, type: 'line', showSymbol: false, data: P(ys), z: 5, lineStyle: { color, width: w || 3, type: dash || 'solid' },
-      itemStyle: { color }, animationDuration: 1600,
-      endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' } });
-    const series = [L('g20', C.opt_20[key], '#f0b04a', '≤ 20 %/a', 3.4)];
-    if (k >= 1) series.push(L('g30', C.opt_30[key], '#e0903e', '≤ 30 %/a'), L('g50', C.opt_50[key], '#cc6f34', '≤ 50 %/a'),
-                            L('frei', C.opt_frei[key], '#3fd0b0', 'ohne Grenze', 3.4));
-    // the capacity paths all fall back towards zero by 2100: named in a legend in the right margin instead
-    if (!trees) for (const x of series) x.endLabel.show = false;
-    if (trees) {   // the warming paths all end at 1.5 °C: their names stand on the capacity chart above, in the same colours
-      for (const x of series) x.endLabel.show = false;
-      const peak = (x, ys, pos, off) => { const i = ys.indexOf(Math.max(...ys));
-        x.markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: x.lineStyle.color, borderColor: '#14181a', borderWidth: 2 },
-          label: { show: true, position: pos, distance: 8, offset: off || [0, 0], color: x.lineStyle.color, fontFamily: EC.font, fontSize: 18, fontWeight: 600,
-                   formatter: `Spitze ${ecNum(ys[i] / 1000, 2)} K` }, data: [{ coord: [D.jahre[i], ys[i]] }] }; };
-      peak(series[0], C.opt_20[key], 'top');
-      if (k >= 1) peak(series[3], C.opt_frei[key], 'right', [2, -16]);   // in the gap between the cyan and the orange paths
-      series.unshift(L('b', D.baeume_rest, '#7fbf8c', 'nur Bäume', 2.4, [8, 6]));
-    }
-    return {
-      title: { text: title, left: 60, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
-      legend: trees ? undefined : { orient: 'vertical', right: 0, top: 44, itemGap: 10, itemWidth: 26, icon: 'path://M0,4 H28 V7 H0 Z',
-                textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 18 }, data: series.map(s => s.name) },
-      grid: { left: 60, right: 150, top: 40, bottom: 34 },
-      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: yMax, interval: yMax / 4, axisLine: { lineStyle: { color: '#4a524d' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18, formatter: yFmt }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
-      series
-    };
-  } };
-}
-const EC_DACTEMPO = ecDacTempo('Kapazität weltweit [Gt CO₂/a]', 'w', 80, v => String(v), false);
-const EC_DACTEMPO_T = ecDacTempo('Erwärmung über 1,5 °C [K]', 'temp', 400, kOf, true);
+/* DAC without a growth limit: world capacity per year, as much as it takes to hold 1.5 °C (key dac.offset) */
+const EC_DACTEMP = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 80, v => String(v), D => [['d', D.dac.offset.w, '#ff5a4f', 'DACCS', null, true]]);
 /* costs of the DAC path after the fact (key kosten_pfad): median per year with the optimistic-pessimistic band;
    then the explicit fossil subsidies and the EU-27 GDP as reference lines, in trillion EUR per year */
 const EC_KOSTEN = {
@@ -547,13 +469,13 @@ const EC_KOSTEN = {
         lineStyle: { opacity: 0 }, areaStyle: { color: '#ff5a4f', opacity: .22 }, animationDuration: 1600 },
       { id: 'med', type: 'line', data: P(K.median.je_jahr_bio), showSymbol: false, z: 5, animationDuration: 1600,
         lineStyle: { color: '#ff5a4f', width: 3.4 }, itemStyle: { color: '#ff5a4f' },
-        endLabel: { show: true, formatter: 'DAC', color: '#ff5a4f', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 },
+        endLabel: { show: true, formatter: 'DACCS', color: '#ff5a4f', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 },
         markLine: { silent: true, symbol: 'none', animationDuration: 700, data: [
           ref(K.fossil_subv_bio, `fossile Subventionen: ${ecNum(K.fossil_subv_bio, 2)}`, '#f0b04a', k >= 1),
           ref(K.eu27_bip_bio, `BIP der EU-27: ${ecNum(K.eu27_bip_bio, 1)}`, '#9fc4e8', k >= 2)] } }];
     return {
       animationDurationUpdate: 700,
-      title: { text: 'Kosten des DAC-Pfads [Bio. € pro Jahr]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
+      title: { text: 'Kosten von DACCS [Bio. € pro Jahr]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       grid: { left: 70, right: 70, top: 56, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
@@ -602,10 +524,9 @@ const EC_VEGAN = {
     };
   }
 };
-/* the vegan world without DAC: warming above 1.5 °C after the trees, with the vegan world, and for comparison
-   with DAC at 20 %/a (mK, read in K) */
+/* the vegan world without DAC: warming above 1.5 °C after the trees and with the vegan world (mK, read in K) */
 const EC_VEGAN_LUECKE = {
-  steps: 2,
+  steps: 1,
   option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const end = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 });
@@ -624,8 +545,6 @@ const EC_VEGAN_LUECKE = {
         label: { show: true, distance: 10, color: '#7fd0e0', fontFamily: EC.font, fontSize: 19, fontWeight: 600 },
         data: [{ coord: [D.jahre[v.indexOf(Math.max(...v))], Math.max(...v)], label: { position: 'top', formatter: `${ecNum(Math.max(...v) / 1000, 2)} K` } },
                { coord: [D.jahre[iv], 0], label: { position: 'insideBottomLeft', offset: [14, -16], formatter: `ab ${D.jahre[iv]}` } }] } });
-    if (k >= 2) series.push({ id: 'd', type: 'line', data: P(D.dac.opt_20.temp), showSymbol: false, z: 4, lineStyle: { color: '#ff5a4f', width: 2.6 },
-      itemStyle: { color: '#ff5a4f' }, animationDuration: 1200 });   // named in the table beside the chart
     return {
       animationDurationUpdate: 900,
       title: { text: 'Erwärmung über 1,5 °C [K]', left: 70, top: 0, textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
@@ -640,20 +559,20 @@ const EC_VEGAN_LUECKE = {
 };
 /* the anchor of chapters 4 and 5: Very Low without its own CO2 removal (vl_series) in deg C with the 1.5 deg C line, and a curve per measure (Very Low plus
    the trees plus the measure), never clipped. Phases: 'k4' chapter 4 (light, Very Low and trees), 0 the DAC model,
-   1 DAC as fast as allowed (click 1 adds 50 and 100 %/a and no limit), 2 the vegan world (click 1; DAC lines step
-   back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
+   1 DAC without a growth limit, as much as it takes to hold 1.5 deg C, 2 the vegan world (click 1; the DAC line
+   steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
    own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
-const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d20: '#ff5a4f', d50: '#f5894a', d100: '#f2b04b', frei: '#ff9a8f', v: '#7fd0e0' };
+const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#7fd0e0' };
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 1, 2: 1 }[phase], option(k) {
+  return { steps: { k4: 0, 0: 0, 1: 0, 2: 1 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const order = ['k4', 0, 1, 2], rank = order.indexOf(phase);
-    const born = { vl: 'k4', b: 'k4', d20: 1, d50: 1, d100: 1, frei: 1, v: 2 };
-    const later = { d50: 1, d100: 1, frei: 1, v: 1 };                          // the click within its phase
+    const born = { vl: 'k4', b: 'k4', d: 1, v: 2 };
+    const later = { v: 1 };                                                    // the click within its phase
     const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && k >= (later[id] || 0));
-    const isNew = id => born[id] === phase, dim = id => phase === 2 && (id.startsWith('d') || id === 'frei');
+    const isNew = id => born[id] === phase, dim = id => phase === 2 && id === 'd';
     const ink = light ? EC.ink : '#f2ede2', mut = light ? EC.muted : '#9aa39d', grid = light ? EC.grid : '#2c3437';
     const dot = (color, data, id) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: isNew(id) ? undefined : false,
       itemStyle: { color, borderColor: light ? '#f2ede2' : '#14181a', borderWidth: 2, opacity: dim(id) ? .35 : 1 },
@@ -671,14 +590,11 @@ function ecAnker(phase) {
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
         markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
     series.push(L('b', b, 'Bäume'));
-    if (has('d20')) series.push(L('d20', on('dac_20'), 'DAC 20 %/a', { mark: [{ coord: [D.dac.opt_20.ab, 1.5], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }] }));
-    if (has('d50')) series.push(L('d50', on('dac_50'), '50 %/a'), L('d100', on('dac_100'), '100 %/a'));
-    if (has('frei')) { const f = on('dac_frei'), [pf, tf] = peak(f);
-      series.push(L('frei', f, 'unbegrenzt', { line: { width: 2.6, type: [4, 5] }, mark: [{ coord: [pf, tf], label: { position: 'right', offset: [2, -16], formatter: `${ecNum(tf, 2)} °C` } }] })); }
+    if (has('d')) series.push(L('d', on('dac'), 'DACCS ohne Grenze'));
     if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
       series.push(L('v', v, 'vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'top', offset: [34, 0], formatter: `vegan: ${ecNum(tw, 2)} °C` } }] })); }
     // y range from all curves of the last phase, so that it stays the same on every slide
-    const ext = ['dac_20', 'dac_50', 'dac_100', 'dac_frei', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+    const ext = ['dac', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
@@ -724,15 +640,7 @@ const EC_VEGAN_ALL = { steps: 0, option() {
   o.xAxis.axisLabel.fontSize = 18; o.yAxis.axisLabel.fontSize = 18;
   return o;
 } };
-/* why the peak stays: world capacity at 20 %/a, the year of the peak marked */
-const EC_ANKERKAP = { steps: 0, option() {
-  const o = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 60, v => String(v), D => [['w', D.dac.opt_20.w, '#ff5a4f', '20 %/a', null, true]]).option();
-  const D = window.ZEIT, w = D.dac.opt_20.w, i = D.jahre.indexOf(2048);
-  o.series[0].markPoint = { silent: true, symbol: 'circle', symbolSize: 10, itemStyle: { color: '#f2ede2', borderColor: '#14181a', borderWidth: 2 },
-    label: { show: true, position: 'top', distance: 10, offset: [10, -58], color: '#f2ede2', fontFamily: EC.font, fontSize: 18, fontWeight: 600, formatter: `Spitze 2048: erst ${ecNum(w[i], 1)} Gt/a` },
-    data: [{ coord: [2048, w[i]] }] };
-  return o; } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, tempo: EC_TEMPO, dactemp: EC_DACTEMP, dactempo: EC_DACTEMPO, dactempot: EC_DACTEMPO_T, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, abbau: EC_ABBAU, veganall: EC_VEGAN_ALL, ankerkap: EC_ANKERKAP };
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, abbau: EC_ABBAU, veganall: EC_VEGAN_ALL };
 
 class EChart {
   constructor(host) {

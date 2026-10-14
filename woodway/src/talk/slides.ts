@@ -1,7 +1,7 @@
 import type { Atlas, Scale } from "@/data/types";
 import { layerById, type Layer, type LayerId } from "@/model/layers";
 import type { AtlasSlideId } from "./sequence";
-import { buildP95, coolingShare, dacCapacityGt, medianDacNet } from "./stats";
+import { buildP95, coolingShare, medianDacNet } from "./stats";
 
 export interface AtlasSlideDef {
   id: AtlasSlideId; title: string; ch?: "vergleich" | "dac"; layer: LayerId;
@@ -43,10 +43,10 @@ const dacStrom: AtlasSlideDef = {
   notes: ["Netto-Anteil einer DAC-Tonne nach den Emissionen von Bau und Betrieb: Er hängt vom Strommix des Ortes ab und steigt, wenn der Strom sauberer wird."],
 };
 const dacAusbau: AtlasSlideDef = {
-  id: "dacAusbau", title: "DAC-Ausbau je Zelle, 2026–2100", ch: "dac", layer: "dacBuild", years: [2026, 2100],
-  takeaway: (at) => `${dacCapacityGt(at, 2100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Gt CO₂ pro Jahr im Jahr 2100; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt.`,
-  source: "Eigene Optimierung: Speicher Gidden et al. 2025, +20 %/a. Hochlauf: Zurbriggen et al. 2026.",
-  notes: ["Ein Klick lässt den Ausbau von 2026 bis 2100 durchlaufen: die Optimierung baut dort, wo der Netto-Anteil am höchsten ist."],
+  id: "dacAusbau", title: "DACCS-Ausbau je Zelle, 2026–2100", ch: "dac", layer: "dacBuild", years: [2026, 2100],
+  takeaway: (at) => `${Math.max(...at.meta.global.dacCapacityGt).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Gt CO₂ pro Jahr ab sofort, ohne Wachstumsgrenze, um ab 2027 höchstens 1,5 °C zu halten; die Kapazität je Land ist auf Zellen nahe Sedimentbecken mit dem höchsten Netto-Anteil verteilt.`,
+  source: "Eigene Rechnung: kleinste Weltkapazität für höchstens 1,5 °C ab 2027, ohne Wachstumsgrenze; Speicher Gidden et al. 2025.",
+  notes: ["Ein Klick lässt den Ausbau von 2026 bis 2100 durchlaufen: gebaut wird dort, wo der Netto-Anteil am höchsten ist, sofort in voller Größe; nach 2041 reicht es."],
 };
 const atlas: AtlasSlideDef = {
   id: "atlas", title: "Atlas", layer: "deltaT", years: [2100], free: true,
@@ -67,7 +67,7 @@ export const atlasSteps = (id: AtlasSlideId): number => {
 const scales = new WeakMap<Atlas, Scale>();
 function talkBuildScale(at: Atlas): Scale {
   let sc = scales.get(at);
-  if (!sc) { sc = { stops: ["#3f9f9a", "#1f8a8a", "#0f6670", "#0a3d4a"], domain: [0, buildP95(at, 2100)], gamma: 0.6, unit: "Mt/a" }; scales.set(at, sc); }
+  if (!sc) { sc = { stops: ["#3f9f9a", "#1f8a8a", "#0f6670", "#0a3d4a"], domain: [0, buildP95(at, 2030)], gamma: 0.6, unit: "Mt/a" }; scales.set(at, sc); }
   return sc;
 }
 const derived = new WeakMap<Atlas, Layer>();
