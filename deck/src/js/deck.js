@@ -557,7 +557,7 @@ const EC_KOSTEN = {
       grid: { left: 70, right: 70, top: 56, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: 0, max: 25, interval: 5, axisLine: { lineStyle: { color: '#4a524d' } },
+      yAxis: ecAxis({ type: 'value', min: 0, max: Math.ceil(Math.max(...hi, K.eu27_bip_bio) / 5) * 5, interval: 5, axisLine: { lineStyle: { color: '#4a524d' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => String(v) }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
       series
     };

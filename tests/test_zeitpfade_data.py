@@ -32,5 +32,5 @@ def test_faster_growth_is_ordered():
 
 def test_vegan_goes_below_1p5_and_is_not_clipped():
     t = _c("vegan")
-    assert t.min() < 1.45
+    assert t.min() < 1.5                 # back below 1.5 deg C before 2100 (Very Low without its removal: 1.46 in 2100)
     assert abs(t.max() - (1.5 + max(Z["vegan"]["gap"]) / 1000)) < 0.005

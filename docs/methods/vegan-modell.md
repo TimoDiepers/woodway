@@ -2,9 +2,9 @@
 
 ## Kurz
 
-Gedankenexperiment für Kapitel 5: Die ganze Welt isst ab 2026 vegan, ohne Übergang. Das ist ein Grenzfall, eine obere Schranke. Gerechnet wird gegen CMIP7 Very Low, die Erwärmung über 1,5 °C nach den Bäumen (als Forst, Holz gebunden) ist die Lücke. Code: `src/nbs/vegan.py`, Daten: `data/vegan/` (Quellen in `data/vegan/QUELLE.md`), Zahlen im Deck: `deck/chart_data/zeitpfade.json`, Schlüssel `vegan`.
+Gedankenexperiment für Kapitel 5: Die ganze Welt isst ab 2026 vegan, ohne Übergang. Das ist ein Grenzfall, eine obere Schranke. Gerechnet wird gegen CMIP7 Very Low ohne seine eigene CO₂-Entnahme (neuartig und Land-Senke, 335 Gt bis 2100; die sollen Bäume und DAC erst liefern), die Erwärmung über 1,5 °C nach den Bäumen (als Forst, Holz gebunden) ist die Lücke. Code: `src/nbs/vegan.py`, Daten: `data/vegan/` (Quellen in `data/vegan/QUELLE.md`), Zahlen im Deck: `deck/chart_data/zeitpfade.json`, Schlüssel `vegan`.
 
-Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DAC sinkt die Spitze über 1,5 °C von 0,31 auf 0,13 K (2044), ab 2065 gilt wieder 1,5 °C. Mit DAC im Hauptfall (niedrigste Spitze, dann so früh wie möglich zurück, 20 %/a) bleiben 0,1 statt 49 Gt/a; gespart bis 2100 im Median 222 Bio. € (134–338).
+Ergebnis: netto 0,20 K kühler schon 2050 (−203 mK), 2100 −207 mK, am stärksten um 2067 (−251 mK). Fast alles ist Methan. Ohne jedes DAC sinkt die Spitze über 1,5 °C von 0,32 auf 0,13 K (2046), ab 2082 gilt wieder 1,5 °C. Mit DAC im Hauptfall (niedrigste Spitze, dann so früh wie möglich zurück, 20 %/a) bleiben 8,5 statt 66 Gt/a, zurück 2072 statt 2085; gespart bis 2100 im Median 262 Bio. € (158–398).
 
 ## 1  Emissionen nach Ursache (`emission_parts`)
 
@@ -47,7 +47,7 @@ Jeder Teil läuft als eigener FaIR-Lauf (`contributions`); netto ist `dt_gase + 
 
 ## 4  DAC mit veganer Welt
 
-Dieselbe Optimierung wie im Hauptfall auf der Lücke mit veganer Welt: 0,11 Gt/a, 1,5 °C ab 2064 statt 2065 ohne DAC. Gespart gegenüber dem Hauptfall: 48,9 Gt/a Kapazität, 1 050 Gt Entnahme, 222 Bio. € (Median; 134 optimistisch, 338 pessimistisch). Die beiden Fälle haben verschiedene Rückkehrjahre (2064 gegen 2083); die Ersparnis für dasselbe Jahr wäre eher größer.
+Dieselbe Optimierung wie im Hauptfall auf der Lücke mit veganer Welt: 8,5 Gt/a, 1,5 °C ab 2072 statt 2082 ohne DAC. Gespart gegenüber dem Hauptfall: 57,4 Gt/a Kapazität, 1 240 Gt Entnahme, 262 Bio. € (Median; 158 optimistisch, 398 pessimistisch). Die beiden Fälle haben verschiedene Rückkehrjahre (2072 gegen 2085); die Ersparnis für dasselbe Jahr wäre eher größer.
 
 ## 5  Was nicht enthalten ist
 
