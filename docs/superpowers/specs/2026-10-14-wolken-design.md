@@ -31,7 +31,7 @@ Antrieb, Kronenschluss, Standfläche und τ_atm = 0,854 bleiben wie bei der Albe
 
 **Waldtypen.** ENF und EBF → EFO; DNF und DBF → DFO; MF → Mittel aus EFO und DFO (wo beide fehlen, das vorhandene).
 
-**Gitter und Lücken.** 0,35° → 0,5°-Modellgitter flächengewichtet. Lücken (Daten nur, wo Wald und Offenland nebeneinander liegen, ca. 4 % der Zellen) wie bei der Albedo: lokal → Mittel des Breitenbands je Monat und Waldtyp; Herkunft (lokal/zonal) wird ausgewiesen wie `product_provenance_grid`. Negative Werte (weniger Wolken über Wald unter Schnee, Amazonas-Trockenzeit) bleiben drin.
+**Gitter und Lücken.** 0,35° → 0,5°-Modellgitter flächengewichtet. Lücken (Daten nur, wo Wald und Offenland nebeneinander liegen, ca. 4 % der Zellen) wie bei der Albedo: lokal → Median des 10°-Breitenbands je Monat und Waldtyp → 0, wo das Band gar keine Messung hat; Herkunft (lokal/zonal) wird ausgewiesen wie `product_provenance_grid`. Negative Werte (weniger Wolken über Wald unter Schnee, Amazonas-Trockenzeit) bleiben drin.
 
 **Schalter.** `ModelConfig.clouds: bool = True`; `False` reproduziert die heutigen Zahlen (Regressionstest).
 
@@ -42,7 +42,7 @@ Antrieb, Kronenschluss, Standfläche und τ_atm = 0,854 bleiben wie bei der Albe
 1. **„Was Bäume tun“**: Das Verdunstungs-Symbol bekommt einen Pfeil zu einer Wolke. Notiz: Verdunstung wirkt vor Ort *und* über Wolken global. Drei global wirksame Effekte, weiterhin zwei Einheiten.
 2. Albedo-Konzept und Karten „Einstrahlung und Albedo-Kontrast“ bleiben.
 3. **Neu: „Mehr Wolken über Wald“** (Schema im DAC-Stil, Klick für Klick): Wiese gegen Wald → Verdunstung und Turbulenz → Luftschicht wächst, erreicht früher die Wolkenbasis → Haufenwolke am Nachmittag wirft Licht zurück → im Modell: Δα_W = Δf · 0,5 · 0,5. Zahl für Aachen (DE) im Vergleich zur Albedo. Quellen Duveiller 2021, Cerasoli 2021.
-4. **„Zusätzlich absorbierte Strahlung je Baum“**: Karte zeigt netto (Albedo + Wolken). Orts-Panels zeigen den Jahresgang getrennt: Albedo nach oben, Wolken nach unten, Summe als Linie. Takeaway: zwei Wirkungen, zwei Einheiten (kg CO₂, W netto).
+4. **„Zusätzlich absorbierte Strahlung je Baum“**: Karte zeigt netto (Albedo + Wolken), Formel mit Δα + Δα_W. Der Jahresgang je Ort (Albedo nach oben, Wolken nach unten, Summe als Linie) steht als letzter Klick auf der Wolken-Folie (Diagramm b8w), weil die Kartenfolie rechts die Formel trägt. Takeaway: zwei Wirkungen, zwei Einheiten (kg CO₂, W netto).
 5. Klima-Kapitel: Energiebilanz am Oberrand nennt Wolken als Teil von ΔQ̇; sonst unverändert.
 6. Einordnung (andere Studien): „Wolken: nicht abgebildet“ wird zu „lokale niedrige Wolken abgebildet“.
 7. Backup: „Ohne Wolken“ (kühlende Fläche, Netto-Anteil, Gt mit/ohne) und Abgleich mit Cerasoli (Breitenprofil).
@@ -51,7 +51,7 @@ Alle Zahlen aus `fakten.json` neu, über die bestehenden Skripte in die Folien.
 
 ## Umsetzung (Grobstruktur)
 
-- `scripts/fetch_data.py`: Eintrag `duveiller_clouds` (Zenodo `study_results.zip`; daraus die 0,35°-Datei mit `delta`, `uncertainty`, `fraction` je Waldtyp).
+- `scripts/fetch_data.py`: Eintrag `duveiller_clouds` (Zenodo `data_for_figures.zip`, 20 MB; darin die von den Autoren bereits gefilterten 0,35°-Daten je Waldtyp als Rdata). `scripts/prepare_clouds.py` legt sie auf das 1°-Gitter von Duveiller 2018 (`data/clouds/`, eingecheckt).
 - `src/nbs/cloud_grid.py`: Laden, Filtern wie die Autoren, Regridding, Typzuordnung, Lückenfüllung, `cloud_q_product(species_key)` und `monthly_cloud_product`; Konstanten `R_CLOUD`, `D_AFTERNOON` in `nbs.constants`.
 - `nbs.albedo_grid` / `nbs.aggregate` / `nbs.pipeline.typical_product`: Netto-Produkt über eine Funktion `light_product(species_key, config)`; Komponenten bleiben einzeln abrufbar.
 - Tests: Vorzeichen und Formel, Typzuordnung, Lückenfüllung, `clouds=False` gleich heute, Ortswerte Aachen/Joensuu/Marabá plausibel (Aachen Sommer Δf ≈ 0,02–0,04).
