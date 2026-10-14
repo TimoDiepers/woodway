@@ -718,6 +718,17 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .slide.chapter.brk h1 em { font-style: normal; color: var(--amber); }
 .slide.chapter.brk .eng { opacity: 0; transform: translateX(380px); transition: transform 1.4s var(--ease), opacity .6s; }
 .slide.chapter.brk .eng.shown { opacity: 1; transform: none; }
+/* click 2: the engineer turns and hauls in the DAC box on a rope; he starts where he stood (1290) and the box comes
+   in from off the slide; then the box stays large enough to explain the machine on it */
+.slide.chapter.brk .haul { transform: translateX(1090px); transition: transform 2.4s cubic-bezier(.33, .02, .2, 1); }
+.slide.chapter.brk .haul.shown { transform: none; }
+.slide.active.chapter.brk .haul.shown { animation: none; }
+.slide.active.chapter.brk .haul.shown .haul-eng { animation: haulstep .3s ease-in-out 8 alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes haulstep { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
+.slide.chapter.brk:has(.haul.shown) .eng { visibility: hidden; }   /* the hauling engineer takes his place; the entrance animation holds opacity, so hide by visibility */
+.slide.chapter.brk:has(.haul.shown) .eng.shown .bubble { opacity: 0; transition: opacity .3s; }
+.all .haul, .embed .haul { transform: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .slide.chapter.brk .haul { transition: none; } .haul-eng { animation: none !important; } }
 .slide.chapter.brk .eng .bubble { opacity: 0; transform: scale(.85); transform-box: fill-box; transform-origin: 90% 100%; transition: opacity .4s 1.3s, transform .5s 1.3s var(--ease); }
 .slide.chapter.brk .eng.shown .bubble { opacity: 1; transform: none; }
 /* slide 4: the tree over the empty left half of the removal chart */
