@@ -14,7 +14,7 @@ def _c(key):
 def test_anchor_series_exist_and_have_the_years():
     n = len(Z["jahre"])
     assert len(Z["vl_c"]) == n
-    assert set(Z["wirkung"]) == {"baeume", "dac", "vegan", "dac_vegan"}
+    assert set(Z["wirkung"]) == {"baeume", "dac", "dac_20", "vegan", "dac_vegan"}
     assert all(len(v) == n for v in Z["wirkung"].values())
 
 

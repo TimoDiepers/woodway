@@ -20,6 +20,10 @@ Danach „DACCS ohne Grenze, kleinste Weltkapazität“ (`solve_offset`). Timo: 
 
 Ergebnis: 75 Gt/a, fast alles 2026–2028 gebaut, Betrieb bis 2047, 1 020 Gt (70 % der Speicher), 143 Bio. € (Median 247, pessimistisch 388), 2026 allein 26 Bio. €. Mit 20 %/a wären 75 Gt/a erst 2080 erreicht (nur als Satz auf der Folie). Vegan: 37 Gt/a bis 2037, 59 Bio. €. Nach 2050 sinkt die Kurve unter 1,5 °C: Very Low sinkt von selbst, entnommenes CO₂ bleibt entnommen.
 
+## Vergleich mit Tempogrenze
+
+Timo: „mach auf 28 nochmal zusätzlich mit der constraint dass wir höchstens 20%/a ausbauen können als realistischeren, aber immer noch mega optimistischen Vergleich.“ Dieselbe Kostenoptimierung mit Weltkapazität: Rampe auf 8,8 Mt/a 2030, danach ≤ 20 %/a; die Bedingung gilt ab dem frühesten machbaren Jahr (Bisektion). Ergebnis: Spitze bleibt 1,82 °C, 1,5 °C erst ab 2084, 92 Gt/a um 2081, 847 Gt, 135 Bio. € optimistisch (Median 248, pessimistisch 404).
+
 ## Story
 
 Folie 28 „Die Lücke mit DACCS füllen“ (Rechnung, Ergebnis, Geht das?, Kosten) → „Was können wir anders machen?“ → 29 „Warum Ernährung?“ → 30 vegan, den Rest füllt dieselbe Kostenoptimierung.

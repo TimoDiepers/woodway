@@ -58,14 +58,17 @@ def main() -> None:
     # per country and year that offset the warming the trees leave, from 2027 on (nbs.dac_optim.solve_cost_offset);
     # no growth limit, that no technology ever grew this fast is said on the slide. The same plan priced with the
     # median and pessimistic costs, against the EU-27 economy and fossil subsidies.
+    def _rk(d):
+        return {k: (round(v, 4) if isinstance(v, float) else [round(x, 4) for x in v]) for k, v in d.items()}
     r_dac = solve_cost_offset(gap_c)
-    dac = {"offset": _case(r_dac, gap_c)}
+    # for comparison, still very optimistic: the same optimisation with the build-out growing at most 20 %/a from the
+    # 8.8 Mt/a planned for 2030 (like wind power once); the offset then holds only from the earliest possible year
+    r_20 = solve_cost_offset(gap_c, growth=GROWTH)
+    dac = {"offset": _case(r_dac, gap_c), "g20": _case(r_20, gap_c)}
+    dac["g20"]["kosten"] = {k: _rk(price_plan(np.array(dac["g20"]["bau"]), np.array(dac["g20"]["u"]), c)) for k, c in COST_CASES.items()}
     w, u, bau = np.array(dac["offset"]["w"]), np.array(dac["offset"]["u"]), np.array(dac["offset"]["bau"])
     # how long the planned build-out (8.8 Mt/a in 2030) would need at 20 %/a, like wind power once, to get there
     dac["offset"]["jahr_bei_20"] = int(2030 + np.ceil(np.log(w.max() / START_2030_GT) / np.log(GROWTH)))
-
-    def _rk(d):
-        return {k: (round(v, 4) if isinstance(v, float) else [round(x, 4) for x in v]) for k, v in d.items()}
     kosten_pfad = {k: _rk(price_plan(bau, u, c)) for k, c in COST_CASES.items()}
     kosten_pfad.update(eu27_bip_bio=EU27_BIP_BIO_EUR, fossil_subv_bio=round(FOSSIL_SUBV_BIO_EUR, 3), quellen=VERGLEICH_QUELLEN)
     print("dac", {k: v for k, v in dac["offset"].items() if not isinstance(v, list)}, "kosten", {k: kosten_pfad[k]["summe_bio"] for k in COST_CASES})
@@ -87,13 +90,15 @@ def main() -> None:
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
     # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
     wirkung = {"baeume": _mk(delta_t("forst")), "vegan": _mk(dg + df),
-               "dac": _mk(-np.array(r_dac["kuehlung_k"])), "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
+               "dac": _mk(-np.array(r_dac["kuehlung_k"])), "dac_20": _mk(-np.array(r_20["kuehlung_k"])),
+               "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
     vl_c = [round(v, 3) for v in vl_series()["median_c"]]
     print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())
     out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile, "vl_c": vl_c, "wirkung": wirkung,
            "flaechen_gha": areas, "dac": dac, "kosten_pfad": kosten_pfad, "vegan": veg}
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     print("wrote", OUT)
+
 
 
 if __name__ == "__main__":

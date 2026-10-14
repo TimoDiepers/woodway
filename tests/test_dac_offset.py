@@ -63,3 +63,36 @@ def test_price_plan_pays_build_and_fixed_cost_per_plant_and_energy_per_tonne():
     p = price_plan(b, u, COST)
     want = (COST["capex"] * 60.0 + COST["fom"] * 60.0 * LIFETIME + (COST["sorbent"] + COST["energy"]) * u.sum()) * 1e9 / 1e12
     assert p["summe_bio"] == pytest.approx(want, rel=1e-9)
+
+
+@pytest.fixture(scope="module")
+def run20(runs):
+    from nbs.dac_optim import solve_cost_offset
+    gap = runs[0]
+    return gap, solve_cost_offset(gap, growth=1.2)
+
+
+def test_growth_limited_keeps_ramp_and_20_percent(run20):
+    from nbs.dac_optim import START_2030_GT
+    _, r = run20
+    w = np.array(r["kap_land"]).sum(axis=0)
+    i30 = list(YEARS).index(2030)
+    for t in range(i30 + 1):
+        assert w[t] <= START_2030_GT * (YEARS[t] - 2025) / 5 + 1e-9
+    assert np.all(w[i30 + 1:] <= 1.2 * w[i30:-1] + 1e-6)
+
+
+def test_growth_limited_returns_at_the_earliest_possible_year(run20):
+    from nbs.dac_optim import solve_cost_offset
+    gap, r = run20
+    i = list(YEARS).index(r["ab_jahr"])
+    assert (gap - np.array(r["kuehlung_k"]))[i:].max() <= 1e-6
+    assert r["ab_jahr"] > 2050
+    with pytest.raises(RuntimeError):
+        solve_cost_offset(gap, ab=r["ab_jahr"] - 1, growth=1.2)
+
+
+def test_growth_limit_costs_less_in_total_but_comes_late(runs, run20):
+    _, r, _, _ = runs
+    _, r20 = run20
+    assert r20["kapazitaet_gt"] > 0 and r20["ab_jahr"] > r["ab_jahr"]

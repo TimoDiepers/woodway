@@ -569,13 +569,16 @@ def solve_min_peak(gap_k: NDArray, growth: float = GROWTH, limit_start: bool = T
 HOLD_FROM = 2027   # a removal cools only from the year after; 2027 is the first year DACCS can offset
 
 
-def solve_cost_offset(gap_k: NDArray, ab: int = HOLD_FROM, c: dict | None = None, stufe: str = "prudent",
-                      quantil: float = 0.9, pathway: str = "SSP2-NDC") -> dict:
+def solve_cost_offset(gap_k: NDArray, ab: int | None = None, c: dict | None = None, growth: float | None = None,
+                      stufe: str = "prudent", quantil: float = 0.9, pathway: str = "SSP2-NDC") -> dict:
     """DACCS as a cost optimisation: the cheapest builds b[c, y] and runs u[c, y] per country and year such that the
     cooling offsets the warming above 1.5 deg C (*gap_k* [K], unclipped) in every year from *ab* on. Costs: the
     optimistic case of Okosun et al. 2026 unless *c* is given (price_plan: investment and fixed operation per plant,
     sorbent and energy per tonne). Plants stand LIFETIME years and may idle (u <= capacity); countries by eta_C with
-    their safe storage; no growth limit -- that no technology ever grew this fast is said on the slide."""
+    their safe storage. growth=None: no growth limit -- that no technology ever grew this fast is said on the slide;
+    *ab* defaults to HOLD_FROM. With *growth*, the world capacity ramps to 8.8 Mt/a in 2030 and grows at most by that
+    factor a year; *ab* then defaults to the earliest year from which the offset is possible at all (bisection).
+    RuntimeError if the offset is impossible from *ab*."""
     from scipy.sparse import coo_matrix, csr_matrix, hstack, vstack
 
     c = COST_CASES["optimistisch"] if c is None else c
@@ -584,7 +587,6 @@ def solve_cost_offset(gap_k: NDArray, ab: int = HOLD_FROM, c: dict | None = None
     gap = np.asarray(gap_k, dtype=float)
     n_c, n = eta.shape
     nx = n_c * n
-    t0 = int(ab - YEARS[0])
     # u - sum of the builds of the last LIFETIME years <= 0 (country-major: index c * n + y)
     rows, cols, vals = [], [], []
     for ci in range(n_c):
@@ -597,19 +599,46 @@ def solve_cost_offset(gap_k: NDArray, ab: int = HOLD_FROM, c: dict | None = None
     cool = np.zeros((n, nx))                                   # cooling in year t per Gt run in country c, year y
     for ci in range(n_c):
         cool[:, ci * n:(ci + 1) * n] = (-k * eta[ci][:, None]).T
-    a_cool = hstack([csr_matrix((n - t0, nx)), csr_matrix(-cool[t0:])])
     st = np.zeros((n_c, nx))
     for ci in range(n_c):
         st[ci, ci * n:(ci + 1) * n] = 1.0
-    a_st = hstack([csr_matrix((n_c, nx)), csr_matrix(st)])
-    A = vstack([a_cap, a_cool, a_st]).tocsr()
-    B = np.r_[np.zeros(nx), -gap[t0:], storage]
+    blocks, rhs = [a_cap, hstack([csr_matrix((n_c, nx)), csr_matrix(st)])], [np.zeros(nx), storage]
+    if growth is not None:
+        # world capacity W[t] = sum over countries of the builds of the last LIFETIME years
+        wmat = np.zeros((n, nx))
+        for t in range(n):
+            for ci in range(n_c):
+                wmat[t, ci * n + max(0, t - LIFETIME + 1):ci * n + t + 1] = 1.0
+        i30 = int(np.where(YEARS == 2030)[0][0])
+        g = wmat[i30 + 1:] - growth * wmat[i30:-1]
+        blocks += [hstack([csr_matrix(wmat[:i30 + 1]), csr_matrix((i30 + 1, nx))]), hstack([csr_matrix(g), csr_matrix((n - i30 - 1, nx))])]
+        rhs += [START_2030_GT * (YEARS[:i30 + 1] - 2025) / 5, np.zeros(n - i30 - 1)]
     years_left = np.minimum(LIFETIME, n - np.arange(n))
     cost = np.r_[np.tile(c["capex"] + c["fom"] * years_left, n_c), np.full(nx, c["sorbent"] + c["energy"])] * 1e9 / 1e12
     bounds = [(0.0, None)] * nx + [(0.0, 0.0 if eta.reshape(-1)[i] <= 0 else None) for i in range(nx)]
-    res = _lp(cost, A_ub=A, b_ub=B, bounds=bounds)
-    if res.status != 0:
-        raise RuntimeError(f"LP: {res.message}")
+
+    def _solve(t0: int):
+        A = vstack(blocks + [hstack([csr_matrix((n - t0, nx)), csr_matrix(-cool[t0:])])]).tocsr()
+        res = _lp(cost, A_ub=A, b_ub=np.concatenate(rhs + [-gap[t0:]]), bounds=bounds)
+        if res.status != 0 and not _infeasible(res):
+            raise RuntimeError(f"LP: {res.message}")
+        return res if res.status == 0 else None
+
+    if ab is None and growth is not None:   # the earliest year the offset can hold from (once possible, every later one is)
+        lo, hi = int(HOLD_FROM - YEARS[0]), n - 1
+        if _solve(hi) is None:
+            raise RuntimeError("no DACCS path offsets the warming even in the last year")
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if _solve(mid) is not None:
+                hi = mid
+            else:
+                lo = mid + 1
+        ab = int(YEARS[hi])
+    ab = HOLD_FROM if ab is None else int(ab)
+    res = _solve(int(ab - YEARS[0]))
+    if res is None:
+        raise RuntimeError(f"no DACCS path offsets the warming from {ab} on")
     b = np.maximum(res.x[:nx].reshape(n_c, n), 0.0)
     u = np.maximum(res.x[nx:].reshape(n_c, n), 0.0)
     cap = np.array([b[:, max(0, t - LIFETIME + 1):t + 1].sum(axis=1) for t in range(n)]).T
