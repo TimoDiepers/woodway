@@ -1732,7 +1732,10 @@ class Deck {
     const prev = this.slides[this.i];
     if (prev && prev !== s && prev.classList.contains('active')) {   // drawn while it fades out
       prev.classList.add('leaving'); clearTimeout(prev._leave);
-      prev._leave = setTimeout(() => prev.classList.remove('leaving'), 400);
+      prev._leave = setTimeout(() => prev.classList.remove('leaving', 'hold'), 400);
+      // two slides on the same anchor chart: the old one stays fully under the new one while it fades in, so what
+      // both show (the chart) does not dip; differing parts still cross-fade
+      if (prev.querySelector('.anker') && s.querySelector('.anker')) prev.classList.add('hold');
     }
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
