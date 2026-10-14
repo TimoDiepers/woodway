@@ -665,12 +665,14 @@ function ecAnker(phase) {
     const born = { b: 0, d: 1, t30: 3, t50: 3, f: 3, v: 2 };                     // the phase a line first appears in
     const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && (id === 'v' ? k >= 2 : ['t30', 't50', 'f'].includes(id) ? k >= 1 : true));
     const isNew = id => born[id] === phase;
-    const dot = (color, data, anim, dim) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: anim,
+    // inherited lines and marks: animation false; new ones leave it unset and follow the deck, which animates only
+    // the click that brings them (a series' own `animation: true` would override that and replay on every click)
+    const dot = (color, data, anim, dim) => ({ silent: true, symbol: 'circle', symbolSize: 11, animation: anim ? undefined : false,
       itemStyle: { color, borderColor: '#14181a', borderWidth: 2, opacity: dim ? .35 : 1 },
       label: { show: true, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 9, opacity: dim ? .45 : 1 }, data });
     const L = (id, ys, color, name, o) => {
       const dim = phase === 2 && !['b', 'v'].includes(id);
-      return Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5, animation: isNew(id), animationDuration: 1600,
+      return Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5, animation: isNew(id) ? undefined : false, animationDuration: 1600,
         lineStyle: Object.assign({ color, width: 3.2, opacity: dim ? .35 : 1 }, o.line || {}), itemStyle: { color },
         markPoint: o.mark ? dot(color, o.mark, isNew(id), dim) : undefined }, o.extra || {}); };
     const series = [];
