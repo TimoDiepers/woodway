@@ -14,16 +14,21 @@ def _c(key):
 def test_anchor_series_exist_and_have_the_years():
     n = len(Z["jahre"])
     assert len(Z["vl_c"]) == n
-    assert set(Z["wirkung"]) == {"baeume", "dac", "dac_20", "vegan", "dac_vegan"}
+    assert set(Z["wirkung"]) == {"baeume", "dac_20", "dac_50", "dac_100", "vegan", "dac_vegan"}
     assert all(len(v) == n for v in Z["wirkung"].values())
 
 
-def test_daccs_holds_1p5_from_2027():
-    assert _c("dac")[1:].max() <= 1.5 + 1e-3          # vl_c is rounded to 0.001 deg C in the file
+def test_daccs_holds_1p5_from_its_return_year_and_faster_is_earlier():
+    ab = {}
+    for g in (20, 50, 100):
+        ab[g] = Z["dac"][f"g{g}"]["ab"]
+        i = Z["jahre"].index(ab[g])
+        assert _c(f"dac_{g}")[i:].max() <= 1.5 + 1e-3     # vl_c is rounded to 0.001 deg C in the file
+    assert ab[100] <= ab[50] <= ab[20]
 
 
-def test_daccs_capacity_stands_until_shutdown_and_costs_hold():
-    o = Z["dac"]["offset"]
+def test_daccs_runs_only_on_standing_plants_and_costs_hold():
+    o = Z["dac"]["g20"]
     w, u = np.array(o["w"]), np.array(o["u"])
     assert np.all(u <= w + 1e-6)
     assert abs(w.max() - o["kap"]) < 0.01
@@ -36,6 +41,8 @@ def test_vegan_goes_below_1p5_and_is_not_clipped():
     assert abs(t.max() - (1.5 + max(Z["vegan"]["gap"]) / 1000)) < 0.005
 
 
-def test_vegan_plus_daccs_holds_1p5_from_2027():
+def test_vegan_plus_daccs_holds_1p5_from_its_return_year():
     t = _c("vegan") + np.array(Z["wirkung"]["dac_vegan"]) / 1000
-    assert t[1:].max() <= 1.5 + 1e-3
+    i = Z["jahre"].index(Z["vegan"]["g20"]["ab"])
+    assert t[i:].max() <= 1.5 + 1e-3
+    assert Z["vegan"]["g20"]["ab"] < Z["dac"]["g20"]["ab"]

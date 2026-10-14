@@ -92,7 +92,7 @@ export const en = {
   "strip.afterDac": "with trees and DACCS",
   "strip.capacity": "DACCS capacity {gt} Gt/a",
   "strip.unit": "mK",
-  "strip.source": "With the trees: managed forest on the {area} Gha that cool, all planted in {year}, timber kept; DACCS: cost-optimal, offsets the warming above 1.5 °C from 2027 on, no growth limit.",
+  "strip.source": "With the trees: managed forest on the {area} Gha that cool, all planted in {year}, timber kept; DACCS: cost-optimal, build-out at most 20 %/a, back to 1.5 °C as early as possible.",
   "hover.value": "{value} {unit}",
   "tools.label": "Map tools",
   "tools.recenter": "Back to the whole world",

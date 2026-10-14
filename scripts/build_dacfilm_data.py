@@ -1,8 +1,8 @@
 """Data for the DAC result film and its still pictures (deck/chart_data/dacfilm.json).
 
 One DAC path against the warming that remains after the trees (managed forest, timber bound; nbs.tree_paths):
-DACCS as a cost optimisation that offsets the warming above 1.5 deg C from 2027 on, without a growth limit
-(nbs.dac_optim.solve_cost_offset; the deck's dac.offset).
+DACCS as a cost optimisation that offsets the warming above 1.5 deg C from the earliest year a growth of at most
+20 %/a allows (nbs.dac_optim.solve_cost_offset; the deck's dac.g20).
 Each country's capacity is spread evenly over the cells the optimisation counts for it (cells near a sediment basin, at or above the
 90 % quantile of the net share; here fixed by the year 2050), plus dark map backgrounds (land, basins).
 
@@ -41,7 +41,7 @@ def main() -> None:
     need = np.array(overshoot_series()["noetig_k"]) * 1000
     tree = -delta_t("forst") * 1000
     paths, cool = {}, {}
-    r = solve_cost_offset(np.array(vl_series()["median_c"]) - 1.5 - tree / 1000)   # cheapest offset, no growth limit
+    r = solve_cost_offset(np.array(vl_series()["median_c"]) - 1.5 - tree / 1000, growth=1.2)   # cheapest, at most 20 %/a
     r["x"] = r["u"]                                                   # the map shows what is removed
     paths["opt"] = (r["laender"], np.array(r["x"]), np.array(r["eta"]))
     cool["opt"] = np.array(r["kuehlung_k"])
