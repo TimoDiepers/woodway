@@ -22,7 +22,7 @@ from nbs import vegan
 from nbs.dac_optim import (COST_CASES, EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, VERGLEICH_QUELLEN, path_cost, solve,
                            solve_cost, solve_min_peak, solve_naive)
 from nbs.tree_paths import delta_t, delta_t_parts, forcing
-from nbs.vergleich_figures import overshoot_series
+from nbs.vergleich_figures import overshoot_series, vl_series
 
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "deck/chart_data/zeitpfade.json"
@@ -71,10 +71,11 @@ def main() -> None:
                 "temp": [round(float(v), 1) for v in np.maximum(over, 0)], "spitze": round(float(over.max()), 1),
                 "laender": r["laender"], "x_2100": [round(float(v), 4) for v in x[:, -1]]}
     frueh = dict(danach="frueh")
-    dac = {"opt_20": _case(solve_min_peak(gap, **frueh)),
-           "opt_30": _case(solve_min_peak(gap, growth=1.3, **frueh)), "opt_50": _case(solve_min_peak(gap, growth=1.5, **frueh)),
-           "opt_frei": _case(solve_min_peak(gap, growth=1e6, limit_start=False, **frueh)),
-           "opt_2035": _case(solve(gap_k=gap, start_jahr=2035)), "opt_2040": _case(solve(gap_k=gap, start_jahr=2040))}
+    runs = {"opt_20": solve_min_peak(gap, **frueh), "opt_30": solve_min_peak(gap, growth=1.3, **frueh),
+            "opt_50": solve_min_peak(gap, growth=1.5, **frueh), "opt_100": solve_min_peak(gap, growth=2.0, **frueh),
+            "opt_frei": solve_min_peak(gap, growth=1e6, limit_start=False, **frueh)}
+    dac = {k: _case(r) for k, r in runs.items()}
+    dac.update(opt_2035=_case(solve(gap_k=gap, start_jahr=2035)), opt_2040=_case(solve(gap_k=gap, start_jahr=2040)))
     # what speed costs: the same lowest peak, back to 1.5 deg C from an earlier year on (and staying there), each
     # with the least capacity; and the earliest year at all
     dac["ab_jahr"] = {str(z): _case(solve_min_peak(gap, ziel_jahr=z)) for z in (2085, 2090, 2095)}
@@ -112,8 +113,12 @@ def main() -> None:
            "ersparnis": {"kap_gt": round(dac["opt_20"]["kap"] - vcase["kap"], 2),
                          "brutto_gt": round(float(w20.sum() - wv.sum()), 1),
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
+    # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
+    wirkung = {"baeume": _mk(delta_t("forst")), "vegan": _mk(dg + df),
+               **{f"dac_{k}": _mk(-np.array(runs[f"opt_{k}"]["kuehlung_k"])) for k in ("20", "50", "100", "frei")}}
+    vl_c = [round(v, 3) for v in vl_series()["median_c"]]
     print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())
-    out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile,
+    out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile, "vl_c": vl_c, "wirkung": wirkung,
            "flaechen_gha": areas, "tempo": cases, "ort": ort, "dac": dac, "kosten": kosten,
            "kosten_pfad": kosten_pfad, "vegan": veg}
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
