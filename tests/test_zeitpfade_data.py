@@ -14,7 +14,7 @@ def _c(key):
 def test_anchor_series_exist_and_have_the_years():
     n = len(Z["jahre"])
     assert len(Z["vl_c"]) == n
-    assert set(Z["wirkung"]) == {"baeume", "dac", "vegan"}
+    assert set(Z["wirkung"]) == {"baeume", "dac", "vegan", "dac_vegan"}
     assert all(len(v) == n for v in Z["wirkung"].values())
 
 
@@ -34,3 +34,8 @@ def test_vegan_goes_below_1p5_and_is_not_clipped():
     t = _c("vegan")
     assert t.min() < 1.5                 # back below 1.5 deg C before 2100 (Very Low without its removal: 1.46 in 2100)
     assert abs(t.max() - (1.5 + max(Z["vegan"]["gap"]) / 1000)) < 0.005
+
+
+def test_vegan_plus_daccs_holds_1p5_from_2027():
+    t = _c("vegan") + np.array(Z["wirkung"]["dac_vegan"]) / 1000
+    assert t[1:].max() <= 1.5 + 1e-3

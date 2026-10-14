@@ -87,7 +87,7 @@ def main() -> None:
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
     # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
     wirkung = {"baeume": _mk(delta_t("forst")), "vegan": _mk(dg + df),
-               "dac": _mk(-np.array(r_dac["kuehlung_k"]))}
+               "dac": _mk(-np.array(r_dac["kuehlung_k"])), "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
     vl_c = [round(v, 3) for v in vl_series()["median_c"]]
     print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())
     out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile, "vl_c": vl_c, "wirkung": wirkung,

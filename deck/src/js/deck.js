@@ -562,15 +562,16 @@ const EC_VEGAN_LUECKE = {
    1 DACCS, cost-optimal, offsetting the warming above 1.5 deg C (click 1), 2 the vegan world (click 1; the DACCS
    line steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
    own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
-const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#7fd0e0' };
+const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#7fd0e0', dv: '#c49ce8' };
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 1, 2: 1 }[phase], option(k) {
+  return { steps: { k4: 0, 0: 0, 1: 1, 2: 2 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
+    const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000),
+      onv = key => on('vegan').map((v, i) => v + W[key][i] / 1000);   // the vegan world plus its own DACCS
     const order = ['k4', 0, 1, 2], rank = order.indexOf(phase);
-    const born = { vl: 'k4', b: 'k4', d: 1, v: 2 };
-    const later = { d: 1, v: 1 };                                              // the click within its phase
+    const born = { vl: 'k4', b: 'k4', d: 1, v: 2, dv: 2 };
+    const later = { d: 1, v: 1, dv: 2 };                                       // the click within its phase
     const has = id => order.indexOf(born[id]) < rank || (born[id] === phase && k >= (later[id] || 0));
     const isNew = id => born[id] === phase, dim = id => phase === 2 && id === 'd';
     const ink = light ? EC.ink : '#f2ede2', mut = light ? EC.muted : '#9aa39d', grid = light ? EC.grid : '#2c3437';
@@ -590,11 +591,12 @@ function ecAnker(phase) {
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] },
         markArea: { silent: true, animation: false, itemStyle: { color: 'rgba(196,18,31,.10)' }, data: [[{ yAxis: 1.5 }, { yAxis: 2.5 }]] } } }));
     series.push(L('b', b, 'Bäume'));
-    if (has('d')) series.push(L('d', on('dac'), 'DACCS'));
+    if (has('d')) series.push(L('d', on('dac'), 'DACCS', phase === 1 ? { mark: [{ coord: [2088, on('dac')[62]], label: { position: 'bottom', distance: 10, formatter: 'CO₂ bleibt entnommen' } }] } : {}));
     if (has('v')) { const v = on('vegan'), [pw, tw] = peak(v);
       series.push(L('v', v, 'vegan', { line: { width: 3.4 }, mark: [{ coord: [pw, tw], label: { position: 'top', offset: [34, 0], formatter: `vegan: ${ecNum(tw, 2)} °C` } }] })); }
+    if (has('dv')) series.push(L('dv', onv('dac_vegan'), 'vegan + DACCS', { line: { width: 3, type: [10, 5] } }));
     // y range from all curves of the last phase, so that it stays the same on every slide
-    const ext = ['dac', 'vegan'].map(on).concat([vl, b]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+    const ext = ['dac', 'vegan'].map(on).concat([vl, b, onv('dac_vegan')]).flat(), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
     return {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
@@ -640,7 +642,27 @@ const EC_VEGAN_ALL = { steps: 0, option() {
   o.xAxis.axisLabel.fontSize = 18; o.yAxis.axisLabel.fontSize = 18;
   return o;
 } };
-const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, abbau: EC_ABBAU, veganall: EC_VEGAN_ALL };
+/* DACCS per year, inside a block beside the anchor: what is removed (area) and the plants standing (dashed) */
+function ecDaccsJahr(lines) {
+  return { steps: 0, option() {
+    const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+    const series = lines(D).map(([id, ys, color, name, dash, area, op]) => ({ id, name, type: 'line', showSymbol: false, data: P(ys), z: area ? 4 : 5,
+      lineStyle: { color, width: dash ? 2.2 : 3, type: dash || 'solid', opacity: op || 1 }, itemStyle: { color },
+      areaStyle: area ? { color, opacity: .3 * (op || 1) } : undefined }));
+    return {
+      grid: { left: 54, right: 16, top: 34, bottom: 30 },
+      legend: { left: 50, top: 0, itemGap: 14, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: '#d6dbd6', fontFamily: EC.font, fontSize: 17 }, data: series.map(x => x.name) },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 17, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: 0, max: 80, interval: 40, axisLine: { lineStyle: { color: '#4a524d' } },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 17 }, splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
+      series
+    };
+  } };
+}
+const EC_DACCS_JAHR = ecDaccsJahr(D => [['u', D.dac.offset.u, '#ff5a4f', 'Entnahme [Gt CO₂/a]', null, true], ['w', D.dac.offset.w, '#ffb3a8', 'Anlagen', [6, 5]]]);
+const EC_DACCS_VEGAN = ecDaccsJahr(D => [['u', D.dac.offset.u, '#ff5a4f', 'nur Bäume', null, true, .45], ['uv', D.vegan.offset.u, '#c49ce8', 'mit veganer Welt [Gt CO₂/a]', null, true]]);
+const EC_CHARTS = { temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, abbau: EC_ABBAU, veganall: EC_VEGAN_ALL, daccsjahr: EC_DACCS_JAHR, daccsvegan: EC_DACCS_VEGAN };
 
 class EChart {
   constructor(host) {
