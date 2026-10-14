@@ -25,7 +25,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.aggregate import co2_factor_grid
-from nbs.albedo_grid import alpha_q_product
+from nbs.light import light_product
 from nbs.config import ModelConfig
 from nbs.constants import A_EARTH_M2, M_CO2_PER_C, T_START, TAU_ATM, YEARS
 from nbs.fair_module import run_fair_baseline, run_fair_perturbed
@@ -83,7 +83,7 @@ def _cells(key: str, mask: NDArray) -> tuple[float, float, float]:
     """Sums over the cells of *key* in *mask*: (trees x co2 site factor, trees x albedo product, area [Gha])."""
     m = (assign_species() == key) & mask
     n = tree_count()[m]
-    return (float((n * co2_factor_grid(key)[m]).sum()), float((n * np.nan_to_num(alpha_q_product(key)[m])).sum()),
+    return (float((n * co2_factor_grid(key)[m]).sum()), float((n * np.nan_to_num(light_product(key)[m])).sum()),
             float(plantable_area_m2()[m].sum()) / 1e13)
 
 

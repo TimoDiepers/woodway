@@ -127,7 +127,7 @@ def _same(got, ref, scale_ref=None, rtol=1e-5):
 
 @pytest.mark.slow
 def test_per_cell_fields_equal_their_model_source():
-    from nbs.animations import _STAND_AREA_M2, _by_type, typical_alpha_q_product
+    from nbs.animations import _STAND_AREA_M2, _by_type, typical_light_product
     from nbs.dac import dac_possible, energy_grid
     from nbs.dac_climate import climate_grid
     from nbs.forest_data import reforestable_area_m2
@@ -137,7 +137,7 @@ def test_per_cell_fields_equal_their_model_source():
     typ = fields["type"] > 0
     ok = dac_possible()
     area = np.where(typ, reforestable_area_m2(), 0.0)
-    _same(fields["light"], -typical_alpha_q_product() * _STAND_AREA_M2)
+    _same(fields["light"], -typical_light_product() * _STAND_AREA_M2)
     _same(fields["sun"], _by_type(albedo_grid.insolation_grid))
     _same(fields["darker"], -100.0 * _by_type(albedo_grid.delta_alpha_grid))
     _same(fields["area"], area)

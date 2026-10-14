@@ -100,11 +100,11 @@ def _species_for(species_key: str, config: ModelConfig, lat_deg: float, lon_deg:
 
 
 @lru_cache(maxsize=None)
-def typical_product(species_key: str) -> float:
-    """Area-weighted mean measured albedo product Delta-alpha*q [W/m^2] over
-    the cells where *species_key* is the typical forest."""
-    from nbs.albedo_grid import alpha_q_product
+def typical_product(species_key: str, clouds: bool | None = None) -> float:
+    """Area-weighted mean measured light product (albedo + clouds, nbs.light)
+    [W/m^2] over the cells where *species_key* is the typical forest."""
     from nbs.landscape import assign_species, plantable_area_m2
+    from nbs.light import light_product
 
     cells = assign_species() == species_key
     if not cells.any():
@@ -112,7 +112,7 @@ def typical_product(species_key: str) -> float:
 
         cells = admissible_types()[species_key.split("_")[0]]
     a = plantable_area_m2()[cells]
-    prod = alpha_q_product(species_key)[cells]
+    prod = light_product(species_key, clouds=clouds)[cells]
     ok = np.isfinite(prod) & (a > 0)
     return float(np.average(prod[ok], weights=a[ok]))
 
@@ -131,7 +131,7 @@ def _forcings(
         # No site cell given: the forest type's measured mean (Duveiller),
         # not the old latitude table (nbs.forcing.fallback_*), which knew
         # nothing about forest types (2026-10-05).
-        d_alpha, q = typical_product(species_key), 1.0
+        d_alpha, q = typical_product(species_key, None if config.clouds else False), 1.0
     else:
         d_alpha = fallback_delta_alpha(lat_deg) if delta_alpha is None else delta_alpha
         q = fallback_q_sw(lat_deg) if q_sw is None else q_sw

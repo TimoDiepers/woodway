@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from nbs.aggregate import _product_no_nan, co2_factor_grid
-from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_alpha_q_product, typical_measured_mask
+from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_light_product, typical_measured_mask
 from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS
 from nbs.dac import dac_possible, efficiency_grid, energy_grid, lca_vintages
 from nbs.dac_climate import climate_grid
@@ -122,7 +122,7 @@ def main() -> None:
     f.add("trees", area / _STAND_AREA_M2, "f4")
     f.add("sun", _by_type(albedo_grid.insolation_grid), "f4")
     f.add("darker", -100.0 * _by_type(albedo_grid.delta_alpha_grid), "f4")
-    f.add("light", -typical_alpha_q_product() * _STAND_AREA_M2, "f4")
+    f.add("light", -typical_light_product() * _STAND_AREA_M2, "f4")
     # albedo of the cell's typical forest measured locally; elsewhere sun/darker are NaN and light is
     # gap-filled -- the deck (b8/b8a) shows measured cells only, so does woodway
     f.add("measured", typical_measured_mask().astype(np.uint8), "u1")

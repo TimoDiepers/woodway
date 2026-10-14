@@ -211,6 +211,22 @@ def typical_alpha_q_product() -> NDArray:
 
 
 @lru_cache(maxsize=1)
+def typical_light_product() -> NDArray:
+    """(360, 720) net light product (albedo + clouds, nbs.light) of the typical forest per cell."""
+    from nbs.light import light_product
+
+    return _by_type(light_product)
+
+
+@lru_cache(maxsize=1)
+def typical_cloud_product() -> NDArray:
+    """(360, 720) cloud brightening product (nbs.cloud_grid) of the typical forest per cell."""
+    from nbs.cloud_grid import cloud_q_product
+
+    return _by_type(cloud_q_product)
+
+
+@lru_cache(maxsize=1)
 def typical_measured_mask() -> NDArray:
     """(360, 720) bool: albedo of the cell's typical forest locally measured."""
     return _by_type(lambda k: (albedo_grid.product_provenance_grid(k) == 0).astype(float)) == 1.0
@@ -238,10 +254,12 @@ def albedo_watts_monthly(species_key: str | None = SPECIES_KEY) -> tuple[NDArray
     from nbs.forest_data import TREES_PER_HA
 
     area = 1e4 / TREES_PER_HA
+    from nbs.light import monthly_light_product
+
     if species_key is None:
-        watts = -_by_type(albedo_grid.monthly_product) * area
+        watts = -_by_type(monthly_light_product) * area
         return watts, typical_measured_mask()
-    watts = -albedo_grid.monthly_product(species_key) * area
+    watts = -monthly_light_product(species_key) * area
     measured = albedo_grid.product_provenance_grid(species_key) == 0
     return watts, measured
 
@@ -471,7 +489,7 @@ def albedo_map_animation(
     measured = in_range & measured_all
     outside = land_mask() & ~in_range
     frames = interpolate_frames(watts, steps_per_month)
-    annual = -typical_alpha_q_product() * _STAND_AREA_M2
+    annual = -typical_light_product() * _STAND_AREA_M2
 
     norm = mcolors.Normalize(0.0, vmax)
     cmap = _ramp_cmap(RAMP_ALBEDO)
@@ -598,7 +616,7 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
     _heading_font, body_font = _register_fonts()
     _style(body_font)
 
-    annual = -typical_alpha_q_product() * _STAND_AREA_M2
+    annual = -typical_light_product() * _STAND_AREA_M2
     in_range = species_range_mask()
     measured = in_range & albedo_watts_monthly()[1]
     estimated = in_range & ~measured

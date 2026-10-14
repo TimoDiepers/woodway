@@ -53,7 +53,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.aggregate import aggregate_by_species, co2_factor_grid, global_delta_t, unit_curves
-from nbs.albedo_grid import alpha_q_product
+from nbs.light import light_product
 from nbs.config import ModelConfig
 from nbs.constants import T_END, YEARS
 from nbs.fair_module import run_fair_baseline, run_fair_perturbed
@@ -169,7 +169,7 @@ def _masked_aggregate_by_species(
         mask = (species_grid == key) & retain_mask
         n_sum = float((n_grid[mask] * co2_factor_grid(key, config)[mask]).sum())
         if mask.any():
-            p = alpha_q_product(key)
+            p = light_product(key)
             np_sum = float(np.sum(n_grid[mask] * p[mask]))
         else:
             np_sum = 0.0
@@ -281,7 +281,7 @@ def _representative_tree(key: str, retain_mask: NDArray) -> tuple[float, float, 
     if not cells.any():
         return None
     w = plantable_area_m2()[cells]
-    product = alpha_q_product(key)[cells]
+    product = light_product(key)[cells]
     factor = site_factor_grid(key)[cells]
     d = ((product - np.average(product, weights=w)) / (np.std(product) + 1e-12)) ** 2 + (
         (factor - np.average(factor, weights=w)) / (np.std(factor) + 1e-12)

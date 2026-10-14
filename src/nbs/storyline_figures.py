@@ -37,6 +37,7 @@ from nbs.animations import (  # noqa: E402
     site_uptake_kg_co2,
 )
 from nbs.constants import M_CO2_PER_C, T_START, YEARS  # noqa: E402
+from nbs.light import light_product  # noqa: E402
 from nbs.metrics import t_star  # noqa: E402
 from nbs.pipeline import SiteResult, run_single_tree  # noqa: E402
 from nbs.response import convolve_response, green_carbon_preindustrial, green_temperature  # noqa: E402
@@ -69,7 +70,7 @@ def _save(fig, out_path: str) -> str:
 def site_annual_watts(site: Site) -> float:
     """Annual extra shortwave per full-grown tree at the site's cell [W]."""
     key = site_key(site)
-    return float(-albedo_grid.alpha_q_product(key)[site_cell(site)] * get_species(key).stand_area_m2)
+    return float(-light_product(key)[site_cell(site)] * get_species(key).stand_area_m2)
 
 
 def _site_species(site: Site):
@@ -82,7 +83,7 @@ def _site_species(site: Site):
 def run_site(site: Site, plant_year: int = YEARS[0]) -> SiteResult:
     """Full model (all shells) at the site, with its own measured albedo cell."""
     key = site_key(site)
-    product = float(albedo_grid.alpha_q_product(key)[site_cell(site)])
+    product = float(light_product(key)[site_cell(site)])
     return run_single_tree(key, site.lat, delta_alpha=product, q_sw=1.0, plant_year=plant_year, lon_deg=site.lon)
 
 
@@ -441,7 +442,7 @@ def ladder_t_star(site: Site) -> list[float]:
     sp = _site_species(site)
     calm = simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS)))
     warm = simulate_deterministic(sp, _background_temperature("ssp245"))
-    product = float(albedo_grid.alpha_q_product(site_key(site))[site_cell(site)])
+    product = float(light_product(site_key(site))[site_cell(site)])
 
     def t_of(phi):
         return t_star(convolve_response(g_t, phi), YEARS)
@@ -472,7 +473,7 @@ def ladder_delta_t(site: Site) -> list[float]:
     sp = _site_species(site)
     calm = simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS)))
     warm = simulate_deterministic(sp, _background_temperature("ssp245"))
-    product = float(albedo_grid.alpha_q_product(site_key(site))[site_cell(site)])
+    product = float(light_product(site_key(site))[site_cell(site)])
 
     def end(phi):
         return float(convolve_response(g_t, phi)[-1])
@@ -965,7 +966,7 @@ def inertia_result_figure(out_path: str) -> str:
     for s in SITES:
         r = run_site(s)
         key = site_key(s)
-        product = float(albedo_grid.alpha_q_product(key)[site_cell(s)])
+        product = float(light_product(key)[site_cell(s)])
         co2 = run_single_tree(key, s.lat, delta_alpha=product, q_sw=1.0, lon_deg=s.lon,
                               config=ModelConfig(albedo=False)).delta_t
         ax_r.plot(YEARS, r.delta_t * scale, color=s.color, linewidth=3.0)
@@ -1510,7 +1511,7 @@ def own_remaining() -> dict[str, float]:
         co2 = _masked_global_delta_t(m, "ssp245", ModelConfig(albedo=False, disturbance="off"))[-1]
         out[name] = float(full / co2)
         out[f"flaeche_{name}_gha"] = float(a[m].sum() / 1e13)
-    prod = _by_type(albedo_grid.alpha_q_product)
+    prod = _by_type(light_product)
     m = plant & np.isfinite(prod)
     per_tco2 = 5.35 / 400.0 / (2.13e9 * 44.0 / 12.0)
     alb = (-prod * TAU_ATM * 1e4 / A_EARTH_M2 / per_tco2 / 0.52 * a / 1e4)[m].sum()

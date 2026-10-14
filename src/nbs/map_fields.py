@@ -272,9 +272,9 @@ def albedo_ingredients() -> dict:
 
 def absorbed_light() -> dict:
     """b8: extra absorbed light per full-grown tree [W], annual mean."""
-    from nbs.animations import _STAND_AREA_M2, typical_alpha_q_product
+    from nbs.animations import _STAND_AREA_M2, typical_light_product
 
-    return {"panels": [_world_panel(-typical_alpha_q_product() * _STAND_AREA_M2, "licht")]}
+    return {"panels": [_world_panel(-typical_light_product() * _STAND_AREA_M2, "licht")]}
 
 
 def availability() -> dict:

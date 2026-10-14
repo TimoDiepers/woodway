@@ -51,7 +51,6 @@ from numpy.typing import NDArray  # noqa: E402
 
 from nbs.aggregate import co2_factor_grid, delta_t_at_year, unit_curves  # noqa: E402
 from nbs.albedo_grid import (  # noqa: E402
-    alpha_q_product,
     product_provenance,
     provenance_fractions,
 )
@@ -60,6 +59,7 @@ from nbs.constants import T_END, T_START, YEARS  # noqa: E402
 from nbs.grid import grid_lats, grid_lons  # noqa: E402
 from nbs.landscape import assign_species  # noqa: E402
 from nbs.landscape import provenance as landscape_provenance  # noqa: E402
+from nbs.light import light_product  # noqa: E402
 from nbs.borders import CITATION as borders_citation  # noqa: E402
 from nbs.borders import add_borders, borders_available  # noqa: E402
 from nbs.landscape import land_mask, plantable_area_m2  # noqa: E402
@@ -289,7 +289,7 @@ def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None =
         if not mask.any():
             continue
         co2, albedo_unit = unit_curves(key, scenario, config)
-        p = alpha_q_product(key)[mask]
+        p = light_product(key)[mask]
         f = co2_factor_grid(key, config)[mask]
         traj = f[:, None] * co2[None, :] + p[:, None] * albedo_unit[None, :]
         field[mask] = _t_star_batch(traj, YEARS)
@@ -436,7 +436,7 @@ def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp2
     lats = grid_lats()
     land = land_mask()
     n_land = land.sum(axis=1)
-    product = alpha_q_product(species_key)
+    product = light_product(species_key)
     zonal_product = np.where(
         n_land > 0, (product * land).sum(axis=1) / np.maximum(n_land, 1), np.nan
     )  # (360,)

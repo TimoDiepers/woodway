@@ -53,7 +53,7 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.albedo_grid import alpha_q_product
+from nbs.light import light_product
 from nbs.config import ModelConfig
 from nbs.constants import A_EARTH_M2, T_END, TAU_ATM, YEARS
 from nbs.landscape import assign_species, tree_count
@@ -172,11 +172,11 @@ def _product_no_nan(species_key: str) -> NDArray:
     albedo at all"); it must never be how "we have no data here" gets
     represented.
     """
-    p = alpha_q_product(species_key)
+    p = light_product(species_key)
     if not np.all(np.isfinite(p)):
         n_nan = int(np.sum(~np.isfinite(p)))
         raise ValueError(
-            f"alpha_q_product({species_key!r}) enthaelt {n_nan} nicht-endliche "
+            f"light_product({species_key!r}) enthaelt {n_nan} nicht-endliche "
             "Werte trotz der Drei-Stufen-Fuellung in nbs.albedo_grid; das "
             "sollte nie vorkommen -- die Fuellung ist kaputt, nicht dieser "
             "Aufruf."

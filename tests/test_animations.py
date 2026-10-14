@@ -67,13 +67,15 @@ def test_interpolated_frames_hit_each_month_and_wrap_to_january():
 
 
 def test_albedo_watts_are_the_unsmoothed_monthly_product_per_tree():
-    """Each cell with its typical forest type: at the sites, the monthly product
-    of that type times the stand area, unsmoothed."""
+    """Each cell with its typical forest type: at the sites, the monthly net light
+    product (albedo + clouds) of that type times the stand area, unsmoothed."""
+    from nbs.light import monthly_light_product
+
     watts, measured = albedo_watts_monthly()
     for s in SITES:
         key = site_key(s)
         cell = (slice(None), *site_cell(s))
-        expected = -albedo_grid.monthly_product(key)[cell] * get_species(key).stand_area_m2
+        expected = -monthly_light_product(key)[cell] * get_species(key).stand_area_m2
         assert np.allclose(watts[cell], expected)
     assert measured.dtype == bool and measured.any()
 

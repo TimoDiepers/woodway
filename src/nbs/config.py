@@ -80,6 +80,10 @@ class ModelConfig:
     (slide 14's "light bulb that never goes out").
     """
 
+    clouds: bool = True
+    """Whether more low clouds over forest (Duveiller et al. 2021, nbs.cloud_grid)
+    brighten the light channel. ``False``: albedo only, the model before 2026-10-14."""
+
     disturbance: Disturbance = "deterministic"
     """How stand-loss risk (fire, storm, pests -- slide on the shrinking
     sink) enters the trajectory.
