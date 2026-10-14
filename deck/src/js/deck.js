@@ -650,7 +650,7 @@ const EC_VEGAN_LUECKE = {
   }
 };
 /* chapter 5 anchor: the warming above 1.5 °C after the trees, the same chart on both slides at the same place.
-   Phase 0 (DAC model) shows the trees alone; phase 1 adds DAC at 20 %/a (click 1) and without a limit (click 3); phase 2 starts there, the DAC lines
+   Phase 0 (DAC model) shows the trees alone; phase 1 adds DAC at 20 %/a (on entry); phase 2 starts there, the DAC lines
    step back, and the vegan world without DAC comes in (click 2). Key numbers stand at the curves. */
 function ecAnker(phase) {
   return { steps: 4, option(k) {
@@ -666,7 +666,7 @@ function ecAnker(phase) {
     const back = still ? { lineStyle: { opacity: .35 } } : {};
     const series = [T('b', b, '#7fbf8c', 'nur Bäume', { lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
       markPoint: dot('#7fbf8c', [{ coord: [D.jahre[ib], b[ib]], label: { position: 'top', formatter: `Spitze ${D.jahre[ib]}: ${ecNum(b[ib] / 1000, 2)} K` } }]) })];
-    const dacOn = still || (phase === 1 && k >= 1), freiOn = still || (phase === 1 && k >= 3);
+    const dacOn = still || phase === 1, freiOn = still;   // the unlimited case is introduced on the pace slide
     if (dacOn) series.push(L('d', d, '#ff5a4f', 'DAC 20 %/a', Object.assign({
       markPoint: dot('#ff5a4f', [{ coord: [D.dac.opt_20.ab, 0], label: { position: 'right', offset: [4, -18], formatter: `1,5 °C ab ${D.dac.opt_20.ab}` } }]) }, still ? { lineStyle: { color: '#ff5a4f', width: 3.2, opacity: .35 }, markPoint: undefined } : {})));
     if (freiOn) series.push(L('f', f, '#ff9a8f', 'DAC unbegrenzt', Object.assign({ lineStyle: { color: '#ff9a8f', width: 2.6, type: [4, 5] },

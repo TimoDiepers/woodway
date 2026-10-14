@@ -1133,6 +1133,18 @@ svg.mo .m-sway.back { animation: none; }
 .fb.cmp .row { grid-template-columns: 178px 1fr 56px; font-size: 19px; }
 .fb.cmp > div { display: flex; flex-direction: column; gap: 7px; }
 .cue { height: 0; }
+.fbw { padding: 4px 0 12px; transition: filter .6s var(--ease); }
+.fbw .pk { font: 600 16px/1.75 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ch-soft); margin-bottom: 6px; }
+.fbw .dleg { margin: 6px 0 8px; }
+.fbw p { font: 400 20px/1.38 var(--sans); color: #d6dbd6; }
+.fbw b.big { font: 600 26px/1 var(--sans); color: #f0b04a; }
+.kz { padding-top: 12px; border-top: 1px solid #2c3437; }
+.kz p { font: 400 20px/1.4 var(--sans); color: #d6dbd6; }
+.kz p.dk { font: 600 16px/1.2 var(--sans); letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+.kz b { font-weight: 600; color: #f2ede2; }
+.flowsvg > g > [data-step] { transition: filter .6s var(--ease); }
+.flowsvg > g > [data-step].shown:has(~ [data-step].shown) { filter: brightness(.45) saturate(.5); }
+.slide:has(.takeaway.shown) .flowsvg > g > [data-step] { filter: none; }
 .flow > [data-step].shown:has(~ [data-step].shown) { filter: brightness(.45) saturate(.5); }
 .slide:has(.takeaway.shown) .flow > [data-step] { filter: none; }
 .takeaway .tq { font-weight: 600; white-space: nowrap; }
