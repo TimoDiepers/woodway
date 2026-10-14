@@ -725,7 +725,9 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .slide.active.chapter.brk .haul.shown { animation: none; }
 .slide.active.chapter.brk .haul.shown .haul-eng { animation: haulstep .3s ease-in-out 8 alternate; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes haulstep { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
-.slide.chapter.brk:has(.haul.shown) .eng { visibility: hidden; }   /* the hauling engineer takes his place; the entrance animation holds opacity, so hide by visibility */
+.slide.chapter.brk:has(.haul.shown) .eng { visibility: hidden; }
+/* the machine on the box keeps running while it is explained (chapter slides otherwise stop their motion after a few turns) */
+.slide.chapter.brk .haul :is(.m-fan, .m-steam, .m-flowd) { animation-iteration-count: infinite !important; }   /* the hauling engineer takes his place; the entrance animation holds opacity, so hide by visibility */
 .slide.chapter.brk:has(.haul.shown) .eng.shown .bubble { opacity: 0; transition: opacity .3s; }
 .all .haul, .embed .haul { transform: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { .slide.chapter.brk .haul { transition: none; } .haul-eng { animation: none !important; } }
