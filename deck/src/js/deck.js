@@ -415,9 +415,7 @@ const EC_ZEIT = {
       line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle'),
       line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200 })];
     if (k >= 1) {
-      series.push(line('fo', p.forst, '#14532d', `+ Forst, Holz gebunden: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300 }));
-      series.push(line('ff', p.forst_frei, '#14532d', `Holz freigesetzt: ${f(p.forst_frei[n])} mK`, 'forst_frei',
-                       { lineStyle: { color: '#14532d', width: 2.4, type: [8, 6] }, animationDelay: 600 }));
+      series.push(line('fo', p.forst, '#14532d', `als Forst: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300 }));
     }
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
@@ -565,9 +563,11 @@ const EC_VEGAN_LUECKE = {
    2 the vegan world (click 1; the DACCS line steps back). What stood on the slide before stands again without an entrance; only new lines are drawn in (a series'
    own `animation: true` would replay on every click, so new ones leave it unset and follow the deck). */
 const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#f0b04a' };
+const ANKER_COL_LIGHT = { vl: '#6d756f', b: '#14532d' };   // b as the forest curve on the left of the same slide   // the light slide of chapter 4: the dark-slide tones would read faded
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
+  const col = id => (light && ANKER_COL_LIGHT[id]) || ANKER_COL[id];
+  return { steps: { k4: 1, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const iPeak = D.jahre.indexOf(2050);
@@ -582,8 +582,8 @@ function ecAnker(phase) {
       label: { show: true, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 9, opacity: dim(id) ? .45 : 1 }, data });
     const L = (id, ys, name, o = {}) => Object.assign({ id, name, type: 'line', data: P(ys), showSymbol: false, z: 5,
       animation: isNew(id) ? undefined : false, animationDuration: 1600,
-      lineStyle: Object.assign({ color: ANKER_COL[id], width: 3, opacity: dim(id) ? .35 : 1 }, o.line || {}), itemStyle: { color: ANKER_COL[id] },
-      markPoint: o.mark ? dot(ANKER_COL[id], o.mark, id) : undefined }, o.extra || {});
+      lineStyle: Object.assign({ color: col(id), width: 3, opacity: dim(id) ? .35 : 1 }, o.line || {}), itemStyle: { color: col(id) },
+      markPoint: o.mark ? dot(col(id), o.mark, id) : undefined }, o.extra || {});
     const peak = ys => { const i = ys.indexOf(Math.max(...ys)); return [D.jahre[i], ys[i]]; };
     const series = [];
     const [pv, tv] = peak(vl);
@@ -591,8 +591,18 @@ function ecAnker(phase) {
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } } }));
-    series.push(L('b', b, 'Globale Aufforstung', light ? { mark: [{ coord: [pv, b[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 92, offset: [70, 0], color: '#2f7a45', fontSize: 20,
+    series.push(L('b', b, light ? 'mit Aufforstung: kühlende Flächen als Forst' : 'Globale Aufforstung', light ? { mark: [{ coord: [pv, b[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 150, offset: [90, 0], color: '#2f7a45', fontSize: 20,
       formatter: `Aufforstung an der Spitze: −${ecNum(-W.baeume[D.jahre.indexOf(pv)] / 1000, 2)} K` } }] } : {}));
+    {   // what the trees take off Very Low as a band, as every measure after it; chapter 4, click 1: what is left above 1.5 deg C, in red
+      const base = (id, ys, stack) => ({ id, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false });
+      const fill = (id, ys, stack, color, op, name, anim) => ({ id, name, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, z: 2,
+        lineStyle: { width: 0 }, itemStyle: { color }, areaStyle: { color, opacity: op }, animation: anim, animationDuration: 1200 });
+      series.push(base('kb', b, 'kuehl'), fill('kg', vl.map((v, i) => v - b[i]), 'kuehl', col('b'), light ? .3 : .4, null, false));
+      if (light && k >= 1) { const r = fill('rr', b.map(v => Math.max(v - 1.5, 0)), 'rot', '#c4121f', .28, null, k === 1), i = D.jahre.indexOf(2080);
+        r.markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2080, 1.5 + (b[i] - 1.5) / 5] }],
+          label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'über 1,5 °C' } };
+        series.push(base('rb', b.map(() => 1.5), 'rot'), r); }
+    }
     if (has('d') && phase === 1) { const d = on('dac_max'), iv = D.jahre.indexOf(D.dac.max.speicher_voll);   // slide 28 only
       series.push(L('d', d, 'DACCS, +20 %/a', { line: { width: 3, type: [10, 5] },
         mark: [{ coord: [2050, d[iPeak]], label: { position: 'bottom', distance: 40, offset: [90, 0], formatter: `bis 2050: −${ecNum(-W.dac_max[iPeak], 1)} mK` } },
@@ -621,7 +631,7 @@ function ecAnker(phase) {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: light ? EC.ink : '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
-                data: series.filter(x => x.id !== 'vb').map(x => x.name) },
+                data: series.filter(x => x.name && x.id !== 'vb').map(x => x.name) },
       grid: { left: 70, right: 24, top: 150, bottom: 40 },   // room for a legend of three rows on every slide
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
                       axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),

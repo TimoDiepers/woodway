@@ -9,7 +9,7 @@ export interface Meta {
   dacYears: number[];
   build: {years: number[]; countries: string[]; cells: [number, number][]; owner: number[]; capacityGt: number[][]};
   global: {years: number[]; need: number[]; afterTrees: number[]; afterDac: number[]; dacCapacityGt: number[];
-           paths: Record<"alle" | "kuehlt" | "forst" | "forst_frei", number[]>; areasGha: Record<"alle" | "kuehlt", number>;
+           paths: Record<"alle" | "kuehlt" | "forst", number[]>; areasGha: Record<"alle" | "kuehlt", number>;
            /** Very Low without its own removal [°C] and what each measure does to it [mK, < 0 = cooler] (deck chapter 5) */
            vlC: number[]; effect: Record<"trees" | "vegan" | "dac20" | "dac50" | "dac100" | "veganDac", number[]>;
            /** DACCS plans per build-out limit [%/a], and the vegan world's at 20 %/a: world capacity [Gt/a], cost

@@ -1037,14 +1037,32 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .vt .ln.g30 { border-color: #e0903e; }
 .vt .ln.g50 { border-color: #cc6f34; }
 
-/* chapter 3: the managed forest in two lines, beside its curve */
-.forstpos { position: absolute; left: 112px; top: 74px; width: 330px; pointer-events: none; }
-.aufforst .forstpos { top: auto; bottom: 74px; left: 112px; }   /* the Delta T curves start at the top; the box sits in the free lower left */
-.forstbox { position: relative; display: grid; grid-template-columns: 92px 1fr; gap: 14px;
-            align-items: center; padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,.75); border: 1.5px solid #c9d8bf;
-            transition: opacity .5s; }
-.forstbox p { font: 400 17px/1.35 var(--sans); color: var(--ink-2); margin: 0; }
-.forstbox p b { color: #14532d; }
+/* chapter 3: the managed forest as a sketch in the right column, on the click before the anchor chart takes it */
+.aufforst > .forstanker { grid-column: 2; grid-row: 1; flex-direction: column; justify-content: center; gap: 28px;
+  transition: opacity .4s var(--ease); }
+/* it enters with the deck's rise; once the anchor chart is shown it steps out (the rise's fill would hold it at 1) */
+.aufforst:has(> .rechts.shown) > .forstanker { animation: none !important; opacity: 0 !important; }
+.aufforst > .rechts { grid-column: 2; grid-row: 1; }
+.forstanker h3 { font: 600 21px/1.2 var(--sans); color: var(--ink); margin: 0; }
+.forstanker h3 b { color: #14532d; }
+.forstanker svg { width: 100%; height: auto; overflow: visible; }
+.forstanker .ax { font: 500 17px var(--sans); fill: var(--ink-2); }
+.forstanker .lab { font: 500 17px var(--sans); fill: #14532d; }
+.forstanker .labg { font: 500 16px var(--sans); fill: #7d8580; }
+.forstanker .axl { fill: none; stroke: #8a7f6c; stroke-width: 1.5; }
+.forstanker .stock { fill: #2f7a45; fill-opacity: .16; stroke: none; }
+.forstanker .stockl { fill: none; stroke: #14532d; stroke-width: 3; stroke-linejoin: round; }
+.forstanker .fell path { fill: none; stroke: #9aa39d; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.forstanker .holz { fill: #b98a3e; fill-opacity: .55; }
+.forstanker .holzl { fill: none; stroke: #8a6424; stroke-width: 2.5; }
+
+/* backup: the assumptions behind the managed forest, in the model and not */
+.forstbk { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; flex: 1; align-content: center; }
+.forstbk > div { border-top: 1.5px solid var(--ch); padding-top: 18px; }
+.forstbk h3 { font: 600 24px/1.2 var(--sans); color: var(--ink); margin: 0 0 14px; }
+.forstbk ul { margin: 0; padding-left: 24px; font: 400 21px/1.5 var(--sans); color: var(--ink-2); }
+.forstbk li + li { margin-top: 10px; }
+.forstbk .fazit { margin: 22px 0 0; font: 600 21px/1.4 var(--sans); color: #14532d; }
 
 /* inside the React deck (?host): the shell draws menu, hint and progress */
 .host #menu-fab, .host .hint, .host .progress { display: none !important; }

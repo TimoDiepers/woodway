@@ -101,7 +101,7 @@ def global_paths() -> dict:
     w, veg = z["wirkung"], z["vegan"]
     return {"years": z["jahre"], "need": z["noetig"], "afterTrees": z["baeume_rest"],
             "afterDac": film["paths"]["opt"]["dac"], "dacCapacityGt": film["paths"]["opt"]["tot"],
-            "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst", "forst_frei")},
+            "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst")},
             "areasGha": {k: z["flaechen_gha"][k] for k in ("alle", "kuehlt")},
             # the deck's anchor (chapter 5): Very Low in deg C and what each measure does to it [mK, < 0 = cooler]
             "vlC": z["vl_c"],
