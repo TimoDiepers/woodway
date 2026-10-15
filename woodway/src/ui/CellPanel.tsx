@@ -11,7 +11,7 @@ import { useNum, useT, type Key } from "@/i18n/useT";
 import { useDark } from "@/lib/useDark";
 
 const TICK = { fontSize: 10, fill: "var(--muted)", fontFamily: "var(--sans)" };
-const TREE_ROWS: LayerId[] = ["area", "sun", "darker", "light"];
+const TREE_ROWS: LayerId[] = ["area", "sun", "darker", "cloud", "light"];
 const DAC_ROWS: LayerId[] = ["elec", "dacNet", "dacBuild"];
 
 type Series = { label: string; color: string; values: number[]; width?: number; faint?: boolean };

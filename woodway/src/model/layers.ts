@@ -2,7 +2,7 @@ import type { Atlas, Scale } from "@/data/types";
 import type { Key } from "@/i18n/useT";
 import { closure, dacBuildMt, dacNet, deltaT, netShare, typeKey } from "./model";
 
-export type LayerId = "forestType" | "area" | "sun" | "darker" | "light" | "deltaT" | "netShare" | "elec" | "dacNet" | "dacBuild";
+export type LayerId = "forestType" | "area" | "sun" | "darker" | "cloud" | "light" | "deltaT" | "netShare" | "elec" | "dacNet" | "dacBuild";
 
 export interface Layer {
   id: LayerId; group: "trees" | "dac"; label: Key; source: Key; timed: boolean;
@@ -22,7 +22,7 @@ export const DARK_GREYS = { land: "#2e373a", unmeasured: "#3a4447", tooCold: "#4
 export function reasonColor(at: Atlas, reason: Key | null, dark = false): string {
   const c = dark ? DARK_GREYS : at.meta.colors;
   if (reason === "reason.tooCold") return c.tooCold;
-  if (reason === "reason.unmeasured") return c.unmeasured;
+  if (reason === "reason.unmeasured" || reason === "reason.noCloud") return c.unmeasured;
   return c.land;
 }
 
@@ -41,6 +41,8 @@ const tooCold = (at: Atlas, c: number): Key | null => (at.f.land[c] && !at.f.dac
 // darker are missing and light is gap-filled, so all three show the cell as reforestable but not measured.
 const measured = (name: string) => (at: Atlas, c: number) => (at.f.type[c] && at.f.measured[c] ? at.f[name][c] : NaN);
 const unmeasured = (at: Atlas, c: number): Key | null => noTrees(at, c) ?? (at.f.type[c] && !at.f.measured[c] ? "reason.unmeasured" : null);
+// Cloud brightening only where Duveiller et al. 2021 retrieve the cloud change locally (deck b8i)
+const cloudless = (at: Atlas, c: number): Key | null => noTrees(at, c) ?? (at.f.type[c] && !Number.isFinite(at.f.cloud[c]) ? "reason.noCloud" : null);
 const TREES: Key[] = ["reason.noTrees"], ALBEDO: Key[] = ["reason.noTrees", "reason.unmeasured"], COLD: Key[] = ["reason.tooCold"];
 
 export const LAYERS: Layer[] = [
@@ -51,6 +53,8 @@ export const LAYERS: Layer[] = [
     value: (at, c) => (at.f.type[c] ? (100 * at.f.area[c]) / ROW_AREA[Math.floor(c / 720)] : NaN), reason: noTrees, greys: TREES },
   { id: "sun", group: "trees", label: "layer.sun", source: "src.albedo", timed: false, kind: "num", scale: "sonne", value: measured("sun"), reason: unmeasured, greys: ALBEDO },
   { id: "darker", group: "trees", label: "layer.darker", source: "src.albedo", timed: false, kind: "num", scale: "abdunkeln", value: measured("darker"), reason: unmeasured, greys: ALBEDO },
+  { id: "cloud", group: "trees", label: "layer.cloud", source: "src.cloud", timed: false, kind: "num", scale: "wolken",
+    value: (at, c) => (at.f.type[c] ? at.f.cloud[c] : NaN), reason: cloudless, greys: ["reason.noTrees", "reason.noCloud"] },
   { id: "light", group: "trees", label: "layer.light", source: "src.light", timed: true, kind: "num", scale: "licht",
     value: (at, c, y) => measured("light")(at, c) * closure(at, c, y), reason: unmeasured, greys: ALBEDO },
   { id: "deltaT", group: "trees", label: "layer.deltaT", source: "src.deltaT", timed: true, kind: "num", scale: "baumwirkung", unit: "unit.deltaT",

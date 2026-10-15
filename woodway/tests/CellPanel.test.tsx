@@ -42,7 +42,7 @@ describe("CellPanel", () => {
     let cell = 0;
     while (!(at.f.type[cell] && deltaT(at, cell, 2100) >= 0 && coolsUntil(at, cell) !== null)) cell++;
     render(<CellPanel atlas={at} cell={cell} year={2050} onClose={() => {}} />);
-    expect(screen.getByText(`Cools the climate until ${coolsUntil(at, cell)}, then warms: the albedo outweighs the CO₂`)).toBeInTheDocument();
+    expect(screen.getByText(`Cools the climate until ${coolsUntil(at, cell)}, then warms: albedo and clouds outweigh the CO₂`)).toBeInTheDocument();
   });
   it("keeps every curve after a language switch", async () => {
     const at = await loadAtlas("data/", diskFetch);
@@ -71,9 +71,9 @@ describe("CellPanel", () => {
     const r = at.meta.reference[0];
     const cell = r.i * 720 + r.j;
     render(<CellPanel atlas={at} cell={cell} year={2100} onClose={() => {}} />);
-    const tug = screen.getByRole("figure", { name: "CO₂ against albedo, 2100" });
+    const tug = screen.getByRole("figure", { name: "CO₂ against albedo and clouds, 2100" });
     const pct = Math.round((1 - netShare(at, cell, 2100)) * 100);
-    expect(within(tug).getByText(`The albedo takes back ${pct} % of the CO₂ effect.`)).toBeInTheDocument();
+    expect(within(tug).getByText(`Albedo and clouds take back ${pct} % of the CO₂ effect.`)).toBeInTheDocument();
   });
   it("ranks the cell among all reforestable cells of the world", async () => {
     const at = await loadAtlas("data/", diskFetch);

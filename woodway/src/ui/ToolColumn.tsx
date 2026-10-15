@@ -1,5 +1,6 @@
 import { Fragment, useState, type ReactNode } from "react";
-import { Compass, Ellipsis, ExternalLink, HelpCircle, Presentation, Search } from "lucide-react";
+import { ChartSpline, Compass, Ellipsis, ExternalLink, HelpCircle, Presentation, Search } from "lucide-react";
+import type { Atlas } from "@/data/types";
 import type { Layer } from "@/model/layers";
 import { useAtlas } from "@/store";
 import { useT } from "@/i18n/useT";
@@ -7,8 +8,9 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
 import { ToolPanel } from "@/ui/ToolPanel";
 import { HelpContent } from "@/ui/HelpContent";
 import { PlaceSearch, type Place } from "@/ui/PlaceSearch";
+import { GlobalStrip } from "@/ui/GlobalStrip";
 
-type PanelId = "search" | "help" | "more";
+type PanelId = "search" | "world" | "help" | "more";
 
 /** The talk's slides: published next to woodway under slides/; in development the dev server serves the built deck. */
 const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
@@ -20,8 +22,9 @@ const EMBEDDED = typeof window !== "undefined" && window.parent !== window;
  * Only what is reached for while exploring sits there (find, go home, how to read the map); the slides and the
  * display settings wait one tap further in "More", each with its name written out.
  */
-export function ToolColumn({ layer, compact, onPlace, onRecenter }: { layer: Layer; compact: boolean; onPlace(p: Place): void; onRecenter(): void }) {
+export function ToolColumn({ atlas, layer, compact, onPlace, onRecenter }: { atlas: Atlas; layer: Layer; compact: boolean; onPlace(p: Place): void; onRecenter(): void }) {
   const t = useT();
+  const year = useAtlas((s) => s.year);
   const touch = useMediaQuery("(pointer: coarse)") || compact;
   const [open, show] = useState<PanelId | null>(null);
   const toggle = (p: PanelId) => (o: boolean) => show(o ? p : open === p ? null : open);
@@ -44,6 +47,9 @@ export function ToolColumn({ layer, compact, onPlace, onRecenter }: { layer: Lay
     <Fragment key="search">{panel("search", t("search.label"), <Search size={18} aria-hidden />, { title: t("search.label") },
       <PlaceSearch autoFocus onPick={(p) => { show(null); onPlace(p); }} />, { edge: "top" })}</Fragment>,
     <Fragment key="recenter">{tool("recenter", t("tools.recenter"), <Compass size={18} aria-hidden />, () => { show(null); onRecenter(); })}</Fragment>,
+    // the whole world in one chart, as the deck's anchor: Very Low, the trees, a vegan world, DACCS
+    <Fragment key="world">{panel("world", t("tools.world"), <ChartSpline size={18} aria-hidden />, { title: t("tools.world") },
+      <GlobalStrip atlas={atlas} year={year} />, { wide: true })}</Fragment>,
     <Fragment key="help">{panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, { title: t("help.title"), sub: t("help.sub") },
       <HelpContent touch={touch} source={t(layer.source)} />, { wide: true })}</Fragment>,
     ...(compact ? [] : [<span key="sep" className="mx-0.5 h-5 w-px bg-[var(--paper-line)]" aria-hidden />]),

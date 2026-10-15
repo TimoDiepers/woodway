@@ -119,7 +119,7 @@ export default function App() {
       sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />
   );
   const tools = (
-    <ToolColumn layer={layer} compact={!wide} onPlace={goTo} onRecenter={recenter} />
+    <ToolColumn atlas={atlas} layer={layer} compact={!wide} onPlace={goTo} onRecenter={recenter} />
   );
   const safeTop = { paddingTop: "max(0.75rem, env(safe-area-inset-top))" };
 

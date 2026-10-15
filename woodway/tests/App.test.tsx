@@ -128,7 +128,7 @@ describe("layer dropdown", () => {
     await userEvent.click(box);
     expect(await screen.findByText("Trees")).toBeInTheDocument();
     expect(screen.getByText("Direct air capture")).toBeInTheDocument();
-    expect(screen.getAllByRole("option")).toHaveLength(10);
+    expect(screen.getAllByRole("option")).toHaveLength(11);
     await userEvent.click(screen.getByRole("option", { name: "DAC net share" }));
     expect(useAtlas.getState().layer).toBe("dacNet");
     expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("DAC net share");

@@ -35,9 +35,9 @@ describe("App on a phone", () => {
     const plate = screen.getByRole("banner");
     expect(within(plate).getByRole("figure", { name: "Temperature effect of one tree" })).toBeInTheDocument();
     const tools = screen.getByRole("toolbar", { name: "Map tools" });
-    // only the four tools reached for while exploring; the rest waits behind More, named in full
+    // only the five tools reached for while exploring; the rest waits behind More, named in full
     expect(within(tools).getAllByRole("button").map((b) => b.getAttribute("aria-label")))
-      .toEqual(["More", "How to read this map", "Back to the whole world", "Search a place"]);
+      .toEqual(["More", "How to read this map", "Worldwide", "Back to the whole world", "Search a place"]);
     await userEvent.click(within(tools).getByRole("button", { name: "More" }));
     const more = await screen.findByRole("dialog", { name: "More" });
     for (const name of ["Deutsch", "Flat map", "Dark"])

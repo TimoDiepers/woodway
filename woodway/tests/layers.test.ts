@@ -45,6 +45,18 @@ describe("layers", () => {
     expect(en["reason.unmeasured"]).toBe("reforestable, not measured locally");
     expect(de["reason.unmeasured"]).toBe("wiederbewaldbar, nicht lokal gemessen");
   });
+  it("the cloud layer shows the local cloud retrieval in %-points, both signs, and greys the rest as not measured", () => {
+    const l = layerById("cloud");
+    let c = 0;
+    while (!(at.f.type[c] && !Number.isFinite(at.f.cloud[c]))) c++;
+    expect(l.reason(at, c)).toBe("reason.noCloud");
+    expect(cellColors(at, l, 2100)[c]).toBe(pack(at.meta.colors.unmeasured));
+    let pos = 0, neg = 0;
+    for (let k = 0; k < 360 * 720; k++) { const v = l.value(at, k, 2100); if (v > 0) pos++; else if (v < 0) neg++; }
+    expect(pos).toBeGreaterThan(neg);
+    expect(neg).toBeGreaterThan(0);   // in places forest has fewer clouds than open land
+    expect(at.meta.scales.wolken.mid).toBe(0);
+  });
   it("extra absorbed light grows with canopy closure: none at planting, mature value times f(t) later", () => {
     let c = 0;
     while (!(at.f.type[c] && at.f.measured[c])) c++;

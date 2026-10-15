@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from nbs.aggregate import _product_no_nan, co2_factor_grid
-from nbs.animations import _STAND_AREA_M2, SITES, _by_type, typical_light_product, typical_measured_mask
+from nbs.animations import _STAND_AREA_M2, SITES, _by_type, cloud_brightening_grid, typical_light_product, typical_measured_mask
 from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS
 from nbs.dac import dac_possible, efficiency_grid, energy_grid, lca_vintages
 from nbs.dac_climate import climate_grid
@@ -86,13 +86,29 @@ def build_table() -> dict:
             "capacityGt": film["paths"]["opt"]["cc"]}
 
 
+def _dac_case(c: dict) -> dict:
+    """One DACCS plan of the deck (zeitpfade.json): world capacity and its cost per year (trillion EUR, the
+    optimistic plan priced with the median, the optimistic and the pessimistic costs)."""
+    k = c["kosten"]
+    return {"capGt": c["w"], "costMed": k["median"]["je_jahr_bio"], "costLo": k["optimistisch"]["je_jahr_bio"],
+            "costHi": k["pessimistisch"]["je_jahr_bio"], "sumMed": k["median"]["summe_bio"], "eurT": k["median"]["eur_t"],
+            "back": c["ab"]}
+
+
 def global_paths() -> dict:
     z = json.loads((CHART_DATA / "zeitpfade.json").read_text(encoding="utf-8"))
     film = json.loads((CHART_DATA / "dacfilm.json").read_text(encoding="utf-8"))
+    w, veg = z["wirkung"], z["vegan"]
     return {"years": z["jahre"], "need": z["noetig"], "afterTrees": z["baeume_rest"],
             "afterDac": film["paths"]["opt"]["dac"], "dacCapacityGt": film["paths"]["opt"]["tot"],
-            "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst")},
+            "paths": {k: z["pfade"][k] for k in ("alle", "kuehlt", "forst", "forst_frei")},
             "areasGha": {k: z["flaechen_gha"][k] for k in ("alle", "kuehlt")},
+            # the deck's anchor (chapter 5): Very Low in deg C and what each measure does to it [mK, < 0 = cooler]
+            "vlC": z["vl_c"],
+            "effect": {"trees": w["baeume"], "vegan": w["vegan"], "dac20": w["dac_20"], "dac50": w["dac_50"],
+                       "dac100": w["dac_100"], "veganDac": w["dac_vegan"]},
+            "dac": {**{g: _dac_case(z["dac"][f"g{g}"]) for g in ("20", "50", "100")}, "vegan": _dac_case({**veg["g20"], "kosten": veg["kosten"]})},
+            "vegan": {"freeGha": veg["frei_gha"], "coolsGha": veg["kuehlt_gha"]},
             # the rules behind the two curves, for the strip's source line
             "plantYear": int(T_START), "dacGrowthPct": round((GROWTH - 1) * 100, 3)}
 
@@ -126,6 +142,10 @@ def main() -> None:
     # albedo of the cell's typical forest measured locally; elsewhere sun/darker are NaN and light is
     # gap-filled -- the deck (b8/b8a) shows measured cells only, so does woodway
     f.add("measured", typical_measured_mask().astype(np.uint8), "u1")
+    # extra reflection of the extra clouds over the typical forest [%-points], where Duveiller et al. 2021 retrieve
+    # it locally (deck b8i, third panel); NaN elsewhere
+    cloud, cloud_ok = cloud_brightening_grid()
+    f.add("cloud", np.where(cloud_ok & (code > 0), cloud, np.nan), "f4")
     f.add("a", a, "f4")
     f.add("b", b, "f4")
     f.add("elec", np.where(ok, energy_grid("waermepumpe")["strom"], np.nan), "f4")
