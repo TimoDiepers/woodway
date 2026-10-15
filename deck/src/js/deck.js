@@ -567,7 +567,7 @@ const EC_VEGAN_LUECKE = {
 const ANKER_COL = { vl: '#9aa39d', b: '#7fbf8c', d: '#ff5a4f', v: '#f0b04a' };
 function ecAnker(phase) {
   const light = phase === 'k4';
-  return { steps: { k4: 0, 0: 0, 1: 1, 2: 3 }[phase], option(k) {
+  return { steps: { k4: 0, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const iPeak = D.jahre.indexOf(2050);
@@ -597,19 +597,21 @@ function ecAnker(phase) {
       series.push(L('d', d, 'DACCS, +20 %/a', { line: { width: 3, type: [10, 5] },
         mark: [{ coord: [2050, d[iPeak]], label: { position: 'bottom', distance: 40, offset: [90, 0], formatter: `bis 2050: −${ecNum(-W.dac_max[iPeak], 1)} mK` } },
                { coord: [D.dac.max.speicher_voll, d[iv]], label: { position: 'left', distance: 10, formatter: `Speicher voll ${D.dac.max.speicher_voll}` } }] })); }
-    if (phase === 2 && k >= 1) {   // the vegan world by cause: first the new forest alone (net of its albedo), then the
-      // gases and the rest from the trees' curve down, the replacement crops (orange) back up; then the net curve
-      const B = D.vegan.beitraege, parts = ['ch4_tier', 'n2o_vermieden', 'co2_hof', 'co2_entwaldung', 'wald_co2', 'ersatz', 'wald_albedo'];
+    if (phase === 2 && k >= 1) {   // the vegan world by cause, one click each: the new forest alone (net of its
+      // albedo), then what the animals themselves emit, then what growing their feed emits, the replacement crops
+      // (red) back up; then the net curve
+      const B = D.vegan.beitraege, parts = ['ch4_tier', 'n2o_tier', 'n2o_acker', 'co2_hof', 'co2_entwaldung', 'wald_co2', 'ersatz', 'wald_albedo'];
       const wald = B.wald_co2.map((x, i) => x + B.wald_albedo[i]);
       const co2 = B.netto.map((x, i) => B.co2_hof[i] + B.co2_entwaldung[i] + x - parts.reduce((a, p) => a + B[p][i], 0));   // what FaIR does not add up exactly goes with the small CO2 band
-      const band = (id, ys, color, name, op = .5, extra = {}) => Object.assign({ id, name, type: 'line', stack: 'veg', stackStrategy: 'all', data: P(ys.map(x => x / 1000)), showSymbol: false, z: 3,
-        animationDuration: 1400, lineStyle: { width: 1.4, color, opacity: .9 }, itemStyle: { color }, areaStyle: { color, opacity: op } }, extra);
+      const band = (id, ys, color, name, at, op = .5) => ({ id, name, type: 'line', stack: 'veg', stackStrategy: 'all', data: P(ys.map(x => x / 1000)), showSymbol: false, z: 3,
+        animationDuration: 1400, animation: k === at, lineStyle: { width: 1.4, color, opacity: .9 }, itemStyle: { color }, areaStyle: { color, opacity: op } });
       series.push({ id: 'vb', type: 'line', stack: 'veg', stackStrategy: 'all', data: P(b), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
-        band('vw', wald, '#e4d84a', 'zusätzlicher Wald', .45, { animation: k === 1 }));
-      if (k >= 2) series.push(...[band('vm', B.ch4_tier, '#4f9fc7', 'Methan'), band('vn', B.n2o_vermieden, '#86c6e4', 'Lachgas'),
-        band('vc', co2, '#c3e3f2', 'CO₂'), band('ve', B.ersatz, '#d0443a', 'Ersatz (wärmt)', .7)].map(x => Object.assign(x, { animation: k === 2 })));
+        band('vw', wald, '#e4d84a', 'Aufforstung neuer Flächen', 1, .45));
+      if (k >= 2) series.push(band('vm', B.ch4_tier, '#4f9fc7', 'Tiere: Methan', 2), band('vn', B.n2o_tier, '#6fb2d6', 'Tiere: Lachgas', 2));
+      if (k >= 3) series.push(band('va', B.n2o_acker, '#9fd0e6', 'Anbau: Lachgas', 3), band('vc', co2, '#c3e3f2', 'Anbau: CO₂', 3));
+      if (k >= 4) series.push(band('ve', B.ersatz, '#d0443a', 'Ersatz (wärmt)', 4, .7));
     }
-    if (phase === 2 && k >= 3) { const v = on('vegan'), [pw, tw] = peak(v);
+    if (phase === 2 && k >= 5) { const v = on('vegan'), [pw, tw] = peak(v);
       series.push(L('v', v, 'netto: vegan', { line: { width: 3 }, mark: [{ coord: [pw, tw], label: { position: 'bottom', distance: 30, offset: [-20, 0], fontSize: 24,
         formatter: `netto: ${ecNum(tw, 2)} °C` } }] })); }
     // y range from all curves of the main part, so that it stays the same on every slide
@@ -682,23 +684,23 @@ const EC_LANDDONUT = {
            : lab === 'out' ? { position: 'outside', formatter: `{n|${name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dimmed(name) ? .4 : 1) } : { show: false },
       labelLine: { show: lab === 'out', lineStyle: { color: '#6d756f' } } });
     const blank = value => ({ value, itemStyle: { color: 'transparent' }, label: { show: false }, labelLine: { show: false }, tooltip: { show: false } });
-    const base = { type: 'pie', center: ['50%', '47%'], startAngle: 90, padAngle: 1.2, itemStyle: { borderRadius: 7 }, emphasis: { disabled: true },
+    const base = { type: 'pie', center: ['50%', '43%'], startAngle: 90, padAngle: 1.2, itemStyle: { borderRadius: 7 }, emphasis: { disabled: true },
                    labelLine: { length: 12, length2: 14 }, label: { overflow: 'none' }, animationDuration: 1100 };
-    const series = [Object.assign({}, base, { id: 'heute', radius: ['38%', '66%'], animation: k <= 1, data: [
+    const series = [Object.assign({}, base, { id: 'heute', radius: ['46%', '81%'], animation: k <= 1, data: [
       item('Wald', L.wald, '#2f6b45', 'in'),
-      item('wiederbewaldbar', L.wiederbewaldbar, '#5fae76', 'out', '#a6e3b4'),
+      item('bewaldbar', L.wiederbewaldbar, '#5fae76', 'out', '#a6e3b4'),
       item('Tierfutter', L.tiere, '#c98a2b', 'in', '#14181a'),
       item('Acker für uns', L.acker, '#e3c46e', 'out'),
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
-    if (k >= 2) series.push(Object.assign({}, base, { id: 'vegan', radius: ['70%', '82%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900, data: [
+    if (k >= 2) series.push(Object.assign({}, base, { id: 'vegan', radius: ['85%', '98%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900, data: [
       blank(L.wald + L.wiederbewaldbar),
-      item('frei, waldfähig', V.frei_gha, '#8fe0a0', 'out', '#a6e3b4'),
-      item('frei, zu trocken', frei - V.frei_gha, '#6b5d45', 'out', '#c9bfae'),
+      item('frei, bewaldbar', V.frei_gha, '#8fe0a0', 'out', '#a6e3b4'),
+      item('frei, nicht bewaldbar', frei - V.frei_gha, '#6b5d45', 'out', '#c9bfae'),
       item('Ersatz', ersatz, '#e3c46e', 'none'),
       blank(L.acker + rest)] }));
     return {
       animationDurationUpdate: 0,
-      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '40%',
+      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '36%',
                textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 28, fontWeight: 600 },
                subtextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } },
       series
@@ -708,26 +710,49 @@ const EC_LANDDONUT = {
 
 /* chapter 5 opener, right: Delta m of the gas in the atmosphere after 1 Gt taken out in 2026: CO2 removed stays
    partly away; (click 2) methane not emitted is gone within decades. Same axis for both, so nothing rescales. */
+/* vegan slide, "wirkt schnell": forcing of the gas after 1 kg taken out in 2026 [10^-15 W/m^2 per kg], i.e. the
+   missing mass times its strength: CO2 removed barely registers; (click 2) methane not emitted weighs ~90 times as
+   much and is gone within decades. Same axis for both, so nothing rescales. */
+/* vegan slide, "kühlt kurzfristig": forcing of the gas after 1 kg taken out in 2026 [10^-15 W/m^2 per kg], i.e. the
+   missing mass times its radiative efficiency. CO2 alone gets an axis of its own size; (click 2) with methane the
+   axis grows smoothly and the CO2 curve shrinks onto 0. The curves start in 2027, the first year the pulse is in
+   the air (FaIR is annual); the legend with the efficiencies sits under the chart, in HTML. */
+/* vegan slide, "kühlt kurzfristig": forcing of the gas after 1 kg taken out in 2026 [10^-15 W/m^2 per kg], i.e. the
+   missing mass times its radiative efficiency. CO2 alone gets an axis of its own size; (click 2) the axis grows
+   smoothly (tween, geometric in the axis length) until methane fits, the CO2 curve shrinking onto 0 and the methane
+   curve rising into view. The curves start in 2027, the first year the pulse is in the air (FaIR is annual). */
 const EC_PULS = {
   steps: 1,
-  option(k) {
-    const D = window.ZEIT, M = D.vegan.masse, P2 = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    // the label at the end of each curve: the formula symbol as on the climate slides (bold, in the gas colour)
-    const sym = (color, sub) => ({ show: true, distance: 10, formatter: `{d|Δ}{m|m}{s|${sub}}{t|(t)}`, rich: {
-      d: { color, fontFamily: 'KaTeX_Main', fontWeight: 'bold', fontSize: 26, lineHeight: 30, verticalAlign: 'middle' }, m: { color, fontFamily: 'KaTeX_Math', fontStyle: 'italic', fontWeight: 'bold', fontSize: 26, lineHeight: 30, verticalAlign: 'middle' },
-      s: { color, fontFamily: 'KaTeX_Main', fontSize: 17, lineHeight: 30, verticalAlign: 'bottom', padding: [0, 0, 0, 1] }, t: { color: '#d6dbd6', fontFamily: 'KaTeX_Main', fontSize: 24, lineHeight: 30, verticalAlign: 'middle', padding: [0, 0, 0, 3] } } });
-    const line = (id, ys, color, sub) => ({ id, type: 'line', showSymbol: false, data: P2(ys), lineStyle: { color, width: 3.8 }, itemStyle: { color },
-      endLabel: sym(color, sub), animationDuration: 1500 });
-    const series = [Object.assign(line('co2', M.co2, '#7fd09a', 'CO₂'), { animation: k === 0 })];
-    if (k >= 1) series.push(line('ch4', M.ch4, '#6fb7e0', 'CH₄'));
+  tween: 1600, intro: 1500,
+  option(k, t = 1) {
+    const D = window.ZEIT, A = D.vegan.antrieb;
+    // click 1 (k 0): t draws the CO2 curve from 2027 on; click 2 (k 1): t grows the axis
+    const g = k >= 1 ? t : 0, lo = -1.5 * Math.pow(100, g), upto = k >= 1 ? 2100 : 2027 + 73 * t;
+    // a tick step of 1, 2 or 5 times a power of ten, about three steps on the axis
+    const raw = -lo / 3, mag = Math.pow(10, Math.floor(Math.log10(raw))), step = [1, 2, 5, 10].find(m => m * mag >= raw) * mag;
+    const dec = step < 1 ? 1 : 0;
+    // the symbol sits on its curve (a point of the curve, so it moves with it when the axis grows)
+    const sym = (color, sub) => ({ formatter: `{m|φ}{s|${sub}}{t|(t)}`, rich: {
+      m: { color, fontFamily: 'KaTeX_Math', fontStyle: 'italic', fontWeight: 'bold', fontSize: 26, lineHeight: 30 },
+      s: { color, fontFamily: 'KaTeX_Main', fontSize: 17, lineHeight: 30, verticalAlign: 'bottom', padding: [0, 0, 0, 1] },
+      t: { color: '#d6dbd6', fontFamily: 'KaTeX_Main', fontSize: 24, lineHeight: 30, padding: [0, 0, 0, 3] } } });
+    const P2 = ys => D.jahre.map((y, i) => [y, ys[i]]).slice(1).filter(([y]) => y <= upto);
+    const at = (ys, year) => [year, ys[D.jahre.indexOf(year)]];
+    const line = (id, ys, color, sub, year, pos, lab = true) => ({ id, type: 'line', showSymbol: false, data: P2(ys), lineStyle: { color, width: 3.8 }, itemStyle: { color },
+      animationDuration: 1500, clip: true,
+      markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: 'transparent' }, silent: true,
+                   data: lab && year <= upto ? [{ coord: at(ys, year), label: Object.assign({ show: true, position: pos, distance: 2 }, sym(color, sub)) }] : [] } });
+    const series = [line('co2', A.co2, '#7fd09a', 'CO₂', 2085, 'top')];
+    // methane rises into view while the axis grows; its label once the axis reaches it
+    if (k >= 1) series.push(line('ch4', A.ch4, '#6fb7e0', 'CH₄', 2040, 'right', lo < -60));
     return {
       animationDurationUpdate: 0,
-      grid: { left: 70, right: 130, top: 16, bottom: 40 },
+      grid: { left: 84, right: 24, top: 26, bottom: 40 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: '#6d756f' } },
                       axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: -1, max: 0, interval: 0.25, name: 'Δm [kg]', nameLocation: 'middle', nameGap: 54, nameTextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19 },
+      yAxis: ecAxis({ type: 'value', min: lo, max: 0, interval: step, name: 'φ [10⁻¹⁵ W/m²]', nameLocation: 'middle', nameGap: 64, nameTextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19 },
                       axisLine: { lineStyle: { color: '#6d756f' } },
-                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, formatter: v => v < 0 ? `−${ecNum(-v, 2)}` : '0' },
+                      axisLabel: { color: '#9aa39d', fontFamily: EC.font, fontSize: 19, showMinLabel: g === 0 || g === 1, formatter: v => v < 0 ? `−${ecNum(-v, dec)}` : '0' },
                       splitLine: { show: true, lineStyle: { color: '#2c3437' } } }),
       series
     };
@@ -739,7 +764,9 @@ const EC_CHARTS = { landdonut: EC_LANDDONUT, puls: EC_PULS, temperatur: EC_TEMPE
 class EChart {
   constructor(host) {
     this.spec = EC_CHARTS[host.dataset.ec];
-    this.nSteps = this.spec ? this.spec.steps : 0;
+    // data-k0 starts the chart at one of its later pictures (the same chart again on a later slide)
+    this.k0 = +host.dataset.k0 || 0;
+    this.nSteps = this.spec ? this.spec.steps - this.k0 : 0;
     if (!this.spec || !window.echarts || !window.CMIP7) { host.textContent = 'Diagramm fehlt (echarts / data/cmip7.js).'; return; }
     this.host = host;
     this.chart = echarts.init(host, null, { renderer: 'svg', width: host.clientWidth || 1400, height: host.clientHeight || 560 });
@@ -759,7 +786,7 @@ class EChart {
     if (!this.chart) return;
     k = Math.max(0, Math.min(k, this.nSteps));
     if (fresh) this.chart.clear();
-    const opt = this.spec.option(k);
+    const opt = this.spec.option(k + this.k0);
     // a click that changes nothing in this chart leaves it alone: setting the same option again would fade its labels in anew
     const same = JSON.stringify(opt);
     if (!fresh && same === this.last) { this.k = k; return; }
@@ -768,8 +795,27 @@ class EChart {
     this.chart.setOption(opt, { replaceMerge: ['series'] });
     this.k = k;
   }
-  play(k) { this.set(k, true, k === 0 || this.k === null || k < this.k); }
-  final(k) { this.set(k < 0 ? 0 : k, false, true); }
+  play(k) {
+    // a chart with a tween (spec.tween ms) eases from one click to the next frame by frame, e.g. an axis that grows
+    // (spec.intro ms: the first picture is drawn the same way, e.g. a curve and the labels it reaches)
+    if (this.chart && this.spec.tween && !deckCalm.matches) {
+      if (k === 0 && this.spec.intro) { this.chart.clear(); return this.tween(0, this.spec.intro); }
+      if (this.k !== null && k === this.k + 1 && k <= this.nSteps) return this.tween(k, this.spec.tween);
+    }
+    this.set(k, true, k === 0 || this.k === null || k < this.k);
+  }
+  tween(k, dur) {
+    cancelAnimationFrame(this.raf);
+    const t0 = performance.now(), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const frame = now => {
+      const t = Math.min(1, (now - t0) / dur), opt = this.spec.option(k + this.k0, ease(t));
+      opt.animation = false;
+      this.chart.setOption(opt, { replaceMerge: ['series'] });
+      if (t < 1) this.raf = requestAnimationFrame(frame); else this.last = JSON.stringify(this.spec.option(k + this.k0));
+    };
+    this.k = k; this.raf = requestAnimationFrame(frame);
+  }
+  final(k) { cancelAnimationFrame(this.raf); this.set(k < 0 ? 0 : k, false, true); }
 }
 
 /* ===========================================================
@@ -1702,7 +1748,7 @@ class Deck {
     subDigits(this.deck);
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
-      if (h) h.appendChild(path(ch));
+      if (h && !s.hasAttribute('data-nonav')) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
       else if (s.matches('.chapter:not(.brk):not(.backup)')) s.appendChild(path(ch));
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
@@ -1852,10 +1898,14 @@ addEventListener('DOMContentLoaded', () => {
   deckEl.querySelectorAll('svg.trees-do').forEach((svg, k) => {
     for (const n of tpl.content.firstElementChild.childNodes) svg.appendChild(n.cloneNode(true));
     // ids per copy: arrowheads and symbols must resolve inside their own (visible) drawing
+    // (only the drawing's own ids: the deck-wide cloud and ray tips stay as they are)
+    const own = new Set([...svg.querySelectorAll('[id]')].map(e => e.id));
     for (const e of svg.querySelectorAll('[id]')) e.id += '-' + k;
     for (const e of svg.querySelectorAll('[marker-end], use')) {
-      if (e.hasAttribute('marker-end')) e.setAttribute('marker-end', e.getAttribute('marker-end').replace(/\)$/, `-${k})`));
-      if (e.hasAttribute('href')) e.setAttribute('href', e.getAttribute('href') + '-' + k);
+      const me = e.getAttribute('marker-end'), m = me && me.match(/^url\(#(.+)\)$/);
+      if (m && own.has(m[1])) e.setAttribute('marker-end', `url(#${m[1]}-${k})`);
+      const h = e.getAttribute('href');
+      if (h && own.has(h.slice(1))) e.setAttribute('href', h + '-' + k);
     }
     // slide 8 builds effect by effect; slide 9 shows them all at once
     if (svg.closest('[data-tree="dim"]')) for (const e of svg.querySelectorAll('[data-step]')) e.removeAttribute('data-step');

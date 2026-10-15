@@ -98,6 +98,15 @@ def emission_parts() -> dict[str, dict[str, NDArray]]:
             "ersatz": {"N2O": ersatz * fao["n2o_acker_kt"] / n["N2O"] * n2o, "CO2 FFI": ersatz * ffi}}
 
 
+def n2o_split() -> dict[str, dict[str, NDArray]]:
+    """n2o_vermieden in its two sources, for the slide that uncovers them one by one: the livestock's own N2O
+    (manure) and the N2O of the feed crops (fertiliser on ACKER_FUTTER of cropland)."""
+    fao, n = json.loads(FAO.read_text()), _nenner()
+    n2o = _bezug_pfad("N2O")
+    return {"n2o_tier": {"N2O": -fao["n2o_tier_kt"] / n["N2O"] * n2o},
+            "n2o_acker": {"N2O": -ACKER_FUTTER * fao["n2o_acker_kt"] / n["N2O"] * n2o}}
+
+
 def emission_delta() -> dict[str, NDArray]:
     """Net change of emissions per year of YEARS (sum of emission_parts): CH4 [Mt/a], N2O [kt/a], CO2 [Mt/a]."""
     out: dict[str, NDArray] = {}
@@ -166,6 +175,12 @@ def puls_masse(gas: str) -> NDArray:
     return _puls_run(gas)[0]
 
 
+def puls_antrieb(gas: str) -> NDArray:
+    """Delta F [10^-15 W/m^2 per kg] of CH4 or CO2 on YEARS after 1 Gt taken out in 2026 (FaIR, direct forcing of
+    the gas only): what the missing mass does to the energy balance, year by year."""
+    return _puls_run(gas)[1] / 1e12 * 1e15
+
+
 def epsilon(gas: str) -> float:
     """Strength of the forcing [W/m^2 per kg] of CH4 or CO2 in the atmosphere in 2027 (FaIR, direct forcing of the
     gas only): forcing change per mass change one year after the pulse."""
@@ -226,6 +241,7 @@ def contributions() -> dict[str, NDArray]:
     out = {k: _dt_fair(v) for k, v in emission_parts().items()}
     out["wald_co2"] = _dt_wald(nee, np.zeros_like(rf))
     out["wald_albedo"] = _dt_wald(np.zeros_like(nee), rf)
+    out.update({k: _dt_fair(v) for k, v in n2o_split().items()})   # n2o_vermieden by source (adds up to it nearly)
     out["netto"] = dt_gase() + dt_flaeche()
     return out
 

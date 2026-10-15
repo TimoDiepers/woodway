@@ -693,6 +693,111 @@ def cloud_season_figure(out_path: str) -> str:
     return out_path
 
 
+def cloud_brightening_grid() -> tuple[NDArray, NDArray]:
+    """((360, 720) extra reflection of the extra clouds over the typical forest [%-points], annual mean;
+    (360, 720) bool: in range with a local cloud retrieval)."""
+    from nbs.cloud_grid import delta_alpha_w_grid
+
+    field = 100.0 * _by_type(delta_alpha_w_grid)
+    return field, species_range_mask() & np.isfinite(field)
+
+
+def _pp(v: float) -> str:
+    return f"{round(float(v), 2) + 0.0:.2f}".replace(".", ",").replace("-", "−")
+
+
+def cloud_brightening_map_figure(out_path: str) -> str:
+    """B8c: the extra reflection of the extra clouds over forest (Delta_alpha_W), annual mean, as a map.
+
+    Same canvas and place as the maps of B8a (the slide before), the right half left free for the
+    equation the slide sets there. Coloured where Duveiller et al. (2021) retrieve the cloud change
+    locally; diverging at 0 -- in places the forest has fewer clouds than the open land.
+    """
+    from nbs.map_fields import SCALES, scale_cmap, scale_norm
+
+    _heading_font, body_font = _register_fonts()
+    _style(body_font)
+
+    field, measured = cloud_brightening_grid()
+    in_range = species_range_mask()
+    outside = land_mask() & ~in_range
+    sc = SCALES["wolken"]
+
+    fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
+    ax_map = fig.add_axes((0.01, 0.16, 0.48, 0.73))
+    ax_cbar = fig.add_axes((0.08, 0.085, 0.34, 0.028))
+    _map_base(ax_map, outside, in_range & ~measured, SITES_VIEW)
+    cmap, norm = scale_cmap(sc), scale_norm(sc)
+    ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
+                      shading="auto", zorder=3)
+    _site_markers(ax_map, lambda s: f"{_pp(field[site_cell(s)])} %")
+    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{W}}$", "#d95f02")
+
+    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
+                      extend="both")
+    cb.outline.set_visible(False)
+    ax_cbar.text(1.03, 0.5, "[%]", transform=ax_cbar.transAxes, ha="left", va="center",
+                 fontsize=11, color=C_INK)
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=FIG_DPI)
+    plt.close(fig)
+    return out_path
+
+
+SITES_CROP = (-62.0, 42.0, -22.0, 70.0)  # the three sites, tight enough for three maps side by side
+
+
+def light_ingredients_figure(out_path: str) -> str:
+    """B8i: the three ingredients of the extra absorbed light side by side, cropped to the three sites.
+
+    Sunlight at the ground [W/m^2], how much darker the forest is (-Delta_alpha) and the extra
+    reflection of the extra clouds (Delta_alpha_W), both in percent, annual means; as B8a and B8c,
+    each coloured only where measured locally.
+    """
+    from nbs.map_fields import SCALES, scale_cmap, scale_norm
+
+    _heading_font, body_font = _register_fonts()
+    _style(body_font)
+
+    in_range = species_range_mask()
+    outside = land_mask() & ~in_range
+    measured = in_range & typical_measured_mask()
+    q = _by_type(albedo_grid.insolation_grid)
+    darker = -100.0 * _by_type(albedo_grid.delta_alpha_grid)
+    cloud, cloud_measured = cloud_brightening_grid()
+
+    fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
+    panels = [
+        (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
+         "#8a6a1e"),
+        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha$",
+         "#d95f02"),
+        (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
+         r"$\Delta\alpha_{\mathrm{W}}$", "#d95f02"),
+    ]
+    for k, (field, ok, scale, ticks, unit, fmt, title, symbol, symbol_color) in enumerate(panels):
+        ax = fig.add_axes((0.005 + k * 0.333, 0.16, 0.323, 0.73))
+        cax = fig.add_axes((0.045 + k * 0.333, 0.085, 0.21, 0.028))
+        _map_base(ax, outside, in_range & ~ok, SITES_CROP)
+        sc = SCALES[scale]
+        cmap, norm = scale_cmap(sc), scale_norm(sc)
+        ax.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~ok, field), cmap=cmap, norm=norm,
+                      shading="auto", zorder=3)
+        _site_markers(ax, lambda s, f=field, fmt=fmt: fmt(f[site_cell(s)]))
+        _title_with_symbol(ax, title, symbol, symbol_color)
+        cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal",
+                          extend="both")
+        cb.outline.set_visible(False)
+        cb.set_ticks(ticks)
+        cax.text(1.04, 0.5, unit, transform=cax.transAxes, ha="left", va="center", fontsize=11, color=C_INK)
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=FIG_DPI)
+    plt.close(fig)
+    return out_path
+
+
 def albedo_ingredients_figure(out_path: str) -> str:
     """B8a: the two ingredients of the extra absorbed light, as two maps.
 
@@ -720,10 +825,10 @@ def albedo_ingredients_figure(out_path: str) -> str:
          (90.0, 260.0), "[W/m²]", "Einstrahlung an der Oberfläche",
          r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
-         (0.0, 18.0), "[%-Punkte]",
+         (0.0, 18.0), "[%]",
          "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha$", "#d95f02"),
     ]
-    units = {id(q): "W/m²", id(darker): "%-Punkte"}
+    units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:
         _map_base(ax, outside, unmeasured, SITES_VIEW)
         cmap = _ramp_cmap(ramp)

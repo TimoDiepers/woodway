@@ -99,6 +99,8 @@ def main() -> None:
            "puls": {g.lower(): [round(1000 * float(v), 3) for v in vegan.dt_puls(g)] for g in ("CH4", "CO2")},
            "masse": {g.lower(): [round(float(v), 4) for v in vegan.puls_masse(g)] for g in ("CH4", "CO2")},
            "epsilon": {g.lower(): vegan.epsilon(g) for g in ("CH4", "CO2")},
+           # forcing of that gas after 1 kg taken out [10^-15 W/m^2 per kg]: the mass times its strength, over time
+           "antrieb": {g.lower(): [round(float(v), 4) for v in vegan.puls_antrieb(g)] for g in ("CH4", "CO2")},
            "land": LAND_GHA,
            "ersparnis": {"kap_gt": round(dac["g20"]["kap"] - vcase["kap"], 2),
                          "brutto_gt": round(float(u.sum() - uv.sum()), 1),

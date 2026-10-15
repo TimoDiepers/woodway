@@ -104,6 +104,16 @@ def cloud_q_product(species_key: str) -> NDArray:
     return _grid_cached(species_key)[0].mean(axis=0)
 
 
+@lru_cache(maxsize=None)
+def delta_alpha_w_grid(species_key: str) -> NDArray:
+    """(360, 720) Delta_alpha_W = Delta_f * R_CLOUD * D_AFTERNOON, plain annual mean of the months with a
+    retrieval (as albedo_grid.delta_alpha_grid for the albedo); NaN without a local retrieval."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        annual = np.nanmean(delta_cloud_native(species_key), axis=0)
+    return _regrid(annual * R_CLOUD * D_AFTERNOON)
+
+
 def cloud_provenance_grid(species_key: str) -> NDArray:
     """(360, 720) int8: 0 lokal, 1 zonal (band median), 2 keine (set to 0)."""
     return _grid_cached(species_key)[1].copy()

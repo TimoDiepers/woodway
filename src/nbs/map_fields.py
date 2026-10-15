@@ -29,7 +29,11 @@ SCALES = {
     # sunlight at the ground [W/m^2]: pale straw -> amber -> umber
     "sonne": {"stops": ["#f5ebc4", "#ebc766", "#d9952b", "#a95d18", "#5e3110"], "domain": [90, 260], "unit": "W/m²"},
     # how much darker forest is than open land [pp albedo]: mist -> glacier blue -> night
-    "abdunkeln": {"stops": ["#e4ecf0", "#a6c3d8", "#5c8fbb", "#2c5b8e", "#122f55"], "domain": [0, 18], "unit": "pp"},
+    "abdunkeln": {"stops": ["#e4ecf0", "#a6c3d8", "#5c8fbb", "#2c5b8e", "#122f55"], "domain": [0, 18], "unit": "%"},
+    # extra reflection of the extra clouds over forest [pp albedo]: diverging at 0, fewer clouds = the albedo
+    # orange family (darker, warming), more clouds = the deck's cloud blue (brighter, cooling)
+    "wolken": {"stops": ["#86420a", "#d07a30", "#ebc39a", "#ece7d8", "#a9cbdc", "#4f8fb0", "#1d4e6a"],
+               "domain": [-1.5, 3], "mid": 0, "unit": "%"},
     # extra absorbed light per tree [W]: straw -> orange -> brick -> wine (wide hue walk so 40 vs 60 W reads)
     "licht": {"stops": ["#f6e3b4", "#efb35d", "#dc7330", "#b33b2a", "#7a1c3a", "#3e1032"], "domain": [0, 100], "unit": "W"},
     # electricity per t CO2 [MWh]: diverging around the median, cheap = teal, costly = umber
@@ -222,14 +226,19 @@ def _europe_panel(field: NDArray, scale: str) -> dict:
     ]}
 
 
-def _world_panel(field: NDArray, scale: str) -> dict:
+def _world_panel(field: NDArray, scale: str, measured: NDArray | None = None) -> dict:
     """Light maps since a tropical site joined: the world in 1 deg blocks (the slide shows the part with the
     three sites) -- mean of the locally
     measured cells (area-weighted); grey where the block has reforestable land but no measurement."""
     from nbs.grid import cell_area_m2
     from nbs.landscape import land_mask
 
-    measured, unmeasured, _outside = _europe_masks()
+    from nbs.animations import species_range_mask
+
+    if measured is None:
+        measured, unmeasured, _outside = _europe_masks()
+    else:
+        unmeasured = species_range_mask() & ~measured
     area = cell_area_m2()
     BLOCK = 2  # 1 deg blocks: the map shows only the part with the three sites, so finer tiles fit
     n, m = field.shape[0] // BLOCK, field.shape[1] // BLOCK
@@ -268,6 +277,23 @@ def albedo_ingredients() -> dict:
     q = _by_type(albedo_grid.insolation_grid)
     darker = -100.0 * _by_type(albedo_grid.delta_alpha_grid)
     return {"panels": [_world_panel(q, "sonne"), _world_panel(darker, "abdunkeln")]}
+
+
+def cloud_brightening() -> dict:
+    """b8c: extra reflection of the extra clouds over forest (Delta_alpha_W) [pp], cells with a local retrieval."""
+    from nbs.animations import cloud_brightening_grid
+
+    field, measured = cloud_brightening_grid()
+    return {"panels": [_world_panel(field, "wolken", measured)]}
+
+
+def light_ingredients() -> dict:
+    """b8i: sunlight at the ground, how much darker the forest is and the cloud brightening, side by side."""
+    from nbs.animations import cloud_brightening_grid
+
+    cloud, measured = cloud_brightening_grid()
+    alb = albedo_ingredients()["panels"]
+    return {"panels": [*alb, _world_panel(cloud, "wolken", measured)]}
 
 
 def absorbed_light() -> dict:
@@ -512,7 +538,7 @@ def facts() -> dict:
             "orte": {s.name: float(dt[site_cell(s)]) for s in SITES}}
 
 
-MAPS = {"v0": reforestable_share, "k15": tree_effect, "b5": forest_types, "b8a": albedo_ingredients, "b8": absorbed_light, "v1": availability,
+MAPS = {"v0": reforestable_share, "k15": tree_effect, "b5": forest_types, "b8i": light_ingredients, "b8": absorbed_light, "v1": availability,
         "d1": dac_energy, "d0": feasibility, "d4": switch_year, "d5": dac_net_over_time}
 
 

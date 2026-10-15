@@ -102,7 +102,7 @@ def test_avoided_co2_is_small_next_to_very_low():
 def test_contributions_sum_to_the_vegan_world():
     from nbs.vegan import contributions, dt_flaeche, dt_gase
     c = contributions()
-    assert set(c) == {"ch4_tier", "n2o_vermieden", "co2_hof", "co2_entwaldung", "ersatz", "wald_co2", "wald_albedo", "netto"}
+    assert set(c) == {"ch4_tier", "n2o_vermieden", "n2o_tier", "n2o_acker", "co2_hof", "co2_entwaldung", "ersatz", "wald_co2", "wald_albedo", "netto"}
     assert np.allclose(c["netto"], dt_gase() + dt_flaeche())
     assert c["ch4_tier"][-1] < 0 and c["n2o_vermieden"][-1] < 0 and c["co2_hof"][-1] < 0 and c["co2_entwaldung"][-1] < 0 and c["ersatz"][-1] > 0
     assert c["wald_co2"][-1] < 0 and c["wald_albedo"][-1] > 0
