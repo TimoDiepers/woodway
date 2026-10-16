@@ -501,8 +501,8 @@ window.ZEIT = @@ZEIT@@;
 
 /* chapter 3: trees all planted in 2026, three ways; then the warming of Very Low above 1.5 deg C */
 const EC_ZEIT = {
-  steps: 1, tip: { unit: 'mK', dec: 0 },
-  option(k) {
+  steps: 2, tip: { unit: 'mK', dec: 0 },
+  option(k) {   // k 1: the chart on the right comes in, nothing changes here; k 2: the managed forest
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), n = D.jahre.length - 1;
     // shown as the temperature change Delta T (cooling < 0, downwards), as for the single tree on slide 21; second
     // label line: the path by cause in 2100: CO2 uptake, release at felling, albedo (data: cooling > 0, so negated)
@@ -518,7 +518,7 @@ const EC_ZEIT = {
     const series = [
       line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle', { lineStyle: { color: EC.alb, width: 3, type: [8, 6] }, tipName: 'alle Flächen' }),
       line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200, tipName: 'kühlende Flächen' })];
-    if (k >= 1) {
+    if (k >= 2) {
       series.push(line('fo', p.forst, '#14532d', `als Forst: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300, tipName: 'als Forst' }));
     }
     return {
@@ -808,7 +808,7 @@ const EC_DACCS_AUSBAU = { steps: 0, tip: { unit: 'Gt CO₂/a', dec: 2 }, option(
    what it would become in a vegan world (forest-capable, too dry, replacement cropland), so both stay to be seen.
    Fixed series ids: a click merges and only the new ring enters. */
 const EC_LANDDONUT = {
-  steps: 2, tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
+  steps: 8,   // k 1 the big block, k 2 the outer ring, k 3-7 the other cards of the slide, k 8 the reveal names the block tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
   option(k) {
     const V = window.ZEIT.vegan, L = V.land, frei = L.tiere + L.acker - L.acker_vegan, ersatz = L.acker_vegan - L.acker;
     const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
@@ -827,7 +827,7 @@ const EC_LANDDONUT = {
     const series = [Object.assign({}, base, { id: 'heute', radius: ['46%', '81%'], animation: k <= 1, data: [
       item('Wald', L.wald, '#2f6b45', 'in'),
       item('bewaldbar', L.wiederbewaldbar, '#5fae76', 'out', '#a6e3b4'),
-      item('Tierfutter', L.tiere, '#c98a2b', 'in', '#14181a'),
+      item(k >= 8 ? 'Tierfutter' : '?', L.tiere, '#c98a2b', 'in', '#14181a'),
       item('Acker für uns', L.acker, '#e3c46e', 'out'),
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
     if (k >= 2) series.push(Object.assign({}, base, { id: 'vegan', radius: ['85%', '98%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900, data: [

@@ -58,11 +58,11 @@
   <div class="body">
     <div style="display:grid; grid-template-columns:210px 1fr; align-items:center; gap:0 10px">
       <div class="rise" data-step="1" style="font:italic 600 22px/1.3 var(--serif); color:var(--ink-2); text-align:right; padding-right:10px; grid-row:span 2; align-self:end; padding-bottom:22px">Modellierung<br>über Parameter&nbsp;↘</div>
-      <div class="eq tex" style="font-size:29px">$$\mB(t) = \underbrace{\mPS(t) - \mRE(t) - \mZS(t)}_{\text{Wachstum}} - \underbrace{\mST(t)}_{\text{Störung}}$$</div>
-      <div class="eq tex" data-step="1" style="font-size:29px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \st{2}{{}\cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)}$$</div>
+      <div class="eq tex" style="font-size:33px">$$\mB(t) = \underbrace{\mPS(t) - \mRE(t) - \mZS(t)}_{\text{Wachstum}} - \underbrace{\mST(t)}_{\text{Störung}}$$</div>
+      <div class="eq tex" data-step="1" style="font-size:33px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \st{2}{{}\cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)}$$</div>
     </div>
-    <div style="display:grid; grid-template-columns:470px 1fr; gap:40px; flex:1; min-height:0; margin-top:4px">
-      <dl class="legend tex" style="align-content:center">
+    <div style="display:grid; grid-template-columns:540px 1fr; gap:40px; flex:1; min-height:0; margin-top:10px">
+      <dl class="legend lg tex" style="align-content:center">
         <dt data-step="1">$\pc{m^{c}_{\mathrm{max}}}$</dt><dd data-step="1">Kohlenstoff-Sättigungsvorrat — 49 kg C</dd>
         <dt data-step="1">$\pc{k}$</dt><dd data-step="1">Wachstumsrate — 0,043 1/a</dd>
         <dt data-step="1">$\pc{p}$</dt><dd data-step="1">Formparameter — 2,0</dd>
@@ -70,12 +70,11 @@
         <dt data-step="2">$\gamma$</dt><dd data-step="2">Anstieg der Störungsrate — 0,26 1/K</dd>
         <dt data-step="2">$\Delta T_{\mathrm{w}}$</dt><dd data-step="2">Temperaturerwärmung gegenüber heute [K]</dd>
       </dl>
-      <figure data-step="3" style="min-height:0; display:flex; flex-direction:column">
-        <figcaption style="font:italic 600 21px/1.3 var(--serif); color:var(--ink); text-align:center; margin-bottom:2px">Beispiel: Mischwald in Aachen (gemäßigt), ein Baum</figcaption>
-        <div class="chart" data-chart="s12" data-step="3" data-delay="300" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, mit Störung bei 0 K und 1 K Erwärmung"></div>
+      <figure data-step="1" style="min-height:0; display:flex; flex-direction:column">
+        <figcaption style="font:italic 600 23px/1.3 var(--serif); color:var(--ink); text-align:center; margin-bottom:2px">Beispiel: Mischwald in Aachen (gemäßigt), ein Baum</figcaption>
+        <div class="chart" data-chart="s12" data-step="1" data-delay="300" data-slot-steps="0,1,2" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, mit Störung ohne Erwärmung und bei Erwärmung bis 2 K"></div>
       </figure>
     </div>
-    <p class="takeaway" data-step="4" style="--d:0; margin-top:6px">Volle Speicherwirkung erst nach Jahrzehnten; Störung trifft den ganzen Vorrat.</p>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (m<sub>max</sub>: Kohlenstoff-Potenzial je ha, aus Inventur- und Satellitendaten)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a> (k: aus über 13 000 Feldmessungen), begrenzt nach <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a></span><span><a href="https://doi.org/10.1126/science.adx6329" target="_blank" rel="noopener">Grünig et al. 2026</a>; <a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (γ)</span><span><i>Annahme</i> (Chapman-Richards, p = 2; 2000 Bäume je ha; s<sub>0</sub> nach <a href="https://doi.org/10.1038/nclimate3303" target="_blank" rel="noopener">Seidl et al. 2017</a>; 23 % des Verlusts sofort frei, Rest zerfällt mit τ ≈ 25 a)</span></p>
   <aside class="notes" data-n="12">
@@ -94,7 +93,7 @@
   <div class="body">
     <div style="display:grid; grid-template-columns:860px 1fr; gap:44px; flex:1; min-height:0; align-items:center">
     <div class="sidecol"><p class="ptitle">Typische Waldtypen</p><div class="chart" data-chart="b5" data-label="Karte: typischer Waldtyp auf der wiederbewaldbaren Fläche"></div></div>
-    <div class="sidecol"><p class="ptitle">CO₂-Aufnahme je Baum, gepflanzt 2026</p><div class="eq tex" style="font-size:17px; margin:2px 0 4px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$$</div><table class="ptab tex"><thead><tr><th></th><th>$\pc{m^{c}_{\mathrm{max}}}$ [kg C]</th><th>$\pc{k}$ [1/a]</th><th>$\pc{p}$</th><th>$\sc{s_{0}}$ [1/a]</th></tr></thead><tbody><tr><td style="color:#2f6fb7">Aachen</td><td>49</td><td>0,043</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#b8357f">Joensuu</td><td>33</td><td>0,045</td><td>2,0</td><td>0,0085</td></tr><tr><td style="color:#6a4c9c">Marabá</td><td>69</td><td>0,045</td><td>2,0</td><td>0,005</td></tr></tbody></table><div class="chart" data-chart="b6s" data-label="CO₂-Aufnahme eines Baums je Jahr von 2026 bis 2100, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div><p class="takeaway" data-step="1" style="--d:0; margin-top:6px">Bis 2100 je Baum: Aachen 163, Joensuu 111, Marabá 232&nbsp;kg CO₂.</p></div>
+    <div class="sidecol"><p class="ptitle">Kohlenstoffvorrat je Baum, gepflanzt 2026</p><div class="eq tex" style="font-size:17px; margin:2px 0 4px">$$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$$</div><div class="chart" data-chart="b6s" style="flex:1; min-height:0" data-label="Kohlenstoffvorrat eines Baums von 2026 bis 2100, Aachen (DE), Joensuu (FI) und Marabá (BR)"></div></div>
     </div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (Waldtyp: wahrscheinlichste Waldklasse, aus Satelliten-Landbedeckung MODIS)</span><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (wiederbewaldbare Fläche, Kohlenstoff der Zelle, Klimazone; aus Inventur- und Satellitendaten hochgerechnet)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a> (Wachstumstempo, begrenzt nach <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a>)</span><span><i>Eigene Rechnung</i> (Kurven; alles auf 0,5° zusammengefasst)</span><span><i>Annahme</i> (Störung mit heutiger Rate; 2000 Bäume je ha)</span></p>
@@ -106,8 +105,8 @@
     <p>p (Formparameter) steht nicht in der Legende, weil er zwischen 1,75 und 2,5 liegt und die Kurvenform nur schwach veraendert. Die vollstaendige Tabelle ist im Backup.</p>
     <p>Der Eukalyptus ist der interessante Fall: schnellste Rate (k = 0,120), aber nur 50 kgC Saettigung. Er ist 2060 schon fertig, waehrend die Buche dann erst bei zwei Dritteln steht — und ueberholt wird.</p>
     <p>Ueberleitung: Bis hierhin war es ein Baum an einem Ort. Ab dieser Folie variieren Art und Breite — dieselbe Kette, andere Zahlen.</p>
-      <p>Rechts die Kurven für die drei markierten Orte — so viel CO₂ nimmt ein Baum des typischen Waldes dort je Jahr auf. Klick: die Summe bis 2100.</p>
-    <p class="q">Ausführlich: Die Linie zeigt, wie viel CO₂ ein Baum in jedem Jahr aufnimmt: Sie steigt in der Jugendphase, erreicht um 2041 ihr Maximum und nimmt bis zur Sättigung ab. Mit der Bilanzgrenze um den Baum gilt: Was der Baum aufnimmt, wird der Atmosphäre entzogen. Die Menge hängt vom Ort ab: Der Mischwald in Aachen (DE) nimmt 1,5-mal so viel auf wie der in Joensuu (FI), der Regenwald bei Marabá (BR) 1,4-mal so viel wie Aachen (DE).</p>
+      <p>Rechts die Kurven für die drei markierten Orte — so viel Kohlenstoff steht in einem Baum des typischen Waldes dort, wie auf der Folie davor für Aachen. Klick: die Summe bis 2100.</p>
+    <p class="q">Ausführlich: Die Linie zeigt den Kohlenstoffvorrat eines Baums: 2100 stehen in Aachen 42, in Joensuu 29, bei Marabá 62 kg C im Baum (mit Störung zur heutigen Rate); dazu kommt Totholz, das noch zerfällt. Mit der Bilanzgrenze um den Baum gilt: Was der Baum aufnimmt, wird der Atmosphäre entzogen. Die Menge hängt vom Ort ab: Der Mischwald in Aachen (DE) nimmt 1,5-mal so viel auf wie der in Joensuu (FI), der Regenwald bei Marabá (BR) 1,4-mal so viel wie Aachen (DE).</p>
     <p>Jeder Jahreszuwachs ist eine kleine negative Emission — Kohlenstoff mal 44/12, Vorzeichen gedreht. Jeder Punkt der Linie ist ein Jahr; die Fläche darunter ist, was der Baum insgesamt aufnimmt. Aufsummiert holt ein Baum, 2026 gepflanzt, bis 2100 in Aachen rund 163 kg CO₂ aus der Luft, bei Marabá (südöstlicher Amazonas) rund 232 kg, in Joensuu (Ostfinnland) rund 111 kg: kürzere Vegetationsperiode, kälter, weniger Licht — der Wald dort trägt weniger Biomasse. Methode: docs/methods/waldtypen.md.</p>
     </aside>
 </section>
@@ -215,12 +214,12 @@
     <div class="chart" style="flex:1; min-height:0" data-chart="b8" data-label="Karte: zusätzlich absorbierte Sonnenstrahlung je ausgewachsenem Baum, Jahresmittel"></div>
     <div class="eqbox rise" style="--d:900; bottom:0; display:flex; flex-direction:column">
       <div>
-      <div class="eq tex">$$\bq{\Delta\dot Q_{\mathrm{Baum}}} = \bq{A_{\mathrm{Baum}}}\, \pc{\dot q_{\mathrm{ein}}}\, (\aq{\Delta\alpha} + \aq{\Delta\alpha_{\mathrm{W}}})\, \gq{f(t)}$$</div>
+      <div class="eq tex">$$\bq{\Delta\dot Q_{\mathrm{Baum}}} = \pc{\dot q_{\mathrm{ein}}}\, (\aq{\Delta\alpha} + \aq{\Delta\alpha_{\mathrm{W}}})\, \bq{A_{\mathrm{Baum}}}\, \gq{f(t)}$$</div>
       <dl class="pdef">
-        <dt>$\bq{A_{\mathrm{Baum}}}$</dt><dd>Standfläche je Baum</dd>
         <dt>$\pc{\dot q_{\mathrm{ein}}}$</dt><dd>Einstrahlung an der Oberfläche [W/m²], linke Karte der Vorfolie</dd>
         <dt>$\aq{\Delta\alpha}$</dt><dd>wie viel dunkler der Wald ist als Offenland, mittlere Karte der Vorfolie</dd>
         <dt>$\aq{\Delta\alpha_{\mathrm{W}}}$</dt><dd>Aufhellung durch zusätzliche Wolken, rechte Karte der Vorfolie</dd>
+        <dt>$\bq{A_{\mathrm{Baum}}}$</dt><dd>Standfläche je Baum</dd>
         <dt>$\gq{f(t)}$</dt><dd>Kronenschluss, 0 bis 1; hier ausgewachsen, also 1</dd>
       </dl>
       </div>
@@ -229,7 +228,7 @@
       <div class="takeaway light tw2" data-step="1" style="--d:300"><p>Beide Wirkungen je Baum:</p>
         <div class="twf">
           <span class="lab">Kohlenstoffaufnahme [kg C]</span><span class="tex">$\mB(t) = \pc{m^{c}_{\mathrm{max}}}\left(1 - e^{-\pc{k}\cdot t}\right)^{\pc{p}} \cdot \left(1 - \sc{s_{0}}\, \textcolor{6f6a60}{e^{\gamma\cdot \Delta T_{\mathrm{w}}}}\right)$</span>
-          <span class="lab">Zusätzlich absorbierte Strahlung [W]</span><span class="tex">$\bq{\Delta\dot Q_{\mathrm{Baum}}}(t) = \bq{A_{\mathrm{Baum}}}\, \pc{\dot q_{\mathrm{ein}}}\, (\aq{\Delta\alpha} + \aq{\Delta\alpha_{\mathrm{W}}})\, \gq{f(t)}$</span>
+          <span class="lab">Zusätzlich absorbierte Strahlung [W]</span><span class="tex">$\bq{\Delta\dot Q_{\mathrm{Baum}}}(t) = \pc{\dot q_{\mathrm{ein}}}\, (\aq{\Delta\alpha} + \aq{\Delta\alpha_{\mathrm{W}}})\, \bq{A_{\mathrm{Baum}}}\, \gq{f(t)}$</span>
         </div></div>
       <p class="bridge" data-step="1" style="--d:1100">Aber was heißt das für den Klimawandel?</p>
     </div>
@@ -237,7 +236,7 @@
   <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Einstrahlung und Albedo-Kontrast)</span><span><a href="https://doi.org/10.1038/s41467-021-24551-5" target="_blank" rel="noopener">Duveiller et al. 2021</a> (Wolken)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (typischer Wald je Zelle)</span><span><i>Eigene Rechnung</i> (Monat für Monat multipliziert, mal 5 m² Standfläche)</span><span><i>Annahme</i> (2000 Bäume je ha; Grau: keine lokale Messung, im Modell mit dem Median des Breitenbandes gefüllt)</span></p>
   <aside class="notes" data-n="16">
     <p class="q">Ausführlich: Die zusätzlich absorbierte Strahlung ist dort am größten, wo Schnee liegt und die Einstrahlung hoch ist: im Jahresmittel, mit den Wolken verrechnet, Aachen (DE) 29 W, Joensuu (FI) 44 W, Marabá (BR) 21 W je ausgewachsenem Baum (nur Albedo: 34, 45, 21 W). Damit liegen beide Wirkungen vor, in zwei Einheiten: CO₂-Aufnahme in kg, absorbierte Strahlung in W. Wie sie auf das Klima wirken, zeigt das nächste Kapitel.</p>
-    <p>Die Gleichung rechts: Standfläche des Baums mal Einstrahlung mal Albedo-Kontrast plus Aufhellung durch Wolken, Monat für Monat, mal Kronenschluss. Die Karte zeigt die Summe. Die Standfläche ist für jeden Baum dieselbe, 5 Quadratmeter; das ist eine Zähleinheit, die beim Kohlenstoff genauso drinsteckt. Aachen hat kaum Schnee — dort folgt der Effekt der Sonne. Joensuu hat im Frühjahr eine Spitze: noch Schnee, Sonne schon hoch. Marabá hat keinen Schnee; dort zählt nur, dass das Kronendach etwas dunkler ist als das Weideland. Im Jahresmittel unterscheiden sich die Orte weniger als im Jahresgang. Zusammen mit dem langsameren Wachstum im Norden entscheidet das später über das Vorzeichen. Grau: wiederbewaldbar, aber ohne lokale Messung.</p>
+    <p>Die Gleichung rechts: Einstrahlung mal Albedo-Kontrast plus Aufhellung durch Wolken, Monat für Monat, mal Standfläche des Baums mal Kronenschluss. Die Karte zeigt die Summe. Die Standfläche ist für jeden Baum dieselbe, 5 Quadratmeter; das ist eine Zähleinheit, die beim Kohlenstoff genauso drinsteckt. Aachen hat kaum Schnee — dort folgt der Effekt der Sonne. Joensuu hat im Frühjahr eine Spitze: noch Schnee, Sonne schon hoch. Marabá hat keinen Schnee; dort zählt nur, dass das Kronendach etwas dunkler ist als das Weideland. Im Jahresmittel unterscheiden sich die Orte weniger als im Jahresgang. Zusammen mit dem langsameren Wachstum im Norden entscheidet das später über das Vorzeichen. Grau: wiederbewaldbar, aber ohne lokale Messung.</p>
     <p>Klick: Damit haben wir beide Wirkungen eines Baums als Formel: die Kohlenstoffaufnahme m^c_Baum(t) von Folie 12, in Kilogramm Kohlenstoff, und die zusätzlich absorbierte Strahlung ΔQ̇_Baum in Watt. Zwei Einheiten, die man nicht direkt vergleichen kann — genau das löst das nächste Kapitel.</p>
   </aside>
 </section>

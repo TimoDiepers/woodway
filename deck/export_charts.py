@@ -152,34 +152,46 @@ def timescales_figure(out_path: str) -> str:
 
 
 def growth_model_figure(out_path: str) -> str:
-    """Slide 12: carbon stock of one tree, Aachen mixed forest, three variants."""
-    from nbs.constants import T_START
+    """Slide 12: carbon stock of one tree, Aachen mixed forest, one curve per click: growth only (with the
+    growth term), with disturbance (with the disturbance term), with disturbance under warming (0 to 2 K by 2100)."""
+    import dataclasses
 
     from nbs.animations import FIG_DPI, _clean_axes
-    from nbs.storyline_figures import _setup
+    from nbs.constants import T_START, YEARS
+    from nbs.storyline_figures import SITES, _setup, _site_species
+    from nbs.tree import biomass_closed, simulate_deterministic
 
     _setup()
     fig, ax = plt.subplots(figsize=(7.8, 3.9), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.1, right=0.67, bottom=0.15, top=0.93)
     _clean_axes(ax)
-    styles = {
-        "nur Wachstum": ("#2f7a45", "-", 2.6, "nur Wachstum"),
-        "mit Störung, ΔT_w = 0": ("#d6604d", "-", 2.2, "mit Störung, $\\Delta T_w$ = 0"),
-        "mit Störung, ΔT_w = 1 K (linear)": ("#a50f15", (0, (6, 4)), 2.2, "mit Störung, $\\Delta T_w$ = 1 K"),
-    }
-    # the curves of the former native chart (deck/chart_data/s12_vorrat.json), shown to the horizon
-    series = json.loads((REPO / "deck" / "chart_data" / "s12_vorrat.json").read_text(encoding="utf-8"))
-    for ser in series:
-        name = ser["name"]
-        # the series start at planting in 2025; shifted so that planting is the start year
-        xs = [v + (T_START - 2025) for v in ser["x"]]
-        x, y = [v for v in xs if v <= 2100], ser["y"][:len([v for v in xs if v <= 2100])]
-        c, ls, lw, lab = styles[name]
-        ax.plot(x, y, color=c, ls=ls, lw=lw)
-        ax.annotate(lab, (x[-1], y[-1]), xytext=(8, {"nur Wachstum": 10, "mit Störung, ΔT_w = 0": -5}.get(name, -21)),
-                    textcoords="offset points", fontsize=13.5, color=c, va="center", annotation_clip=False)
+    # the later curves each on their own (invisible) axes, a hair lower at the top: the deck shows each one click later
+    l, b, w, h = ax.get_position().bounds
+    lo, hi = 0, 52
+    overlays = []
+    for j in (1, 2):
+        cut = 0.0045 * j
+        a = fig.add_axes((l, b, w, h - cut))
+        a.axis("off")
+        a.set_xlim(T_START, 2100)
+        a.set_ylim(lo, hi - (hi - lo) * cut / h)   # same data mapping as the main axes
+        overlays.append(a)
+    # the Aachen model tree; warming rises linearly from 0 at planting to dT_w in 2100
+    sp = _site_species(next(s for s in SITES if s.name == "Aachen"))
+    ramp = (YEARS - YEARS[0]) / (YEARS[-1] - YEARS[0])
+    curves = [
+        (ax, biomass_closed(YEARS - YEARS[0], sp), "#2f7a45", "-", 2.6, "nur Wachstum", 10),
+        (overlays[0], simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS))).stock_kgC,
+         "#d6604d", "-", 2.2, "mit Störung, $\\Delta T_w$ = 0", -5),
+        (overlays[1], simulate_deterministic(sp, 2.0 * ramp).stock_kgC,
+         "#a50f15", (0, (6, 4)), 2.2, "mit Störung, $\\Delta T_w$ = 2 K", -21),
+    ]
+    for a, y, c, ls, lw, lab, dy in curves:
+        a.plot(YEARS, y, color=c, ls=ls, lw=lw)
+        a.annotate(lab, (YEARS[-1], y[-1]), xytext=(8, dy), textcoords="offset points", fontsize=13.5, color=c,
+                   va="center", annotation_clip=False)
     ax.set_xlim(T_START, 2100)
-    ax.set_ylim(0, 52)
+    ax.set_ylim(lo, hi)
     ax.set_xticks([T_START, 2050, 2075, 2100])
     ax.set_ylabel("Vorrat $m_{Baum}$ [kg C]")
     fig.savefig(out_path, dpi=FIG_DPI)
@@ -202,7 +214,7 @@ def chart_jobs() -> list[tuple[str, object]]:
         ("s11", timescales_figure),
         ("s12", growth_model_figure),
         ("b5", sf.forest_type_map_figure),
-        ("b6s", sf.uptake_panel_figure),
+        ("b6s", sf.stock_panel_figure),
         ("b8i", an.light_ingredients_figure),
         ("b8", an.albedo_annual_map_figure),
         ("b10", sf.common_currency_bars_figure),

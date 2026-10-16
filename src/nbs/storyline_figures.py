@@ -1058,6 +1058,31 @@ def uptake_panel_figure(out_path: str) -> str:
     return _save(fig, out_path)
 
 
+def stock_panel_figure(out_path: str) -> str:
+    """B6 as carbon stock, for the side panel next to the forest-type map: the stock of one tree at the
+    three sites (disturbance at today's rate), as the Aachen curve on the slide before; names upper left."""
+    _setup()
+    # sized to its box on the slide (520 x 581 px) at the scale of the other model charts (~0.675 px per figure px),
+    # so lines and type match them
+    fig, ax = plt.subplots(figsize=(4.8, 5.4), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.13, right=0.97, bottom=0.07, top=0.98)
+    _clean_axes(ax)
+    ax.set_xlim(YEARS[0], YEARS[-1])
+    ax.set_xticks([T_START, 2060, 2100])
+    ends = []
+    for s in SITES:
+        m = _shell_one_trajectory(s).stock_kgC
+        ax.plot(YEARS, m, color=s.color, linewidth=2.6)
+        ends.append((float(m[-1]), s))
+    # names in the empty upper left, in the order of the curves (highest first)
+    for k, (_, s) in enumerate(sorted(ends, key=lambda p: -p[0])):
+        ax.text(0.03, 0.96 - 0.11 * k, s.label, transform=ax.transAxes, ha="left", va="top",
+                fontsize=13.5, color=s.color, fontweight="bold")
+    ax.set_ylim(0, None)
+    ax.set_ylabel("Vorrat [kg C]")   # short: the panel is small
+    return _save(fig, out_path)
+
+
 def exchange_bars_figure(out_path: str) -> str:
     """B9: what one tree exchanges per year: kg CO2 (left) and W of light (right)."""
     _setup()
@@ -1208,24 +1233,25 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     g = green_carbon_preindustrial(horizon + 1)
     t = np.arange(horizon + 1)
     c_rm, c_back = "#2e7d4f", "#8c6d5a"
-    # as wide as its 270 px high slot on slide 19 allows (about 1.9 : 1), so ticks and labels reach the hall minimum (2026-10-11)
-    fig, ax = plt.subplots(figsize=(4.6, 2.4), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.24, top=0.96)
+    # sized to its slot on the slide (530 x 360 px) at the scale of the other model charts (~0.675 px per figure px),
+    # so lines and type match them
+    fig, ax = plt.subplots(figsize=(4.9, 3.33), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.205, right=0.97, bottom=0.17, top=0.97)
     _clean_axes(ax)
     ax.axhline(0, color=C_INK_MUTED, linewidth=1.0)
     ax.axhline(-1, color=c_rm, linewidth=1.1, linestyle=(0, (2, 3)), alpha=0.8)
     ax.fill_between(t, 0, -g, color=c_rm, alpha=0.14, linewidth=0)
     ax.fill_between(t, -g, -1, color=c_back, alpha=0.16, linewidth=0)
-    ax.plot(t, -g, color=c_rm, linewidth=3.0)
+    ax.plot(t, -g, color=c_rm, linewidth=2.6)
     for yr in (20, 50, 100):
         ax.plot(yr, -g[yr], "o", ms=7, color=c_rm, mec="white", mew=1.5, zorder=5)
         ax.annotate(f"{100 * g[yr]:.0f} %", (yr, -g[yr]), xytext=(4, -10), textcoords="offset points", ha="left", va="top",
                     fontsize=12, color=C_INK)
     from nbs.response import _JOOS_A0 as a0
     ax.axhline(-a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
-    ax.text(horizon, -a0 + 0.04, f"→ {100 * a0:.0f} % dauerhaft", ha="right", va="bottom", fontsize=12, color=c_rm)
-    ax.text(3, -0.06, "Entnahme von 1 kg CO$_2$", fontsize=12.5, color=c_rm, fontweight="bold", va="top")
-    ax.text(horizon - 2, -0.93, "von Land und Ozean zurückgegeben", ha="right", va="bottom", fontsize=12, color=c_back,
+    ax.text(horizon, -a0 + 0.04, f"{100 * a0:.0f} % dauerhaft", ha="right", va="bottom", fontsize=12, color=c_rm)
+    ax.text(3, -0.06, "1 kg CO$_2$ entnommen", fontsize=12.5, color=c_rm, fontweight="bold", va="top")
+    ax.text(horizon - 2, -0.96, "Land + Ozean geben zurück", ha="right", va="bottom", fontsize=12, color=c_back,
             fontweight="bold")
     ax.set_xlim(0, horizon)
     ax.set_ylim(-1.12, 0.1)
