@@ -412,7 +412,7 @@ const EC_ZEIT = {
       animationDuration: 1800 }, extra || {});
     const p = D.pfade, f = v => (v > 0 ? '−' : '') + ecNum(Math.abs(v), 0);
     const series = [
-      line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle'),
+      line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle', { lineStyle: { color: EC.alb, width: 3, type: [8, 6] } }),
       line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200 })];
     if (k >= 1) {
       series.push(line('fo', p.forst, '#14532d', `als Forst: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300 }));
@@ -567,7 +567,7 @@ const ANKER_COL_LIGHT = { vl: '#6d756f', b: '#14532d' };   // b as the forest cu
 function ecAnker(phase) {
   const light = phase === 'k4';
   const col = id => (light && ANKER_COL_LIGHT[id]) || ANKER_COL[id];
-  return { steps: { k4: 1, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
+  return { steps: { k4: 3, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const iPeak = D.jahre.indexOf(2050);
@@ -591,14 +591,37 @@ function ecAnker(phase) {
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } } }));
-    series.push(L('b', b, light ? 'mit Aufforstung: kühlende Flächen als Forst' : 'Globale Aufforstung', light ? { mark: [{ coord: [pv, b[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 150, offset: [90, 0], color: '#2f7a45', fontSize: 20,
-      formatter: `Aufforstung an der Spitze: −${ecNum(-W.baeume[D.jahre.indexOf(pv)] / 1000, 2)} K` } }] } : {}));
-    {   // what the trees take off Very Low as a band, as every measure after it; chapter 4, click 1: what is left above 1.5 deg C, in red
-      const base = (id, ys, stack) => ({ id, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false });
-      const fill = (id, ys, stack, color, op, name, anim) => ({ id, name, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, z: 2,
-        lineStyle: { width: 0 }, itemStyle: { color }, areaStyle: { color, opacity: op }, animation: anim, animationDuration: 1200 });
-      series.push(base('kb', b, 'kuehl'), fill('kg', vl.map((v, i) => v - b[i]), 'kuehl', col('b'), light ? .3 : .4, null, false));
-      if (light && k >= 1) { const r = fill('rr', b.map(v => Math.max(v - 1.5, 0)), 'rot', '#c4121f', .28, null, k === 1), i = D.jahre.indexOf(2080);
+    const base = (id, ys, stack) => ({ id, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false });
+    // a band runs in from the left together with its line (same entrance), or stands still
+    const fill = (id, ys, stack, color, op, anim) => ({ id, type: 'line', stack, stackStrategy: 'all', data: P(ys), showSymbol: false, silent: true, z: 2,
+      lineStyle: { width: 0 }, itemStyle: { color }, areaStyle: { color, opacity: op }, animation: anim ? undefined : false, animationDuration: 1600 });
+    // what the trees take off Very Low as a band, as every measure after it
+    const trees = (id, ys, color, name, mark, anim) => {
+      const l = L(id, ys, name, mark ? { mark: [mark] } : {});
+      Object.assign(l.lineStyle, { color }); l.itemStyle = { color }; if (l.markPoint) l.markPoint.itemStyle.color = color;
+      l.animation = anim ? undefined : false; if (l.markPoint) l.markPoint.animation = l.animation;
+      series.push(l, base(id + 'B', ys, id), fill(id + 'G', vl.map((v, i) => v - ys[i]), id, color, light ? .3 : .4, anim));
+    };
+    const atPeak = (ys, cool) => ({ coord: [pv, ys[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 150, offset: [90, 0], color: '#2f7a45', fontSize: 20,
+      formatter: `Aufforstung an der Spitze: −${ecNum(cool, 2)} K` } });
+    if (!light) trees('b', b, col('b'), 'Globale Aufforstung', null, false);
+    else {   // slide 27, the three cases of the left chart: k 0 all land (dashed) and the cooling land, the band under the
+      // cooling land; k 1 the forest sketch stands in front; k 2 the cooling land as managed forest runs in with its band
+      // while the others stay; k 3 red: what stays above 1.5 deg C
+      const ip = D.jahre.indexOf(pv), anim0 = k === 0;
+      const ba = vl.map((v, i) => v - D.pfade.alle[i] / 1000), bk = vl.map((v, i) => v - D.pfade.kuehlt[i] / 1000);
+      const plain = (id, ys, color, name, dash) => { const l = L(id, ys, name, { line: dash ? { width: 3, type: [8, 6] } : {} });
+        Object.assign(l.lineStyle, { color }); l.itemStyle = { color }; l.animation = anim0 ? undefined : false; return l; };
+      series.push(plain('ba', ba, EC.alb, 'alle Flächen', true), plain('bk', bk, '#2f7a45', 'kühlende Flächen'));
+      if (k >= 2) { const l = plain('b', b, col('b'), 'kühlende Flächen als Forst'); l.animation = k === 2 ? undefined : false; series.push(l); }
+      // one band for the case on the table: on click 2 its lower edge glides from the cooling land onto the forest
+      // (same ids, so the data morphs instead of the band being drawn anew); the peak label rides on it
+      const cur = k >= 2 ? b : bk, cool = k >= 2 ? -W.baeume[ip] / 1000 : D.pfade.kuehlt[ip] / 1000;
+      const edge = Object.assign(base('tB', cur, 't'), { animationDurationUpdate: 1600 });
+      edge.markPoint = dot('#2f7a45', [atPeak(cur, cool)], 'tB'); edge.markPoint.animation = anim0 ? undefined : false;
+      const band = Object.assign(fill('tG', vl.map((v, i) => v - cur[i]), 't', '#2f7a45', .3, anim0), { animationDurationUpdate: 1600 });
+      series.push(edge, band);
+      if (k >= 3) { const r = fill('rr', b.map(v => Math.max(v - 1.5, 0)), 'rot', '#c4121f', .28, k === 3), i = D.jahre.indexOf(2080);
         r.markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2080, 1.5 + (b[i] - 1.5) / 5] }],
           label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'über 1,5 °C' } };
         series.push(base('rb', b.map(() => 1.5), 'rot'), r); }
@@ -631,7 +654,7 @@ function ecAnker(phase) {
       animationDurationUpdate: 800,
       title: { text: 'Erwärmung gegenüber vorindustriell [°C]', left: 70, top: 0, textStyle: { color: ink, fontFamily: EC.font, fontSize: 19, fontWeight: 600 } },
       legend: { left: 66, top: 34, itemGap: 12, itemWidth: 22, icon: 'path://M0,4 H28 V7 H0 Z', textStyle: { color: light ? EC.ink : '#d6dbd6', fontFamily: EC.font, fontSize: 18 },
-                data: series.filter(x => x.name && x.id !== 'vb').map(x => x.name) },
+                data: series.filter(x => x.name).map(x => x.name) },
       grid: { left: 70, right: 24, top: 150, bottom: 40 },   // room for a legend of three rows on every slide
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLine: { lineStyle: { color: light ? EC.muted : '#4a524d' } },
                       axisLabel: { color: mut, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
