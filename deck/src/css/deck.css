@@ -1423,7 +1423,6 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg:has(.hwp.shown) h1 { font-size: 60px; }
 .slide.holzweg svg.deco { transition: opacity .9s var(--ease); }
 .slide.holzweg:has(.hwp.shown) svg.deco { opacity: .16; }
-.slide.holzweg .hwq { position: absolute; left: 0; right: 0; bottom: 34px; margin: 0; text-align: center; font: italic 600 40px/1.25 var(--serif); color: var(--amber); }
 .slide.holzweg .hw { position: absolute; left: 110px; right: 110px; top: 160px; bottom: 110px; display: grid; grid-template-columns: 1fr 1fr; gap: 70px; }
 .slide.holzweg .hwp { display: flex; flex-direction: column; min-height: 0; }
 .slide.holzweg .hwp .pk { font: 600 18px/1.6 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ch-soft); }
@@ -1453,7 +1452,6 @@ svg.mo .m-sway.back { animation: none; }
 .fb b.big.wald { color: #e4d84a; }
 .slide.holzweg .hwc.fut, .slide.holzweg .hwc.fut b { color: #e2a95a; }
 .slide.holzweg .hwc.ch4, .slide.holzweg .hwc.ch4 b { color: #6fb7e0; }
-.slide.holzweg .hwq span { display: inline-block; }
 
 /* the vegan world beside the anchor: one row per click, an icon, a few words, the number */
 .vz { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; padding: 18px 0; border-top: 1px solid #2c3437; transition: filter .6s var(--ease); }
@@ -1513,22 +1511,17 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg:has(.hwk3.shown) .ctext { top: 56px; }
 .slide.holzweg:has(.hwk3.shown) h1 { font-size: 60px; }
 .slide.holzweg:has(.hwk3.shown) svg.deco { opacity: .16; }
-.slide.holzweg .hw3 { position: absolute; left: 110px; right: 110px; top: 210px; bottom: 140px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 30px; }
+.slide.holzweg .hw3 { position: absolute; left: 80px; right: 80px; top: 190px; bottom: 70px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; align-content: center; }
 .slide.holzweg .hwk3 { display: flex; flex-direction: column; min-height: 0; }
-.slide.holzweg .hwk3 .pk { margin: 0; font: 600 18px/1.5 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ch-soft); font-style: normal; }
+.slide.holzweg .hwk3 .pk { margin: 0; min-height: 2.8em; font: 600 22px/1.4 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ch-soft); font-style: normal; }
 .slide.holzweg .hwk3 svg { width: 100%; height: auto; margin: 18px 0 22px; overflow: visible; font-family: var(--sans); }
-.slide.holzweg .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.slide.holzweg .why li { display: flex; gap: 10px; align-items: baseline; font: 400 19px/1.35 var(--sans); color: #d6dbd6; }
+.slide.holzweg .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.slide.holzweg .why li { display: flex; gap: 12px; align-items: baseline; font: 400 23px/1.35 var(--sans); color: #d6dbd6; }
 .slide.holzweg .why b { color: #f2ede2; font-weight: 600; }
-.slide.holzweg .why .no { color: #e07a5f; font: 700 22px/1 var(--sans); flex: none; }
+.slide.holzweg .why .no { color: #e07a5f; font: 700 26px/1 var(--sans); flex: none; }
 .slide.holzweg p.src { margin-top: 0; font: 400 13px/1.45 var(--sans); font-style: normal; color: #8d958f; opacity: 0; transition: opacity .6s var(--ease); }
 .slide.holzweg:has(.hwk3.shown) p.src { opacity: 1; }
-.slide.holzweg:has(.hwk3.shown) .hwq { bottom: 150px; }
-.slide.holzweg:has(.hwk3.shown) .hwq { font-size: 32px; }
 /* the four demands: brighter, and underlined one after the other once the sentence is there */
-.slide.holzweg .hwq .hl { font-weight: 700; color: #f2ede2; padding-bottom: 2px;
-  background: linear-gradient(var(--amber), var(--amber)) 0 100% / 0 3px no-repeat; transition: background-size .5s var(--ease) var(--hd, 0s); }
-.slide.holzweg .hwq .shown .hl { background-size: 100% 3px; }
 /* vegan slide: the two pictures large, the three short claims small underneath */
 .vg4 { grid-template-rows: 1fr auto; }
 .vg4 .vgc:nth-child(n+3) { padding: 10px 18px 12px; }
