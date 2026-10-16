@@ -343,7 +343,7 @@ const EC_KURS = { steps: 3,
   }
   if (k >= 2) {
     const x = upto(2026, 2100, 2);
-    series.push({ id: 'vl', name: 'ehrgeizigstes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
+    series.push({ id: 'vl', name: 'ambitioniertestes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
       lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: KURS_COL.vl, borderColor: '#f2ede2', borderWidth: 2 },
                    label: { show: true, position: 'top', distance: 9, color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
