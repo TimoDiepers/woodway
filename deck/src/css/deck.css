@@ -1565,3 +1565,57 @@ svg.mo .m-sway.back { animation: none; }
 .slide.finale .grenzen ol li b { font-weight: 600; }
 .slide.finale:not(.ende) .grenzen { margin-top: 50px; }
 .slide.finale:not(.ende) .grenzen { width: max-content; max-width: 1220px; }   /* leaves the sun free */
+
+/* slide 2: real headlines, cut out and laid on the paper one per click */
+.clips { position: relative; flex: 1; min-height: 0; }
+.clip { position: absolute; display: block; color: inherit; text-decoration: none; transform: rotate(var(--r));
+        filter: drop-shadow(0 14px 16px rgba(30, 26, 18, .22)) drop-shadow(0 1px 1px rgba(30, 26, 18, .18)); }
+.cl-in { display: block; background: #fbf9f3; padding: 20px 26px 22px;
+         /* a scissor cut: straight edges with a slight wobble */
+         clip-path: polygon(0 1%, 18% 0, 41% .8%, 63% 0, 84% .6%, 100% 0, 99.6% 34%, 100% 71%, 99.4% 100%, 77% 99.2%, 52% 100%, 29% 99.3%, 7% 100%, 0 99.5%, .5% 62%, 0 27%); }
+.cl-src { display: flex; gap: 14px; white-space: nowrap; align-items: baseline; font: 400 16px/1.2 var(--sans); color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid #ddd5c4; }
+.cl-src b { font-weight: 600; color: var(--ink); font-size: 17px; }
+.cl-dach { display: block; margin-top: 14px; font: italic 400 19px/1.2 var(--serif); color: var(--ink-2); }
+.cl-h { display: block; margin-top: 10px; font: 600 28px/1.18 var(--serif); color: var(--ink); text-wrap: balance; }
+.cl-dach + .cl-h { margin-top: 4px; }
+.cl-txt { display: block; height: 30px; margin-top: 16px; background: repeating-linear-gradient(#e2dccd 0 4px, transparent 4px 14px); width: 92%; }
+.clip.sci .cl-in { padding: 16px 24px 18px; }
+.clip.sci .cl-src b { font-family: var(--serif); font-style: italic; font-size: 19px; }
+.clip.sci .cl-h { font-size: 22px; }
+.cl-by { display: block; margin-top: 8px; font: 400 16px/1.3 var(--sans); color: var(--muted); }
+.cl-sub { display: block; margin-top: 8px; font: italic 400 18px/1.35 var(--serif); color: var(--ink-2); }
+.clips.sm .cl-h { font-size: 25px; }
+.clips.sm .clip.sci .cl-h { font-size: 20px; }
+.clip:focus-visible { outline: 2px solid var(--moss); outline-offset: 6px; }
+@media (prefers-reduced-motion: reduce) { .clip { animation: none !important; } }
+@keyframes clipin { from { opacity: 0; transform: translateY(-26px) rotate(calc(var(--r) + 5deg)) scale(1.04); } to { opacity: 1; transform: rotate(var(--r)); } }
+.slide.active .clip:not([data-step]), .slide.active .clip[data-step].shown { animation: clipin .75s var(--ease) both; animation-delay: calc(var(--d, 0) * 1ms); }
+
+/* slide 3: the warming so far and in the most ambitious scenario, text beside it */
+.kurs { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 44px; margin-bottom: 18px; }
+.kurs > .chart { min-height: 0; height: 100%; }
+.kurs-side { display: flex; flex-direction: column; justify-content: center; gap: 26px; font-family: var(--sans); }
+.kurs-now { font: 400 23px/1.4 var(--sans); color: var(--ink-2); }
+.kurs-now b { color: var(--ink); }
+.kurs-side { position: relative; }
+.kurs-txt { display: flex; flex-direction: column; gap: 26px; transition: opacity .5s var(--ease); }
+.takeaway.stay { animation: none !important; opacity: 1 !important; top: 0 !important; }   /* stands as on the slide before */
+.kurs-tree { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.kurs-tree svg { width: 100%; height: auto; }
+.kurs-tq { margin: 12px 0 14px; font: 600 28px/1.25 var(--serif); color: var(--moss); }
+.kurs-asis { font: 600 23px/1.4 var(--sans); color: #b5562e; }
+.kurs-h { font: 600 23px/1.3 var(--sans); color: #4b524d; margin-bottom: 10px; }
+.kurs-side ul { list-style: none; }
+.kurs-side li { font: 400 21px/1.35 var(--sans); color: var(--ink-2); padding-left: 22px; position: relative; margin-bottom: 6px; }
+.kurs-side li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: #6d756f; }
+.kurs-but { margin-top: 16px; font: 600 24px/1.35 var(--sans); color: #8e0d16; }
+
+/* tooltips (all charts): head, grey line, rows of dot · name · value. Fixed colours, not the slide tokens: the
+   tooltip is light paper on every slide, the dark ones included (their --ink is light) */
+.tc { min-width: 9em; color: #1b2420; }
+.tc-h { font-weight: 600; color: #1b2420; }
+.tc-s { color: #5d665f; font-size: .86em; margin-top: .1em; }
+.tc-r { display: flex; align-items: baseline; gap: .2em .5em; margin-top: .25em; }
+.tc-h + .tc-r, .tc-s + .tc-r { margin-top: .4em; }
+.tc-r .tc-n { flex: 1; color: #3f4a44; }
+.tc-r .tc-v { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: #1b2420; }

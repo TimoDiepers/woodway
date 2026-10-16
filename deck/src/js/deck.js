@@ -96,14 +96,66 @@ function ecAxis(extra) {
     nameTextStyle: { color: EC.muted, fontFamily: EC.font, fontSize: 19 }
   }, extra);
 }
+/* Tooltips: one look for every chart in the deck. They live inside the 1600x900 canvas, which is scaled to the
+   screen, so on a phone a 17px tooltip would end up at 7px: --tipk (Deck.fit) scales them back up. Hover on a
+   desktop, tap on a touch screen (triggerOn click); confine keeps them inside the chart. */
 function ecTooltip(extra) {
   return Object.assign({
+    confine: true, triggerOn: 'mousemove|click', transitionDuration: .15, enterable: false,
     backgroundColor: 'rgba(251,248,241,.97)', borderColor: EC.line, borderWidth: 1, padding: [8, 12],
     textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 17 },
-    extraCssText: 'box-shadow:0 6px 18px -8px rgba(40,34,20,.35); border-radius:6px;'
+    extraCssText: 'box-shadow:0 6px 18px -8px rgba(40,34,20,.35); border-radius:6px; font-size:calc(17px * var(--tipk, 1)) !important;'
+                + 'line-height:1.45; padding:calc(8px * var(--tipk, 1)) calc(12px * var(--tipk, 1)) !important; max-width:calc(420px * var(--tipk, 1)); white-space:normal;'
   }, extra);
 }
-const ecDot = c => `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};margin-right:6px"></span>`;
+// a colour dot; a near-white line of the dark slides gets a dark ring, so it shows on the light tooltip
+const ecDot = c => { const h = /^#([0-9a-f]{6})$/i.exec(c || ''), lum = h ? [0, 2, 4].map(i => parseInt(h[1].slice(i, i + 2), 16)).reduce((a, v) => a + v, 0) / 765 : 0;
+  return `<span style="display:inline-block;width:.6em;height:.6em;border-radius:50%;background:${c};margin-right:.4em;box-sizing:border-box;${lum > .85 ? 'border:1.5px solid #5d665f' : ''}"></span>`; };
+const ecSigned = (v, d) => ecNum(v, d).replace('-', '−');
+/* The one layout of every tooltip in the deck (styles: .tc in deck.css): a bold head (the year, the place, the
+   category), an optional grey line saying what is measured, then rows of colour dot, name and value. */
+const tipEsc = t => String(t ?? '').replace(/&(?![a-z#0-9]+;)/gi, '&amp;').replace(/</g, '&lt;');
+function tipCard({ head, sub, rows = [], note }) {
+  if (sub && head && String(sub).trim() === String(head).trim()) sub = '';   // no line that says the head again
+  const r = rows.filter(Boolean).map(({ c, name, v }) =>
+    `<div class="tc-r">${c ? ecDot(c) : ''}${name ? `<span class="tc-n">${tipEsc(name)}</span>` : ''}${v !== undefined && v !== '' ? `<b class="tc-v">${v}</b>` : ''}</div>`).join('');
+  return `<div class="tc">${head ? `<div class="tc-h">${tipEsc(head)}</div>` : ''}${sub ? `<div class="tc-s">${tipEsc(sub)}</div>` : ''}${r}${note ? `<div class="tc-s">${tipEsc(note)}</div>` : ''}</div>`;
+}
+const tipVal = (v, d, u) => `${ecSigned(v, d)}${u ? '\u202f' + u : ''}`;
+// a place on a map, rounded to whole degrees, and the named site if it is right there
+function tipPlace(lon, lat) {
+  const ns = `${Math.abs(Math.round(lat))}° ${lat >= 0 ? 'N' : 'S'}`, ew = `${Math.abs(Math.round(lon))}° ${lon >= 0 ? 'O' : 'W'}`;
+  const site = (window.MAPDATA && window.MAPDATA.sites || []).find(q => Math.abs(q.lon - lon) < 1.2 && Math.abs(q.lat - lat) < 1.2);
+  return `${ns} · ${ew}${site ? ` (bei ${site.name.replace(/\s*\(.*\)/, '')})` : ''}`;
+}
+/* The default tooltip of a chart whose spec names its unit (spec.tip = { unit, dec, k }): the year, then every
+   series that has a label (tipName, else its name without a trailing [unit]), at the value it shows there.
+   A series can carry its own unit (tip: { unit, k, dec }), absolute values for a stacked band (tipData),
+   or tip: false. spec.tip.item: a formatter for pie and other item charts instead. */
+function ecAutoTip(opt, spec) {
+  const T = spec && spec.tip;
+  if (!T || opt.tooltip !== undefined) return opt;
+  if (T.item) { opt.tooltip = ecTooltip({ trigger: 'item', formatter: T.item }); return opt; }
+  const S = [].concat(opt.series || []);
+  const lab = s => s && s.tip !== false && (s.tipName || (s.name || '').replace(/\s*\[[^\]]*\]\s*$/, '').trim());
+  opt.tooltip = ecTooltip({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: EC.muted, type: [3, 3] } },
+    formatter: ps => {
+      const seen = new Set(), rows = [];
+      for (const p of ps) {
+        const sr = S[p.seriesIndex], name = lab(sr);
+        if (!name || seen.has(name)) continue;
+        const raw = sr.tipData ? sr.tipData[p.dataIndex] : (Array.isArray(p.value) ? p.value[1] : p.value);
+        if (raw === null || raw === undefined || !isFinite(raw)) continue;
+        const m = Object.assign({ unit: T.unit, k: T.k || 1, dec: T.dec === undefined ? 1 : T.dec }, sr.tip || {});
+        const c = typeof p.color === 'string' ? p.color : (sr.itemStyle && sr.itemStyle.color) || EC.muted;
+        seen.add(name); rows.push({ c, name, v: tipVal(raw * m.k, m.dec, m.unit) });
+      }
+      if (!rows.length) return '';
+      const x = Array.isArray(ps[0].value) ? ps[0].value[0] : ps[0].axisValue;
+      return tipCard({ head: String(Math.round(x)), sub: T.sub, rows });
+    } });
+  return opt;
+}
 
 /* slide 2: warming of the seven markers ------------------------------------ */
 /* area under a curve: the colour half way to grey, a vertical fade from the line down */
@@ -180,9 +232,9 @@ const EC_TEMPERATURE = {
         formatter: ps => {
           const year = ps[0].axisValue, rows = ps.filter(p => p.seriesName && p.seriesName.trim() && p.seriesType === 'line');
           const seen = new Set();
-          return `<b>${year}</b><br>` + rows.sort((a, b) => b.value[1] - a.value[1])
+          return tipCard({ head: String(year), sub: 'Erwärmung, Median', rows: rows.sort((a, b) => b.value[1] - a.value[1])
             .filter(p => !seen.has(p.seriesName.trim()) && seen.add(p.seriesName.trim()))
-            .map(p => `${ecDot(p.color)}${p.seriesName.trim()}: <b>${ecNum(p.value[1], 2)} °C</b>`).join('<br>');
+            .map(p => ({ c: p.color, name: p.seriesName.trim(), v: tipVal(p.value[1], 2, '°C') })) });
         }
       }),
       series
@@ -243,9 +295,9 @@ const EC_REMOVAL = {
         formatter: p => {
           if (p.seriesType === 'bar') {
             const c = D.cum.find(x => x.k === order[p.dataIndex]);
-            return `<b>${lab(c.k)}</b><br>2024–2100: <b>${neg(-c.total)} Gt CO₂</b>`;
+            return tipCard({ head: lab(c.k), sub: 'CO₂-Entnahme 2024–2100', rows: [{ c: col(c.k), v: `${neg(-c.total)}\u202fGt CO₂` }] });
           }
-          return `${ecDot(p.color)}${p.seriesName.trim()}, ${p.value[0]}: <b>${neg(p.value[1])} Gt CO₂ seit 2024</b>`;
+          return tipCard({ head: String(p.value[0]), sub: 'CO₂-Entnahme seit 2024', rows: [{ c: p.color, name: p.seriesName.trim(), v: `${neg(p.value[1])}\u202fGt CO₂` }] });
         }
       }),
       series
@@ -254,19 +306,71 @@ const EC_REMOVAL = {
 };
 
 
-/* slide 4: only the bars of slide 3, at the same place and without a new entrance */
-const EC_REMOVAL_BARS = {
-  steps: 0,
-  still: true,   // already on screen on the slide before
-  option(k) {
-    const o = EC_REMOVAL.option(k);
-    o.series = o.series.filter(s => s.xAxisIndex === 1);
-    o.xAxis[0].show = false; o.yAxis[0].show = false;
-    o.title = [o.title[1]];
-    o.animation = false;
-    return o;
+/* slide 4, the problem: what the climate does, for everyone in the room. Click 0 the observed warming up to today,
+   1 going on as today (CMIP7 Medium), 2 the most ambitious scenario (the reference of chapters 4 and 5: Very Low without its own
+   removal, ZEIT.vl_c, same grey and dash as the anchor), 3 red the gap that stays above 1.5 deg C (the anchor's red band).
+   Each series runs in on its own click and stands still afterwards. */
+const KURS_COL = { obs: EC.ink, med: '#b5562e', vl: '#6d756f', rot: '#c4121f' };
+const EC_KURS = { steps: 3,
+  // every curve is drawn by the deck itself, frame by frame (tween): the line of the current click reaches year
+  // t of its span, at the same pace for all of them (75 years in 2.6 s) and from its own first year, without the
+  // lag of the ECharts entrance, which sweeps over the whole axis from 1950
+  tween: 2600, intro: 2600, linear: true, tip: { unit: '°C', dec: 2 },
+  option(k, t = 1) {
+  const C = window.CMIP7, Z = window.ZEIT, vl = Z.vl_c, P = ys => Z.jahre.map((y, i) => [y, ys[i]]);
+  const upto = (from, to, at) => k === at ? from + (to - from) * t : (k > at ? to : from);
+  const cut = (pts, x) => {   // the points up to year x, the last one interpolated, so the tip moves smoothly
+    const out = pts.filter(p => p[0] <= x), n = pts.find(p => p[0] > x), l = out[out.length - 1];
+    if (l && n && x > l[0]) out.push([x, l[1] + (n[1] - l[1]) * (x - l[0]) / (n[0] - l[0])]);
+    return out;
+  };
+  const iPeak = vl.indexOf(Math.max(...vl));
+  const series = [{
+    id: 'obs', name: 'Beobachtung', type: 'line', showSymbol: false, data: cut(C.obs.y.map((y, i) => [y, C.obs.v[i]]), upto(1950, 2025, 0)), z: 5,
+    lineStyle: { color: KURS_COL.obs, width: 2.4 }, itemStyle: { color: KURS_COL.obs },
+    // the 1.5 deg C line, and today (2026, where the scenarios start; the measurements end a year earlier)
+    markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.ink, width: 1.6, type: 'solid', opacity: .7 },
+                label: { show: true, position: 'insideStartTop', color: EC.ink, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' },
+                data: [{ yAxis: 1.5 }, { xAxis: 2026, lineStyle: { color: EC.muted, width: 1.4, type: [4, 5], opacity: 1 },
+                                         label: { position: 'end', distance: 8, color: EC.ink, fontWeight: 600, formatter: 'heute' } }] }
+  }];
+  if (k >= 1) {   // as today: CMIP7 Medium, about the policies in force now; its label rides on the tip of the line
+    const M = C.temp.M, pm = M.y.map((y, i) => [y, M.med[i]]).filter(p => p[0] >= 2026 && p[0] <= 2100);
+    series.push({ id: 'med', name: 'Business-as-Usual', type: 'line', showSymbol: false, data: cut(pm, upto(2026, 2100, 1)), z: 4,
+      lineStyle: { color: KURS_COL.med, width: 3, opacity: k >= 2 ? .45 : 1 }, itemStyle: { color: KURS_COL.med },
+      endLabel: { show: true, align: 'right', offset: [-6, -20], color: KURS_COL.med, opacity: k >= 2 ? .55 : 1, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+                  formatter: p => `Business-as-Usual: ${ecNum(p.value[1], 1)} °C` } });
   }
-};
+  if (k >= 2) {
+    const x = upto(2026, 2100, 2);
+    series.push({ id: 'vl', name: 'ehrgeizigstes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
+      lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
+      markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: KURS_COL.vl, borderColor: '#f2ede2', borderWidth: 2 },
+                   label: { show: true, position: 'top', distance: 9, color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+                            formatter: `Spitze ${Z.jahre[iPeak]}: ${ecNum(vl[iPeak], 2)} °C` },
+                   data: x >= Z.jahre[iPeak] ? [{ coord: [Z.jahre[iPeak], vl[iPeak]] }] : [] } });
+  }
+  if (k >= 3) {
+    const over = vl.map(v => Math.max(v - 1.5, 0)), x = upto(2026, 2100, 3), i = Z.jahre.indexOf(2075);
+    series.push({ id: 'rb', tip: false, type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(vl.map(() => 1.5)), x), showSymbol: false, silent: true, lineStyle: { width: 0 } },
+      { id: 'rr', tipName: 'Lücke über 1,5 °C', type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(over), x), showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 },
+        itemStyle: { color: KURS_COL.rot }, areaStyle: { color: KURS_COL.rot, opacity: .28 },
+        markPoint: { silent: true, symbol: 'circle', symbolSize: 0, data: x >= 2075 ? [{ coord: [2075, 1.5 + over[i] / 2] }] : [],
+                     label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'Lücke' } } });
+  }
+  const ax = { color: EC.muted, fontFamily: EC.font, fontSize: 19 };
+  return {
+    animation: false,
+    grid: { left: 84, right: 30, top: 24, bottom: 44 },
+    xAxis: ecAxis({ type: 'value', min: 1950, max: 2100, axisTick: { customValues: [1950, 1975, 2000, 2026, 2050, 2075, 2100] },   // 2026 under 'heute', not 2025
+                    axisLabel: Object.assign({ customValues: [1950, 1975, 2000, 2026, 2050, 2075, 2100], formatter: v => String(v) }, ax) }),
+    yAxis: ecAxis({ type: 'value', min: 0, max: 3, interval: .5, name: 'Erwärmung gegenüber vorindustriell', nameLocation: 'middle', nameGap: 62, nameTextStyle: ax,
+                    axisLabel: Object.assign({ formatter: v => `${ecNum(v, 1)} °C` }, ax), splitLine: { show: true, lineStyle: { color: EC.grid } } }),
+    series
+  };
+} };
+
+
 window.LUECKE = {"co2": 262.3, "y": [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2042, 2043, 2044, 2045, 2046, 2047, 2048, 2049, 2050, 2051, 2052, 2053, 2054, 2055, 2056, 2057, 2058, 2059, 2060, 2061, 2062, 2063, 2064, 2065, 2066, 2067, 2068, 2069, 2070, 2071, 2072, 2073, 2074, 2075, 2076, 2077, 2078, 2079, 2080, 2081, 2082, 2083, 2084, 2085, 2086, 2087, 2088, 2089, 2090, 2091, 2092, 2093, 2094, 2095, 2096, 2097, 2098, 2099, 2100], "k": [-0.0, 0.03, 0.14, 0.34, 0.64, 1.01, 1.46, 1.98, 2.56, 3.19, 3.86, 4.57, 5.3, 6.04, 6.8, 7.56, 8.31, 9.06, 9.8, 10.51, 11.21, 11.89, 12.54, 13.16, 13.76, 14.33, 14.86, 15.37, 15.84, 16.28, 16.7, 17.08, 17.44, 17.76, 18.06, 18.34, 18.59, 18.81, 19.01, 19.19, 19.35, 19.49, 19.61, 19.72, 19.8, 19.88, 19.94, 19.98, 20.02, 20.04, 20.06, 20.06, 20.06, 20.05, 20.03, 20.01, 19.98, 19.95, 19.91, 19.87, 19.83, 19.78, 19.73, 19.68, 19.63, 19.58, 19.53, 19.48, 19.42, 19.37, 19.31, 19.26, 19.2, 19.14, 19.14], "al": [-0.0, 0.05, 0.21, 0.5, 0.92, 1.46, 2.11, 2.84, 3.64, 4.5, 5.41, 6.34, 7.28, 8.23, 9.17, 10.08, 10.97, 11.82, 12.63, 13.39, 14.1, 14.76, 15.36, 15.9, 16.38, 16.8, 17.17, 17.47, 17.73, 17.92, 18.07, 18.17, 18.22, 18.23, 18.19, 18.12, 18.01, 17.87, 17.7, 17.5, 17.28, 17.03, 16.76, 16.47, 16.17, 15.86, 15.53, 15.2, 14.85, 14.5, 14.15, 13.79, 13.43, 13.07, 12.71, 12.35, 11.99, 11.64, 11.29, 10.95, 10.61, 10.28, 9.95, 9.63, 9.32, 9.01, 8.72, 8.43, 8.14, 7.87, 7.6, 7.33, 7.08, 6.83, 6.83], "need": [0.0, 7.1, 19.7, 33.5, 60.3, 85.3, 109.1, 134.0, 155.5, 178.1, 197.0, 213.0, 230.4, 245.6, 258.2, 270.5, 282.2, 290.9, 300.6, 307.2, 314.8, 320.1, 322.6, 321.8, 322.9, 318.9, 316.7, 311.3, 304.6, 300.5, 296.9, 292.0, 290.2, 285.4, 282.8, 282.5, 278.6, 273.2, 268.4, 265.1, 261.9, 257.1, 253.4, 253.0, 249.0, 245.5, 240.5, 235.9, 232.8, 230.1, 224.1, 220.4, 217.1, 211.3, 205.8, 198.1, 188.3, 180.5, 175.2, 169.4, 163.4, 158.9, 154.1, 149.9, 145.8, 140.8, 132.3, 128.7, 123.7, 119.4, 115.2, 110.1, 107.0, 108.0, 105.8]};
 
 /* slide 25 overlay: first the trees alone (own scale), then the limit (scale grows), then the gap in red */
@@ -302,8 +406,8 @@ const EC_GAP = {
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] }, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
       yAxis: ecAxis({ type: 'value', min: 0, max: k >= 1 ? 120 : 25, interval: k >= 1 ? 20 : 5, name: 'Kühlung der Erde [mK]', nameLocation: 'middle', nameGap: 52,
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19 }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
-      tooltip: ecTooltip({ trigger: 'axis', formatter: ps => `<b>${ps[0].value[0]}</b><br>` + ps.filter(p => ['k', 'al'].includes(p.seriesId))
-                    .map(p => `${ecDot(p.color)}${ecNum(p.value[1], 0)} mK`).join('<br>') }),
+      tooltip: ecTooltip({ trigger: 'axis', formatter: ps => tipCard({ head: String(ps[0].value[0]), sub: 'Kühlung der Erde',
+                    rows: ps.filter(p => ['k', 'al'].includes(p.seriesId)).map(p => ({ c: p.color, name: p.seriesId === 'k' ? 'kühlende Flächen' : 'alle Flächen', v: tipVal(p.value[1], 0, 'mK') })) }) }),
       series
     };
   }
@@ -312,7 +416,7 @@ const EC_GAP = {
 /* temperature slide: one year -> every fifth year -> sum = the tree -> three sites; the axis fits each click */
 window.TEMPSUM = @@TEMPSUM@@;
 const EC_TEMPSUM = {
-  steps: 3,
+  steps: 3, tip: { unit: '·10⁻¹⁵ K', dec: 1 },
   option(k) {
     const D = window.TEMPSUM, A = D.sites[0], red = '#b2182b';
     const pulse = p => [[p.year, 0], ...p.v.map((v, i) => [p.year + i, v])];
@@ -326,7 +430,7 @@ const EC_TEMPSUM = {
     const step = [1, 2, 5, 10, 20, 50].find(s => -lo * 1.08 / s <= 6.5) || 100;
     const ymin = Math.floor(lo * 1.08 / step) * step, ymax = step * 0.35;
     if (k <= 2) {
-      series.push({ id: 'one', type: 'line', data: pulse(D.one), showSymbol: false, z: 6,
+      series.push({ id: 'one', tipName: `ein Jahr Antrieb (${D.one.year})`, type: 'line', data: pulse(D.one), showSymbol: false, z: 6,
                     lineStyle: { color: red, width: 3.2 }, animationDuration: 900 });
       const v0 = D.one.v[0], y = D.one.year;
       const num = (x, yv, t, pos) => ({ value: [x, yv], symbolSize: 0,
@@ -337,14 +441,14 @@ const EC_TEMPSUM = {
     }
     if (k >= 1 && k <= 2) {
       const data = D.pulses.flatMap(p => [...pulse(p), null]);
-      series.push({ id: 'every', type: 'line', data, connectNulls: false, showSymbol: false, z: 4,
+      series.push({ id: 'every', tip: false, type: 'line', data, connectNulls: false, showSymbol: false, z: 4,
                     lineStyle: { color: red, width: 1.6, opacity: .45 }, animationDuration: 900 });
       series.push({ id: 'every-dots', type: 'scatter', z: 5, silent: true, symbolSize: 8, itemStyle: { color: red },
                     data: [D.one, ...D.pulses].map(p => [p.year, p.v[0]]), animationDuration: 400 });
     }
     // the site name at the end of its curve, once the three sites are shown
     const site = (s, i) => ({
-      id: 'site' + i, type: 'line', data: D.years.map((y, j) => [y, s.dt[j]]), showSymbol: false, z: 7, clip: false,
+      id: 'site' + i, tipName: s.name, type: 'line', data: D.years.map((y, j) => [y, s.dt[j]]), showSymbol: false, z: 7, clip: false,
       lineStyle: { color: s.color, width: 3.4 }, itemStyle: { color: s.color }, animationDuration: 2200, animationEasing: 'linear',
       markPoint: { silent: true, symbol: 'circle', symbolSize: 0, animationDelay: 2200,
                    data: k >= 3 ? [{ coord: [D.years[D.years.length - 1], s.dt[s.dt.length - 1]],
@@ -397,7 +501,7 @@ window.ZEIT = @@ZEIT@@;
 
 /* chapter 3: trees all planted in 2026, three ways; then the warming of Very Low above 1.5 deg C */
 const EC_ZEIT = {
-  steps: 1,
+  steps: 1, tip: { unit: 'mK', dec: 0 },
   option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), n = D.jahre.length - 1;
     // shown as the temperature change Delta T (cooling < 0, downwards), as for the single tree on slide 21; second
@@ -412,10 +516,10 @@ const EC_ZEIT = {
       animationDuration: 1800 }, extra || {});
     const p = D.pfade, f = v => (v > 0 ? '−' : '') + ecNum(Math.abs(v), 0);
     const series = [
-      line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle', { lineStyle: { color: EC.alb, width: 3, type: [8, 6] } }),
-      line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200 })];
+      line('al', p.alle, EC.alb, `alle Flächen: ${f(p.alle[n])} mK`, 'alle', { lineStyle: { color: EC.alb, width: 3, type: [8, 6] }, tipName: 'alle Flächen' }),
+      line('k', p.kuehlt, '#2f7a45', `kühlende Flächen: ${f(p.kuehlt[n])} mK`, 'kuehlt', { animationDelay: 200, tipName: 'kühlende Flächen' })];
     if (k >= 1) {
-      series.push(line('fo', p.forst, '#14532d', `als Forst: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300 }));
+      series.push(line('fo', p.forst, '#14532d', `als Forst: ${f(p.forst[n])} mK`, 'forst', { lineStyle: { color: '#14532d', width: 3.8 }, animationDelay: 300, tipName: 'als Forst' }));
     }
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
@@ -433,10 +537,10 @@ const EC_ZEIT = {
 
 /* a small dark chart beside the DAC map (result of the optimisation), from deck/chart_data/zeitpfade.json
    (key dac); line names at the line ends */
-function ecDacSmall(title, yMax, yFmt, lines) {
-  return { steps: 0, option() {
+function ecDacSmall(title, yMax, yFmt, lines, tip) {
+  return { steps: 0, tip, option() {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-    const series = lines(D).map(([id, ys, color, name, dash, area]) => ({ id, type: 'line', showSymbol: false, data: P(ys), z: area ? 4 : 5,
+    const series = lines(D).map(([id, ys, color, name, dash, area]) => ({ id, tipName: name, type: 'line', showSymbol: false, data: P(ys), z: area ? 4 : 5,
       lineStyle: { color, width: dash ? 2.4 : 3.2, type: dash || 'solid' }, itemStyle: { color }, animationDuration: 1400,
       areaStyle: area ? { color, opacity: .28 } : undefined,
       endLabel: { show: true, formatter: name, color, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 }, labelLayout: { moveOverlap: 'shiftY' } }));
@@ -453,21 +557,21 @@ function ecDacSmall(title, yMax, yFmt, lines) {
 }
 const kOf = v => v ? ecNum(v / 1000, 1) : '0';   // data in mK, read in K
 /* DACCS at most 20 %/a: world capacity per year (key dac.g20) */
-const EC_DACTEMP = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 100, v => String(v), D => [['d', D.dac.g20.w, '#ff5a4f', 'DACCS', null, true]]);
+const EC_DACTEMP = ecDacSmall('Kapazität weltweit [Gt CO₂/a]', 100, v => String(v), D => [['d', D.dac.g20.w, '#ff5a4f', 'DACCS', null, true]], { unit: 'Gt CO₂/a', dec: 1 });
 /* costs of the DAC path after the fact (key kosten_pfad): median per year with the optimistic-pessimistic band;
    then the explicit fossil subsidies and the EU-27 GDP as reference lines, in trillion EUR per year */
 const EC_KOSTEN = {
-  steps: 2,
+  steps: 2, tip: { unit: 'Bio. €/a', dec: 2 },
   option(k) {
     const D = window.ZEIT, K = D.kosten_pfad, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const lo = K.optimistisch.je_jahr_bio, hi = K.pessimistisch.je_jahr_bio;
     const ref = (v, name, color, show) => ({ yAxis: v, lineStyle: { color, width: 2.6, type: [8, 6], opacity: show ? 1 : 0 },
       label: { show, position: 'insideStartTop', distance: 6, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, formatter: name } });
     const series = [
-      { id: 'lo', type: 'line', stack: 'band', data: P(lo), showSymbol: false, lineStyle: { opacity: 0 }, silent: true, animationDuration: 1600 },
-      { id: 'band', type: 'line', stack: 'band', data: P(hi.map((v, i) => v - lo[i])), showSymbol: false, silent: true,
+      { id: 'lo', tipName: 'optimistisch', type: 'line', stack: 'band', data: P(lo), showSymbol: false, lineStyle: { opacity: 0 }, itemStyle: { color: '#ff9a92' }, silent: true, animationDuration: 1600 },
+      { id: 'band', tipName: 'pessimistisch', tipData: hi, itemStyle: { color: '#ff9a92' }, type: 'line', stack: 'band', data: P(hi.map((v, i) => v - lo[i])), showSymbol: false, silent: true,
         lineStyle: { opacity: 0 }, areaStyle: { color: '#ff5a4f', opacity: .22 }, animationDuration: 1600 },
-      { id: 'med', type: 'line', data: P(K.median.je_jahr_bio), showSymbol: false, z: 5, animationDuration: 1600,
+      { id: 'med', tipName: 'DACCS, Median', type: 'line', data: P(K.median.je_jahr_bio), showSymbol: false, z: 5, animationDuration: 1600,
         lineStyle: { color: '#ff5a4f', width: 3.4 }, itemStyle: { color: '#ff5a4f' },
         endLabel: { show: true, formatter: 'DACCS', color: '#ff5a4f', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 },
         markLine: { silent: true, symbol: 'none', animationDuration: 700, data: [
@@ -488,12 +592,12 @@ const EC_KOSTEN = {
 /* the vegan world from 2026 by cause (key vegan.beitraege, mK, < 0 = cooler): cooling stacked above zero,
    warming below, the net as a line; built up in steps */
 const EC_VEGAN = {
-  steps: 3,
+  steps: 3, tip: { unit: 'mK', dec: 0 },
   option(k) {
     const D = window.ZEIT, B = D.vegan.beitraege, P = ys => D.jahre.map((y, i) => [y, -ys[i]]);
     const co2 = B.co2_hof.map((v, i) => v + B.co2_entwaldung[i]);
     const A = (id, ys, color, name, stack, show) => ({ id, name, type: 'line', stack, data: P(show ? ys : ys.map(() => 0)), showSymbol: false,
-      lineStyle: { width: 0 }, areaStyle: { color, opacity: show ? .85 : 0 }, itemStyle: { color }, animationDuration: 1400, z: 3 });
+      lineStyle: { width: 0 }, areaStyle: { color, opacity: show ? .85 : 0 }, itemStyle: { color }, animationDuration: 1400, z: 3, tip: show ? undefined : false });
     const series = [
       A('ch4', B.ch4_tier, '#4f9fc7', 'Methan der Tierhaltung', 'kuehl', true),
       A('n2o', B.n2o_vermieden, '#86c6e4', 'Lachgas: Tierhaltung, Futteranbau', 'kuehl', k >= 1),
@@ -502,7 +606,7 @@ const EC_VEGAN = {
       A('ers', B.ersatz, '#e0903e', 'Ersatzprodukte', 'waerm', k >= 2),
       A('alb', B.wald_albedo, '#d0644a', 'Wald auf freier Fläche: Albedo', 'waerm', k >= 2),
       { id: 'net', name: 'netto', type: 'line', data: P(B.netto), showSymbol: false, z: 6,
-        lineStyle: { color: '#f2ede2', width: 3.4, opacity: k >= 3 ? 1 : 0 }, itemStyle: { color: '#f2ede2' }, animationDuration: 1200,
+        lineStyle: { color: '#f2ede2', width: 3.4, opacity: k >= 3 ? 1 : 0 }, itemStyle: { color: '#f2ede2' }, animationDuration: 1200, tip: k >= 3 ? undefined : false,
         endLabel: { show: k >= 3, formatter: 'netto', color: '#f2ede2', fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 8 } }];
     // the two large bands named inside them, where they are widest
     const band = (x, base, ys, year, text) => { const i = D.jahre.indexOf(year);
@@ -526,7 +630,7 @@ const EC_VEGAN = {
 };
 /* the vegan world without DAC: warming above 1.5 °C after the trees and with the vegan world (mK, read in K) */
 const EC_VEGAN_LUECKE = {
-  steps: 1,
+  steps: 1, tip: { unit: 'K', k: .001, dec: 2 },
   option(k) {
     const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const end = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10 });
@@ -536,10 +640,10 @@ const EC_VEGAN_LUECKE = {
         data: [{ coord: [D.jahre[i], ys[i]] }] }; };
     const v = D.vegan.gap, iv = v.findIndex((x, i) => i > v.indexOf(Math.max(...v)) && x <= 0);
     const series = [
-      { id: 'b', type: 'line', data: P(D.baeume_rest), showSymbol: false, z: 4, lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
+      { id: 'b', tipName: 'nur Bäume', type: 'line', data: P(D.baeume_rest), showSymbol: false, z: 4, lineStyle: { color: '#7fbf8c', width: 2.6, type: [8, 6] },
         itemStyle: { color: '#7fbf8c' }, endLabel: end('nur Bäume', '#7fbf8c'), animationDuration: 1200,
         markPoint: peak(D.baeume_rest, '#7fbf8c', `${ecNum(Math.max(...D.baeume_rest) / 1000, 2)} K`) }];
-    if (k >= 1) series.push({ id: 'v', type: 'line', data: P(v), showSymbol: false, z: 5, lineStyle: { color: '#7fd0e0', width: 3.4 },
+    if (k >= 1) series.push({ id: 'v', tipName: 'mit veganer Welt', type: 'line', data: P(v), showSymbol: false, z: 5, lineStyle: { color: '#7fd0e0', width: 3.4 },
       areaStyle: { color: '#7fd0e0', opacity: .25 }, itemStyle: { color: '#7fd0e0' }, animationDuration: 1600,
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#7fd0e0', borderColor: '#14181a', borderWidth: 2 },
         label: { show: true, distance: 10, color: '#7fd0e0', fontFamily: EC.font, fontSize: 19, fontWeight: 600 },
@@ -567,7 +671,7 @@ const ANKER_COL_LIGHT = { vl: '#6d756f', b: '#14532d' };   // b as the forest cu
 function ecAnker(phase) {
   const light = phase === 'k4';
   const col = id => (light && ANKER_COL_LIGHT[id]) || ANKER_COL[id];
-  return { steps: { k4: 3, 0: 0, 1: 1, 2: 5 }[phase], option(k) {
+  return { steps: { k4: 3, 0: 0, 1: 1, 2: 5 }[phase], tip: { unit: '°C', dec: 2 }, option(k) {
     const D = window.ZEIT, W = D.wirkung, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
     const vl = D.vl_c, b = vl.map((v, i) => v + W.baeume[i] / 1000), on = key => b.map((v, i) => v + W[key][i] / 1000);
     const iPeak = D.jahre.indexOf(2050);
@@ -637,7 +741,8 @@ function ecAnker(phase) {
       const wald = B.wald_co2.map((x, i) => x + B.wald_albedo[i]);
       const co2 = B.netto.map((x, i) => B.co2_hof[i] + B.co2_entwaldung[i] + x - parts.reduce((a, p) => a + B[p][i], 0));   // what FaIR does not add up exactly goes with the small CO2 band
       const band = (id, ys, color, name, at, op = .5) => ({ id, name, type: 'line', stack: 'veg', stackStrategy: 'all', data: P(ys.map(x => x / 1000)), showSymbol: false, z: 3,
-        animationDuration: 1400, animation: k === at, lineStyle: { width: 1.4, color, opacity: .9 }, itemStyle: { color }, areaStyle: { color, opacity: op } });
+        animationDuration: 1400, animation: k === at, lineStyle: { width: 1.4, color, opacity: .9 }, itemStyle: { color }, areaStyle: { color, opacity: op },
+        tip: { unit: 'mK', k: 1000, dec: 0 } });
       series.push({ id: 'vb', type: 'line', stack: 'veg', stackStrategy: 'all', data: P(b), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
         band('vw', wald, '#e4d84a', 'Aufforstung neuer Flächen', 1, .45));
       if (k >= 2) series.push(band('vm', B.ch4_tier, '#4f9fc7', 'Tiere: Methan', 2), band('vn', B.n2o_tier, '#6fb2d6', 'Tiere: Lachgas', 2));
@@ -679,7 +784,7 @@ const EC_VEGAN_ALL = { steps: 0, option() {
 } };
 /* slide 28: the fastest DACCS build-out -- what is removed each year (gross) and net; until 2030 the planned capacity
    (Zurbriggen et al. 2026), shaded, then +20 %/a until the safe storage is full (marked) */
-const EC_DACCS_AUSBAU = { steps: 0, option() {
+const EC_DACCS_AUSBAU = { steps: 0, tip: { unit: 'Gt CO₂/a', dec: 2 }, option() {
   const D = window.ZEIT, M = D.dac.max, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
   return {
     grid: { left: 54, right: 16, top: 34, bottom: 30 },
@@ -703,7 +808,7 @@ const EC_DACCS_AUSBAU = { steps: 0, option() {
    what it would become in a vegan world (forest-capable, too dry, replacement cropland), so both stay to be seen.
    Fixed series ids: a click merges and only the new ring enters. */
 const EC_LANDDONUT = {
-  steps: 2,
+  steps: 2, tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
   option(k) {
     const V = window.ZEIT.vegan, L = V.land, frei = L.tiere + L.acker - L.acker_vegan, ersatz = L.acker_vegan - L.acker;
     const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
@@ -755,7 +860,7 @@ const EC_LANDDONUT = {
    smoothly (tween, geometric in the axis length) until methane fits, the CO2 curve shrinking onto 0 and the methane
    curve rising into view. The curves start in 2027, the first year the pulse is in the air (FaIR is annual). */
 const EC_PULS = {
-  steps: 1,
+  steps: 1, tip: { unit: '·10⁻¹⁵ W/m²', dec: 2 },
   tween: 1600, intro: 1500,
   option(k, t = 1) {
     const D = window.ZEIT, A = D.vegan.antrieb;
@@ -771,7 +876,7 @@ const EC_PULS = {
       t: { color: '#d6dbd6', fontFamily: 'KaTeX_Main', fontSize: 24, lineHeight: 30, padding: [0, 0, 0, 3] } } });
     const P2 = ys => D.jahre.map((y, i) => [y, ys[i]]).slice(1).filter(([y]) => y <= upto);
     const at = (ys, year) => [year, ys[D.jahre.indexOf(year)]];
-    const line = (id, ys, color, sub, year, pos, lab = true) => ({ id, type: 'line', showSymbol: false, data: P2(ys), lineStyle: { color, width: 3.8 }, itemStyle: { color },
+    const line = (id, ys, color, sub, year, pos, lab = true) => ({ id, tipName: sub, type: 'line', showSymbol: false, data: P2(ys), lineStyle: { color, width: 3.8 }, itemStyle: { color },
       animationDuration: 1500, clip: true,
       markPoint: { symbol: 'circle', symbolSize: 12, itemStyle: { color: 'transparent' }, silent: true,
                    data: lab && year <= upto ? [{ coord: at(ys, year), label: Object.assign({ show: true, position: pos, distance: 2 }, sym(color, sub)) }] : [] } });
@@ -792,7 +897,8 @@ const EC_PULS = {
   }
 };
 
-const EC_CHARTS = { landdonut: EC_LANDDONUT, puls: EC_PULS, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, entnahmebalken: EC_REMOVAL_BARS, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
+const EC_KURS_END = Object.assign({}, EC_KURS, { still: true, tween: 0, intro: 0 });   // slide 5: the last picture of slide 4, standing
+const EC_CHARTS = { kurs: EC_KURS, kursend: EC_KURS_END, landdonut: EC_LANDDONUT, puls: EC_PULS, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, lueckeend: EC_GAP_END, zeit: EC_ZEIT, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
 
 class EChart {
   constructor(host) {
@@ -819,7 +925,7 @@ class EChart {
     if (!this.chart) return;
     k = Math.max(0, Math.min(k, this.nSteps));
     if (fresh) this.chart.clear();
-    const opt = this.spec.option(k + this.k0);
+    const opt = ecAutoTip(this.spec.option(k + this.k0), this.spec);
     // a click that changes nothing in this chart leaves it alone: setting the same option again would fade its labels in anew
     const same = JSON.stringify(opt);
     if (!fresh && same === this.last) { this.k = k; return; }
@@ -841,10 +947,10 @@ class EChart {
     cancelAnimationFrame(this.raf);
     const t0 = performance.now(), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const frame = now => {
-      const t = Math.min(1, (now - t0) / dur), opt = this.spec.option(k + this.k0, ease(t));
+      const t = Math.min(1, (now - t0) / dur), opt = ecAutoTip(this.spec.option(k + this.k0, this.spec.linear ? t : ease(t)), this.spec);   // linear: a constant pace, e.g. years per second
       opt.animation = false;
       this.chart.setOption(opt, { replaceMerge: ['series'] });
-      if (t < 1) this.raf = requestAnimationFrame(frame); else this.last = JSON.stringify(this.spec.option(k + this.k0));
+      if (t < 1) this.raf = requestAnimationFrame(frame); else this.last = JSON.stringify(ecAutoTip(this.spec.option(k + this.k0), this.spec));
     };
     this.k = k; this.raf = requestAnimationFrame(frame);
   }
@@ -975,6 +1081,29 @@ class MplChart {
     this.size();
     const svg = !this.isMap || host.dataset.renderer === 'svg';
     this.chart = echarts.init(this.inner, null, svg ? { renderer: 'svg' } : { renderer: 'canvas', devicePixelRatio: 3 });
+    // a figure with bars or maps has an item tooltip; inside a panel of curves the pointer anywhere snaps to the
+    // nearest x of its curves (hover on a desktop, tap or drag on a touch screen), as an axis tooltip would
+    const snap = e => {
+      const S = this.series, c = this.chart;
+      if (!S || !this.d || !this.d.axes.some(a => a.map || a.items.some(it => ['bar', 'cells', 'points'].includes(it.t)))) return;
+      const xy = [e.offsetX, e.offsetY];
+      for (let i = 0; i < this.d.axes.length; i++) {
+        const a = this.d.axes[i];
+        if (a.map || a.items.some(it => ['bar', 'cells', 'points'].includes(it.t))) continue;
+        if (!c.containPixel({ gridIndex: i }, xy)) continue;
+        let k = -1;   // the curve of the panel with the most points
+        S.forEach((q, n) => { if (q.tipLine && q.xAxisIndex === i && (q.data || []).length > (k < 0 ? 0 : S[k].data.length)) k = n; });
+        if (k < 0) return;
+        const x = c.convertFromPixel({ gridIndex: i }, xy)[0], d = S[k].data.map(e2 => Array.isArray(e2) ? e2 : e2 && e2.value);
+        let j = 0, best = Infinity;
+        d.forEach((q, n) => { if (q && isFinite(q[0]) && Math.abs(q[0] - x) < best) { best = Math.abs(q[0] - x); j = n; } });
+        clearTimeout(this.snapT);   // after ECharts' own (throttled) hide of the item tooltip, not before it
+        this.snapT = setTimeout(() => c.dispatchAction({ type: 'showTip', seriesIndex: k, dataIndex: j }), 30);
+        return;
+      }
+    };
+    this.chart.getZr().on('mousemove', snap);
+    this.chart.getZr().on('click', snap);
     this.k = null;
     this.timeLayer = this.mapSpec && this.mapSpec.panels[0].layers.find(L => L.frames);
     if (this.timeLayer) { this.year = this.timeLayer.years[0]; if (host.dataset.renderer !== 'svg') this.player(); }
@@ -1057,8 +1186,9 @@ class MplChart {
     const stopX = this.stops ? this.stops[Math.max(0, Math.min(k, this.stops.length - 1))] : Infinity;
     const font = (it, base) => ({ fontFamily: it.serif ? MPL_SERIF : MPL_FONT, fontSize: (it.fs || base) * s,
                                   fontWeight: it.b ? 600 : 400, fontStyle: it.i ? 'italic' : 'normal' });
-    const legendLabel = {};
-    for (const lg of d.legends) for (const e of lg.entries) if (e.k === 'patch' && e.col) legendLabel[e.col] = e.s;
+    const legendLabel = {}, legendName = {};
+    for (const lg of d.legends) for (const e of lg.entries) { if (e.k === 'patch' && e.col) legendLabel[e.col] = e.s; if (e.col) legendName[String(e.col).toLowerCase()] = e.s; }
+    this.legendName = legendName;
     // within one click the panels follow each other
     const newSlots = [...new Set(d.axes.map((a, i) => this.fresh(i, k) ? this.slot[i] : -1).filter(v => v >= 0))].sort((a, b) => a - b);
     const t0 = i => (this.fresh(i, k) ? newSlots.indexOf(this.slot[i]) : 0) * 450;
@@ -1077,6 +1207,9 @@ class MplChart {
         splitArea: { show: false }, silent: true, animation: false
       };
     };
+    // bars, maps or points somewhere in the figure: one item tooltip for all, with the curves made hoverable
+    const mixed = d.axes.some(a => a.map || a.items.some(it => ['bar', 'cells', 'points'].includes(it.t)));
+    this.series = series;
     d.axes.forEach((a, i) => {
       const show = this.visible(i, k), [bx, by, bw, bh] = a.box;
       grid.push({ left: bx * W, top: by * H, width: bw * W, height: bh * H, containLabel: false, show: false });
@@ -1099,10 +1232,11 @@ class MplChart {
                          : mk ? { color: mk.fc || 'transparent', borderColor: mk.ec || mk.fc, borderWidth: (mk.ew || 0) * s } : { color: it.c };
           const dataPts = mk && mk.idx ? pts.map((p, q) => mk.idx.includes(q) ? { value: p } : { value: p, symbolSize: 0 }) : pts;
           series.push({
-            id: id('l' + j), name: it.name || ' ', type: onlyMk ? 'scatter' : 'line', xAxisIndex: i, yAxisIndex: i, z: Z(it),
+            id: id('l' + j), name: it.name || ' ', tipLine: !(pts.length <= 2 && !it.name && !legendName[String(it.c).toLowerCase()] && !this.textName(i, it.c)), tipName: it.name || legendName[String(it.c).toLowerCase()] || this.textName(i, it.c), type: onlyMk ? 'scatter' : 'line', xAxisIndex: i, yAxisIndex: i, z: Z(it),
             data: dataPts, showSymbol: !!mk, symbol: sym, symbolSize: mk ? mk.size * s : 0, itemStyle: symStyle,
             lineStyle: { color: it.c, width: it.lw * s, type: it.dash ? it.dash.map(v => v * s) : 'solid', opacity: it.a ?? 1, cap: 'round' },
             connectNulls: false, clip: !it.noclip, smooth: false, emphasis: { disabled: true },
+            ...(mixed && !mk && it.lw ? { showSymbol: true, symbol: 'circle', symbolSize: 22 * s, itemStyle: { color: it.c, opacity: 0 } } : {}),
             animationDuration: onlyMk ? 500 : 1500, animationEasing: 'cubicInOut', animationDelay: base + (site ? 0 : onlyMk ? 900 : 0)
           });
         } else if (it.t === 'bar') {
@@ -1190,19 +1324,72 @@ class MplChart {
     return {
       // maps have more than ECharts' default 2000 shapes per series, above which it skips the entry animation
       animation: animate, animationThreshold: 100000, animationDurationUpdate: 600, grid, xAxis, yAxis, series, graphic,
-      tooltip: { trigger: 'item', confine: true, backgroundColor: 'rgba(251,248,241,.97)', borderColor: '#d6ccb6', padding: [6, 10],
-                 textStyle: { color: '#1b2420', fontFamily: MPL_FONT, fontSize: 14 }, extraCssText: 'box-shadow:0 6px 18px -8px rgba(40,34,20,.35);border-radius:6px;',
-                 formatter: p => this.tip(p) }
+      // a figure of curves only: an axis tooltip (every curve of the panel under the pointer, at that x);
+      // with bars, maps or points the tooltip names the bar, cell or point under the pointer
+      tooltip: mixed
+        ? ecTooltip({ trigger: 'item', hideDelay: 0, formatter: p => this.tip(p) })   // hide at once: the snap of a curve panel shows it again in the same move
+        : ecTooltip({ trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: '#5d665f', type: [3, 3] } },
+                      formatter: ps => this.axisTip(+(/^a(\d+)_/.exec(ps[0] && ps[0].seriesId || '') || [0, 0])[1], ps, series) })
     };
   }
 
+  /* what axis i measures, read off the figure: the y label "Größe [Einheit]" gives the quantity and its unit,
+     the x label its unit; tick labels name the categories of bar charts */
+  axisInfo(i) {
+    this.axInfo = this.axInfo || {};
+    if (this.axInfo[i]) return this.axInfo[i];
+    const a = this.d.axes[i], split = t => { const m = /\[([^\]]+)\]/.exec(t || ''); return { q: (t || '').replace(/\s*\[[^\]]*\]\s*/, ' ').replace(/\s+/g, ' ').trim(), u: m ? m[1] : '' }; };
+    const yl = (a.labels.find(l => l.rot === 90) || {}).s, xl = (a.labels.find(l => !l.rot && /\[[^\]]+\]/.test(l.s)) || {}).s;
+    const title = (a.labels.find(l => !l.rot && !/\[/.test(l.s)) || {}).s;
+    const I = { y: split(yl), x: split(xl), title: title ? title.split('\n')[0] : '' };
+    // a row of panels often labels only its first y axis: the others measure the same
+    if (!I.y.u) { const o = this.d.axes.find(b => b !== a && /\[[^\]]+\]/.test((b.labels.find(l => l.rot === 90) || {}).s || '')); if (o) I.y = split(o.labels.find(l => l.rot === 90).s); }
+    return (this.axInfo[i] = I);
+  }
+  // a curve labelled in place: the text in its own colour names it (first line, without a value after a colon)
+  textName(i, c) {
+    const same = t => t.c && c && t.c.toLowerCase() === String(c).toLowerCase();
+    const t = (this.d.axes[i].texts || []).find(same) || this.d.axes.flatMap(a => a.texts || []).find(same);   // or the panel next to it
+    return t ? t.s.split('\n')[0].replace(/[:=]\s*[−-]?[\d,.]+.*$/, '').replace(/^[—–-]\s*/, '').trim() : '';   // without a value after it or a dash before it
+  }
+  num(v, u) { return `${mplNum(v).replace('-', '−')}${u ? '\u202f' + u : ''}`; }
+  xText(x, u) { return (Math.abs(x - Math.round(x)) < 1e-6 && Math.abs(x) > 1000) ? String(Math.round(x)) : this.num(x, u); }
+  axisTip(i, ps, series) {
+    const I = this.axisInfo(i), rows = [], seen = new Set();
+    for (const p of ps) {
+      const sr = series[p.seriesIndex], v = Array.isArray(p.value) ? p.value : p.data && p.data.value;
+      if (!sr || !sr.tipLine || !v || !isFinite(v[1])) continue;
+      const name = sr.tipName || '', key = name || this.num(v[1], '');   // a marker on a curve: once
+      if (seen.has(key) || (!name && rows.some(r => r.v === this.num(v[1], I.y.u)))) continue; seen.add(key);
+      const c = sr.lineStyle && sr.lineStyle.color || '#5d665f';
+      rows.push({ c, name, v: this.num(v[1], I.y.u) });
+    }
+    if (!rows.length) return '';
+    const x = Array.isArray(ps[0].value) ? ps[0].value[0] : ps[0].axisValue;
+    return tipCard({ head: this.xText(+x, I.x.u), sub: [this.d.axes.length > 1 ? I.title : '', I.y.q].filter(Boolean).join(' · '), rows });
+  }
   tip(p) {
     if (p.seriesType === 'custom') return p.data && p.data.tip ? p.data.tip : '';
     const v = Array.isArray(p.value) ? p.value : p.data && p.data.value;
     if (!v) return '';
-    const x = v[0], y = v[1], xs = Number.isInteger(x) || Math.abs(x - Math.round(x)) < 1e-6 && Math.abs(x) > 1000 ? String(Math.round(x)) : mplNum(x);
-    const name = (p.seriesName || '').trim();
-    return `${name ? `<b>${name}</b><br>` : ''}${xs}: <b>${mplNum(y)}</b>`;
+    const i = +(/^a(\d+)_/.exec(p.seriesId || '') || [0, 0])[1], I = this.axisInfo(i), sr = this.series && this.series[p.seriesIndex];
+    // a curve in a figure with bars or a map: hovering it shows every curve of its panel at that x, as an axis tooltip would
+    if (sr && sr.tipLine && this.series) {
+      const ps = this.series.map((q, k) => q.tipLine && q.xAxisIndex === i ? { seriesIndex: k, value: this.at(q, v[0]) } : null).filter(q => q && q.value);
+      return this.axisTip(i, ps, this.series);
+    }
+    const a = this.d.axes[i], name = (p.seriesName || '').trim() || (sr && sr.tipName) || '';
+    if (a.map) return tipCard({ head: tipPlace(v[0], v[1]), sub: name, rows: [] });
+    return tipCard({ head: name || this.xText(v[0], I.x.u), sub: I.y.q, rows: [{ c: p.color, name: name ? this.xText(v[0], I.x.u) : '', v: this.num(v[1], I.y.u) }] });
+  }
+  // a curve's value at x (straight between its points), for the tooltip of a curve under the pointer
+  at(q, x) {
+    const d = (q.data || []).map(e => Array.isArray(e) ? e : e && e.value).filter(e => e && isFinite(e[0]) && isFinite(e[1]));
+    if (!d.length || x < d[0][0] - 1e-9 || x > d[d.length - 1][0] + 1e-9) return null;
+    const j = d.findIndex(e => e[0] >= x);
+    if (j <= 0) return [x, d[Math.max(0, j)][1]];
+    const [a, b] = [d[j - 1], d[j]];
+    return [x, a[1] + (b[1] - a[1]) * (x - a[0]) / ((b[0] - a[0]) || 1)];
   }
 
   textEl(id, t, font, W, H) {
@@ -1242,6 +1429,15 @@ class MplChart {
     return e;
   }
 
+  // a hexagon of a map: where it is (rounded), what the panel shows, its class or value
+  mapTip(i, li, lon, lat, tip, col) {
+    const [first, ...rest] = String(tip).split('<br>'), I = this.axisInfo(i);
+    const cb = this.cbarAxes && this.cbarAxes[this.mapAxes.indexOf(i)];
+    // what the map shows: its title, else the colour bar's label without the unit and the explanation after a colon
+    const what = (I.title || (cb !== undefined ? this.axisInfo(cb).y.q || ((this.d.axes[cb].labels[0] || {}).s || '') : ''))
+      .replace(/\s*\[[^\]]*\]/g, '').split(/:\s/)[0].split('\n')[0].trim();
+    return tipCard({ head: tipPlace(lon, lat), sub: what, rows: [{ c: col, v: first }], note: rest.join(' ') });
+  }
   hexSeries(series, id, i, panel, base, s, enter) {
     // enter: the panel comes in with this click; its cells fade in along their colour scale (mapRun)
     // regular hexagons on a pixel lattice over the map; each takes the value of the data cell under its
@@ -1280,7 +1476,7 @@ class MplChart {
           col = mapScale(sc, v); tip = mapFmt(v, sc) + (L.frames ? ` (${Math.round(this.year ?? L.years[0])})` : '');
           if (enter) run = mapRun(sc, v);
         }
-        const it = tip ? { value: [lon, lat], col, tip: `<b>${tip}</b>` } : { value: [lon, lat], col, tooltip: { show: false } };
+        const it = tip ? { value: [lon, lat], col, tip: this.mapTip(i, li, lon, lat, tip, col) } : { value: [lon, lat], col, tooltip: { show: false } };
         if (run) it.run = run;
         items.push(it);
       }
@@ -1318,12 +1514,22 @@ class MplChart {
     });
   }
 
+  barTip(i, b) {
+    const a = this.d.axes[i], I = this.axisInfo(i), v = b.o === 'v', at = v ? (b.r[0] + b.r[2]) / 2 : (b.r[1] + b.r[3]) / 2;
+    const ticks = (v ? a.x : a.y).ticks.filter(t => t[1] && t[1].trim());
+    const near = ticks.length ? ticks.reduce((m, t) => Math.abs(t[0] - at) < Math.abs(m[0] - at) ? t : m) : null;
+    const span = v ? Math.abs(b.r[2] - b.r[0]) : Math.abs(b.r[3] - b.r[1]);
+    const cat = near && Math.abs(near[0] - at) <= span ? near[1].replace(/\n/g, ' ') : '';
+    const part = this.legendName && this.legendName[String(b.fc || '').toLowerCase()] || '';
+    const val = v ? b.r[3] - b.r[1] : b.r[2] - b.r[0], q = I.y.q && !part ? I.y.q : '';
+    return tipCard({ head: cat || part || I.y.q, sub: [I.title && this.d.axes.length > 1 ? I.title : '', q].filter(Boolean).join(' · '),
+                     rows: [{ c: b.fc, name: cat ? part : '', v: this.num(val, v ? I.y.u : I.x.u || I.y.u) }] });
+  }
   barSeries(id, i, bars, base, s) {
     const xs = [...new Set(bars.map(b => b.o === 'v' ? b.r[0] : -b.r[1]))].sort((a, b) => a - b);
     return {
       id, type: 'custom', xAxisIndex: i, yAxisIndex: i, z: 2 + (bars[0].z || 0), clip: true,
-      data: bars.map((b, q) => ({ value: [(b.r[0] + b.r[2]) / 2, (b.r[1] + b.r[3]) / 2], b,
-        tip: `<b>${mplNum(b.o === 'v' ? b.r[3] - b.r[1] : b.r[2] - b.r[0])}</b>` })),
+      data: bars.map((b, q) => ({ value: [(b.r[0] + b.r[2]) / 2, (b.r[1] + b.r[3]) / 2], b, tip: this.barTip(i, b) })),
       renderItem: (p, api) => {
         const b = bars[p.dataIndex];
         const [xa, ya] = api.coord([b.r[0], b.r[1]]), [xb, yb] = api.coord([b.r[2], b.r[3]]);
@@ -1355,8 +1561,10 @@ class MplChart {
       id, type: 'custom', xAxisIndex: i, yAxisIndex: i, z: 2 + (c.z || 0), clip: true,
       data: c.runs.map(r => {
         const v = r.length > 4 ? r[4] : null, lab = v === null ? this.nearestLabel(c.pal[r[3]], legendLabel) : null;
-        const tip = v !== null ? `<b>${mplNum(v)}</b>` : lab ? `<b>${lab}</b>` : null;
-        return tip ? { value: [c.x[r[1]], c.y[r[0]][0]], tip } : { value: [c.x[r[1]], c.y[r[0]][0]], tooltip: { show: false } };
+        const x = c.x[r[1]], y = c.y[r[0]][0], I = this.axisInfo(i), col = c.pal[r[3]];
+        const val = v !== null ? this.num(v, I.y.u) : lab;
+        const tip = val ? tipCard({ head: a.map ? tipPlace(x, y) : this.xText(x, I.x.u), sub: I.title || I.y.q, rows: [{ c: typeof col === 'string' ? col : null, v: val }] }) : null;
+        return tip ? { value: [x, y], tip } : { value: [x, y], tooltip: { show: false } };
       }),
       renderItem: (p, api) => {
         const r = c.runs[p.dataIndex], [ya, yb] = c.y[r[0]];
@@ -1803,6 +2011,7 @@ class Deck {
   fit() {
     const k = Math.min(innerWidth / 1600, innerHeight / 900);
     this.deck.style.transform = `translate(-50%, -50%) scale(${k})`;
+    document.documentElement.style.setProperty('--tipk', Math.min(2.6, Math.max(1, .8 / k)).toFixed(3));   // tooltips at least ~14px on screen
   }
   steps(s) {
     // clicks on this slide: the highest data-step, including chart panels behind their host's step
@@ -1816,6 +2025,7 @@ class Deck {
   }
   go(n, step) {
     n = Math.max(0, Math.min(this.slides.length - 1, n));
+    if (this.hideTips && this.slides[this.i]) this.hideTips();   // no tooltip stays open over the next slide
     if (this.booted && window.__deckDataNow) window.__deckDataNow();   // the speaker moves on: load the charts now
     if (window.__ensureCharts) { window.__ensureCharts(this.slides[n]); delete this.slides[n]._steps; }
     if (window.__ensureTex) window.__ensureTex(this.slides[n]);
@@ -1912,7 +2122,16 @@ class Deck {
       lock = now + 650; e.deltaY > 0 ? this.next() : this.prev();
     }, { passive: true });
     let x0 = null, y0 = null;
-    addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    const hideTips = () => { for (const h of this.slides[this.i].querySelectorAll('.chart')) h._chart && h._chart.chart && h._chart.chart.dispatchAction({ type: 'hideTip' }); };
+    this.hideTips = hideTips;
+    addEventListener('touchstart', e => {
+      const host = e.target.closest && e.target.closest('.chart');
+      if (host) {   // inside a chart: scrub its tooltip, no swipe; the other charts of the slide close theirs
+        for (const h of this.slides[this.i].querySelectorAll('.chart')) if (h !== host && h._chart && h._chart.chart) h._chart.chart.dispatchAction({ type: 'hideTip' });
+        x0 = null; return;
+      }
+      hideTips(); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
     addEventListener('touchend', e => {
       if (x0 === null) return;
       const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
