@@ -226,6 +226,7 @@ def chart_jobs() -> list[tuple[str, object]]:
         ("k13", sf.planting_year_figure),
         ("k14", sf.ladder_figure),
         ("k15", vf.tree_effect_figure),
+        ("k16", vf.total_effect_figure),
         ("v0", vf.reforestable_share_figure),
         ("v1b", sf.literature_comparison_figure),
         ("w3", vf.planting_delay_figure),

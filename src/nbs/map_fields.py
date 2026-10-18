@@ -47,6 +47,9 @@ SCALES = {
     # warming = the albedo orange family (the same pair as "kühlt/wärmt" in the Vergleich chapter)
     "baumwirkung": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
                     "domain": [-90, 45], "mid": 0, "unit": "·10⁻¹⁵ K"},
+    # what reforesting all free area of a block brings in 2100, per land area: same diverging palette
+    "lohnt": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
+              "domain": [-12, 8], "mid": 0, "unit": "µK je Mha"},
     # year from which DAC beats the tree: diverging around 2037, early = deep teal, late = ochre
     "umstieg": {"stops": ["#0d4f57", "#3f9a96", "#e7e0cc", "#d8a24f", "#94591a"], "domain": [T_START, 2050],
                 "mid": 2037.5, "unit": ""},
@@ -522,6 +525,30 @@ def tree_effect() -> dict:
     ]}]}
 
 
+def total_effect() -> dict:
+    """k16: temperature effect in 2100 of reforesting all free area of a 2 deg block (typical forest, planted in the
+    start year): per-tree effect x trees on the reforestable area, summed over the block, per block land area
+    [µK per Mha of land]. Where reforestation pays most: the tree cools and there is space."""
+    from nbs.forest_data import key_grid
+    from nbs.species import SPECIES, get_species
+    w, land, blk, land_area = _blocks_and_land()
+    dt = _tree_dt_grid()
+    keys = key_grid()
+    trees = np.zeros_like(dt)
+    for key in SPECIES:
+        m = keys == key
+        trees[m] = w[m] / get_species(key).stand_area_m2
+    ok = np.isfinite(dt) & (w > 0)
+    tot = blk(np.where(ok, dt * trees, 0.0))
+    per = np.where(land_area > 0, tot * 1e6 / np.maximum(land_area, 1.0) * 1e10, np.nan)
+    keep = _keep_blocks(land)
+    has = keep & (blk(np.where(ok, w, 0.0)) > 0)
+    return {"panels": [{"grid": _grid(2.0), "layers": [
+        {"kind": "mask", "color": LAND, "cells": _mask(keep & (land_area > 0) & ~has), "label": "kein Platz für Bäume"},
+        {"kind": "num", "scale": "lohnt", "cells": _num(per, has, 2)},
+    ]}]}
+
+
 def facts() -> dict:
     """Numbers the map slides state (from the cell data, not from the drawn blocks)."""
     from nbs.animations import SITES, site_cell
@@ -538,7 +565,7 @@ def facts() -> dict:
             "orte": {s.name: float(dt[site_cell(s)]) for s in SITES}}
 
 
-MAPS = {"v0": reforestable_share, "k15": tree_effect, "b5": forest_types, "b8i": light_ingredients, "b8": absorbed_light, "v1": availability,
+MAPS = {"v0": reforestable_share, "k15": tree_effect, "k16": total_effect, "b5": forest_types, "b8i": light_ingredients, "b8": absorbed_light, "v1": availability,
         "d1": dac_energy, "d0": feasibility, "d4": switch_year, "d5": dac_net_over_time}
 
 

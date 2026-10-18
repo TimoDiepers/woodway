@@ -621,6 +621,9 @@ svg:has(.gh3.shown) .gh2 text { opacity: 0; }
 .road > .nextroad { position: absolute; inset: 0; display: flex; gap: 16px; align-items: center; }
 .road > .froad { transition: opacity .4s var(--ease); }
 .road:has(> .nextroad.shown) > .froad { opacity: 0; }
+/* slide 22: the question of the slide before, until the answer lies over it */
+.road > .qroad { display: flex; gap: 16px; align-items: center; transition: opacity .4s var(--ease); }
+.road:has(> .nextroad.shown) > .qroad { opacity: 0; }
 .froad { display: inline-flex; align-items: center; gap: 12px; font: 500 23px/1.2 var(--sans); color: var(--ink); letter-spacing: 0; }
 .froad .tex { font-size: 26px; }
 .froad .fx { color: var(--muted); }
@@ -826,6 +829,9 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .play .strips svg { width: 100%; height: auto; overflow: visible; display: block; }
 
 .mapnote { font: 400 19px/1.35 var(--sans); color: var(--muted); margin: 0; }
+/* map slides: the map takes the whole body, the takeaway sits in its empty lower-left corner */
+.mapcorner { position: absolute; left: 0; bottom: 8px; width: 370px; display: flex; flex-direction: column; gap: 12px; z-index: 2; }
+.mapcorner .takeaway { margin: 0; font-size: 22px; }
 .ptab { width: 100%; border-collapse: collapse; font: 400 18px/1.3 var(--sans); color: var(--ink-2); margin: 2px 0 6px; }
 .ptab th, .ptab td { padding: 2px 6px; text-align: right; border: 0; }
 .ptab th:first-child, .ptab td:first-child { text-align: left; }
@@ -839,6 +845,7 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 .axlab { position: absolute; transform: translate(-50%, -50%) rotate(-90deg); white-space: nowrap; pointer-events: none;
          font: 400 19px/1 var(--sans); color: var(--muted); }
 .axlab .katex { font-size: 1.2em; }
+.slide.active .axlab[data-step].shown { animation-name: fadein; }   /* rise would move `top` and drop the rotation */
 
 .opt2 { display: grid; grid-template-columns: 640px 1fr; gap: 40px; flex: 1; min-height: 0; }
 .opt2 > .chart { height: 100%; min-height: 0; }
@@ -1518,6 +1525,10 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .slide.holzweg .why li { display: flex; gap: 12px; align-items: baseline; font: 400 23px/1.35 var(--sans); color: #d6dbd6; }
 .slide.holzweg .why b { color: #f2ede2; font-weight: 600; }
+/* the opener with two cards: what holds the trees back, then what is sought */
+.slide.holzweg .hw3.hw2 { grid-template-columns: repeat(2, minmax(0, 540px)); justify-content: center; gap: 140px; bottom: 170px; }
+.slide.holzweg .hwnext { position: absolute; left: 80px; right: 80px; bottom: 82px; text-align: center; }
+.slide.holzweg .hwnext p { margin: 0; font: 500 34px/1.3 var(--serif); color: #f2ede2; }
 .slide.holzweg .why .no { color: #e07a5f; font: 700 26px/1 var(--sans); flex: none; }
 .slide.holzweg p.src { margin-top: 0; font: 400 13px/1.45 var(--sans); font-style: normal; color: #8d958f; opacity: 0; transition: opacity .6s var(--ease); }
 .slide.holzweg:has(.hwk3.shown) p.src { opacity: 1; }
@@ -1625,14 +1636,45 @@ svg.mo .m-sway.back { animation: none; }
 .tc-r .tc-v { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: #1b2420; }
 
 /* vegan slide: the headline asks first and names the answer on the last click */
-.vgtitle .ha { display: none; }
-.slide:has(.vgreveal.shown) .vgtitle .hq { display: none; }
-.slide:has(.vgreveal.shown) .vgtitle .ha { display: inline; animation: fadein .7s var(--ease) both; }
-/* the bottom row: the three small cards, then (after the reveal) the three points that say what is meant, in their place */
 .vg4 > .vgc:nth-child(3) { grid-row: 2; grid-column: 1 / 3; }
 .vg4 > .vgc:nth-child(4) { grid-row: 2; grid-column: 3 / 5; }
 .vg4 > .vgc:nth-child(5) { grid-row: 2; grid-column: 5 / 7; }
-.vg4 > .vgexp { grid-row: 2; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; min-height: 0; }
-.vg4:has(> .vgexp > .shown) > .vgc:nth-child(n+3) { visibility: hidden; }
-.vg4 > .vgexp > .vgc { grid-column: auto; background: color-mix(in srgb, #c98a2b 12%, #1a2022); }
-.vgexp .vgk { color: #e8b866; }
+/* slide 22: the tree thins the top CO2 layer, the cold escape from the top steps back */
+svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
+.slide:has(.lessco2.shown) svg.s21 .toprow { opacity: .15; }
+.slide:has(.lessco2.shown) svg.s21 .esc0 { opacity: 0; }
+
+/* slide 22: FaIR as a short flow from top to bottom */
+.fflow { align-self: center; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fflow .fins { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fflow .fin, .fflow .fout { background: var(--paper-deep); border-radius: 12px; padding: 18px 22px; display: flex; flex-direction: column; gap: 6px; }
+.fflow b { font: 600 24px/1.2 var(--sans); }
+.fflow .fin > span, .fflow .fout > span { font: 400 19px/1.3 var(--sans); color: var(--ink-2); }
+.fflow .ffair { background: var(--clay); color: var(--paper); border-radius: 14px; padding: 22px 26px; display: flex; flex-direction: column; gap: 8px; }
+.fflow .ffair b { font-size: 30px; }
+.fflow .ffair ul { margin: 4px 0 2px; padding: 0 0 0 22px; display: flex; flex-direction: column; gap: 6px; }
+.fflow .ffair li { font: 400 20px/1.3 var(--sans); color: var(--paper); }
+.fflow .fout { align-items: center; padding: 12px 22px; }
+.fflow .fout b { font-size: 34px; }
+.fflow .ffair > span { font: 400 19px/1.3 var(--sans); color: #ead7d2; }
+.fflow .fout b { font-size: 28px; }
+.fflow .fdn2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fflow .fdn svg { display: block; width: 24px; height: 32px; margin: 0 auto; overflow: visible; }
+
+/* a headline that asks first and answers on a later click (marker .qreveal) */
+.qtitle .ha { display: none; }
+.slide:has(.qreveal.shown) .qtitle .hq { display: none; }
+.slide:has(.qreveal.shown) .qtitle .ha { display: inline; animation: fadein .7s var(--ease) both; }
+
+/* vegan slide: where human-made methane comes from, one bar; at the reveal the animals turn the colour of the feed land in the donut */
+.ch4src { margin-top: 10px; }
+.ch4src .vgek { margin: 0 0 6px; font: 400 16px/1.3 var(--sans); color: var(--muted); }
+.srcbar { display: flex; gap: 3px; height: 38px; border-radius: 8px; overflow: hidden; }
+.srcbar span { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; font: 600 16px/1 var(--sans); color: #d6dbd6; background: #2f383b; }
+.srcbar span { transition: background .6s var(--ease), color .6s var(--ease); }
+.slide:has(.qreveal.shown) .srcbar span.tier { background: #c98a2b; color: #14181a; }
+.slide:has(.qreveal.shown) .srcbar span:not(.tier) { opacity: .45; }
+/* vegan slide: the answer stands out, the line under the donut only after the reveal */
+.qtitle .ha b { font-weight: inherit; color: #14181a; background: #e8b866; padding: 0 .22em; border-radius: .14em; box-decoration-break: clone; }
+.vgt.reveal-only { opacity: 0; transition: opacity .6s var(--ease); }
+.slide:has(.qreveal.shown) .vgt.reveal-only { opacity: 1; }

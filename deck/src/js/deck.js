@@ -488,7 +488,6 @@ const EC_TEMPSUM = {
   }
 };
 
-
 /* the gap chart on a dark slide: light text and lines, the colours of the curves stay */
 function ecDark(o) {
   const map = { [EC.ink]: '#f2ede2', [EC.ink2]: '#d6dbd6', [EC.muted]: '#9aa39d', [EC.grid]: '#2c3437', [EC.line]: '#3a4447', '#8a918c': '#6d756f', '#8e0d16': '#ff7a6e', '#c4121f': '#ff5a4f', '#2f7a45': '#6cc28a', [EC.alb]: '#ef8a52' };
@@ -750,7 +749,7 @@ function ecAnker(phase) {
       if (k >= 4) series.push(band('ve', B.ersatz, '#d0443a', 'Ersatz (wärmt)', 4, .7));
     }
     if (phase === 2 && k >= 5) { const v = on('vegan'), [pw, tw] = peak(v);
-      series.push(L('v', v, 'netto: vegan', { line: { width: 3 }, mark: [{ coord: [pw, tw], label: { position: 'bottom', distance: 30, offset: [-20, 0], fontSize: 24,
+      series.push(L('v', v, 'netto: pflanzlich', { line: { width: 3 }, mark: [{ coord: [pw, tw], label: { position: 'bottom', distance: 30, offset: [-20, 0], fontSize: 24,
         formatter: `netto: ${ecNum(tw, 2)} °C` } }] })); }
     // y range from all curves of the main part, so that it stays the same on every slide
     // DACCS (phase 1) is a backup slide; the main part keeps its own range
@@ -808,37 +807,53 @@ const EC_DACCS_AUSBAU = { steps: 0, tip: { unit: 'Gt CO₂/a', dec: 2 }, option(
    what it would become in a vegan world (forest-capable, too dry, replacement cropland), so both stay to be seen.
    Fixed series ids: a click merges and only the new ring enters. */
 const EC_LANDDONUT = {
-  steps: 8,   // k 1 the big block, k 2 the outer ring, k 3-7 the other cards of the slide, k 8 the reveal names the block tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
+  // k 0 the land today; k 1 a second ring around all of it: what each part could carry as forest (forest already is,
+  // the unused land fully, part of agriculture, nothing of the rest); k 2 (the reveal) agriculture split, only the
+  // animals' land and its afforestable part stay in front
+  steps: 2,
+  tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
   option(k) {
-    const V = window.ZEIT.vegan, L = V.land, frei = L.tiere + L.acker - L.acker_vegan, ersatz = L.acker_vegan - L.acker;
+    const V = window.ZEIT.vegan, L = V.land;
     const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
     const gha = v => `${ecNum(v, v < 1 ? 2 : 1)} Gha`;
     const rich = (c, op = 1) => ({ n: { color: c, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 22, opacity: op },
                          v: { color: c, fontFamily: EC.font, fontSize: 18, lineHeight: 20, opacity: .85 * op } });
-    // click 1 points at the feed land: the rest of today's ring steps back (and stays back while the outer ring comes)
-    const dimmed = name => k >= 1 && ['Wald', 'Acker für uns', 'übriges Land'].includes(name);
-    const item = (name, value, color, lab, ink) => ({ name, value, itemStyle: { color, opacity: dimmed(name) ? .3 : 1 },
-            label: lab === 'in' ? { position: 'inside', formatter: `{n|${name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dimmed(name) ? .4 : 1) }
-           : lab === 'out' ? { position: 'outside', formatter: `{n|${name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dimmed(name) ? .4 : 1) } : { show: false },
-      labelLine: { show: lab === 'out', lineStyle: { color: '#6d756f' } } });
-    const blank = value => ({ value, itemStyle: { color: 'transparent' }, label: { show: false }, labelLine: { show: false }, tooltip: { show: false } });
-    const base = { type: 'pie', center: ['50%', '43%'], startAngle: 90, padAngle: 1.2, itemStyle: { borderRadius: 7 }, emphasis: { disabled: true },
-                   labelLine: { length: 12, length2: 14 }, label: { overflow: 'none' }, animationDuration: 1100 };
-    const series = [Object.assign({}, base, { id: 'heute', radius: ['46%', '81%'], animation: k <= 1, data: [
+    // what share of each land use could carry forest (Walker et al. 2022: 15.8 % of its 2.06 Gha grazing land, 61.7 % of
+    // its 1.81 Gha cropland pass the reforestation rule; results/_tools/land_shares.py), applied to the parts of this
+    // ring: our own fields are 62 % of cropland, the feed crops 38 % of it (Poore & Nemecek 2018), the rest of the
+    // animals' land is pasture. Of the animals' afforestable land a vegan world frees V.frei_gha, the replacement crops
+    // take the rest
+    const sWeide = 0.158, sAcker = 0.617, futter = L.acker * 0.38 / 0.62;
+    const aTier = sWeide * (L.tiere - futter) + sAcker * futter, ersatz = aTier - V.frei_gha, aUns = sAcker * L.acker;
+    const front = ['Tierhaltung', 'frei, aufforstbar'];   // at the reveal only these stay in front (names, not labels)
+    const dim = name => k >= 2 && !front.includes(name);
+    const item = (name, value, color, lab, ink, label) => ({ name, value, itemStyle: { color, opacity: dim(name) ? .25 : 1 },
+            label: lab ? { position: lab === 'in' ? 'inside' : 'outside', formatter: `{n|${label || name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dim(name) ? .35 : 1) }
+                       : { show: false },
+            labelLine: { show: lab === 'out', lineStyle: { color: '#6d756f', opacity: dim(name) ? .35 : 1 } } });
+    const base = { type: 'pie', center: ['46%', '46%'], startAngle: 90, padAngle: 1.2, itemStyle: { borderRadius: 7 }, emphasis: { disabled: true },
+                   labelLine: { length: 12, length2: 14 }, label: { overflow: 'none' }, animationDuration: 1100, animationDurationUpdate: 700 };
+    const agri = k >= 2 ? [item('Tierhaltung', L.tiere, '#c98a2b', 'in', '#14181a', 'Weide, Tierfutter'), item('Acker für uns', L.acker, '#e3c46e', 'out')]
+                        : [item('Landwirtschaft', L.tiere + L.acker, '#8a7a5c', 'in')];
+    const series = [Object.assign({}, base, { id: 'heute', radius: ['44%', '78%'], data: [
       item('Wald', L.wald, '#2f6b45', 'in'),
-      item('bewaldbar', L.wiederbewaldbar, '#5fae76', 'out', '#a6e3b4'),
-      item(k >= 8 ? 'Tierfutter' : '?', L.tiere, '#c98a2b', 'in', '#14181a'),
-      item('Acker für uns', L.acker, '#e3c46e', 'out'),
+      item('ungenutzt', L.wiederbewaldbar, '#6b8f5e', k >= 1 ? null : 'out', '#c9d8c0'),
+      ...agri,
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
-    if (k >= 2) series.push(Object.assign({}, base, { id: 'vegan', radius: ['85%', '98%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900, data: [
-      blank(L.wald + L.wiederbewaldbar),
-      item('frei, bewaldbar', V.frei_gha, '#8fe0a0', 'out', '#a6e3b4'),
-      item('frei, nicht bewaldbar', frei - V.frei_gha, '#6b5d45', 'out', '#c9bfae'),
-      item('Ersatz', ersatz, '#e3c46e', 'none'),
-      blank(L.acker + rest)] }));
+    // the second ring: what of each part could carry forest; before the split all of agriculture's in one piece
+    const green = (name, v, c, lab, label) => item(name, v, c, lab, '#a6e3b4', label);
+    if (k >= 1) series.push(Object.assign({}, base, { id: 'ring', radius: ['82%', '94%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900,
+      data: [item('schon Wald', L.wald, '#24402f', null),
+             green('aufforstbar', L.wiederbewaldbar, '#5fae76', 'out'),
+             ...(k >= 2
+               ? [green('frei, aufforstbar', V.frei_gha, '#8fe0a0', 'out'), green('aufforstbar, für Ersatzanbau', ersatz, '#5fae76', null),
+                  item('nicht aufforstbar', L.tiere - aTier, '#3a3a33', null),
+                  green('Acker, aufforstbar', aUns, '#5fae76', null), item('nicht aufforstbar ', L.acker - aUns, '#3a3a33', null)]
+               : [green('davon aufforstbar', aTier + aUns, '#8fe0a0', 'out'), item('nicht aufforstbar', L.tiere + L.acker - aTier - aUns, '#3a3a33', null)]),
+             item('nicht aufforstbar  ', rest, '#2a3033', null)] }));
     return {
-      animationDurationUpdate: 0,
-      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '36%',
+      animationDurationUpdate: 700,
+      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '39%',
                textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 28, fontWeight: 600 },
                subtextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } },
       series

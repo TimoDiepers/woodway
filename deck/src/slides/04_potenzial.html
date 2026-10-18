@@ -8,9 +8,9 @@
 
 <section class="slide" data-ch="vergleich" data-title="Temperaturwirkung eines Baums je Ort">
   <header class="sh"><h2>Temperaturwirkung eines Baums je Ort</h2></header>
-  <div class="body">
+  <div class="body" style="position:relative">
     <div class="chart" data-chart="k15" data-label="Weltkarte: Temperaturwirkung eines Baums im Jahr 2100, grün kühlt, orange wärmt"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0">Gar nicht überall negativ! Problem: viele Flächen liegen dort, wo der Baum wärmt.</p></div>
+    <!-- the takeaway in the empty corner of the map (south-east Pacific) --><div class="mapcorner"><p class="takeaway" data-step="1" style="--d:0">Nicht überall kühlend: auf vielen Flächen wärmt der Baum.</p></div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (Waldtyp)</span><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (Kohlenstoff der Zelle)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a> (Wachstumstempo)</span><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Albedo; ohne Messung Breitenband)</span><span><a href="https://doi.org/10.1029/2025JG009284" target="_blank" rel="noopener">Williams et al. 2026</a> (Kronenschluss)</span><span><a href="https://doi.org/10.1126/science.adx6329" target="_blank" rel="noopener">Grünig et al. 2026</a> (Störung)</span><span><a href="https://doi.org/10.5194/gmd-14-3007-2021" target="_blank" rel="noopener">Leach et al. 2021</a>; <a href="https://doi.org/10.5194/gmd-17-8569-2024" target="_blank" rel="noopener">Smith et al. 2024</a> (FaIR, SSP2-4.5)</span><span><i>Eigene Rechnung</i> (gepflanzt 2026; Mittel je 2°-Block, flächengewichtet)</span></p>
   <aside class="notes" data-n="25">
@@ -25,13 +25,27 @@
   <header class="sh"><h2>Wiederbewaldbare Fläche</h2></header>
   <div class="body" style="position:relative">
     <div class="chart" data-chart="v0" data-label="Weltkarte: Anteil der Landfläche, der wiederbewaldbar ist"></div>
-    <div class="foot"><div><p class="mapnote">Nicht wiederbewaldbar: bestehender Wald, Acker, Stadt, Wüste und offenes Grasland</p></div><p class="takeaway" data-step="1" style="--d:0">0,83&nbsp;Gha (Mrd. Hektar) wiederbewaldbar, nur 0,42 Gha davon kühlend.</p></div>
+    <div class="mapcorner"><p class="mapnote">Nicht wiederbewaldbar: bestehender Wald, Acker, Stadt, Wüste und offenes Grasland</p><p class="takeaway" data-step="1" style="--d:0">0,83&nbsp;Gha frei, nur die Hälfte kühlt.</p></div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (wiederbewaldbare Fläche)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (typischer Waldtyp)</span><span><i>Eigene Rechnung</i> (Anteil je 2°-Block; kühlend: Kühlung mit FaIR, SSP2-4.5)</span></p>
   <aside class="notes" data-n="26">
     <p class="q">Ausführlich: Wiederbewaldbar sind 0,83 Gha, rund 6 % der eisfreien Landfläche: das entspricht rund 1,7 Billionen Bäumen; die Überschlagsrechnung setzte 2,1 Billionen voraus. Kühlend wirkt ein 2026 gepflanzter Baum davon nur auf 0,42 Gha (0,8 Billionen Bäume); auf der übrigen, etwas größeren Hälfte, in hohen Breiten und Trockengebieten, wirkt er erwärmend.</p>
-    <p>Die Karte davor: Gar nicht überall kühlt der Baum. Jetzt die Frage für den Vergleich: Wie viel Platz gibt es überhaupt? Grün heißt: Dieser Anteil des Landes ist wiederbewaldbar — kein bestehender Wald, kein Acker, keine Stadt, keine Wüste und kein natürlich offenes Grasland. Grau: Land ohne Platz. Kräftig grün wird es nur im hohen Norden und in einzelnen Regionen der Tropen — und gerade im Norden wärmt der Baum. Bei 2000 Bäumen je Hektar ist das Platz für rund 1,7 Billionen Bäume — die naive Rechnung vom Anfang brauchte 2,1 Billionen. Und nur rund die Hälfte davon kühlt: Von den 0,83 Gha bleiben 0,42 Gha, auf denen ein 2026 gepflanzter Baum bis 2100 kühlt, rund 0,8 Billionen Bäume. Das sind die grünen Flächen der Karte davor; die orangen wärmen.</p>
+    <p>Die Karte davor: Gar nicht überall kühlt der Baum. Jetzt die Frage für den Vergleich: Wie viel Platz gibt es überhaupt? Grün heißt: Dieser Anteil des Landes ist wiederbewaldbar — kein bestehender Wald, kein Acker, keine Stadt, keine Wüste und kein natürlich offenes Grasland. Grau: Land ohne Platz, das meiste davon Acker und Weide — darauf kommen wir am Ende zurück. Kräftig grün wird es nur im hohen Norden und in einzelnen Regionen der Tropen — und gerade im Norden wärmt der Baum. Bei 2000 Bäumen je Hektar ist das Platz für rund 1,7 Billionen Bäume — die naive Rechnung vom Anfang brauchte 2,1 Billionen. Und nur rund die Hälfte davon kühlt: Von den 0,83 Gha bleiben 0,42 Gha, auf denen ein 2026 gepflanzter Baum bis 2100 kühlt, rund 0,8 Billionen Bäume. Das sind die grünen Flächen der Karte davor; die orangen wärmen.</p>
     <p class="q">Falls Fragen kommen — Fläche nach Walker et al. (2022), nur Zellen mit einem typischen Waldtyp nach Hasler et al. (2024). Baum = typischer Wald der Zelle (Hasler et al. 2024), wie in allen Kapiteln; gepflanzt 2026, bewertet 2100. Die Karte „Wo Bäume kühlen — und wo nicht“ liegt im Backup. Gezeigt als Anteil an der Landfläche je 2°-Block; Blöcke mit weniger als 3 von 16 Landzellen sind ausgeblendet (Inselchen, einzelne Landzellen im Klimadatensatz), die Flächensummen enthalten sie.</p>
+  </aside>
+</section>
+
+<section class="slide" data-ch="vergleich" data-title="Wo Aufforstung sich lohnt">
+  <header class="sh"><h2>Wo Aufforstung sich lohnt</h2></header>
+  <div class="body" style="position:relative">
+    <div class="chart" data-chart="k16" data-label="Weltkarte: Temperaturwirkung 2100, wenn alle freie Fläche eines Gebiets bewaldet wird, je Landfläche; grün kühlt, orange wärmt. Stark kühlend: Tropen, Osten der USA, Südostasien; wärmend: borealer Norden"></div>
+    <div class="mapcorner"><p class="mapnote">Wirkung je Baum × Zahl der Bäume, die auf die freie Fläche passen</p><p class="takeaway" data-step="1" style="--d:0">Lohnt: Tropen. Viel Platz im Norden, aber dort wärmt der Wald.</p></div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (wiederbewaldbare Fläche)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (typischer Waldtyp)</span><span><i>Eigene Rechnung</i> (Wirkung je Baum 2100 wie auf der vorletzten Karte, mal Bäume auf der freien Fläche, je 2°-Block durch seine Landfläche; FaIR, SSP2-4.5)</span></p>
+  <aside class="notes">
+    <p>Die beiden Karten zusammen: die Wirkung je Baum mal die Zahl der Bäume, die auf die freie Fläche passen. Also: Was bringt es, wenn man hier alles Freie bewaldet? Geteilt durch die Landfläche, damit große und kleine Kacheln vergleichbar sind.</p>
+    <p>Dunkelgrün lohnt sich: die Tropen in Südamerika, Afrika und Südostasien, dazu der Osten der USA und Südchina. Dort kühlt jeder Baum stark, und es ist Platz. Der größte Teil der freien Fläche aber liegt im Norden, in Kanada und Sibirien — und dort wärmt der Wald bis 2100, weil er Schnee verdeckt. Deshalb kühlt von den 0,83 Gha nur gut die Hälfte; die Hälfte mit Platz im Norden arbeitet dagegen.</p>
+    <p class="q">Falls Fragen kommen — Zahlen nach Zone: boreal (über 50°) 0,37 Gha frei, davon 23 % kühlend; gemäßigt und subtropisch 0,23 Gha, 57 %; Tropen 0,22 Gha, 91 %. Alle freie Fläche zusammen: rund −9 mK im Jahr 2100. Einheit der Karte: µK je Million Hektar Landfläche des Blocks.</p>
   </aside>
 </section>
 

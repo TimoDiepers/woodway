@@ -941,8 +941,8 @@ def de_num(v: float, nd: int = 0) -> str:
 
 
 def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text) -> str:
-    """Layout of a world hex map: map at full width, colour bar and legend underneath; the three sites with
-    *site_text(value)* of their cell.
+    """Layout of a world hex map: the map at full width, colour bar and legend in a strip underneath; the three
+    sites with *site_text(value)* of their cell.
 
     The deck draws the map itself (nbs.map_fields + the HTML renderer, exported to the
     pptx as SVG); this figure supplies the layout, the borders and a reference picture."""
@@ -954,18 +954,18 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     grid = np.full((90, 180), np.nan)
     for r, c, v in layer["cells"]:
         grid[r, c] = v
-    fig, ax = plt.subplots(figsize=(12.0, 4.7), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.2, top=0.995)
+    fig, ax = plt.subplots(figsize=(12.0, 5.4), dpi=FIG_DPI)   # 360 x 144 degrees on top, 0.6 in for the legend
+    fig.subplots_adjust(left=0.0, right=1.0, bottom=0.6 / 5.4, top=1.0)
     im = ax.imshow(np.ma.masked_invalid(grid), extent=(-180, 180, -90, 90), origin="upper", cmap=M.scale_cmap(sc),
                    norm=M.scale_norm(sc), interpolation="nearest")
     _map_axes(ax)
     world_site_labels(ax, lambda s: None if (v := map_site_value(data, s)) is None else site_text(v))
-    cax = fig.add_axes([0.3, 0.045, 0.36, 0.025])
+    cax = fig.add_axes([0.3, 0.03, 0.36, 0.02])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
     cb.set_label(cbar_label, fontsize=11)
     cb.ax.xaxis.set_label_position("top")
     cb.outline.set_visible(False)
-    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label)], loc="lower left", bbox_to_anchor=(0.69, 0.01),
+    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label)], loc="lower left", bbox_to_anchor=(0.69, -0.005),
                frameon=False, fontsize=11)
     return _save(fig, out_path)
 
@@ -973,7 +973,7 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
 def reforestable_share_figure(out_path: str) -> str:
     """V0: where trees could go at all -- reforestable share of each 2 deg block's land."""
     return _world_map_skeleton(out_path, "v0", "wiederbewaldbarer Anteil der Landfläche [%]", [0, 5, 10, 20, 30, 50],
-                               "kein Platz für Bäume (Wald, Acker, Stadt, …)", lambda v: f"{de_num(v)} %")
+                               "kein Platz für Bäume", lambda v: f"{de_num(v)} %")
 
 
 def feasibility_figure(out_path: str) -> str:
@@ -1004,3 +1004,10 @@ def tree_effect_figure(out_path: str) -> str:
     return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [10$^{-15}$ K]: grün kühlt, orange wärmt",
                                [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
                                lambda v: f"{de_num(v)}·10$^{{-15}}$ K")
+
+
+def total_effect_figure(out_path: str) -> str:
+    """K16: where reforestation pays: effect in 2100 of reforesting all free area, per land area."""
+    return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [µK je Mio. ha Land]",
+                               [-12, -8, -4, 0, 4, 8], "kein Platz für Bäume",
+                               lambda v: f"{de_num(v, 1)} µK")
