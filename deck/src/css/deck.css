@@ -63,6 +63,7 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   visibility: hidden; opacity: 0;
   transition: opacity .35s var(--ease), visibility 0s linear .35s;
   background: var(--paper);   /* every slide opaque in its own colour: the next one fades in over it (see Deck.go) */
+  isolation: isolate;          /* a raised element (z-index) stays inside its slide, never above the next one */
 }
 .slide.active { visibility: visible; opacity: 1; transition: opacity .35s var(--ease); z-index: 2; }
 /* the slide being left holds still under the next while that one fades in: what both show does not dip (Deck.go) */
@@ -167,7 +168,13 @@ strong { font-weight: 600; }
 
 /* signpost: the overall equation with the term in work boxed (Klima) */
 .road { display: flex; gap: 16px; align-items: center; margin: 0 0 12px; font: 500 19px/1.2 var(--sans); color: var(--muted); letter-spacing: .02em; }
-.road .tex { font-size: 25px; color: var(--ink); }
+.road .tex { font-size: 28px; color: var(--ink); }
+/* the label of the signpost line under the headline: a chip in the chapter colour, so the line reads as the slide's thread */
+.road .rl { flex: none; display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px 8px; border-radius: 10px;
+            font: 600 24px/1.1 var(--sans); letter-spacing: 0; white-space: nowrap;
+            color: var(--ch); background: color-mix(in srgb, var(--ch) 12%, var(--paper)); }
+.road .rl .tex { font-size: 30px; color: inherit; }
+.road .rt { font: 500 24px/1.2 var(--sans); color: var(--ink); letter-spacing: 0; }
 
 /* symbol legends */
 .legend { display: grid; grid-template-columns: auto 1fr; gap: 6px 22px; align-items: baseline; }
@@ -624,8 +631,8 @@ svg:has(.gh3.shown) .gh2 text { opacity: 0; }
 /* slide 22: the question of the slide before, until the answer lies over it */
 .road > .qroad { display: flex; gap: 16px; align-items: center; transition: opacity .4s var(--ease); }
 .road:has(> .nextroad.shown) > .qroad { opacity: 0; }
-.froad { display: inline-flex; align-items: center; gap: 12px; font: 500 23px/1.2 var(--sans); color: var(--ink); letter-spacing: 0; }
-.froad .tex { font-size: 26px; }
+.froad { display: inline-flex; align-items: center; gap: 12px; font: 500 24px/1.2 var(--sans); color: var(--ink); letter-spacing: 0; }
+.froad .tex { font-size: 28px; }
 .froad .fx { color: var(--muted); }
 .froad .fw { padding: 2px 10px 4px; border: 2.5px solid transparent; border-radius: 10px; color: #a49c8c; }
 .froad .fw.cur { border-color: #1b7837; background: rgba(27, 120, 55, .07); color: var(--ink); }
@@ -1086,6 +1093,11 @@ svg.mo .m-pulse { transform-box: fill-box; transform-origin: center; }
 
 /* a formula symbol in a slide title: the math font, without making the title line taller */
 .sh h2 .katex { font-size: 1.08em; line-height: 0; }
+/* climate: which way the radiative forcing points */
+.phi-sign { display: flex; gap: 10px; }
+.phi-sign b { font: 600 17px/1 var(--sans); padding: 7px 12px; border-radius: 999px; }
+.phi-sign .w { color: #b2182b; background: color-mix(in srgb, #b2182b 10%, var(--paper)); }
+.phi-sign .k { color: var(--fjord, #2c5d7c); background: color-mix(in srgb, var(--fjord, #2c5d7c) 12%, var(--paper)); }
 .sh h2 .katex .strut { display: none !important; }   /* KaTeX's strut would still add a few px to the line */
 
 .ww-side { display: flex; align-items: center; gap: 18px; padding: 14px 18px 14px 14px; border-radius: 14px; background: rgba(255, 255, 255, .6);
@@ -1678,3 +1690,42 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 .qtitle .ha b { font-weight: inherit; color: #14181a; background: #e8b866; padding: 0 .22em; border-radius: .14em; box-decoration-break: clone; }
 .vgt.reveal-only { opacity: 0; transition: opacity .6s var(--ease); }
 .slide:has(.qreveal.shown) .vgt.reveal-only { opacity: 1; }
+/* intro: hype and critique side by side, each with its own label */
+.hk { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 6px; }
+.hkcol { display: flex; flex-direction: column; min-height: 0; }
+.hkk { margin: 0 0 18px; font: 600 18px/1.2 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--moss); }
+.hkk.kr { color: var(--clay); }
+/* intro: a dense collage, smaller cards; the Science study the sum comes from stands out */
+.hk .clip.key { z-index: 5; }
+.clip.key .cl-in { background: #fbf3dc; box-shadow: 0 0 0 3px var(--moss), 0 10px 26px rgba(0, 0, 0, .18); }
+.clip.key .cl-h { font-size: 28px; color: var(--moss); }
+.clip.key .cl-by { color: var(--moss); font-weight: 600; }
+/* intro: many headlines per column, so smaller type than the other clip slides */
+.hk .clips.sm .cl-in { padding: 14px 20px 16px; }
+.hk .clips.sm .cl-src { font-size: 14px; gap: 10px; padding-bottom: 8px; }
+.hk .clips.sm .cl-src b { font-size: 15px; }
+.hk .clips.sm .clip.sci .cl-src b { font-size: 17px; }
+.hk .clips.sm .cl-dach { margin-top: 10px; font-size: 16px; }
+.hk .clips.sm .cl-h { font-size: 21px; }
+.hk .clips.sm .clip.sci .cl-h { font-size: 18px; }
+.hk .clips.sm .clip.key .cl-h { font-size: 23px; }
+.hk .clips.sm .cl-by { font-size: 14px; }
+/* intro: the back-of-envelope sum built from its parts: demand ÷ one tree ≈ trees; the Science study under it */
+.ue { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 46px; }
+.ue-eq { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 0 26px; align-items: center; }
+.ue-box { display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%;
+          padding: 26px 28px 28px; background: var(--paper-deep); border-radius: 12px; }
+.ue-ico { width: 96px; height: 80px; margin-bottom: 14px; }
+.ue-box b { font: 600 50px/1 var(--sans); letter-spacing: -.02em; color: var(--ink); white-space: nowrap; font-variant-numeric: lining-nums; }
+.ue-bedarf b { color: var(--clay); }
+.ue-baum b, .ue-erg b { color: var(--moss); }
+.ue-c { margin-top: 12px; max-width: 330px; font: 400 19px/1.35 var(--sans); color: var(--ink-2); text-wrap: balance; }
+.ue-op { font: 400 64px/1 var(--serif); color: var(--muted); }
+.ue-erg { background: var(--moss); }
+.ue-erg b { color: var(--paper); }
+.ue-erg .ue-c { color: color-mix(in srgb, var(--paper) 85%, var(--moss)); }
+.ue-tag { display: block; margin-bottom: 12px; font: 600 15px/1.2 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--moss); }
+.ue .clip.ue-sci { position: relative; align-self: flex-end; width: 760px; margin-right: 10px; }
+.ue-sci .cl-in { padding: 20px 28px 22px; }
+.ue-sci .cl-h { font-size: 28px; }
+.ue-sci .cl-sub { font-size: 20px; margin-top: 10px; text-wrap: balance; }
