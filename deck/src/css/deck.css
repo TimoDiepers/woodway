@@ -1690,6 +1690,22 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 .qtitle .ha b { font-weight: inherit; color: #14181a; background: #e8b866; padding: 0 .22em; border-radius: .14em; box-decoration-break: clone; }
 .vgt.reveal-only { opacity: 0; transition: opacity .6s var(--ease); }
 .slide:has(.qreveal.shown) .vgt.reveal-only { opacity: 1; }
+/* the requirements below come in as bare labels, centred; the reveal ticks them off and fills them in, in the accent.
+   The row has a fixed height, so the charts above keep their size when the texts open */
+.vg4:has(.vgb) { grid-template-rows: 1fr 134px; }
+.vg4 .vgc.vgb { justify-content: center; align-items: center; text-align: center; padding: 10px 22px;
+                box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow .8s var(--ease), background-color .8s var(--ease); }
+.vg4 .vgc.vgb .vgk { justify-content: center; margin: 0; font-size: 22px; }
+.vgic { flex: none; width: 30px; height: 30px; fill: none; stroke: #a6e3b4; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke .6s var(--ease); }
+.vgb .ok { display: inline-block; max-width: 0; margin-left: -10px; opacity: 0; overflow: hidden; color: #e8b866;
+           transition: max-width .6s var(--ease), margin-left .6s var(--ease), opacity .6s var(--ease) .15s; }
+.vg4 .vgc.vgb .vgt.reveal-only { max-height: 0; margin-top: 0; overflow: hidden;
+  transition: opacity .6s var(--ease) .3s, max-height .7s var(--ease), margin-top .7s var(--ease); }
+.vgb .vgt b { color: #e8b866; }
+.slide:has(.qreveal.shown) .vgb { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, #e8b866 70%, transparent); background-color: color-mix(in srgb, #e8b866 8%, #1a2022); }
+.slide:has(.qreveal.shown) .vgb .vgic { stroke: #e8b866; }
+.slide:has(.qreveal.shown) .vgb .ok { max-width: 1.2em; margin-left: 0; opacity: 1; }
+.slide:has(.qreveal.shown) .vg4 .vgc.vgb .vgt.reveal-only { max-height: 4.5em; margin-top: 8px; }
 /* intro: hype and critique side by side, each with its own label */
 .hk { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 6px; }
 .hkcol { display: flex; flex-direction: column; min-height: 0; }
@@ -1729,3 +1745,17 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 .ue-sci .cl-in { padding: 20px 28px 22px; }
 .ue-sci .cl-h { font-size: 28px; }
 .ue-sci .cl-sub { font-size: 20px; margin-top: 10px; text-wrap: balance; }
+/* vegan slide, tempo: the integral of each curve to 2100 laid over the chart's empty lower right */
+.pulsw { position: relative; flex: 1; min-height: 0; display: flex; }
+.pulsw > .chart { flex: 1; }
+.pulsint { position: absolute; right: 34px; bottom: 58px; padding: 12px 18px 14px; border-radius: 12px; background: rgba(20, 24, 26, .78);
+           border: 1px solid #2c3437; font: 400 17px/1.3 var(--sans); color: #9aa39d; min-width: 230px; }
+.pulsint .pik { margin-bottom: 6px; font: 600 17px/1.3 var(--sans); color: #d6dbd6; }
+.pulsint .pir { display: flex; align-items: center; gap: 10px; font-size: 20px; color: #d6dbd6; margin-top: 4px; }
+.pulsint .pir b { margin-left: auto; font: 600 30px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+.pulsint .pir b small { margin-left: 6px; font: 400 17px/1 var(--sans); color: #9aa39d; }
+.pulsint .co2 b { color: #7fd09a; } .pulsint .ch4 b { color: #6fb7e0; }
+.pulsint .sw { width: 22px; height: 4px; border-radius: 2px; } .pulsint .co2 .sw { background: #7fd09a; } .pulsint .ch4 .sw { background: #6fb7e0; }
+.ch4src { display: flex; align-items: center; gap: 14px; }
+.ch4src .srck { flex: none; font: 600 17px/1.2 var(--sans); color: #d6dbd6; }
+.ch4src .srcbar { flex: 1; min-width: 0; }

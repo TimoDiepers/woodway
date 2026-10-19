@@ -807,12 +807,14 @@ const EC_DACCS_AUSBAU = { steps: 0, tip: { unit: 'Gt CO₂/a', dec: 2 }, option(
    what it would become in a vegan world (forest-capable, too dry, replacement cropland), so both stay to be seen.
    Fixed series ids: a click merges and only the new ring enters. */
 const EC_LANDDONUT = {
-  // k 0 the land today; k 1 a second ring around all of it: what each part could carry as forest (forest already is,
-  // the unused land fully, part of agriculture, nothing of the rest); k 2 (the reveal) agriculture split, only the
-  // animals' land and its afforestable part stay in front
-  steps: 2,
+  // k 0 the land today; k 1 a second ring around agriculture only: how much of it could carry forest (the other parts
+  // say it themselves); k 2 (the reveal) agriculture split, only the
+  // animals' land and its afforestable part stay in front; the slide shows its requirement boxes in between, so the
+  // chart holds k 1 for one more click
+  steps: 3,
   tip: { item: p => p.name ? tipCard({ head: p.name, sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
   option(k) {
+    if (k >= 2) k -= 1;
     const V = window.ZEIT.vegan, L = V.land;
     const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
     const gha = v => `${ecNum(v, v < 1 ? 2 : 1)} Gha`;
@@ -825,7 +827,7 @@ const EC_LANDDONUT = {
     // take the rest
     const sWeide = 0.158, sAcker = 0.617, futter = L.acker * 0.38 / 0.62;
     const aTier = sWeide * (L.tiere - futter) + sAcker * futter, ersatz = aTier - V.frei_gha, aUns = sAcker * L.acker;
-    const front = ['Tierhaltung', 'frei, aufforstbar'];   // at the reveal only these stay in front (names, not labels)
+    const front = ['Tierhaltung', 'frei, aufforstbar', 'nicht aufforstbar', 'aufforstbar, für Ersatzanbau'];   // at the reveal only these stay in front (names, not labels)
     const dim = name => k >= 2 && !front.includes(name);
     const item = (name, value, color, lab, ink, label) => ({ name, value, itemStyle: { color, opacity: dim(name) ? .25 : 1 },
             label: lab ? { position: lab === 'in' ? 'inside' : 'outside', formatter: `{n|${label || name}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dim(name) ? .35 : 1) }
@@ -837,20 +839,23 @@ const EC_LANDDONUT = {
                         : [item('Landwirtschaft', L.tiere + L.acker, '#8a7a5c', 'in')];
     const series = [Object.assign({}, base, { id: 'heute', radius: ['44%', '78%'], data: [
       item('Wald', L.wald, '#2f6b45', 'in'),
-      item('ungenutzt', L.wiederbewaldbar, '#6b8f5e', k >= 1 ? null : 'out', '#c9d8c0'),
+      item('aufforstbar', L.wiederbewaldbar, '#6b8f5e', 'out', '#c9d8c0'),
       ...agri,
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
     // the second ring: what of each part could carry forest; before the split all of agriculture's in one piece
     const green = (name, v, c, lab, label) => item(name, v, c, lab, '#a6e3b4', label);
+    // only agriculture gets the second ring: the rest stays an invisible spacer, so the ring lines up with the first
+    const spacer = (name, v) => ({ name, value: v, itemStyle: { color: 'rgba(0, 0, 0, 0)' }, label: { show: false }, labelLine: { show: false }, tooltip: { show: false } });
     if (k >= 1) series.push(Object.assign({}, base, { id: 'ring', radius: ['82%', '94%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900,
-      data: [item('schon Wald', L.wald, '#24402f', null),
-             green('aufforstbar', L.wiederbewaldbar, '#5fae76', 'out'),
+      data: [spacer('Wald ', L.wald), spacer('aufforstbar ', L.wiederbewaldbar),
              ...(k >= 2
-               ? [green('frei, aufforstbar', V.frei_gha, '#8fe0a0', 'out'), green('aufforstbar, für Ersatzanbau', ersatz, '#5fae76', null),
-                  item('nicht aufforstbar', L.tiere - aTier, '#3a3a33', null),
+               ? [green('frei, aufforstbar', V.frei_gha, '#8fe0a0', 'out'),
+                  item('nicht aufforstbar', L.tiere - aTier, '#4a4a40', 'out', '#9aa39d'),
+                  // next to our own fields: the afforestable animal land the plant replacement needs as cropland
+                  green('aufforstbar, für Ersatzanbau', ersatz, '#5fae76', 'out', 'Ersatzanbau'),
                   green('Acker, aufforstbar', aUns, '#5fae76', null), item('nicht aufforstbar ', L.acker - aUns, '#3a3a33', null)]
-               : [green('davon aufforstbar', aTier + aUns, '#8fe0a0', 'out'), item('nicht aufforstbar', L.tiere + L.acker - aTier - aUns, '#3a3a33', null)]),
-             item('nicht aufforstbar  ', rest, '#2a3033', null)] }));
+               : [green('davon aufforstbar', aTier + aUns, '#8fe0a0', 'out'), item('nicht aufforstbar', L.tiere + L.acker - aTier - aUns, '#4a4a40', 'out', '#9aa39d')]),
+             spacer('übriges Land ', rest)] }));
     return {
       animationDurationUpdate: 700,
       title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: 'center', top: '39%',
