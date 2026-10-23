@@ -8,7 +8,7 @@ Main deck, static (decided 2026-10-01 after reviewing the clips):
   map, plus the monthly cycle at both sites as the reason why.
 
 Optional material, looping clips. Both a map of where the Norway spruce can grow next to a curve
-for the two example sites (Aachen, Joensuu):
+for the example sites (Aachen, Fairbanks, Marabá):
 
 - ``carbon_map_animation`` -- CO2 one tree has taken out of the air, over the
   years. Growth depends on the species only, so the map fills uniformly and
@@ -84,7 +84,7 @@ MONTHS_DE_LONG = (
 EXTENT = (-12.0, 65.0, 35.0, 72.0)  # lon_min, lon_max, lat_min, lat_max
 WORLD = (-180.0, 180.0, -58.0, 84.0)
 # the light maps since a tropical site joined (2026-10-06): the part of the world with all three sites
-SITES_VIEW = (-85.0, 55.0, -30.0, 72.0)
+SITES_VIEW = (-160.0, 55.0, -30.0, 72.0)
 
 FIG_SIZE_IN = (12.0, 5.625)  # 16:7.5 -> 1920 x 900 px at FIG_DPI
 FIG_DPI = 160
@@ -104,14 +104,16 @@ class Site:
         return f"{self.name} ({self.cc})" if self.cc else self.name
 
 
-# Validated as a categorical pair against C_SURFACE (CVD and normal-vision
-# separation pass); markers differ in shape too, so identity is never colour alone.
+# Each site in the colour of its forest type on the forest-type map (nbs.map_fields CATEGORIES["waldtyp"]);
+# markers differ in shape too, so identity is never colour alone.
 SITES = (
-    Site("Aachen", 50.78, 6.08, "#2f6fb7", "o", "DE"),
-    Site("Joensuu", 62.60, 29.76, "#b8357f", "s", "FI"),
+    Site("Aachen", 50.78, 6.08, "#8a5596", "o", "DE"),
+    # interior Alaska: boreal conifer forest, snow half the year, much reforestable land -- a site where the tree
+    # warms by 2100 (replaced Joensuu, boreal mixed forest, 2026-10-22)
+    Site("Fairbanks", 64.84, -147.72, "#1e5b57", "s", "US"),
     # south-eastern Amazon (Pará), "arc of deforestation": much reforestable land, much sun, a typical
     # tropical carbon potential (Walker et al. 2022: 139 Mg C/ha; Belém, tried first, has only 80) -- 2026-10-06
-    Site("Marabá", -5.37, -49.12, "#6a4c9c", "D", "BR"),
+    Site("Marabá", -5.37, -49.12, "#3d8a42", "D", "BR"),
 )
 
 
@@ -350,9 +352,9 @@ def _site_markers(ax, values=None) -> None:
             s.lon, s.lat, marker=s.marker, ms=11, mfc=s.color, mec="white", mew=2.0,
             zorder=10, linestyle="none",
         )
-        # with values (two lines), Aachen and Joensuu sit close: both labels go left of their marker
+        # with values (two lines), the northern sites: labels left of their marker
         left = values is not None and s.lon > 0
-        # Joensuu (north) on one line beside its marker, Aachen below-left of its own
+        # Fairbanks (north) on one line beside its marker, Aachen below-left of its own
         north = left and s.lat > 55
         off, ha, va = ((-12, 0), "right", "center") if north else ((-11, -4), "right", "top") if left else ((9, 7), "left", "baseline")
         text = s.label if values is None else f"{s.label}: {values(s)}" if north else f"{s.label}\n{values(s)}"
@@ -440,7 +442,7 @@ def carbon_map_animation(
         lines.append(ax_curve.plot([], [], color=st.color, linewidth=2.5)[0])
         dots.append(ax_curve.plot([], [], marker=st.marker, ms=10, mfc=st.color, mec="white", mew=1.8,
                                   linestyle="none", zorder=5, clip_on=False)[0])
-    ax_curve.set_title("Aachen und Joensuu", fontsize=13, loc="left", color=C_INK)
+    ax_curve.set_title("Aachen und Fairbanks", fontsize=13, loc="left", color=C_INK)
     fig.text(0.69, 0.06, "Farbig: wiederbewaldbare Flächen (Walker et al. 2022),\n"
              "typischer Wald je Ort, Störung mit heutiger Rate.", fontsize=10, color=C_INK_MUTED, va="bottom")
 
@@ -606,9 +608,7 @@ def carbon_curve_figure(out_path: str) -> str:
 def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 100.0) -> str:
     """B8: yearly extra shortwave per full-grown tree as a map.
 
-    Same canvas and the same place as the left map of B8a (the slide before), so
-    the map stays put when the slide changes; the right half is left free for the
-    equation the slide sets there. Only locally measured cells are coloured; the
+    The whole world across the slide (the formula stands above it, in HTML). Only locally measured cells are coloured; the
     rest of the range is grey. The colour scale is stretched to vmin..vmax because
     the annual values cluster at 30-100 W -- on a 0-based scale the north-south
     difference vanishes, although 44 vs 65 W is worth 20 years of t*.
@@ -624,22 +624,19 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
 
     cmap = _ramp_cmap(RAMP_ABSORBED)
     norm = mcolors.Normalize(vmin, vmax)
-    # the left half of the slide, laid out as the left map of the slide before (B8a), with title and symbol;
-    # equation and definitions on the right, in HTML
+    # the whole world across the slide, no title: the formula above it (in HTML) names the quantity
     fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
-    ax_map = fig.add_axes((0.01, 0.16, 0.48, 0.73))
-    ax_cbar = fig.add_axes((0.08, 0.085, 0.34, 0.028))
-    _map_base(ax_map, outside, estimated, SITES_VIEW)
+    ax_map = fig.add_axes((0.01, 0.12, 0.98, 0.86))
+    ax_cbar = fig.add_axes((0.33, 0.06, 0.34, 0.028))
+    _map_base(ax_map, outside, estimated, WORLD)
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
-    _title_with_symbol(ax_map, "Zusätzlich absorbierte Strahlung je Baum", r"$\Delta\dot{Q}_{\mathrm{Baum}}$",
-                       "#6b4a2b")   # tree brown, as \bq in the deck's formulas
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
     cb.outline.set_visible(False)
-    # the title names the quantity: the bar carries only its unit, to its right
+    # the formula above the map names the quantity: the bar carries only its unit, to its right
     ax_cbar.text(1.03, 0.5, "[W]", transform=ax_cbar.transAxes, ha="left", va="center", fontsize=11, color=C_INK)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -731,7 +728,7 @@ def cloud_brightening_map_figure(out_path: str) -> str:
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{_pp(field[site_cell(s)])} %")
-    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{W}}$", "#d95f02")
+    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{Wolke}}$", "#d95f02")
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
@@ -771,10 +768,10 @@ def light_ingredients_figure(out_path: str) -> str:
     panels = [
         (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
          "#8a6a1e"),
-        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha$",
+        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{Laub}}$",
          "#d95f02"),
         (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
-         r"$\Delta\alpha_{\mathrm{W}}$", "#d95f02"),
+         r"$\Delta\alpha_{\mathrm{Wolke}}$", "#d95f02"),
     ]
     for k, (field, ok, scale, ticks, unit, fmt, title, symbol, symbol_color) in enumerate(panels):
         ax = fig.add_axes((0.005 + k * 0.333, 0.16, 0.323, 0.73))
@@ -826,7 +823,7 @@ def albedo_ingredients_figure(out_path: str) -> str:
          r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
          (0.0, 18.0), "[%]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha$", "#d95f02"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Laub}}$", "#d95f02"),
     ]
     units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

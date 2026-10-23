@@ -1,6 +1,6 @@
 """Figures for the storyline v2 deck (docs/slides/dissvortrag-storyline-v2.md).
 
-Running example: Norway spruce at two sites, Aachen and Joensuu, each
+Running example: the typical forest at Aachen, Fairbanks and Marabá, each
 with its own locally measured albedo cell. Same colours, markers and surface
 as nbs.animations, so every figure of the talk reads as one system.
 
@@ -739,7 +739,7 @@ def temperature_response_figure(out_path: str) -> str:
 
 
 def carbon_pulse_figure(out_path: str, site_name: str = "Aachen", pulse_year: int = 2050) -> str:
-    """Left: yearly CO2 removal of both known trees (Aachen, Joensuu; from the
+    """Left: yearly CO2 removal of both known trees (Aachen, Fairbanks; from the
     growth curves of the Bäume chapter). Right: one year's removal at
     *site_name* and what of it is still missing from the air later -- the
     Joos g_C applied to that pulse. Site colours as on the profile slide."""
@@ -1074,12 +1074,14 @@ def stock_panel_figure(out_path: str) -> str:
         m = _shell_one_trajectory(s).stock_kgC
         ax.plot(YEARS, m, color=s.color, linewidth=2.6)
         ends.append((float(m[-1]), s))
-    # names in the empty upper left, in the order of the curves (highest first)
-    for k, (_, s) in enumerate(sorted(ends, key=lambda p: -p[0])):
-        ax.text(0.03, 0.96 - 0.11 * k, s.label, transform=ax.transAxes, ha="left", va="top",
-                fontsize=13.5, color=s.color, fontweight="bold")
+    # each name just above its own curve, towards the end (a little higher on the steeper curves)
+    xl = 2080
+    for _, s in ends:
+        m = _shell_one_trajectory(s).stock_kgC
+        ax.annotate(s.label, (xl, float(np.interp(xl, YEARS, m))), xytext=(0, {"Fairbanks": 12, "Aachen": 20}.get(s.name, 30)), textcoords="offset points",
+                    ha="center", va="bottom", fontsize=13.5, color=s.color, fontweight="bold")
     ax.set_ylim(0, None)
-    ax.set_ylabel("Vorrat [kg C]")   # short: the panel is small
+    ax.set_ylabel("Kohlenstoffvorrat mᶜ$_{Baum}$ [kg C]")
     return _save(fig, out_path)
 
 
@@ -1243,16 +1245,17 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     ax.fill_between(t, 0, -g, color=c_rm, alpha=0.14, linewidth=0)
     ax.fill_between(t, -g, -1, color=c_back, alpha=0.16, linewidth=0)
     ax.plot(t, -g, color=c_rm, linewidth=2.6)
-    for yr in (20, 50, 100):
+    # one marked point is enough to read the curve: half a century on, about half is still missing in the air
+    for yr in (50,):
         ax.plot(yr, -g[yr], "o", ms=7, color=c_rm, mec="white", mew=1.5, zorder=5)
-        ax.annotate(f"{100 * g[yr]:.0f} %", (yr, -g[yr]), xytext=(4, -10), textcoords="offset points", ha="left", va="top",
-                    fontsize=12, color=C_INK)
+        ax.annotate(f"{100 * g[yr]:.0f} % nach {yr} Jahren", (yr, -g[yr]), xytext=(4, -10), textcoords="offset points", ha="left",
+                    va="top", fontsize=12, color=C_INK)
     from nbs.response import _JOOS_A0 as a0
     ax.axhline(-a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
-    ax.text(horizon, -a0 + 0.04, f"{100 * a0:.0f} % dauerhaft", ha="right", va="bottom", fontsize=12, color=c_rm)
-    ax.text(3, -0.06, "1 kg CO$_2$ entnommen", fontsize=12.5, color=c_rm, fontweight="bold", va="top")
-    ax.text(horizon - 2, -0.96, "Land + Ozean geben zurück", ha="right", va="bottom", fontsize=12, color=c_back,
+    ax.text(horizon, -a0 + 0.04, f"{100 * a0:.0f} % dauerhaft entfernt", ha="right", va="bottom", fontsize=13.5, color=c_rm,
             fontweight="bold")
+    ax.text(horizon - 2, -0.96, "Land + Ozean gasen aus", ha="right", va="bottom", fontsize=13.5, color=c_back,
+            fontweight="bold")   # as large as the share that stays removed: the two parts of the same kilogram
     ax.set_xlim(0, horizon)
     ax.set_ylim(-1.12, 0.1)
     ax.set_yticks([-1, -0.5, 0])
@@ -1320,14 +1323,6 @@ def tree_temperature_figure(out_path: str) -> str:
         ax.plot(YEARS, r.delta_t * scale, color=s.color, linewidth=3.2)
         ax.annotate(s.label, (YEARS[-1], r.delta_t[-1] * scale), xytext=(8, 0), textcoords="offset points", va="center",
                     fontsize=12.5, color=s.color, fontweight="bold", annotation_clip=False)
-        if s.label.startswith("Joensuu"):
-            # the dip: the albedo warming grows as the canopy closes over the snow, the uptake slows down
-            i = int(np.argmin(r.delta_t))
-            x0, y0 = YEARS[i] + 11, -19.5
-            ax.text(x0 + 1, y0, "Antrieb wird schwächer:\nAlbedo wärmt weiter,\nBaum bindet kaum noch CO$_2$", fontsize=11, color=s.color,
-                    ha="left", va="top")
-            ax.annotate("", (YEARS[i] + 0.5, r.delta_t[i] * scale - 0.8), xytext=(x0, y0 - 1.2), textcoords="data",
-                        arrowprops=dict(arrowstyle="-|>", color=s.color, lw=1.6, shrinkA=0, shrinkB=2))
     ax.set_title("Je Baum: sein Antrieb φ(t) → ΔT(t)", loc="left", fontsize=13, color=C_INK)
     ax.text(2028, ax.get_ylim()[0] * 0.92, "unter null: kühlt", fontsize=12, color=C_INK_MUTED)
     return _save(fig, out_path)

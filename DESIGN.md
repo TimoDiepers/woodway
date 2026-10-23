@@ -84,6 +84,8 @@ typography:
     lineHeight: 1.35
 rounded:
   box: "8px"
+  term: "10px"
+  card: "12px"
   pill: "22px"
 spacing:
   slide-x: "88px"
@@ -161,6 +163,20 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 
 **Die Kanalfarben-Regel.** Eine Farbe heißt überall dasselbe. CO₂ ist grün und Albedo orange, in Formel, Schema, Chart und Takeaway. Neue Farben kommen als Token in `:root`, nie als Hex in einer Folie.
 
+### Symbolfarben (Formeln)
+Jedes Formelsymbol hat eine eigene Farbe (`--s-<rolle>`, Klasse `.c-<rolle>`). Der Farbton zeigt den Kanal, die Abstufung das Symbol:
+- **CO₂ (Grün bis Türkis):** φ_CO₂ `phic`, ε_CO₂ `eps`, Δm_CO₂ `dm`, ṁ_CO₂ `mdc`, g_C `gc`; Konzentration c, c₀ in Blau (`conc`, `conco`).
+- **Albedo und Energie (Orange bis Braun):** φ_α `phia`, α `alb`, α_B/α_W, Δα_Laub `dal`, Δα_Wolke `daw`, α_Wolke, Δf_Wolke, q̇_ein `qin` (Sonnengold), ΔQ̇_Baum `dq`; Flächen A_Baum, A_Erde und τ_atm gedeckt.
+- **Strahlungsantrieb gesamt:** φ in Violett (`phi`, `phio`), weil er beide Kanäle summiert.
+- **Temperatur (Karmin bis Wein):** ΔT, T `dt`, R `rf`, S `sk`, f `ft`.
+- **Baum:** m_Baum `mb`, die vier Prozessfarben, Wachstumsparameter in Ocker (`mmax`, `kw`, `pw`), Störung in Rost (`sz`, `gam`, `pd`).
+
+Die Farbe hängt am KaTeX-Makro (`\phic`, `\eps`, `\dm`, `\dT` … in `deck.js`), nie an einem Hex in der Folie. Chip, Markierung und Badge eines Symbols tragen dieselbe Klasse. Auf Nachtfolien werden die Symbole automatisch aufgehellt, auf gefüllten Flächen (Takeaway, `.card.solid`) nehmen sie die Schriftfarbe der Fläche an.
+
+**Die Ein-Symbol-eine-Farbe-Regel.** Ein Symbol hat in jeder Formel, jedem Chip, jeder Zeichnung und jedem Chart dieselbe Farbe; zwei Symbole in derselben Formel haben nie dieselbe.
+
+**Die Eine-Markierung-Regel.** Hervorgehoben wird ein Term immer gleich: eine 12-%-Tönung seiner Farbe ohne Rand, 10px Ecken (`.hl`, `.chip`, Chart-Symbole). Kein Rahmen, keine andere Form.
+
 ## Typography
 
 **Display Font:** Literata (mit Georgia)
@@ -179,6 +195,15 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 - **Annotation** (Plex 400, 19px): Legenden, Achsenticks, Schema-Text; Untergrenze 18px.
 - **Source** (Plex 400, 13px): Quellenzeile unten; die einzige Schrift, die klein sein darf.
 
+### Rollen (Klassen)
+Text im Folienkörper nimmt eine Rolle, kein eigenes `font:`. Größe per `.sm`/`.lg`, Farbe per `.c-<rolle>`:
+- `.t-kicker` Plex 600 16px, Versalien, gesperrt, gedämpft (`.lg` 20px): Überschrift über einer Gruppe.
+- `.t-head` Plex 600 21px, Tinte (`.sm` 18, `.lg` 24): Überschrift eines Panels, einer Karte, einer Zeile.
+- `.t-text` Plex 400 20px/1,4, Tinte 2 (`.sm` 18, `.lg` 23): Text in Panels und Listen.
+- `.t-note` Plex 400 18px, gedämpft: Legende, Hinweis, Unterzeile.
+- `.t-stat` Plex 600 44px, Akzentfarbe (`.sm` 32, `.lg` 52, `.xl` 92); `small` = Einheit.
+- `.t-say` Literata 600 28px, Kapitelfarbe: eine Aussage im Buchton.
+
 ### Named Rules
 **Die Letzte-Reihe-Regel.** Gemessen auf der 1600×900-Leinwand: Ticks, Legenden und Schema-Text ≥ 18px, Fließtext ≥ 20px, Versal-Labels ≥ 16px. Bei matplotlib-Figuren die figsize an den Folienplatz anpassen (Skalierung ≥ 0,65), nicht die Schrift aufblasen.
 
@@ -186,7 +211,7 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 
 ## Layout
 
-Feste Leinwand von 1600×900, als Ganzes auf den Viewport skaliert; die Seitenfarbe übernimmt die Farbe der aktuellen Folie, damit die Folie bis an den Bildschirmrand läuft. Innenabstand 64/88/72px (oben/seitlich/unten); die unteren 72px sind das Quellenband, Inhalt und Takeaway enden darüber. Kopfzeile mit Titel links und Kapitelmarker rechts, 36px Abstand zum Körper. Inhaltsfolien sind meist „Abbildung + Seitenspalte“ (`1fr 470px`, 56px Abstand) oder zwei gleiche Spalten; die Abbildung füllt den Rest der Höhe. Quellenzeile absolut unten (14px Abstand) ab x=150, höchstens zwei Zeilen, Foliennummer bei x=88.
+Feste Leinwand von 1600×900, als Ganzes auf den Viewport skaliert; die Seitenfarbe übernimmt die Farbe der aktuellen Folie, damit die Folie bis an den Bildschirmrand läuft. Innenabstand 64/88/72px (oben/seitlich/unten); die unteren 72px sind das Quellenband, Inhalt und Takeaway enden darüber. Kopfzeile mit Titel links und Kapitelmarker rechts, 36px Abstand zum Körper. Inhaltsfolien nutzen ein festes Raster: `.split` (Abbildung + Seitenspalte 470px, 40px Abstand; `.narrow` 400px, `.wide` 620px), `.split.even` (zwei Hälften) oder `.split.draw` (Zeichnung 860px + Rest); die Abbildung füllt den Rest der Höhe. Dazu `.stack` (Spalte mit Abstand), `.fill`, `.center`, `.cols`/`.cols3` für linierte Textspalten. Quellenzeile absolut unten (14px Abstand) ab x=150, höchstens zwei Zeilen, Foliennummer bei x=88.
 
 Auf Handys im Hochformat bleibt die Leinwand erhalten; ein Hinweis bittet ums Drehen. Die Übersicht (M) ist ein Raster aus Miniaturen, auf schmalen Bildschirmen mit kleineren Kacheln.
 
@@ -221,6 +246,16 @@ Sanft gerundete Kästen (8px), volle Pillen (22px Radius) für Kapitelmarker und
 - **Form:** je Kapitel eine Scheibe (44px) mit Lucide-Icon in der Kapitelfarbe; das aktuelle Kapitel als gefüllte Pille mit Namen.
 - **Ort:** oben rechts auf Inhaltsfolien, oben links auf Kapitelfolien (invertiert auf Kapitelfarbe).
 
+### Formelzeile, Chip und Markierung
+- **Formelzeile** (`.fline`, unter dem Titel `.fline.head`): Chip, dann Formel oder Worte; `.part` gruppiert, `.part.next` liegt darüber und übernimmt per Klick.
+- **Chip** (`.chip.c-<rolle>`): Name und Symbol einer Größe in der Tönung ihrer Farbe, ohne Rand.
+- **Markierung** (`\hl{rolle on}{…}` in KaTeX, `.hl` in HTML): dieselbe Tönung hinter dem Term, nimmt keinen Platz ein; leuchtet mit `.on` oder dem Auslöser der Folie.
+- **Legende** (`.legend`, `.sm`/`.lg`/`.two`): Symbol rechtsbündig, Bedeutung in Plex.
+- **Schritte** (`.nstep` mit `.badge.c-<rolle>`): nummerierte Erklärung neben einer Zeichnung.
+
+### Karte
+- `.card` (tiefes Papier, 12px Ecken, 18/22px Innenabstand), `.card.solid` gefüllt in ihrer Farbe mit heller Schrift, `.card.line` nur Umriss. Die Folie setzt nur Größe und Ort.
+
 ### Schema-Knoten und Badges
 - **Knoten:** tiefes Papier, Rand in Papierlinie oder Kanalfarbe, Titel Plex 600 19px, Unterzeile 15px gedämpft.
 - **Badges:** nummerierte Kreise in Fluss- oder Kapitelfarbe, Ziffer hell.
@@ -247,9 +282,13 @@ Sanft gerundete Kästen (8px), volle Pillen (22px Radius) für Kapitelmarker und
 - **Do** jede Zahl mit Quelle in der Quellenzeile belegen.
 - **Do** Schemata im flachen DAC-Stil zeichnen: Plex-Textblöcke, Kapitälchen-Labels (16px gesperrt), nummerierte Badges.
 - **Do** `prefers-reduced-motion` mit dem Endzustand bedienen, nicht mit Abschalten.
+- **Do** Folien aus dem festen Vokabular bauen (Kopf von `deck.css`): Rolle + Größe + Farbrolle, z. B. `class="t-stat lg c-moss"`.
+- **Do** Symbole über ihr Makro schreiben (`\phic(t)`), Markierungen über `\hl{…}`.
 
 ### Don't:
 - **Don't** Hex-Werte direkt in Folien-SVGs schreiben, wenn ein Token existiert.
+- **Don't** `font:` oder Farbe inline oder in einer folienspezifischen Klasse setzen, wenn eine Rolle das schon tut.
+- **Don't** Formelterme mit Rahmen hervorheben; Markierung ist immer die randlose Tönung.
 - **Don't** ein Element, das auf der Vorfolie stand, erneut einblenden oder verschieben.
 - **Don't** Inhaltstext unter 20px oder Chart-Beschriftungen unter 18px setzen.
 - **Don't** Slogans oder Antithesen als Titel oder Takeaway formulieren.

@@ -144,7 +144,7 @@ def timescales_figure(out_path: str) -> str:
     a3.set_xlim(0, 100)
     a3.set_ylim(0, m_max * 1.08)
     a3.set_xlabel("Bestandesalter [a]")
-    a3.set_ylabel("kg C je Baum (Vorrat)")
+    a3.set_ylabel("Kohlenstoffvorrat mᶜ$_{Baum}$ [kg C]")
     a3.set_title("Über Jahrzehnte", loc="left", fontsize=19, fontweight="bold", color=c_ink)
     fig.savefig(out_path, dpi=FIG_DPI)
     plt.close(fig)
@@ -152,10 +152,9 @@ def timescales_figure(out_path: str) -> str:
 
 
 def growth_model_figure(out_path: str) -> str:
-    """Slide 12: carbon stock of one tree, Aachen mixed forest, one curve per click: growth only (with the
-    growth term), with disturbance (with the disturbance term), with disturbance under warming (0 to 2 K by 2100)."""
-    import dataclasses
-
+    """Slide 10: carbon stock of one tree, Aachen mixed forest, one curve per click: growth only (with the
+    growth term), then with disturbance at a constant warming above 1850-1900 of 0, 1.5 (about today) and 3 K --
+    the model's reference for Delta T_w."""
     from nbs.animations import FIG_DPI, _clean_axes
     from nbs.constants import T_START, YEARS
     from nbs.storyline_figures import SITES, _setup, _site_species
@@ -169,22 +168,20 @@ def growth_model_figure(out_path: str) -> str:
     l, b, w, h = ax.get_position().bounds
     lo, hi = 0, 52
     overlays = []
-    for j in (1, 2):
+    for j in (1, 2, 3):
         cut = 0.0045 * j
         a = fig.add_axes((l, b, w, h - cut))
         a.axis("off")
         a.set_xlim(T_START, 2100)
         a.set_ylim(lo, hi - (hi - lo) * cut / h)   # same data mapping as the main axes
         overlays.append(a)
-    # the Aachen model tree; warming rises linearly from 0 at planting to dT_w in 2100
     sp = _site_species(next(s for s in SITES if s.name == "Aachen"))
-    ramp = (YEARS - YEARS[0]) / (YEARS[-1] - YEARS[0])
+    flat = lambda k: simulate_deterministic(sp, np.full(len(YEARS), k)).stock_kgC
     curves = [
-        (ax, biomass_closed(YEARS - YEARS[0], sp), "#2f7a45", "-", 2.6, "nur Wachstum", 10),
-        (overlays[0], simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS))).stock_kgC,
-         "#d6604d", "-", 2.2, "mit Störung, $\\Delta T_w$ = 0", -5),
-        (overlays[1], simulate_deterministic(sp, 2.0 * ramp).stock_kgC,
-         "#a50f15", (0, (6, 4)), 2.2, "mit Störung, $\\Delta T_w$ = 2 K", -21),
+        (ax, biomass_closed(YEARS - YEARS[0], sp), "#2f7a45", "-", 2.6, "nur Wachstum", 12),
+        (overlays[0], flat(0.0), "#e8a291", "-", 2.2, "$\\Delta T_w$ = 0", -2),
+        (overlays[1], flat(1.5), "#d6604d", "-", 2.2, "$\\Delta T_w$ = 1,5 K (heute)", -16),
+        (overlays[2], flat(3.0), "#a50f15", (0, (6, 4)), 2.2, "$\\Delta T_w$ = 3 K", -30),
     ]
     for a, y, c, ls, lw, lab, dy in curves:
         a.plot(YEARS, y, color=c, ls=ls, lw=lw)
@@ -193,7 +190,7 @@ def growth_model_figure(out_path: str) -> str:
     ax.set_xlim(T_START, 2100)
     ax.set_ylim(lo, hi)
     ax.set_xticks([T_START, 2050, 2075, 2100])
-    ax.set_ylabel("Vorrat $m_{Baum}$ [kg C]")
+    ax.set_ylabel("Kohlenstoffvorrat mᶜ$_{Baum}$ [kg C]")
     fig.savefig(out_path, dpi=FIG_DPI)
     plt.close(fig)
     return out_path

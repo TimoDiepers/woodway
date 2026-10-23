@@ -219,7 +219,7 @@ def hasler() -> dict:
 
 
 def boreal_reference() -> dict:
-    """Typical forest at Joensuu (boreal mixed forest) for the DAC slide."""
+    """Typical forest at the northern site (Fairbanks, conifer forest) for the DAC slide."""
     from nbs.animations import site_key
     from nbs.storyline_figures import run_site
 

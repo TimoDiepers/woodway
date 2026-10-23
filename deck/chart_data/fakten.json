@@ -27,24 +27,24 @@
         -3.733600957526876e-14
       ]
     },
-    "Joensuu": {
-      "t_star": 2026,
-      "phi_negativ_ab": 2026,
-      "delta_t_2150_K": -1.1092403345748621e-14,
-      "anteil_pflanzjahr_2085": 0.6965005416944817,
+    "Fairbanks": {
+      "t_star": null,
+      "phi_negativ_ab": null,
+      "delta_t_2150_K": 2.636664660260772e-14,
+      "anteil_pflanzjahr_2085": -0.1460850456538996,
       "leiter": [
         2026,
         2026,
-        2026,
-        2026,
-        2026
+        null,
+        null,
+        null
       ],
       "leiter_dt_2150_K": [
-        -1.0711359656772928e-13,
-        -7.759884205088151e-14,
-        -2.7931879489149975e-14,
-        -8.403752822586721e-15,
-        -1.1092403345748621e-14
+        -7.758204571609742e-14,
+        -1.3768284425424909e-14,
+        2.2172814435251474e-14,
+        3.633247270674027e-14,
+        2.636664660260772e-14
       ]
     },
     "Marabá": {
@@ -70,7 +70,7 @@
   },
   "licht_ueberwiegt_bis": {
     "Aachen": null,
-    "Joensuu": null,
+    "Fairbanks": null,
     "Marabá": null
   },
   "a_co2": {
@@ -133,10 +133,10 @@
     "boreal_ueber_50": 0.9555753564154786
   },
   "boreal_referenz": {
-    "art": "mf_boreal",
-    "breite": 62.6,
-    "t_star": 2026,
-    "stoerung_50_jahre": 0.5044111336848085
+    "art": "enf_boreal",
+    "breite": 64.84,
+    "t_star": null,
+    "stoerung_50_jahre": 0.6298994773026924
   },
   "baeume": {
     "orte": {
@@ -150,15 +150,15 @@
         "k": 0.04309054753162702,
         "licht_w": 29.004915387889408
       },
-      "Joensuu": {
-        "art": "mf_boreal",
-        "name": "Mischwald (boreal)",
-        "zuwachs_mgc_ha": 65.96551513671875,
-        "saettigung_kgc": 32.982757568359375,
-        "saettigung_kg_co2": 120.93677775065105,
-        "aufnahme_2150_kg_co2": 111.0866599924444,
+      "Fairbanks": {
+        "art": "enf_boreal",
+        "name": "Immergrüner Nadelwald (boreal)",
+        "zuwachs_mgc_ha": 48.21714401245117,
+        "saettigung_kgc": 24.108572006225586,
+        "saettigung_kg_co2": 88.39809735616048,
+        "aufnahme_2150_kg_co2": 80.53089901816384,
         "k": 0.045110777463851295,
-        "licht_w": 44.167811848601005
+        "licht_w": 103.23857977560913
       },
       "Marabá": {
         "art": "ebf_tropisch",
@@ -434,11 +434,11 @@
         "netto_w": 29.0,
         "anteil": 0.152
       },
-      "Joensuu": {
-        "albedo_w": 45.3,
-        "wolken_w": -1.1,
-        "netto_w": 44.2,
-        "anteil": 0.025
+      "Fairbanks": {
+        "albedo_w": 104.8,
+        "wolken_w": -1.5,
+        "netto_w": 103.2,
+        "anteil": 0.015
       },
       "Marabá": {
         "albedo_w": 20.7,

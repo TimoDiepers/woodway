@@ -10,7 +10,7 @@ as the figure it stands for.
 SCALES and CATEGORIES are the deck's map palettes: warm earth tones on the
 cream slide, one hue family per quantity, diverging scales where a value has
 a natural middle. They are validated for contrast against the slide
-(#f2ede2) and kept apart from the two site colours (Aachen blue, Joensuu
+(#f2ede2) and kept apart from the two site colours (Aachen blue, Fairbanks
 magenta), so the sites never disappear into the field.
 """
 

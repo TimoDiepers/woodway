@@ -753,7 +753,7 @@ class Place:
 
 
 PLACES = (
-    Place("Joensuu", 62.60, 29.76, "FI"),
+    Place("Joensuu", 62.60, 29.76, "FI"),   # DAC comparison: the tree site is in Alaska
     Place("Aachen", 50.78, 6.08, "DE"),
     Place("Krakau", 50.06, 19.94, "PL"),
     Place("Peking", 39.90, 116.40, "CN"),
@@ -923,7 +923,7 @@ def map_site_value(data: dict, site):
 def world_site_labels(ax, text_of, marker=None) -> None:
     """The three sites on a world map, each labelled with its name and, below it, *text_of(site)* (its value);
     *marker* overrides the marker style.
-    Joensuu's label above its marker, the others below, so Aachen's and Joensuu's do not meet."""
+    Fairbanks's label above its marker, the others below."""
     from nbs.animations import SITES
 
     for s in SITES:
@@ -931,7 +931,7 @@ def world_site_labels(ax, text_of, marker=None) -> None:
                 **(dict(marker=s.marker, ms=9, mfc=s.color, mec="white", mew=2.0) | (marker or {})))
         value = text_of(s)
         text = s.label if value is None else f"{s.label}\n{value}"
-        up = s.name == "Joensuu"
+        up = s.name == "Fairbanks"
         ax.annotate(text, (s.lon, s.lat), xytext=(7, 6) if up else (7, -8), textcoords="offset points",
                     va="bottom" if up else "top", fontsize=11, fontweight="bold", color=C_INK, zorder=7)
 
