@@ -38,7 +38,7 @@ describe("TalkApp", () => {
   });
 
   it("a key right after the deck's reply starts from the reply's state, before React re-rendered", () => {
-    const i = deckIndex("Temperaturwirkung eines Baums je Ort");
+    const i = deckIndex("Ein Baum an jedem Ort");
     const { container } = render(<TalkApp />);
     const frame = container.querySelector("iframe")!;
     fireEvent.load(frame);
