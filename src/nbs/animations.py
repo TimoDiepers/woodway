@@ -768,7 +768,7 @@ def light_ingredients_figure(out_path: str) -> str:
     panels = [
         (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
          "#8a6a1e"),
-        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{Laub}}$",
+        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{Baum}}$",
          "#d95f02"),
         (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
          r"$\Delta\alpha_{\mathrm{Wolke}}$", "#d95f02"),
@@ -823,7 +823,7 @@ def albedo_ingredients_figure(out_path: str) -> str:
          r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
          (0.0, 18.0), "[%]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Laub}}$", "#d95f02"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Baum}}$", "#d95f02"),
     ]
     units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

@@ -11,7 +11,7 @@
   <div class="body">
     <div class="fline head"><span class="part"><span class="chip c-phi"><span>Strahlungsantrieb</span><span class="tex">$\phit(t)$</span></span><span class="gloss">= zusätzliche Wärmeleistung je m² Erde [W/m²]</span></span><span class="part next" data-step="4"><span class="chip c-phi"><span>Strahlungsantrieb</span><span class="tex">$\phit(t)$</span></span><span class="tex">$=$ <span class="hl c-phia at-falb">$\phia(t)$<span class="fcheck">✓</span></span> $+$ <span class="hl c-phic at-fco2">$\phic(t)$</span></span></span></div>
     <div class="split sketch center">
-    <svg class="schema anim s17" data-export="s_antrieb_v3" viewBox="0 0 880 560" style="width:860px; height:547px; overflow:visible; align-self:start" aria-label="Energiebilanz am Oberrand: Sonnenlicht kurzwellig, Wärmeabstrahlung langwellig; Albedo: Baumfläche auf den Oberrand projiziert, auf dem Weg nach oben kommen 85 % der Reflexion an; CO2 lässt kurzwelliges Licht durch, absorbiert langwellige Wärmestrahlung und strahlt sie in alle Richtungen wieder ab">
+    <svg class="schema anim s17" data-step="1" data-export="s_antrieb_v3" viewBox="0 0 880 560" style="width:860px; height:547px; overflow:visible; align-self:start" aria-label="Energiebilanz am Oberrand: Sonnenlicht kurzwellig, Wärmeabstrahlung langwellig; Albedo: Baumfläche auf den Oberrand projiziert, auf dem Weg nach oben kommen 85 % der Reflexion an; CO2 lässt kurzwelliges Licht durch, absorbiert langwellige Wärmestrahlung und strahlt sie in alle Richtungen wieder ab">
   <defs>
     <marker id="fx-y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--sun-ray)"/></marker>
     <marker id="fx-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--ray)"/></marker>
@@ -59,7 +59,7 @@
       <line x1="296" y1="74" x2="296" y2="372" stroke="#d95f02" stroke-width="2" stroke-dasharray="5 5"/>
       <line x1="144" y1="74" x2="296" y2="74" stroke="#d95f02" stroke-width="6" stroke-linecap="round"/>
       <text x="220" y="62" text-anchor="middle" font-size="22" font-weight="600" fill="#b04a00">÷ A<tspan font-size="15" dy="5">Erde</tspan><tspan dy="-5" font-size="18" font-weight="400"> → W je m² Erde</tspan></text>
-      <text x="306" y="424" font-size="21" font-weight="600" fill="#7a5b2e">ΔQ̇<tspan font-size="15" dy="5">Baum</tspan></text>
+      <text x="306" y="424" font-size="21" font-weight="600" fill="#7a5b2e">ΔQ̇<tspan font-size="15" dy="5">Albedo</tspan></text>
       <text x="306" y="448" font-size="18" fill="var(--muted)">mehr absorbiert [W]</text>
       <!-- on its way up part of the reflected light is absorbed or scattered: 85 % reach the top -->
       <text x="312" y="206" font-size="21" font-weight="600" fill="#7a5b2e">τ<tspan font-size="15" dy="5">atm</tspan><tspan dy="-5"> = 0,854</tspan></text>
@@ -85,7 +85,12 @@
 </svg>
     <div class="stack">
       <p class="phi-sign"><span class="chip sm c-dt">φ &gt; 0 wärmt</span><span class="chip sm c-cool">φ &lt; 0 kühlt</span></p>
-      <div class="fexp alb"><div class="rise f-alb" data-step="5" style="--d:500"><div class="eq sm left tex">$$\phia(t) = \tatm\,\dQ(t)\,/\,\Ae$$</div><dl class="legend sm tex"><dt>$\tatm$</dt><dd>Anteil der Reflexionsänderung, der am Oberrand ankommt — 0,854</dd><dt>$\dQ$</dt><dd>zusätzlich absorbierte Strahlung des Baums [W]: dunklere Krone und Wolken, $\propto \dal + \daw$ — Kapitel Bäume</dd><dt>$\Ae$</dt><dd>Erdoberfläche — 5,1 · 10¹⁴ m²</dd></dl></div></div>
+      <div class="ebil rise" data-step="3"><p class="ebil-k t-kicker">Energiebilanz an der Bilanzgrenze</p>
+        <div class="ebil-eq tex">$\phit = \Delta\,(\text{herein} - \text{hinaus})$</div>
+        <dl class="ebil-l"><dt>herein</dt><dd>Sonnenlicht</dd><dd></dd>
+          <dt>hinaus</dt><dd>Reflexion</dd><dd class="ebil-to" data-step="4"><span class="tex">$\to\ \phia$</span></dd>
+          <dt></dt><dd>Wärmeabstrahlung</dd><dd class="ebil-to" data-step="4"><span class="tex">$\to\ \phic$</span></dd></dl></div>
+      <div class="fexp alb"><div class="rise f-alb" data-step="5" style="--d:500"><div class="eq left tex" style="font-size:28px">$$\phia(t) = \tatm\,\dQ(t)\,/\,\Ae$$</div><dl class="legend tex" style="margin-top:14px"><dt>$\tatm$</dt><dd>Anteil der Reflexionsänderung, der am Oberrand ankommt — 0,854</dd><dt>$\dQ$</dt><dd>zusätzlich absorbierte Strahlung des Baums [W]: dunklere Krone und Wolken, $\propto \dal + \daw$ — Kapitel Bäume</dd><dt>$\Ae$</dt><dd>Erdoberfläche — 5,1 · 10¹⁴ m²</dd></dl></div></div>
     </div>
     </div>
   </div>
@@ -94,13 +99,13 @@
     <p>Im Kapitel Bäume hatten wir zwei Wirkungen in zwei Einheiten: Kilogramm CO₂ und Watt Strahlung. Für das Klima zählen beide über dieselbe Größe, den Strahlungsantrieb φ: die zusätzliche Wärmeleistung je Quadratmeter Erde.</p>
     <p>Klick: Welchen Strahlungsantrieb hat ein Baum?</p>
     <p>Klick: Dafür ziehen wir eine Bilanzgrenze: oben der Rand der Atmosphäre, unten um die Erde herum.</p>
-    <p>Klick: Über diese Grenze gehen drei Ströme: herein das Sonnenlicht, kurzwellig; hinaus das reflektierte Licht und die Wärmestrahlung der Erde, langwellig. Den Effekt von φ bestimmen wir über die Energiebilanz an dieser Grenze.</p>
-    <p>Klick: Der Baum ändert sie auf zwei Wegen: über die Albedo, φ_α, und über das CO₂, φ_CO₂.</p>
-    <p>Klick: zuerst das Licht, der einfache Teil. Der Baum absorbiert netto mehr Sonnenlicht, dunkles Laub minus Wolken: ΔQ̇_Baum, in Watt, aus dem Kapitel Bäume. Am Oberrand zählt das je Quadratmeter Erde, also teilen wir durch die Erdoberfläche. Und auf dem Weg nach oben nehmen Wolken, Wasserdampf und Aerosole einen Teil der Reflexionsänderung weg: Oben kommen 85 Prozent an, τ_atm.</p>
+    <p>Klick: Über diese Grenze gehen drei Ströme: herein das Sonnenlicht, kurzwellig; hinaus das reflektierte Licht und die Wärmestrahlung der Erde, langwellig. Den Effekt von φ bestimmen wir über die Energiebilanz an dieser Grenze, rechts: φ ist die Änderung von herein minus hinaus.</p>
+    <p>Klick: Der Baum ändert sie auf zwei Wegen, genau über die zwei Ströme hinaus: über die Reflexion, die Albedo, φ_α, und über die Wärmeabstrahlung, das CO₂, φ_CO₂.</p>
+    <p>Klick: zuerst das Licht, der einfache Teil. Der Baum absorbiert netto mehr Sonnenlicht, dunkles Laub minus Wolken: ΔQ̇_Albedo, in Watt, aus dem Kapitel Bäume. Am Oberrand zählt das je Quadratmeter Erde, also teilen wir durch die Erdoberfläche. Und auf dem Weg nach oben nehmen Wolken, Wasserdampf und Aerosole einen Teil der Reflexionsänderung weg: Oben kommen 85 Prozent an, τ_atm.</p>
     <p>Klick: φ_α haben wir.</p>
     <p>Klick: Jetzt das CO₂: Der Baum nimmt CO₂ aus der Luft, sagen wir ein Kilogramm.</p>
     <p>Klick: Was fehlt damit in der Atmosphäre? CO₂ hält Wärme in ihr, der Treibhauseffekt. Nimmt der Baum CO₂ heraus, wird weniger gehalten, es kühlt. Wie das genau funktioniert und wie viel es ausmacht, zeigen die nächsten Folien.</p>
-    <p class="q">Falls Fragen kommen — τ_atm = 0,854: ΔQ̇_Baum gilt an der Oberfläche, der Weg nach unten (Wolken) steckt schon in der gemessenen Einstrahlung. Auf dem Weg nach oben absorbieren oder streuen Wolken, Wasserdampf und Aerosole einen Teil: Reflektiert die Oberfläche 10 W weniger, verlassen am Oberrand nur etwa 8,5 W weniger die Erde. Globaler Mittelwert nach Lenton &amp; Vaughan (2009), auch bei Cherubini et al. (2012): Wurzel der zweiseitigen Transmission 0,730 bei klarem Himmel (Lacis &amp; Hansen 1974). Genauer wären Strahlungs-Kernels je Ort und Monat (Bright &amp; O'Halloran 2019). Die Verdunstung ist an dieser Grenze ein interner Fluss und kein Antrieb (Backup „Und die Verdunstung?“). Kurz- und langwellig: Sonnenlicht hat sein Maximum bei etwa 0,5 µm, die Wärmestrahlung der Erde bei etwa 10 µm; CO₂ absorbiert vor allem um 15 µm.</p>
+    <p class="q">Falls Fragen kommen — τ_atm = 0,854: ΔQ̇_Albedo gilt an der Oberfläche, der Weg nach unten (Wolken) steckt schon in der gemessenen Einstrahlung. Auf dem Weg nach oben absorbieren oder streuen Wolken, Wasserdampf und Aerosole einen Teil: Reflektiert die Oberfläche 10 W weniger, verlassen am Oberrand nur etwa 8,5 W weniger die Erde. Globaler Mittelwert nach Lenton &amp; Vaughan (2009), auch bei Cherubini et al. (2012): Wurzel der zweiseitigen Transmission 0,730 bei klarem Himmel (Lacis &amp; Hansen 1974). Genauer wären Strahlungs-Kernels je Ort und Monat (Bright &amp; O'Halloran 2019). Die Verdunstung ist an dieser Grenze ein interner Fluss und kein Antrieb (Backup „Und die Verdunstung?“). Kurz- und langwellig: Sonnenlicht hat sein Maximum bei etwa 0,5 µm, die Wärmestrahlung der Erde bei etwa 10 µm; CO₂ absorbiert vor allem um 15 µm.</p>
   </aside>
 </section>
 

@@ -3,7 +3,7 @@ import type { Cmd, DeckState } from "./navigation";
 
 export const DECK_URL = import.meta.env.DEV ? "/deck/index.html?host" : "slides/index.html?host";
 
-export interface DeckFrameHandle { send: (cmd: NonNullable<Cmd>) => void }
+export interface DeckFrameHandle { send: (cmd: NonNullable<Cmd>) => void; cursor: (off: boolean) => void }
 interface Props { onState: (s: DeckState) => void; onMissing: () => void; onReload?: () => void }
 
 const ANSWER_TIMEOUT_MS = 4000;
@@ -23,6 +23,7 @@ const DeckFrame = forwardRef<DeckFrameHandle, Props>(function DeckFrame({ onStat
 
   useImperativeHandle(ref, () => ({
     send: (cmd) => post(cmd.send === "goto" ? { cmd: "goto", n: cmd.n, step: cmd.step } : { cmd: cmd.send }),
+    cursor: (off) => post({ cmd: "cursor", off }),
   }), [post]);
 
   useEffect(() => {

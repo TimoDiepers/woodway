@@ -75,3 +75,6 @@
 }
 .ov-hex { width: 34%; aspect-ratio: 1 / 1.1547; background: var(--ch); opacity: .85;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+
+/* C: no mouse pointer in the talk (the deck frame hides its own on the same key) */
+html.nocursor, html.nocursor * { cursor: none !important; }

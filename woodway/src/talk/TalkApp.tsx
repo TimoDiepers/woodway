@@ -113,6 +113,10 @@ export default function TalkApp() {
       else if (e.key === "Home") { e.preventDefault(); go(0); }
       else if (e.key === "b" || e.key === "B") go(MAIN_END);
       else if (e.key === "n" || e.key === "N") setNotesOpen((o) => !o);
+      else if (e.key === "c" || e.key === "C") {   // the mouse pointer off, here and inside the deck's frame
+        const off = document.documentElement.classList.toggle("nocursor");
+        frame.current?.cursor(off);
+      }
       else if (e.key === "f" || e.key === "F") {
         if (document.fullscreenElement) void document.exitFullscreen();
         else void document.documentElement.requestFullscreen?.();

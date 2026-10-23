@@ -10,10 +10,10 @@ The talk widens the system boundary step by step. It starts with one tree, which
 ## The chain
 
     m(t)  →  ṁ_CO₂ = −(44/12)·ṁ  →  Δm_CO₂ = g_C ∗ ṁ_CO₂  →  φ_CO₂ = ε_CO₂·Δm_CO₂
-          →  f(t)                                          →  φ_α = τ_atm·ΔQ̇_Baum / A_Erde
+          →  f(t)                                          →  φ_α = τ_atm·ΔQ̇_Albedo / A_Erde
                                                            →  ΔT = g_T ∗ (φ_CO₂ + φ_α)
 
-FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C and g_T. Area-wide numbers come from a direct FaIR run instead, with the removal as a negative emission and the albedo as a forcing, so filling sinks and the weaker effect per kg at higher CO₂ are part of the result. Evapotranspiration itself is not a term in φ: it does not cross the top of the atmosphere. What it does there, through more low clouds over forest, is part of ΔQ̇_Baum (Duveiller et al. 2021, see docs/methods/wolken.md).
+FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C and g_T. Area-wide numbers come from a direct FaIR run instead, with the removal as a negative emission and the albedo as a forcing, so filling sinks and the weaker effect per kg at higher CO₂ are part of the result. Evapotranspiration itself is not a term in φ: it does not cross the top of the atmosphere. What it does there, through more low clouds over forest, is part of ΔQ̇_Albedo (Duveiller et al. 2021, see docs/methods/wolken.md).
 
 ```python
 from nbs.pipeline import run_single_tree

@@ -29,11 +29,11 @@ const TEX_MACROS = {
   // sunlight, energy, albedo
   "\\qin":  "\\q{qin}{\\dot q_{\\mathrm{ein}}}",
   "\\alb":  "\\q{alb}{\\alpha}",
-  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{Laub}}}",
+  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{Baum}}}",
   "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{Wolke}}}",
   "\\alw":  "\\q{alw}{\\alpha_{\\mathrm{Wolke}}}",
   "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{Wolke}}}",
-  "\\dQ":   "\\q{dq}{\\Delta\\dot Q_{\\mathrm{Baum}}}",
+  "\\dQ":   "\\q{dq}{\\Delta\\dot Q_{\\mathrm{Albedo}}}",
   "\\Ab":   "\\q{ab}{A_{\\mathrm{Baum}}}",
   "\\Ae":   "\\q{ae}{A_{\\mathrm{Erde}}}",
   "\\tatm": "\\q{tau}{\\tau_{\\mathrm{atm}}}",
@@ -75,8 +75,8 @@ const TEX_MACROS = {
 
 // the figures' own formula labels (mpl texts that are one $…$) and the colour role of the symbol they show
 const CHART_TEX_ROLE = {
-  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{Laub}}': 'dal',
-  '\\Delta\\alpha_{\\mathrm{Wolke}}': 'daw', '\\Delta\\dot{Q}_{\\mathrm{Baum}}': 'dq'
+  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{Baum}}': 'dal',
+  '\\Delta\\alpha_{\\mathrm{Wolke}}': 'daw', '\\Delta\\dot{Q}_{\\mathrm{Albedo}}': 'dq'
 };
 
 /* y-axis titles: an HTML label (.axlab) in the deck's axis face (Plex, muted, 17-19px), set with KaTeX, so a symbol on
@@ -408,8 +408,9 @@ const EC_REMOVAL = {
 };
 
 
-/* slide 4, the problem: what the climate does, for everyone in the room. Click 0 the observed warming up to today,
-   1 going on as today (CMIP7 Medium), 2 the most ambitious scenario (the reference of chapters 4 and 5: Very Low without its own
+/* slide 2, the problem: what the climate does, for everyone in the room, told with the UNEP Emissions Gap Report 2026
+   and drawn with the CMIP7 curves that match it. Click 0 the observed warming up to today,
+   1 the policies in force today (CMIP7 Medium, UNEP 2.8 deg C), 2 the best scenario (the reference of chapters 4 and 5: Very Low without its own
    removal, ZEIT.vl_c, same grey and dash as the anchor), 3 red the gap that stays above 1.5 deg C (the anchor's red band).
    Each series runs in on its own click and stands still afterwards. */
 const KURS_COL = { obs: EC.ink, med: '#b5562e', vl: '#6d756f', rot: '#c4121f' };
@@ -438,14 +439,14 @@ const EC_KURS = { steps: 3,
   }];
   if (k >= 1) {   // as today: CMIP7 Medium, about the policies in force now; its label rides on the tip of the line
     const M = C.temp.M, pm = M.y.map((y, i) => [y, M.med[i]]).filter(p => p[0] >= 2026 && p[0] <= 2100);
-    series.push({ id: 'med', name: 'Business-as-Usual', type: 'line', showSymbol: false, data: cut(pm, upto(2026, 2100, 1)), z: 4,
+    series.push({ id: 'med', name: 'heutige Politik', type: 'line', showSymbol: false, data: cut(pm, upto(2026, 2100, 1)), z: 4,
       lineStyle: { color: KURS_COL.med, width: 3, opacity: k >= 2 ? .45 : 1 }, itemStyle: { color: KURS_COL.med },
       endLabel: { show: true, align: 'right', offset: [-6, -20], color: KURS_COL.med, opacity: k >= 2 ? .55 : 1, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
-                  formatter: p => `Business-as-Usual: ${ecNum(p.value[1], 1)} °C` } });
+                  formatter: 'heutige Politik' } });   // the number stands in the text (UNEP 2.8), the curve is CMIP7's (2.98)
   }
   if (k >= 2) {
     const x = upto(2026, 2100, 2);
-    series.push({ id: 'vl', name: 'ambitioniertestes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
+    series.push({ id: 'vl', name: 'bestes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
       lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: KURS_COL.vl, borderColor: '#f2ede2', borderWidth: 2 },
                    label: { show: true, position: 'top', distance: 9, color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
@@ -592,7 +593,7 @@ const EC_ORTE3 = {
   // the curves and the name each carries on the plot
   parts: [
     { key: 'co2', name: 'CO₂', role: 'phic' },
-    { key: 'laub', name: 'Albedo (Laub)', role: 'dal' },
+    { key: 'laub', name: 'Albedo (Baum)', role: 'dal' },
     { key: 'wolke', name: 'Albedo (Wolken)', role: 'daw' },
     { key: 'dt', name: 'netto', role: 'ink', net: true }],
   // a name on each curve, outside its area: CO2 under its curve, the leaves above theirs, the clouds, which stay near
@@ -1070,8 +1071,7 @@ const EC_LANDDONUT = {
 /* Holzweg: the donut on the left card, held while the right card has its clicks; what a world without animals frees
    comes after them */
 const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 7, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1, 1][k]) });
-const EC_KURS_END = Object.assign({}, EC_KURS, { still: true, tween: 0, intro: 0 });   // slide 5: the last picture of slide 4, standing
-const EC_CHARTS = { kurs: EC_KURS, kursend: EC_KURS_END, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
+const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
 
 class EChart {
   constructor(host) {
@@ -2191,6 +2191,12 @@ class Deck {
       this.go(n, d.step === 'end' ? 'end' : Number.isInteger(d.step) ? d.step : 0);   // 'end' like prev(): the last state, drawn without replaying the slide
     }
     else if (d.cmd === 'hello') this.sync();
+    else if (d.cmd === 'cursor') this.cursor(!!d.off);
+  }
+  cursor(off) {
+    // C: the mouse pointer off over the whole page (a laser pointer draws its own), kept for the session
+    document.documentElement.classList.toggle('nocursor', off);
+    try { sessionStorage.setItem('dv-nocursor', off ? '1' : ''); } catch (e) { /* private mode: only for this page */ }
   }
   sync() {
     // Tell the presenter window where we are and what comes next.
@@ -2329,6 +2335,7 @@ class Deck {
   next() { if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); } else if (this.i < this.slides.length - 1) this.go(this.i + 1, 0); }
   prev() { if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
   bind() {
+    try { if (sessionStorage.getItem('dv-nocursor')) this.cursor(true); } catch (e) { /* no storage */ }
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
     addEventListener('keydown', e => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -2343,6 +2350,7 @@ class Deck {
       else if (k === 'n' || k === 'N') this.drawer.inert = !this.drawer.classList.toggle('open');
       else if (k === 'p' || k === 'P') this.openPresenter();
       else if (k === 'f' || k === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+      else if (k === 'c' || k === 'C') this.cursor(!document.documentElement.classList.contains('nocursor'));
     });
     let lock = 0;
     addEventListener('wheel', e => {

@@ -686,27 +686,23 @@ body:has(#menu.open) #menu-fab { display: none; }
 
 /* slide 13: it opens on slide 8's last picture, CO₂ ticked off; then only the tree and the sun stay for the reference
    case, and that picture shrinks into the first of the four boxes */
-.alb-intro { position: relative; }
-.alb-stage { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .9s var(--ease), opacity .7s var(--ease) .25s; z-index: 1; }
-.alb-stage > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* slide 13, the big reference case: one line above it says what the model takes (it fades with the big view) */
 /* the definitions of the model's two quantities: a definition box as for ε_CO₂ (climate chapter), in the albedo colour */
-.slide.active .alb-stage > .alb-lead.shown { animation-name: fadein; }   /* rise would move `top` */
 /* clicks 5-7 change the one case step by step (more sun, then snow); each value has a version per state
    (on0 before the changes, on5, on6), and what changes is red on its own click */
-.alb-v { opacity: 0; transition: opacity .5s var(--ease); }
-.slide:not(:has(.alb-k5.shown)) .alb-v.on0,
-.slide:has(.alb-k5.shown):not(:has(.alb-k6.shown)) .alb-v.on5,
-.slide:has(.alb-k6.shown) .alb-v.on6 { opacity: 1; }
-.slide:has(.alb-k6.shown) .alb-v.hot6 :is(text, tspan):not([font-family]) { fill: #b3412e; }
+.alb-intro { position: relative; }   /* slide 10: the recap drawing, the tick on carbon in its own layer on top */
+.alb-stage { position: absolute; inset: 0; z-index: 1; }
+.alb-stage > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .trees-do.recap *, .alb-check { animation: none !important; }
 .trees-do.recap :is(.pop, .grow) { opacity: 1; transform: none; }
 .trees-do.recap :is(.td-co2 > g, .td-vapor path) { opacity: .85; }
  
 
 .trees-do.recap .td-lab { transform: none; }
-.trees-do.recap > g > :not(:first-child), .alb-check { transition: opacity .6s var(--ease); }
-.slide:has(.alb-on.shown) :is(.trees-do.recap > g > :not(:first-child), .alb-check) { opacity: 0; }
+.trees-do.recap > g > :not(:first-child) { transition: opacity .6s var(--ease); }
+/* slide 10, click 1: carbon is done, it steps back for the reflection */
+.trees-do.recap > g > .td-lab, .trees-do.recap .td-co2, .trees-do.recap .td-badge, .alb-check { transition: opacity .6s var(--ease); }
+.slide:has(.td-fade.shown) :is(.trees-do.recap > g > .td-lab, .trees-do.recap .td-co2, .trees-do.recap .td-badge:first-child, .alb-check) { opacity: .12; }
 /* formula symbols in a figure (MplChart.placeTex): KaTeX over the chart */
 
 /* forest-type slide: the map left, the three sites' parameters and uptake curves in a column at the right */
@@ -716,6 +712,14 @@ body:has(#menu.open) #menu-fab { display: none; }
 /* forcing slide: the term being explained is framed, the albedo marks fade when CO2 comes */
 .slide:has(.f-chk.shown) .fexp.alb { opacity: .4; }
 .fexp { transition: opacity .4s; }
+/* slide 16: the energy balance at the system boundary, beside the drawing; it maps the two outgoing flows onto phi_alpha and phi_CO2 */
+.ebil { margin-bottom: 34px; }
+.ebil-k { margin: 0 0 10px; color: var(--s-phi); }
+.ebil-eq { font-size: 28px; }
+.ebil-l { display: grid; grid-template-columns: max-content max-content max-content; gap: 6px 18px; align-items: baseline; margin: 14px 0 0; }
+.ebil-l dt { font: 600 20px/1.35 var(--sans); color: var(--muted); }
+.ebil-l dd { margin: 0; font: 400 21px/1.35 var(--sans); color: var(--ink-2); }
+.ebil-l .ebil-to { font-size: 24px; }
 svg:has(.f-chk.shown) .albmark { opacity: .18; transition: opacity .5s; }
 /* last click: the two factors of the CO2 term framed, they come next */
 
@@ -1069,6 +1073,9 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .sh h2 .katex { font-size: 1.08em; line-height: 0; }
 /* climate: which way the radiative forcing points */
 .phi-sign { display: flex; gap: 10px; }
+/* forcing slide: the sign key stands in the row of the definition line, over the formula column (out of the stack, so the formula centres) */
+.slide:has(.phi-sign) .body { position: relative; }
+.phi-sign { position: absolute; left: 900px; top: 12px; }   /* the left edge of the formula column below, clear of the definition line */
 .sh h2 .katex .strut { display: none !important; }   /* KaTeX's strut would still add a few px to the line */
 
 .ww-side { display: flex; align-items: center; gap: 18px; padding: 14px 18px 14px 14px; border-radius: 14px; background: rgba(255, 255, 255, .6);
@@ -1533,13 +1540,20 @@ svg.mo .m-sway.back { animation: none; }
 .kurs-side { display: flex; flex-direction: column; justify-content: center; gap: 26px; font-family: var(--sans); position: relative; }
 .kurs-txt { display: flex; flex-direction: column; gap: 26px; transition: opacity .5s var(--ease); }
 .takeaway.stay { animation: none !important; opacity: 1 !important; top: 0 !important; }   /* stands as on the slide before */
-.kurs-tree { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.kurs .clip.kurs-clip { position: relative; margin-bottom: 6px; }   /* the news of the day opens the talk */
+.kurs-clip .cl-h { font-size: 27px; }
+.kurs-clip .cl-sub { font-size: 19px; }
+.cl-who { display: block; margin-top: 6px; font: 400 15px/1.2 var(--sans); font-style: normal; color: var(--muted); }
+.kurs-asis, .kurs-best, .kurs-but { font: 600 23px/1.35 var(--sans); }
+.kurs-asis { color: #b5562e; }
+.kurs-best { color: #6d756f; }
+.kurs-but { color: #8e0d16; }
+.kurs-tree { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }   /* last click: the text gives way to the tree */
 .kurs-tree svg { width: 100%; height: auto; }
 .kurs-tq { margin: 12px 0 14px; }
-.kurs-asis { font: 600 23px/1.4 var(--sans); color: #b5562e; }
-.kurs-h { margin-bottom: 10px; }
 .kurs-side .dots { --c: var(--muted); }
-.kurs-but { margin-top: 16px; font: 600 24px/1.35 var(--sans); color: #8e0d16; }
+.kurs-side:has(> .kurs-tree.shown) .kurs-txt { opacity: 0; }
+.kurs-sub { margin-top: 4px; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
 
 /* tooltips (all charts): head, grey line, rows of dot · name · value. Fixed colours, not the slide tokens: the
    tooltip is light paper on every slide, the dark ones included (their --ink is light) */
@@ -1636,7 +1650,22 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 .ue-erg b { --c: var(--paper); }
 .ue-erg .ue-c { color: color-mix(in srgb, var(--paper) 85%, var(--moss)); }
 .ue-tag { display: block; margin-bottom: 12px; }
-.ue .clip.ue-sci { position: relative; align-self: flex-end; width: 760px; margin-right: 10px; }
+.ue-lit { display: flex; justify-content: space-between; gap: 60px; padding: 0 10px; }   /* the paper and its critique */
+.ue .clip.ue-sci { position: relative; width: 700px; }
+.ue-hype { width: 720px; }   /* the paper, and the headlines it set off */
+.ue-hype .clips { height: 340px; }
+.ue-hype .ue-sci .cl-h { font-size: 24px; }
+.ue-hype .ue-sci .cl-sub { font-size: 18px; }
+.ue-hype .clip.ue-sci { position: absolute; z-index: 1; }
+.ue-hype .clip:not(.sci) { z-index: 2; }
+.ue-hype .clip:not(.sci) .cl-src, .ue-crit .clip:not(.sci) .cl-src { font-size: 14px; padding-bottom: 8px; }
+.ue-hype .clip:not(.sci) .cl-src b, .ue-crit .clip:not(.sci) .cl-src b { font-size: 15px; }
+.ue-hype .clip:not(.sci) .cl-dach, .ue-crit .clip:not(.sci) .cl-dach { margin-top: 8px; font-size: 16px; }
+.ue-hype .clip:not(.sci) .cl-h, .ue-crit .clip:not(.sci) .cl-h { font-size: 19px; }
+.ue-crit { width: 680px; display: flex; flex-direction: column; }   /* the five comments in Science, stacked */
+.ue-crit .clips { height: 300px; flex: none; }
+.ue-crit .clip:not(.sci) { z-index: 2; }
+.ue-hype .clip:not(.sci) .cl-in, .ue-crit .clip:not(.sci) .cl-in { padding: 14px 20px 16px; }
 .ue-sci .cl-in { padding: 20px 28px 22px; }
 .ue-sci .cl-h { font-size: 28px; }
 .ue-sci .cl-sub { font-size: 20px; margin-top: 10px; text-wrap: balance; }
@@ -1648,7 +1677,6 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 
 /* a definition the first time a symbol comes in: the chip of the signpost line (name and symbol), then what it is */
 .refl-def { align-self: center; margin-top: 16px; }
-.alb-stage > .alb-lead { position: absolute; left: 0; top: 52px; max-width: 430px; }
 /* in a side column the text goes under the chip, smaller */
 /* the end of a chapter: a card in front, the slide behind it blurred and lightened */
 .ovl { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center;
@@ -1663,13 +1691,12 @@ svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
 .ovq { margin-top: 24px; font: italic 400 28px/1.35 var(--serif); color: var(--ch); }
 .ovq::before { content: "→ "; font-style: normal; }
 .slide:has(> .ovl) > .num { z-index: 7; }   /* the slide number stays sharp above the blur */
-/* slide 9 (.c9): the balance builds up in the definition line (hidden terms take no room); click 6 sends the
-   picture up and out, the line stays: slide 10 has the same line in the same place */
+/* slide 9 (.c9): the balance builds up in the definition line (hidden terms take no room); the line stays:
+   slide 10 has the same line in the same place */
 .c9-body { position: relative; }
 .c9-line { position: relative; z-index: 1; align-items: flex-start; }
 /* the tree drawn where slide 8 has it: same box as its body, viewBox shifted so the ground lands on the same line */
-.c9-a { position: absolute; inset: 0; transition: transform .8s var(--ease), opacity .6s var(--ease); }
-.slide:has(.c9-go.shown) .c9-a { transform: translateY(-160px); opacity: 0; }
+.c9-a { position: absolute; inset: 0; }
 .c10-model { grid-column: 2; }
 /* slide 10: the model formula starts where its "=" sits under the "=" of the balance above (measured), the key and
    the example figure under it */
@@ -1747,3 +1774,22 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 .slide.active .trees-do [data-step="3"].shown .td-cloud { animation: td-cloud-in 1.4s cubic-bezier(.2, .7, .3, 1) 2.6s both; }
 @keyframes td-cloud-in { from { opacity: 0; transform: scale(.35); } 40% { opacity: 1; } to { opacity: 1; transform: none; } }
 .slide.active .trees-do [data-step="3"].shown .td-late { animation: fadein .7s var(--ease) 4s both; }
+
+/* C: no mouse pointer anywhere on the page, for a presentation with a laser pointer */
+html.nocursor, html.nocursor * { cursor: none !important; }
+
+/* slide 10: the braces of the balance come with their labels (the label carries the click step, the brace follows it) */
+.c9-line .gloss .stretchy { transition: opacity .6s var(--ease); }
+.slide:not(:has(.c9-line .gloss .enclosing[data-step].shown)) .c9-line .gloss .stretchy { opacity: 0; }
+
+/* slide 11: the albedo of the leaves, three examples instead of a worked drawing */
+.alx-def { margin-top: 18px; }
+.alx-def .gloss { white-space: nowrap; }
+.alx { margin: 56px 0 0 0; display: flex; flex-direction: column; gap: 22px; }
+.alx-row { display: grid; grid-template-columns: 120px 300px 230px 1fr; align-items: center; gap: 0 18px; }
+.alx-ico { width: 120px; height: 80px; }
+.alx-name { font: 600 26px/1.2 var(--sans); color: var(--ink); }
+.alx-d { font: 600 30px/1 var(--sans); color: var(--s-dal); white-space: nowrap; }
+.alx-bar { height: 22px; border-radius: 11px; background: color-mix(in srgb, var(--s-dal) 10%, transparent); overflow: hidden; }
+.alx-bar i { display: block; height: 100%; border-radius: 11px; background: var(--s-dal); }
+.dq-leg { margin: 4px 0 0; }

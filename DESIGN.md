@@ -166,7 +166,7 @@ Jede Kapitelfarbe hat eine `-soft`-Variante für Blatt-Icon im Takeaway, Ränder
 ### Symbolfarben (Formeln)
 Jedes Formelsymbol hat eine eigene Farbe (`--s-<rolle>`, Klasse `.c-<rolle>`). Der Farbton zeigt den Kanal, die Abstufung das Symbol:
 - **CO₂ (Grün bis Türkis):** φ_CO₂ `phic`, ε_CO₂ `eps`, Δm_CO₂ `dm`, ṁ_CO₂ `mdc`, g_C `gc`; Konzentration c, c₀ in Blau (`conc`, `conco`).
-- **Albedo und Energie (Orange bis Braun):** φ_α `phia`, α `alb`, α_B/α_W, Δα_Laub `dal`, Δα_Wolke `daw`, α_Wolke, Δf_Wolke, q̇_ein `qin` (Sonnengold), ΔQ̇_Baum `dq`; Flächen A_Baum, A_Erde und τ_atm gedeckt.
+- **Albedo und Energie (Orange bis Braun):** φ_α `phia`, α `alb`, α_B/α_W, Δα_Baum `dal`, Δα_Wolke `daw`, α_Wolke, Δf_Wolke, q̇_ein `qin` (Sonnengold), ΔQ̇_Albedo `dq`; Flächen A_Baum, A_Erde und τ_atm gedeckt.
 - **Strahlungsantrieb gesamt:** φ in Violett (`phi`, `phio`), weil er beide Kanäle summiert.
 - **Temperatur (Karmin bis Wein):** ΔT, T `dt`, R `rf`, S `sk`, f `ft`.
 - **Baum:** m_Baum `mb`, die vier Prozessfarben, Wachstumsparameter in Ocker (`mmax`, `kw`, `pw`), Störung in Rost (`sz`, `gam`, `pd`).
