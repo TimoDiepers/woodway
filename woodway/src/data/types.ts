@@ -22,7 +22,7 @@ export interface Meta {
   scales: Record<string, Scale>;
   categories: {waldtyp: {key: string; label: string; color: string}[]};
   colors: {land: string; tooCold: string; unmeasured: string};
-  reference: {i: number; j: number; dt2050: number; dt2100: number; net2100: number; dac2026: number; dac2045: number}[];
+  reference: {i: number; j: number; dt2050: number; dt2100: number; net2100: number; dac2026: number | null; dac2045: number | null}[];
 }
 
 export interface Scale {

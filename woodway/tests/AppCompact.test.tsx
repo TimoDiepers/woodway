@@ -45,7 +45,7 @@ describe("App on a phone", () => {
     const slides = within(more).getByRole("link", { name: "Slides of the talk" });
     expect(slides).toHaveAttribute("target", "_blank");
     expect(slides.getAttribute("href")).toMatch(/slides\/$|\/deck\/index\.html$/);
-    expect(insets().right).toBeGreaterThan(0);          // the globe centres left of the tool column
+    expect(insets().right).toBe(0);                     // upright the globe centres on the screen
     expect(insets().bottom).toBeGreaterThan(0);         // … and above the dock
   });
 

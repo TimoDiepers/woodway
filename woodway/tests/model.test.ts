@@ -17,8 +17,10 @@ describe("model", () => {
       expect(deltaT(at, c, 2050)).toBeCloseTo(r.dt2050, 20);
       expect(deltaT(at, c, 2100) / r.dt2100).toBeCloseTo(1, 5);
       expect(netShare(at, c, 2100) / r.net2100).toBeCloseTo(1, 5);
-      expect(dacNet(at, c, 2026)).toBeCloseTo(r.dac2026, 5);
-      expect(dacNet(at, c, 2045)).toBeCloseTo(r.dac2045, 5);
+      for (const [y, v] of [[2026, r.dac2026], [2045, r.dac2045]] as const) {
+        if (v === null) expect(dacNet(at, c, y)).toBeNaN();   // no DAC in this cell
+        else expect(dacNet(at, c, y)).toBeCloseTo(v, 5);
+      }
     }
   });
   it("ocean cell gives NaN and no series", () => {

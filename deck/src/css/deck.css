@@ -1854,7 +1854,7 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.fazit:has(.fz-dusk.shown) :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line) { filter: opacity(0); }
 .slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child :is(h4, .big-n) { color: #f2ede2; }
 .slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child p { color: #b9c0bb; }
-.slide.fazit:has(.fz-dusk.shown) .fz-k { color: #e8b866; text-decoration-color: #e8b866; font-weight: 600; }
+.slide.fazit:has(.fz-dusk.shown) .fz-k { color: #e8b866; text-decoration-color: #e8b866; }   /* colour only: a bolder weight would rewrap the text */
 .slide.fazit svg.deco use[href="#cloud"] { transition: opacity 1.2s var(--ease); }
 .slide.fazit:has(.fz-dusk.shown) svg.deco use[href="#cloud"] { opacity: 0; }   /* the night of the Holzweg slide has none */
 
@@ -1872,7 +1872,7 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.holzweg .hw-fz3 .col { border-top: 1px solid rgb(61, 85, 45); padding-top: 18px; }
 .slide.holzweg .hw-fz3 :is(h4, .big-n) { color: #f2ede2; }
 .slide.holzweg .hw-fz3 p { font: 400 25px/1.42 var(--serif); color: #b9c0bb; }
-.slide.holzweg .hw-fz3 .fz-k { color: #e8b866; font-weight: 600; text-decoration: underline 3px #e8b866; text-underline-offset: 7px; }
+.slide.holzweg .hw-fz3 .fz-k { color: #e8b866; text-decoration: underline 3px #e8b866; text-underline-offset: 7px; }
 .slide.holzweg .hw-fz3 :is(h4, .big-n, p) { transition: color .7s var(--ease); }
 .slide.holzweg .hw-fz3 .col { transition: border-color .7s var(--ease); }
 .slide.holzweg:has(.hwk3.shown) .hw-fz3 :is(h4, .big-n, p) { color: transparent; }   /* the rest of takeaway 3 goes, the gold phrases wait for their card */

@@ -83,9 +83,10 @@ export default function App() {
   const bottom = !wide && open ? Math.round(snaps[snap] * vh) : dockH + 16;
   // upright, the plate takes the top of the screen: the globe centres below it (sideways it sits beside it)
   // on a desktop the details sit on the right: the view centres in the map left of them
+  // upright the globe centres on the screen, the thin tool column floats over its edge; sideways it keeps clear of it
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const insets = wide ? { top: 0, bottom: 0, right: open ? 27 * rem : 0 }
-    : { top: mode === "sheet" ? plateH : 0, bottom: Math.min(bottom, Math.round(vh * 0.6)), right: TOOLS_W };
+    : { top: mode === "sheet" ? plateH : 0, bottom: Math.min(bottom, Math.round(vh * 0.6)), right: mode === "sheet" ? 0 : TOOLS_W };
 
   // the globe fills the free part of a phone or tablet screen: ~1.0 at 360 px, ~2.1 on a 768 px tablet
   const freeSide = Math.min(window.innerWidth - TOOLS_W, vh - DOCK_H - (mode === "sheet" ? 140 : 0));

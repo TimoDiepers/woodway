@@ -170,7 +170,8 @@ def main() -> None:
         carbon = np.float32(a[i, j]) * curves[keys[code[i, j] - 1]]["dtCo2"][k]
         reference.append({"i": i, "j": j, "dt2050": dt_at(i, j, 2050), "dt2100": dt_at(i, j, 2100),
                           "net2100": float(dt_at(i, j, 2100) / carbon),
-                          "dac2026": float(efficiency_grid(2026)[i, j]), "dac2045": float(efficiency_grid(2045)[i, j])})
+                          # no DAC in the cell (e.g. Fairbanks): null, the browser gives NaN there
+                          **{f"dac{y}": (None if np.isnan(v := float(efficiency_grid(y)[i, j])) else v) for y in (2026, 2045)}})
 
     assert len(reference) == 3, f"expected the three example sites, got {len(reference)}"
 
