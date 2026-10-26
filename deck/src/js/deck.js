@@ -100,7 +100,7 @@ function axTex(host, key, tex, x, y, fontPx) {
       if (!part) continue;
       const sp = document.createElement('span');
       if (part.startsWith('$') && window.katex) katex.render(part.slice(1, -1), sp, { macros: TEX_MACROS, throwOnError: false, strict: false, trust: c => c.command === '\\htmlClass' });
-      else sp.textContent = part.replace(/^\$|\$$/g, '');
+      else sp.innerHTML = supHTML(tipEsc(part.replace(/^\$|\$$/g, '')));
       el.append(sp);
     }
     host.append(el);
@@ -146,9 +146,94 @@ function E(tag, attrs, parent) {
   if (parent) parent.appendChild(e);
   return e;
 }
+/* superscript numbers (10⁻¹⁵): Plex is loaded without the superscript block, so ⁰ ⁴–⁹ ⁻ would come from a fallback
+   face of another height. Written as text with a raised, smaller run instead: <sup> in HTML, a rich-text token in charts */
+const SUP_RE = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]*[⁰⁴⁵⁶⁷⁸⁹⁺⁻][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]*/g;
+const SUP_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁺': '+', '⁻': '−' };
+const supPlain = r => [...r].map(c => SUP_MAP[c] || c).join('');
+const supHTML = html => String(html).replace(SUP_RE, r => `<sup class="sx">${supPlain(r)}</sup>`);
+function supText(root) {   // every text node outside drawings and formulas
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), hits = [];
+  while (w.nextNode()) { const n = w.currentNode; SUP_RE.lastIndex = 0; if (SUP_RE.test(n.nodeValue) && !n.parentElement.closest('svg, .katex, script, style, template')) hits.push(n); }
+  for (const n of hits) {
+    const frag = document.createDocumentFragment();
+    let last = 0; n.nodeValue.replace(SUP_RE, (r, at) => {
+      if (at > last) frag.append(n.nodeValue.slice(last, at));
+      const sup = document.createElement('sup'); sup.className = 'sx'; sup.textContent = supPlain(r); frag.append(sup); last = at + r.length; return r; });
+    if (last < n.nodeValue.length) frag.append(n.nodeValue.slice(last));
+    n.replaceWith(frag);
+  }
+}
+/* Holzweg slide: it opens on the summary's last picture, takeaway 3 with two phrases in gold. As each card comes in,
+   its heading flies out of the matching phrase into place, growing from the phrase's size to the heading's.
+   Only when stepping forward on the open slide; a jump to the slide (or backwards) just shows the end state. */
+function holzwegFly(slide) {
+  const srcs = [...slide.querySelectorAll('.hw-fz3 .fz-k')];
+  const pairs = [...slide.querySelectorAll('.hwv .hwk3')].map((card, i) => ({ card, src: srcs[i], dst: card.querySelector('.hw-h') })).filter(q => q.src && q.dst);
+  let since = 0;
+  new MutationObserver(() => { const on = slide.classList.contains('active'); if (on && !since) since = performance.now(); if (!on) since = 0; })
+    .observe(slide, { attributes: true, attributeFilter: ['class'] });
+  for (const q of pairs) {
+    let was = q.card.classList.contains('shown');
+    new MutationObserver(() => {
+      const on = q.card.classList.contains('shown');
+      if (on === was) return;
+      was = on;
+      q.src.style.visibility = on ? 'hidden' : '';
+      q.dst.style.visibility = '';
+      if (on && slide.classList.contains('active') && performance.now() - since > 200 && !matchMedia('(prefers-reduced-motion: reduce)').matches) fly(q);
+    }).observe(q.card, { attributes: true, attributeFilter: ['class'] });
+  }
+  function fly({ card, src, dst }) {
+    const b = slide.getBoundingClientRect(), k = b.width / slide.offsetWidth;
+    const sr = src.getBoundingClientRect(), dr = dst.getBoundingClientRect(), cs = getComputedStyle(dst);
+    const rise = parseFloat(getComputedStyle(card).top) || 0;   // the card is still rising into place
+    const ex = (dr.left - b.left) / k, ey = (dr.top - b.top) / k - rise, sx = (sr.left - b.left) / k, sy = (sr.top - b.top) / k;
+    const sc = parseFloat(getComputedStyle(src).fontSize) / parseFloat(cs.fontSize);
+    const clone = document.createElement('p');
+    clone.textContent = dst.textContent;
+    Object.assign(clone.style, { position: 'absolute', left: ex + 'px', top: ey + 'px', margin: 0, zIndex: 50, whiteSpace: 'nowrap', pointerEvents: 'none',
+                                 font: cs.font, color: cs.color, transformOrigin: '0 0' });
+    slide.append(clone);
+    dst.style.visibility = 'hidden';
+    clone.animate([{ transform: `translate(${sx - ex}px, ${sy - ey}px) scale(${sc})` }, { transform: 'none' }],
+                  { duration: 950, easing: 'cubic-bezier(.6, .05, .25, 1)' }).onfinish = () => { clone.remove(); if (card.classList.contains('shown')) dst.style.visibility = ''; };
+  }
+}
+/* the closing scene builds up as the night lifts: first the trees grow, left to right, then the animals, the people's
+   things and the motion come in, and the labels last (after the headline). Each piece is wrapped in its own group,
+   so the animations already on the pieces (walking, swinging, flying) keep running */
+function endeStage(svg) {
+  const LATE = '.deer, .fox, .ende-hare, .swing, .balance, .hammock, .logs, .squirrel, .pond, .frog, .cut';
+  const wrap = (el, cls, d) => { const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.setAttribute('class', cls); g.style.setProperty('--d', d.toFixed(2) + 's'); el.before(g); g.append(el); };
+  const x = el => { const m = /translate\(\s*(-?[\d.]+)/.exec(el.getAttribute('transform') || ''); return m ? +m[1] : 800; };
+  let late = 0;
+  const lateD = () => 2.6 + (late++ % 12) * 0.13;
+  const box = [...svg.children].find(c => c.getAttribute('transform') === 'translate(0 -0)');
+  if (box) for (const el of [...box.children]) {
+    if (el.matches('.balance') || el.querySelector('.balance')) wrap(el, 'e-dank', 0.4);   // the vegan comparison: only with the thanks
+    if (el.matches(LATE) || el.querySelector(LATE)) wrap(el, 'e-late', lateD());
+    else if (el.querySelector('.m-sway') || /scale/.test(el.getAttribute('transform') || '')) {
+      for (const owl of el.querySelectorAll('.owl')) wrap(owl, 'e-late', 3.4);
+      wrap(el, 'e-tree', 0.5 + x(el) / 1600 * 1.8);
+    }
+    else if (el.tagName === 'g') wrap(el, 'e-late', lateD());   // a person
+    else if (el.tagName === 'path' && !/^#(dde3cc|cbd6b4)$/.test(el.getAttribute('fill'))) wrap(el, 'e-dank e-branch', 0);   // the branch the balance hangs from: with the thanks, before the balance
+  }
+  for (const el of [...svg.children]) if (el.matches('.fly-l, .fly-r, .vapor, .tt-wander') || el.querySelector(':scope > .tt-co2, :scope > .tt-wander, .rain')) wrap(el, 'e-late', lateD());
+}
+function supRichText(text, f, color) {   // chart text with superscript runs as rich tokens; null when there are none
+  SUP_RE.lastIndex = 0; if (!text || !SUP_RE.test(text)) return null;
+  const n = f.fontSize, base = { fontFamily: f.fontFamily, fontWeight: f.fontWeight, fontStyle: f.fontStyle, color, verticalAlign: 'bottom' };
+  const esc = x => x.replace(/[{}|]/g, '');
+  const line = l => { let out = '', last = 0; l.replace(SUP_RE, (r, at) => { if (at > last) out += `{n|${esc(l.slice(last, at))}}`; out += `{sp|${supPlain(r)}}`; last = at + r.length; return r; });
+                      if (last < l.length) out += `{n|${esc(l.slice(last))}}`; return out; };
+  return { formatter: String(text).split('\n').map(line).join('\n'),
+           rich: { n: { ...base, fontSize: n, lineHeight: n * 1.18 }, sp: { ...base, fontSize: n * .66, lineHeight: n * 1.18, padding: [0, 0, n * .42, 0] } } };
+}
 /* a chart text with a letter subscript (q̇_ein): rich text, the subscript smaller and lower */
 function subRich(t, f) {
-  if (!t.sub) return {};
+  if (!t.sub) return supRichText(t.s, f, t.c) || {};
   const n = f.fontSize, base = { fontFamily: f.fontFamily, fontWeight: f.fontWeight, color: t.c, verticalAlign: 'bottom' };
   return {
     formatter: t.sub.map(([x, low]) => `{${low ? 'lo' : 'up'}|${x.replace(/[{}|]/g, '')}}`).join(''),
@@ -216,14 +301,14 @@ const ecDot = c => { const h = /^#([0-9a-f]{6})$/i.exec(c || ''), lum = h ? [0, 
 const ecSigned = (v, d) => ecNum(v, d).replace('-', '−');
 /* The one layout of every tooltip in the deck (styles: .tc in deck.css): a bold head (the year, the place, the
    category), an optional grey line saying what is measured, then rows of colour dot, name and value. */
-const tipEsc = t => String(t ?? '').replace(/&(?![a-z#0-9]+;)/gi, '&amp;').replace(/</g, '&lt;');
+const tipEsc = t => supHTML(String(t ?? '').replace(/&(?![a-z#0-9]+;)/gi, '&amp;').replace(/</g, '&lt;'));
 function tipCard({ head, sub, rows = [], note }) {
   if (sub && head && String(sub).trim() === String(head).trim()) sub = '';   // no line that says the head again
   const r = rows.filter(Boolean).map(({ c, name, v }) =>
     `<div class="tc-r">${c ? ecDot(c) : ''}${name ? `<span class="tc-n">${tipEsc(name)}</span>` : ''}${v !== undefined && v !== '' ? `<b class="tc-v">${v}</b>` : ''}</div>`).join('');
   return `<div class="tc">${head ? `<div class="tc-h">${tipEsc(head)}</div>` : ''}${sub ? `<div class="tc-s">${tipEsc(sub)}</div>` : ''}${r}${note ? `<div class="tc-s">${tipEsc(note)}</div>` : ''}</div>`;
 }
-const tipVal = (v, d, u) => `${ecSigned(v, d)}${u ? '\u202f' + u : ''}`;
+const tipVal = (v, d, u) => `${ecSigned(v, d)}${u ? '\u202f' + supHTML(u) : ''}`;
 // a place on a map, rounded to whole degrees, and the named site if it is right there
 function tipPlace(lon, lat) {
   const ns = `${Math.abs(Math.round(lat))}° ${lat >= 0 ? 'N' : 'S'}`, ew = `${Math.abs(Math.round(lon))}° ${lon >= 0 ? 'O' : 'W'}`;
@@ -633,7 +718,7 @@ const EC_ORTE3 = {
     const xAxis = sites.map((_, i) => ecAxis({ gridIndex: i, type: 'value', min: 2026, max: 2100,
       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }));
     const yAxis = sites.map((_, i) => ecAxis({ gridIndex: i, type: 'value', min: ymin, max: ymax, interval: 20,
-      name: i === 0 ? 'ΔT je Baum [fK]' : '', nameTex: i === 0 ? '$\\dT$ je Baum [fK]' : undefined, nameLocation: 'middle', nameGap: 46,
+      name: i === 0 ? 'ΔT je Baum [fK = 10⁻¹⁵ K]' : '', nameTex: i === 0 ? '$\\dT$ je Baum [fK = 10⁻¹⁵ K]' : undefined, nameLocation: 'middle', nameGap: 56,
       axisLabel: { show: i === 0, color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => v === 0 ? '0' : ecNum(v, 0).replace('-', '−') },
       splitLine: { show: true, lineStyle: { color: EC.grid } } }));
     // the parts' areas fade from the curve towards zero, at every year relative to the curve's own value there: ten
@@ -920,22 +1005,23 @@ function ecAnker(phase) {
       k = kk;
       const ip = D.jahre.indexOf(pv), anim1 = phase === 'k4' && k === 1;
       const ba = vl.map((v, i) => v - D.pfade.alle[i] / 1000), bk = vl.map((v, i) => v - D.pfade.kuehlt[i] / 1000);
+      const bf = vl.map((v, i) => v - D.pfade.forst[i] / 1000);   // the managed forest (backup only; the trees of chapter 5 are the cooling land)
       const plain = (id, ys, color, name, dash) => { const l = L(id, ys, name, { line: dash ? { width: 3, type: [8, 6] } : {} });
         Object.assign(l.lineStyle, { color }); l.itemStyle = { color }; l.animation = anim1 ? undefined : false; return l; };
       if (k >= 1) {
         series.push(plain('ba', ba, EC.alb, 'alle Flächen', true), plain('bk', bk, '#2f7a45', 'kühlende Flächen'));
-        if (k >= 6) { const l = plain('b', b, col('b'), 'kühlende Flächen als Forst'); l.animation = k === 6 ? undefined : false; series.push(l); }
+        if (k >= 6) { const l = plain('b', bf, col('b'), 'kühlende Flächen als Forst'); l.animation = k === 6 ? undefined : false; series.push(l); }
         // one band for the case on the table: on click 3 its lower edge glides from the cooling land onto the forest
         // (same ids, so the data morphs instead of the band being drawn anew); the peak label rides on it
-        const cur = k >= 6 ? b : bk, cool = k >= 6 ? -W.baeume[ip] / 1000 : D.pfade.kuehlt[ip] / 1000;
+        const cur = k >= 6 ? bf : bk, cool = (k >= 6 ? D.pfade.forst : D.pfade.kuehlt)[ip] / 1000;
         const edge = Object.assign(base('tB', cur, 't'), { animationDurationUpdate: 1600 });
         edge.markPoint = dot('#2f7a45', [atPeak(cur, cool)], 'tB'); edge.markPoint.animation = anim1 ? undefined : false;
         series.push(edge, Object.assign(fill('tG', vl.map((v, i) => v - cur[i]), 't', '#2f7a45', .3, anim1), { animationDurationUpdate: 1600 }));
       }
-      if (k >= 7) { const i = D.jahre.indexOf(2080), red = [fill('rr', b.map(v => Math.max(v - 1.5, 0)), 'rot', '#c4121f', .28, k === 7)];
-        red[0].markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2080, 1.5 + (b[i] - 1.5) / 5] }],
+      if (k >= 7) { const i = D.jahre.indexOf(2080), red = [fill('rr', bf.map(v => Math.max(v - 1.5, 0)), 'rot', '#c4121f', .28, k === 7)];
+        red[0].markPoint = { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [2080, 1.5 + (bf[i] - 1.5) / 5] }],
           label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'über 1,5 °C' } };
-        series.push(base('rb', b.map(() => 1.5), 'rot'), ...red); }
+        series.push(base('rb', bf.map(() => 1.5), 'rot'), ...red); }
     }
     if (has('d') && phase === 1) { const d = on('dac_max'), iv = D.jahre.indexOf(D.dac.max.speicher_voll);   // slide 28 only
       series.push(L('d', d, 'DACCS, +20 %/a', { line: { width: 3, type: [10, 5] },
@@ -1631,9 +1717,11 @@ class MplChart {
         if (e.hatch) children.push(mplHatchLines(e.hatch, e.hc || '#000', s, { type: 'rect', shape: r }, [r.x, r.y, r.x + r.width, r.y + r.height]));
       }
       if (e.k === 'marker' || (e.k === 'line' && e.sym)) children.push({ type: 'circle', shape: { cx: (x0 + x1) / 2, cy: y, r: lg.fs * s * .3 }, style: { fill: e.col } });
-      children.push({ type: 'text', x, y, style: { text: e.s, fill: e.c || '#1b2420', textVerticalAlign: 'middle', font: `400 ${lg.fs * s}px ${MPL_FONT}`, lineHeight: lg.fs * s * 1.15 } });
+      { const r = supRichText(e.s, { fontSize: lg.fs * s, fontFamily: MPL_FONT, fontWeight: 400, fontStyle: 'normal' }, e.c || '#1b2420') || {};
+        children.push({ type: 'text', x, y, style: { text: r.formatter || e.s, rich: r.rich, fill: e.c || '#1b2420', textVerticalAlign: 'middle', font: `400 ${lg.fs * s}px ${MPL_FONT}`, lineHeight: lg.fs * s * 1.15 } }); }
     }
-    if (lg.title) children.push({ type: 'text', x: lg.title.f[0] * W, y: lg.title.f[1] * H, style: { text: lg.title.s, fill: lg.title.c, textAlign: lg.title.al, textVerticalAlign: 'middle', font: `600 ${lg.title.fs * s}px ${MPL_FONT}` } });
+    if (lg.title) { const r = supRichText(lg.title.s, { fontSize: lg.title.fs * s, fontFamily: MPL_FONT, fontWeight: 600, fontStyle: 'normal' }, lg.title.c) || {};
+      children.push({ type: 'text', x: lg.title.f[0] * W, y: lg.title.f[1] * H, style: { text: r.formatter || lg.title.s, rich: r.rich, fill: lg.title.c, textAlign: lg.title.al, textVerticalAlign: 'middle', font: `600 ${lg.title.fs * s}px ${MPL_FONT}` } }); }
     return { id, type: 'group', silent: true, z: 40, children };
   }
 
@@ -1871,6 +1959,23 @@ function label(g, x, y, s, d0) {
   const red = s.startsWith('!');
   const t = E('text', { x, y, 'font-family': 'Literata', 'font-style': 'italic', 'font-weight': 700, 'font-size': 27, fill: red ? '#a3121b' : '#1b2420', class: 'pop', style: `--d:${d0}` }, g);
   t.textContent = red ? s.slice(1) : s;
+}
+/* light as a wave, like the heat radiation but with a shorter wavelength: the straight ray (.ray-l) keeps
+   only its arrow tip, the dots (.ray-p, next to it) become the wave with running dashes. A straight tail
+   lets the tip point along the ray. */
+function waveRay(l) {
+  const p = l.nextElementSibling;
+  if (!p || !p.classList.contains('ray-p')) return;
+  const [x1, y1, x2, y2] = l.getAttribute('d').match(/-?[\d.]+/g).map(Number);
+  const w = parseFloat(l.style.getPropertyValue('--srw')) || 3, amp = 5;
+  const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+  // a whole number of half-waves (wavelength about 26, stretched to fit), then a short straight end under the tip
+  const waveLen = Math.max(0, len - 3.1 * w - 9), lam = 2 * waveLen / Math.max(1, Math.round(waveLen / 13));
+  const pt = (s, o) => `${(x1 + ux * s - uy * o).toFixed(1)} ${(y1 + uy * s + ux * o).toFixed(1)}`;
+  let d = 'M' + pt(0, 0);
+  for (let s = lam / 16; s <= waveLen + 1e-6; s += lam / 16) d += ' L' + pt(s, amp * Math.sin(2 * Math.PI * s / lam));
+  l.setAttribute('d', d + ' L' + pt(len, 0));
+  p.setAttribute('d', d + ' L' + pt(len - 2.8 * w, 0));
 }
 function drawAlbedo(svg) {
   const tiles = JSON.parse(svg.dataset.tiles);
@@ -2401,7 +2506,11 @@ addEventListener('DOMContentLoaded', () => {
     // slide 13 opens on slide 8's last picture: everything there at once, the global effects numbered
     if (svg.closest('[data-tree="recap"]')) { for (const e of svg.querySelectorAll('[data-step]')) e.removeAttribute('data-step'); svg.classList.add('recap'); }
   });
+  for (const l of deckEl.querySelectorAll('path.ray-l')) waveRay(l);
   for (const svg of deckEl.querySelectorAll('svg.albedo')) drawAlbedo(svg);
+  supText(deckEl);
+  for (const s of deckEl.querySelectorAll('.slide.holzweg')) holzwegFly(s);
+  for (const svg of deckEl.querySelectorAll('svg.ende-scene')) endeStage(svg);
   window.deck = new Deck();
   // formulas, typeset one slide per task (the current one first): they carry click steps, so the slide counts again
   const texed = new WeakSet(), texOne = s => {

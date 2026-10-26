@@ -3,7 +3,7 @@
 Chapter 3: three planting paths, each planted at once in 2026 (every reforestable cell, the cooling cells, the
 cooling cells as managed forest with the timber bound; the timber released as the dashed comparison), each one
 full FaIR run, and the warming of Very Low above 1.5 deg C.
-Chapter 5: with the managed forest as the trees' contribution, DACCS as a cost optimisation (optimistic costs of
+Chapter 5: with the trees on the cooling cells (left to grow) as the trees' contribution, DACCS as a cost optimisation (optimistic costs of
 Okosun et al. 2026) that offsets the remaining warming above 1.5 deg C from the earliest year a build-out of at most
 20, 50 or 100 %/a allows (nbs.dac_optim.solve_cost_offset); the 20 %/a plan also priced with the median and
 pessimistic costs, set against the EU-27
@@ -48,8 +48,8 @@ def main() -> None:
     teile = {p: {k: _mk(-v) for k, v in delta_t_parts(p).items()} for p in ("alle", "kuehlt", "forst")}
     teile["forst_frei"] = {k: _mk(-v) for k, v in delta_t_parts("forst", release=True).items()}
     areas = {p: round(forcing(p)[2], 3) for p in ("alle", "kuehlt", "forst")}
-    gap = need + delta_t("forst")
-    gap_c = np.array(vl_series()["median_c"]) - 1.5 + delta_t("forst")   # unclipped: below 1.5 deg C counts too
+    gap = need + delta_t("kuehlt")
+    gap_c = np.array(vl_series()["median_c"]) - 1.5 + delta_t("kuehlt")   # unclipped: below 1.5 deg C counts too
 
     def _case(r, g):
         x = np.array(r["u"]); over = 1000 * (g - np.array(r["kuehlung_k"]))
@@ -106,7 +106,7 @@ def main() -> None:
                          "brutto_gt": round(float(u.sum() - uv.sum()), 1),
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
     # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
-    wirkung = {"baeume": _mk(delta_t("forst")), "vegan": _mk(dg + df),
+    wirkung = {"baeume": _mk(delta_t("kuehlt")), "vegan": _mk(dg + df),
                **{f"dac_{g}": _mk(-np.array(r["kuehlung_k"])) for g, r in runs.items()}, "dac_max": _mk(-np.array(r_max["kuehlung_k"])),
                "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
     vl_c = [round(v, 3) for v in vl_series()["median_c"]]
