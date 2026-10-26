@@ -730,7 +730,7 @@ body:has(#menu.open) #menu-fab { display: none; }
 svg:has(.f-chk.shown) .albmark { opacity: 0; transition: opacity .5s; }   /* ticked off: the labels go, the formula keeps it */
 /* last click: the two factors of the CO2 term framed, they come next */
 
-.fcheck { font: 700 26px/1 var(--sans); color: var(--s-phia); margin-left: 4px; opacity: 0; transition: opacity .4s; }
+.fcheck { width: 26px; height: 23px; vertical-align: -2px; color: var(--s-phia); margin-left: 6px; opacity: 0; transition: opacity .4s; }   /* drawn, as the tick on the recap */
 .slide:has(.f-chk.shown) .fcheck { opacity: 1; }
 /* slide 18: the greenhouse drawing gives way to the charts */
 .ghwrap { position: relative; width: 860px; height: 547px; align-self: start; }
@@ -1502,7 +1502,7 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg .hwnice .nk { font: italic 400 22px/1.2 var(--serif); color: var(--muted); }
 .slide.holzweg .hwnice .nc { display: inline-flex; align-items: center; gap: 12px; }
 .slide.holzweg .hwnice .nc b { color: var(--gold); font-weight: 600; }
-.slide.holzweg .hwnice .vgic { width: 28px; height: 28px; stroke: var(--gold); }
+.slide.holzweg .hwnice .vgic { width: 30px; height: 30px; flex: none; stroke: none; }   /* drawn flat, as the scenes */
 /* the four demands: brighter, and underlined one after the other once the sentence is there */
 /* vegan slide: the two pictures large, the three short claims small underneath */
 .vg4 { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; grid-template-rows: 1fr auto; }
