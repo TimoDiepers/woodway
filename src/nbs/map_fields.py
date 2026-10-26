@@ -43,10 +43,10 @@ SCALES = {
     # (square-root scale: in half the blocks under 3 % of the land is free, a linear scale would leave them white)
     "flaeche": {"stops": ["#ece6d3", "#c9d6a4", "#8db36c", "#4c8547", "#1f5532"], "domain": [0, 50], "gamma": 0.5,
                 "unit": "%"},
-    # temperature effect of one tree in 2100 [10^-15 K]: diverging at 0, cooling = the CO2 green family,
+    # temperature effect of one tree in 2100 [fK = 10^-15 K]: diverging at 0, cooling = the CO2 green family,
     # warming = the albedo orange family (the same pair as "kühlt/wärmt" in the Vergleich chapter)
     "baumwirkung": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
-                    "domain": [-90, 45], "mid": 0, "unit": "·10⁻¹⁵ K"},
+                    "domain": [-90, 45], "mid": 0, "unit": "fK"},
     # what reforesting all free area of a block brings in 2100, per land area: same diverging palette
     "lohnt": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
               "domain": [-12, 8], "mid": 0, "unit": "µK je Mha"},

@@ -1001,9 +1001,9 @@ def feasibility_figure(out_path: str) -> str:
 
 def tree_effect_figure(out_path: str) -> str:
     """K15: temperature effect in 2100 of one tree of the local typical forest, planted in the start year."""
-    return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [10$^{-15}$ K]: grün kühlt, orange wärmt",
+    return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [fK]: grün kühlt, orange wärmt",
                                [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
-                               lambda v: f"{de_num(v)}·10$^{{-15}}$ K")
+                               lambda v: f"{de_num(v)} fK")
 
 
 def total_effect_figure(out_path: str) -> str:

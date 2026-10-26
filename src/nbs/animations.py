@@ -645,7 +645,7 @@ def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 
     return out_path
 
 
-C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Was Bäume tun" drawing
+C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wie ein Baum aufs Klima wirkt" drawing
 
 
 def cloud_season_series(site: Site) -> tuple[NDArray, NDArray, NDArray]:

@@ -88,8 +88,8 @@ const MPL_AXIS_TEX = {
   'Antrieb [W/m²]': 'Antrieb $\\phit(\\cc)$ [W/m²]',
   'Antrieb je kg [10⁻¹⁵ W/m²]': '$\\eps$ [10⁻¹⁵ W/m² je kg]',
   'Antrieb [10⁻¹⁵ W/m² je Baum]': 'Antrieb $\\phit$ [10⁻¹⁵ W/m² je Baum]',
-  'Wirkung je Baum im Jahr 2100 [10⁻¹⁵ K]': '$\\dT$ je Baum 2100 [fK]',
-  'Temperatur je Baum 2100 [10⁻¹⁵ K]': '$\\dT$ je Baum 2100 [fK]'
+  'Wirkung je Baum im Jahr 2100 [fK]': '$\\dT$ je Baum 2100 [fK]',
+  'Temperatur je Baum 2100 [fK]': '$\\dT$ je Baum 2100 [fK]'
 };
 function axTex(host, key, tex, x, y, fontPx) {
   // one label per key, kept between pictures (no flicker), moved to (x, y) in the host's pixels, rotated as an axis title
@@ -170,9 +170,17 @@ function supText(root) {   // every text node outside drawings and formulas
 function holzwegFly(slide) {
   const srcs = [...slide.querySelectorAll('.hw-fz3 .fz-k')];
   const pairs = [...slide.querySelectorAll('.hwv .hwk3')].map((card, i) => ({ card, src: srcs[i], dst: card.querySelector('.hw-h') })).filter(q => q.src && q.dst);
-  let since = 0;
-  new MutationObserver(() => { const on = slide.classList.contains('active'); if (on && !since) since = performance.now(); if (!on) since = 0; })
-    .observe(slide, { attributes: true, attributeFilter: ['class'] });
+  // word by word: a phrase that wraps in takeaway 3 flies as its words, each from its own line
+  const words = el => { el.innerHTML = el.textContent.trim().split(/\s+/).map(w => `<span>${w}</span>`).join(' '); return [...el.children]; };
+  for (const q of pairs) { q.sw = words(q.src); q.dw = words(q.dst); }
+  // coming from the summary, the first card follows at once; coming back (or a reload) nothing flies
+  let ok = false;
+  new MutationObserver(() => {
+    if (!slide.classList.contains('active')) { ok = false; return; }
+    if (ok) return;
+    const d = window.deck;
+    setTimeout(() => { ok = true; if (d && d.slides[d.i] === slide && d.step === 0 && !d.still) d.next(); }, 0);
+  }).observe(slide, { attributes: true, attributeFilter: ['class'] });
   for (const q of pairs) {
     let was = q.card.classList.contains('shown');
     new MutationObserver(() => {
@@ -181,23 +189,34 @@ function holzwegFly(slide) {
       was = on;
       q.src.style.visibility = on ? 'hidden' : '';
       q.dst.style.visibility = '';
-      if (on && slide.classList.contains('active') && performance.now() - since > 200 && !matchMedia('(prefers-reduced-motion: reduce)').matches) fly(q);
+      if (on && ok && slide.classList.contains('active') && !matchMedia('(prefers-reduced-motion: reduce)').matches) fly(q);
     }).observe(q.card, { attributes: true, attributeFilter: ['class'] });
   }
-  function fly({ card, src, dst }) {
-    const b = slide.getBoundingClientRect(), k = b.width / slide.offsetWidth;
-    const sr = src.getBoundingClientRect(), dr = dst.getBoundingClientRect(), cs = getComputedStyle(dst);
-    const rise = parseFloat(getComputedStyle(card).top) || 0;   // the card is still rising into place
-    const ex = (dr.left - b.left) / k, ey = (dr.top - b.top) / k - rise, sx = (sr.left - b.left) / k, sy = (sr.top - b.top) / k;
-    const sc = parseFloat(getComputedStyle(src).fontSize) / parseFloat(cs.fontSize);
-    const clone = document.createElement('p');
-    clone.textContent = dst.textContent;
-    Object.assign(clone.style, { position: 'absolute', left: ex + 'px', top: ey + 'px', margin: 0, zIndex: 50, whiteSpace: 'nowrap', pointerEvents: 'none',
-                                 font: cs.font, color: cs.color, transformOrigin: '0 0' });
-    slide.append(clone);
+  function fly({ card, sw, dw, dst }) {
+    const b = slide.getBoundingClientRect(), k = b.width / slide.offsetWidth, cs = getComputedStyle(dst);
+    const at = el => { const r = el.getBoundingClientRect(); return [(r.left - b.left) / k, (r.top - b.top) / k]; };
+    const sc0 = parseFloat(getComputedStyle(sw[0]).fontSize) / parseFloat(cs.fontSize);
+    const from = sw.map(at);   // the takeaway stays put; the card is still rising, so its words are read every frame
+    const clones = dw.map(w => {
+      const c = document.createElement('span');
+      c.textContent = w.textContent;
+      Object.assign(c.style, { position: 'absolute', left: 0, top: 0, margin: 0, zIndex: 50, whiteSpace: 'nowrap', pointerEvents: 'none',
+                               font: cs.font, lineHeight: 'normal', color: cs.color, transformOrigin: '0 0' });
+      slide.append(c); return c;
+    });
     dst.style.visibility = 'hidden';
-    clone.animate([{ transform: `translate(${sx - ex}px, ${sy - ey}px) scale(${sc})` }, { transform: 'none' }],
-                  { duration: 950, easing: 'cubic-bezier(.6, .05, .25, 1)' }).onfinish = () => { clone.remove(); if (card.classList.contains('shown')) dst.style.visibility = ''; };
+    const T = 950, LAG = 35, t0 = performance.now(), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    (function frame(now) {
+      let done = true;
+      clones.forEach((c, i) => {
+        const t = Math.min(1, Math.max(0, (now - t0 - i * LAG) / T)), e = ease(t); if (t < 1) done = false;
+        const [ex, ey] = at(dw[i]), [sx, sy] = from[i], sc = sc0 + (1 - sc0) * e;
+        c.style.transform = `translate(${sx + (ex - sx) * e}px, ${sy + (ey - sy) * e}px) scale(${sc})`;
+      });
+      if (!done && slide.classList.contains('active')) return requestAnimationFrame(frame);
+      clones.forEach(c => c.remove());
+      if (card.classList.contains('shown')) dst.style.visibility = '';
+    })(t0);
   }
 }
 /* the closing scene builds up as the night lifts: first the trees grow, left to right, then the animals, the people's
@@ -604,7 +623,7 @@ const EC_GAP = {
 /* temperature slide: one year -> every fifth year -> sum = the tree -> three sites; the axis fits each click */
 window.TEMPSUM = @@TEMPSUM@@;
 const EC_TEMPSUM = {
-  steps: 3, tip: { unit: '·10⁻¹⁵ K', dec: 1 },
+  steps: 3, tip: { unit: 'fK', dec: 1 },
   option(k) {
     const D = window.TEMPSUM, A = D.sites[0], red = '#b2182b';
     const pulse = p => [[p.year, 0], ...p.v.map((v, i) => [p.year + i, v])];
@@ -773,9 +792,9 @@ const EC_ZEIT = {
       return `CO₂ ${sg(T.co2_aufnahme[n])}` + (Math.abs(T.co2_verlust[n]) >= .5 ? ` · Fällen ${sg(T.co2_verlust[n])}` : '') + ` · Albedo ${sg(T.albedo[n])}`; };
     // two lines, the bold first one at the tip of its curve, also while the curve is drawn: an empty line above as
     // tall as the second one makes the block symmetric, so centring it on the tip centres the bold line
-    const end = (text, color, key) => ({ show: true, formatter: key ? `{e|}\n{a|${text}}\n{b|${parts(key)}}` : text, color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, distance: 10,
-      rich: { e: { lineHeight: 22, fontSize: 17 }, a: { color, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 24 },
-              b: { color: EC.muted, fontFamily: EC.font, fontSize: 17, fontWeight: 400, lineHeight: 22 } } });
+    const end = (text, color, key) => ({ show: true, formatter: key ? `{e|}\n{a|${text}}\n{b|${parts(key)}}` : text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10,
+      rich: { e: { lineHeight: 24, fontSize: 19 }, a: { color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, lineHeight: 27 },
+              b: { color: EC.muted, fontFamily: EC.font, fontSize: 19, fontWeight: 400, lineHeight: 24 } } });
     const line = (id, ys, color, text, key, extra) => Object.assign({ id, type: 'line', showSymbol: false, data: P(ys.map(v => -v)), z: 5,
       lineStyle: { color, width: 3.4 }, itemStyle: { color }, endLabel: end(text, color, key), labelLayout: { moveOverlap: 'shiftY' },
       animationDuration: 1800 }, extra || {});
@@ -996,7 +1015,7 @@ function ecAnker(phase) {
       series.push(l, base(id + 'B', ys, id), fill(id + 'G', vl.map((v, i) => v - ys[i]), id, color, light ? .3 : .4, anim));
     };
     const atPeak = (ys, cool) => ({ coord: [pv, ys[D.jahre.indexOf(pv)]], label: { position: 'bottom', distance: 150, offset: [90, 0], color: '#2f7a45', fontSize: 20,
-      formatter: `Aufforstung an der Spitze: −${ecNum(cool, 2)} K` } });
+      formatter: `Aufforstung an der Spitze: −${ecNum(cool * 1000, 0)} mK` } });
     if (!light) trees('b', b, col('b'), 'Globale Aufforstung', null, false);
     else {   // slide 27 (k4): k 0 Very Low alone; k 1 all land (dashed) and the cooling land, the band under the cooling
       // land. The forest slide (k4f): k 0 that picture standing; k 1 the cooling land as managed forest runs in, the

@@ -197,7 +197,7 @@ Die Farbe hängt am KaTeX-Makro (`\phic`, `\eps`, `\dm`, `\dT` … in `deck.js`)
 
 ### Rollen (Klassen)
 Text im Folienkörper nimmt eine Rolle, kein eigenes `font:`. Größe per `.sm`/`.lg`, Farbe per `.c-<rolle>`:
-- `.t-kicker` Plex 600 16px, Versalien, gesperrt, gedämpft (`.lg` 20px): Überschrift über einer Gruppe.
+- `.t-kicker` Plex 600 17px, normale Schreibung, ink-2 (`.lg` 21px): Überschrift über einer Gruppe. Keine Versalien, keine Sperrung.
 - `.t-head` Plex 600 21px, Tinte (`.sm` 18, `.lg` 24): Überschrift eines Panels, einer Karte, einer Zeile.
 - `.t-text` Plex 400 20px/1,4, Tinte 2 (`.sm` 18, `.lg` 23): Text in Panels und Listen.
 - `.t-note` Plex 400 18px, gedämpft: Legende, Hinweis, Unterzeile.
@@ -265,7 +265,7 @@ Sanft gerundete Kästen (8px), volle Pillen (22px Radius) für Kapitelmarker und
 - **Form:** 470px breit, voller Körperhöhe, über der Abbildung rechts; erscheint per Klick und darf die Abbildung überdecken.
 
 ### Charts
-- **Quelle:** die eigenen matplotlib-Figuren, als ECharts nachgezeichnet; Beschriftungen in Arial wie im Original, Achsen in Plex.
+- **Quelle:** die eigenen matplotlib-Figuren, als ECharts nachgezeichnet; Beschriftungen und Achsen in Plex, wie alle anderen Diagramme.
 - **Bildsprache:** Balken = was ein Baum in einem Jahr austauscht; Linien = erst mit Systemantwort. Orte in einem gemeinsamen Diagramm.
 - **Bewegung:** Einlauf beim Erscheinen; bei reduzierter Bewegung sofort im Endzustand.
 

@@ -517,7 +517,7 @@ def ladder_figure(out_path: str) -> str:
     ax.set_ylim(lo * 1.15, max(30.0, -lo * 0.12))
     ax.set_xticks(x)
     ax.set_xticklabels(LADDER_STEPS, fontsize=11.5)
-    ax.set_ylabel("Temperatur je Baum 2100 [10$^{-15}$ K]")
+    ax.set_ylabel("Temperatur je Baum 2100 [fK]")
     return _save(fig, out_path)
 
 

@@ -241,7 +241,7 @@ strong { font-weight: 600; }
    Every label, heading, text, note, number and statement inside a slide body takes one of these, in Plex unless
    named otherwise; a size modifier (.sm, .lg) where the room asks for it, a colour role (.c-*) where the meaning
    asks for it. They read the slide's tokens, so the same class works on paper and on the night slides.
-     .t-kicker  uppercase label over a group           600 16px, tracked, muted  (.lg 20px)
+     .t-kicker  label over a group, sentence case        600 17px, ink-2  (.lg 21px)
      .t-head    heading of a panel, a card, a row      600 21px, ink             (.sm 18px, .lg 24px)
      .t-text    running text in panels and lists       400 20px/1.4, ink-2      (.sm 18px, .lg 23px)
      .t-note    caption, key, aside                    400 18px, muted
@@ -250,8 +250,8 @@ strong { font-weight: 600; }
    =========================================================== */
 /* a role on a container sets its paragraphs and items too (the base rule for p and li would win otherwise) */
 :is(.t-text, .t-note) :where(p, li) { font: inherit; color: inherit; }
-.t-kicker { font: 600 16px/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--c, var(--muted)); }
-.t-kicker.lg { font-size: 20px; }
+.t-kicker { font: 600 17px/1.3 var(--sans); color: var(--c, var(--ink-2)); }
+.t-kicker.lg { font-size: 21px; }
 .t-head { font: 600 21px/1.25 var(--sans); color: var(--c, var(--ink)); }
 .t-head.sm { font-size: 18px; }
 .t-head.lg { font-size: 24px; }
@@ -544,7 +544,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
 .player .yr { flex: none; width: 64px; font: 600 26px/1 var(--sans); color: var(--ch); font-variant-numeric: tabular-nums; }
 .chart > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
 .chart[data-ec] > div:first-child { position: absolute !important; inset: 0; }
-.chart text { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; }
+.chart text { font-family: var(--sans); }
 .chart text.serif { font-family: var(--serif); }
 
 .foot { display: grid; grid-template-columns: minmax(0, 1fr) 720px; gap: 40px; align-items: end; margin-top: 6px; }
@@ -723,7 +723,7 @@ body:has(#menu.open) #menu-fab { display: none; }
 .ebil-l dt { font: 600 20px/1.35 var(--sans); color: var(--muted); }
 .ebil-l dd { margin: 0; font: 400 21px/1.35 var(--sans); color: var(--ink-2); }
 .ebil-l .ebil-to { font-size: 24px; }
-svg:has(.f-chk.shown) .albmark { opacity: .18; transition: opacity .5s; }
+svg:has(.f-chk.shown) .albmark { opacity: 0; transition: opacity .5s; }   /* ticked off: the labels go, the formula keeps it */
 /* last click: the two factors of the CO2 term framed, they come next */
 
 .fcheck { font: 700 26px/1 var(--sans); color: var(--s-phia); margin-left: 4px; opacity: 0; transition: opacity .4s; }
@@ -792,9 +792,9 @@ svg.cc > g > g:first-of-type > text:not(:nth-of-type(1)) { opacity: 0; }
 
 /* the radiation in this drawing stands still: here the topic is the energy balance, not the radiation */
 svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
-/* slide 22: the extra heat loss after the uptake fades once the cooler Earth radiates less (click on Lambda) */
-svg.s21 :is(.extra-lw) { transition: opacity .8s var(--ease); }
-.slide:has(.ts2.shown) svg.s21 :is(.extra-lw) { opacity: .2; }
+/* temperature slide: with R the heat radiation comes forward */
+svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease); }
+.slide:has(.ts2.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; }
 
 /* one highlight for formula terms everywhere (as on slide 17): a coloured, rounded frame with an even tint.
    A layer behind the term's own box (accents like the dot over Q do not bend it); it takes no space,
@@ -950,7 +950,8 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 :is(.embed, .all) .slide.fazit :is(.fg, .fz-sun) { animation: none; }
 @media (prefers-reduced-motion: reduce) { .slide.fazit :is(.fg, .fz-sun) { animation: none !important; } }
 @media print { .slide.fazit :is(.fg, .fz-sun) { animation: none !important; } }
-.slide.fazit .cols3 .col p { font-size: 22px; line-height: 1.42; }
+.slide.fazit .cols3 .col p { font-size: 25px; line-height: 1.42; }
+.slide.fazit .cols3 .col h4, .slide.holzweg .hw-fz3 h4 { font-size: 30px; }   /* the same in both: the hand-over lines up */
 
 /* the closing slide: from the dark vegan world into the day. It opens at night, the sun comes up behind the hills,
    the night lifts, then the words. Only on arrival (.active); the overview and previews show the day */
@@ -1440,11 +1441,11 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg .hwv .hwfix { margin: 6px 0 0; font-weight: 600; color: var(--gold); }
 /* the tempo card: one tree on a time line, 2026, the peak 2050 and 2100; with the card it grows to both later sizes */
 .slide.holzweg .tempo-tl { flex: 1; min-height: 0; width: 100%; margin-top: 8px; font-family: var(--sans); overflow: visible; }
-.tempo-tl .tl-peak { font-size: 18px; font-weight: 600; fill: var(--gold); }
-.tempo-tl .tl-band { font-size: 17px; fill: var(--gold); }
-.tempo-tl .tl-yr { font-size: 18px; fill: var(--muted); }
-.tempo-tl .tl-sm { font-size: 16px; fill: var(--ink-2); }
-.tempo-tl .tl-big { font-size: 30px; font-weight: 600; fill: var(--gold); }
+.tempo-tl .tl-peak { font-size: 22px; font-weight: 600; fill: var(--gold); }
+.tempo-tl .tl-band { font-size: 21px; fill: var(--gold); }
+.tempo-tl .tl-yr { font-size: 22px; fill: var(--muted); }
+.tempo-tl .tl-sm { font-size: 20px; fill: var(--ink-2); }
+.tempo-tl .tl-big { font-size: 34px; font-weight: 600; fill: var(--gold); }
 .tempo-tl .tl-big.full { fill: var(--co2-lt); }
 .tempo-tl .tgrow { transform-box: fill-box; transform-origin: 50% 100%; }
 .slide.holzweg.active .tempo-tl .shown .tgrow { animation: fz-grow 1.1s cubic-bezier(.34, 1.3, .6, 1) .7s both; }   /* once the card is in */
@@ -1593,10 +1594,6 @@ svg.mo .m-sway.back { animation: none; }
 .vg4 > .vgc:nth-child(3) { grid-row: 2; grid-column: 1 / 3; }
 .vg4 > .vgc:nth-child(4) { grid-row: 2; grid-column: 3 / 5; }
 .vg4 > .vgc:nth-child(5) { grid-row: 2; grid-column: 5 / 7; }
-/* slide 22: the tree thins the top CO2 layer, the cold escape from the top steps back */
-svg.s21 :is(.toprow, .esc0) { transition: opacity .8s var(--ease); }
-.slide:has(.lessco2.shown) svg.s21 .toprow { opacity: .15; }
-.slide:has(.lessco2.shown) svg.s21 .esc0 { opacity: 0; }
 
 /* slide 22: FaIR as a short flow from top to bottom */
 .fflow { align-self: center; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -1874,7 +1871,7 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.holzweg .hw-fz3 > .col:not(:last-child) { visibility: hidden; }
 .slide.holzweg .hw-fz3 .col { border-top: 1px solid rgb(61, 85, 45); padding-top: 18px; }
 .slide.holzweg .hw-fz3 :is(h4, .big-n) { color: #f2ede2; }
-.slide.holzweg .hw-fz3 p { font: 400 22px/1.42 var(--serif); color: #b9c0bb; }
+.slide.holzweg .hw-fz3 p { font: 400 25px/1.42 var(--serif); color: #b9c0bb; }
 .slide.holzweg .hw-fz3 .fz-k { color: #e8b866; font-weight: 600; text-decoration: underline 3px #e8b866; text-underline-offset: 7px; }
 .slide.holzweg .hw-fz3 :is(h4, .big-n, p) { transition: color .7s var(--ease); }
 .slide.holzweg .hw-fz3 .col { transition: border-color .7s var(--ease); }
