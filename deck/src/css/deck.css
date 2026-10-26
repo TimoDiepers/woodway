@@ -139,17 +139,21 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
 }
 /* chapter marker: one disc per chapter in its own colour, the current one a filled pill with its name */
 .path { display: flex; align-items: center; gap: 8px; padding-top: 6px; flex: none; }
-.path .pc { display: flex; align-items: center; gap: 10px; height: 44px; min-width: 44px; justify-content: center; border-radius: 22px;
-  border: 2px solid color-mix(in srgb, var(--ch) 45%, var(--paper)); color: var(--ch); }
-.path .pc svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.path .pc.on { background: var(--ch); border-color: var(--ch); color: var(--paper); padding: 0 16px 0 11px; }
+.path .pc { display: flex; align-items: center; gap: 10px; height: 44px; padding: 2px; border: 0; border-radius: 22px; background: none;
+  color: var(--ch); font: inherit; cursor: pointer; opacity: .62; transition: opacity .2s var(--ease); }
+.path .pc:hover, .path .pc:focus-visible { opacity: 1; }
+.path .pc:focus-visible { outline: 2px solid var(--ch); outline-offset: 2px; }
+.path .pc svg { width: 40px; height: 40px; flex: none; }
+.path .pc.on { opacity: 1; background: var(--ch); color: var(--paper); padding: 2px 18px 2px 2px; cursor: default; }
+.path .pc.on svg { border-radius: 50%; box-shadow: 0 0 0 2px var(--paper); }
 .path .pc b { font: 600 20px/1 var(--sans); }
-.slide.dark .path .pc:not(.on) { border-color: color-mix(in srgb, var(--ch-soft) 40%, var(--night)); color: var(--ch-soft); }
-.slide.dark .path .pc.on { color: var(--night); background: var(--ch-soft); border-color: var(--ch-soft); }
+.slide.dark .path .pc.on { color: var(--night); background: var(--ch-soft); }
+.slide.dark .path .pc.on svg { box-shadow: 0 0 0 2px var(--night); }
 /* on a chapter opener: top left, above the title, light on the chapter's colour */
 .slide.chapter > .path { position: absolute; left: 120px; top: 108px; padding: 0; }
-.slide.chapter > .path .pc { border-color: color-mix(in srgb, var(--paper) 45%, var(--ch-host)); color: color-mix(in srgb, var(--paper) 80%, var(--ch-host)); }
-.slide.chapter > .path .pc.on { background: var(--paper); border-color: var(--paper); color: var(--ch); }
+.slide.chapter > .path .pc { opacity: .8; }
+.slide.chapter > .path .pc.on { opacity: 1; background: var(--paper); color: var(--ch); }
+.slide.chapter > .path .pc.on svg { box-shadow: none; }
 
 /* ground line: every content slide stands on a thin strip of its chapter colour */
 /* the ground line sits at the bottom of the screen, not of the 16:9 box (see Deck.stage) */

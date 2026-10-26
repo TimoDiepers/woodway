@@ -2334,15 +2334,22 @@ class Deck {
     this.peer = window.open(location.href.split(/[?#]/)[0] + '?presenter', 'dv-presenter', 'width=1440,height=900');
   }
   decorate() {
-    // Where the talk stands: the chapters as on the overview slide, each its icon in its own colour, the current
+    // Where the talk stands: the chapters as on the overview slide, each its disc in its own colour, the current
     // one named. Content slides carry it top right, the chapter openers top left (on their colour, inverted).
+    // A click opens the chapter.
     const chapters0 = ['baeume', 'klima', 'vergleich'];
     const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
+    const opener = c => this.slides.findIndex(s => s.matches('.chapter') && s.dataset.ch === c);
     const path = ch0 => {
       const ch = ch0 === 'dac' ? 'vergleich' : ch0;   // the Holzweg part (dark, amber) still belongs to the chapter Potenzial
-      const el = document.createElement('div'); el.className = 'path'; el.setAttribute('aria-hidden', 'true');
+      const el = document.createElement('nav'); el.className = 'path'; el.setAttribute('aria-label', 'Kapitel');
       el.innerHTML = chapters0.map(c =>
-        `<span class="pc${c === ch ? ' on' : ''}" data-ch="${c}"><svg><use href="#i-${c}"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</span>`).join('');
+        `<button type="button" class="pc${c === ch ? ' on' : ''}" data-ch="${c}" aria-label="Kapitel ${names[c]}"${c === ch ? ' aria-current="true"' : ''}>`
+        + `<svg viewBox="-24 -24 48 48" aria-hidden="true"><use href="#m-${c}" x="-24" y="-24" width="48" height="48"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</button>`).join('');
+      el.addEventListener('click', e => {
+        const b = e.target.closest('.pc'); if (!b) return;
+        e.stopPropagation(); const n = opener(b.dataset.ch); if (n >= 0) this.go(n, 0);
+      });
       return el;
     };
     subDigits(this.deck);
