@@ -856,7 +856,8 @@ function aufMorph(phase, t) {
   const bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), ext = vl.concat(bk);
   const lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
   const mix = (a, b) => a + (b - a) * t;
-  const [l0, l1] = phase === 3 ? [[-.035, 0], AUF_WIDE] : [AUF_WIDE, [lo, hi]];
+  // 'direct': from the Delta T picture straight to the warming, the tree curves moving onto Very Low as the axis goes
+  const [l0, l1] = phase === 3 ? [[-.035, 0], AUF_WIDE] : phase === 'direct' ? [[-.035, 0], [lo, hi]] : [AUF_WIDE, [lo, hi]];
   const min = mix(l0[0], l1[0]), max = mix(l0[1], l1[1]), span = max - min;
   const lift = phase === 3 ? 0 : t, on = d => vl.map((v, i) => lift * v - d[i] / 1000);   // 4: the tree curves move up onto Very Low
   // a round step for the ticks every frame (1, 2, 5 x 10^n, about six of them), on its multiples
@@ -864,10 +865,10 @@ function aufMorph(phase, t) {
   const ticks = []; for (let v = Math.ceil(min / step - 1e-6) * step; v <= max + 1e-9; v += step) ticks.push(+v.toFixed(6));
   const dec = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
   // Very Low and the 1.5 deg C line fade in as they come into view (the top of the axis passes 1.5 deg C)
-  const muted = a => `rgba(93, 102, 95, ${a})`, vlIn = phase === 3 ? Math.max(0, Math.min(1, (max - 1.3) / .5)) : 1;
-  const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk], peak = phase === 4 ? Math.max(0, (t - .7) / .3) : 0;
+  const muted = a => `rgba(93, 102, 95, ${a})`, vlIn = phase === 4 ? 1 : Math.max(0, Math.min(1, (max - 1.3) / .5));
+  const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk], peak = phase === 3 ? 0 : phase === 'direct' ? vlIn * Math.max(0, (t - .85) / .15) : Math.max(0, (t - .7) / .3);   // the band only once Very Low is in view
   const end = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
-  const named = phase === 4 || t >= .5;
+  const named = phase !== 3 || t >= .5;
   return {
     title: { text: AUF_TITLE, left: AUF_LEFT, top: 0, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
     grid: { left: AUF_LEFT, right: 300, top: 50, bottom: 34 },
@@ -889,7 +890,7 @@ function aufMorph(phase, t) {
         lineStyle: { color: EC.alb, width: 3, type: [8, 6] }, itemStyle: { color: EC.alb }, endLabel: end(named ? 'alle Flächen' : `alle Flächen: −${ecNum(p.alle.at(-1), 0)} mK`, EC.alb) },
       { id: 'k', type: 'line', data: P(on(p.kuehlt)), showSymbol: false, z: 6, labelLayout: { moveOverlap: 'shiftY' },
         lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: end(named ? 'kühlende Flächen' : `kühlende Flächen: −${ecNum(p.kuehlt.at(-1), 0)} mK`, '#2f7a45') },
-      ...(phase === 4 ? [
+      ...(phase !== 3 ? [
         { id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(on(p.kuehlt)), showSymbol: false, silent: true, lineStyle: { width: 0 } },
         { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - on(p.kuehlt)[i])), showSymbol: false, silent: true, z: 2,
           lineStyle: { width: 0 }, areaStyle: { color: '#2f7a45', opacity: .3 * peak } }] : [])]
@@ -897,10 +898,10 @@ function aufMorph(phase, t) {
 }
 
 /* slide 24 in one chart: 0-2 the Delta T of the trees as before (all land, its turning point, the cooling land);
-   3 the axis turns into the warming in deg C, Very Low without its removal is drawn and the tree curves move straight
-   onto it, as Very Low minus their cooling (same series, so they glide there); 4 the cooling as a band, its size at
-   the peak, and what stays above 1.5 deg C */
-const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 1800, tweenAt: [3, 4],
+   3 in one move the axis goes from the trees' Delta T to the warming in deg C, Very Low without its removal comes into
+   view and the tree curves move onto it, as Very Low minus their cooling (same series, so they glide there), ending on
+   the cooling as a band and its size at the peak; 4 what stays above 1.5 deg C */
+const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   option(k, t = 1) {
   // one title through all pictures: the scenario stays, only the axis changes
   if (k <= 2) {
@@ -910,9 +911,7 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 1800, tweenAt: [3, 4],
     return o;
   }
   const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), p = D.pfade, vl = D.vl_c;
-  if (k === 3) return aufMorph(3, t);          // zoomed out: the trees at 0, Very Low far above
-  if (k === 4 && t < 1) return aufMorph(4, t);
-  k--;                                          // from here the pictures as before: 3 the subtracted curves, 4 the band
+  if (k === 3 && t < 1) return aufMorph('direct', t);   // the move; its last frame is the picture below
   const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk];
   const ba = vl.map((v, i) => v - p.alle[i] / 1000), bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), tip = { unit: '°C', dec: 2 };
   const lab = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
@@ -1322,6 +1321,9 @@ class EChart {
     if (!this.chart) return;
     k = Math.max(0, Math.min(k, this.nSteps));
     if (fresh) this.chart.clear();
+    // the curves are drawn anew from the start: their names, already placed by the finished picture, go too and come
+    // again as the sweep reaches them (placeLabels)
+    if (fresh && animate) for (const el of this.host.querySelectorAll(':scope > .mtex.ectex')) el.remove();
     const opt = ecDraw(ecAutoTip(this.spec.option(k + this.k0), this.spec));
     // a click that changes nothing in this chart leaves it alone: setting the same option again would fade its labels in anew
     const same = JSON.stringify(opt);
