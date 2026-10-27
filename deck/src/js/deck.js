@@ -518,11 +518,12 @@ const EC_REMOVAL = {
    removal, ZEIT.vl_c, same grey and dash as the anchor), 3 red the gap that stays above 1.5 deg C (the anchor's red band).
    Each series runs in on its own click and stands still afterwards. */
 const KURS_COL = { obs: EC.ink, med: '#b5562e', vl: '#6d756f', rot: '#c4121f' };
-const EC_KURS = { steps: 3,
+const EC_KURS = { steps: 2,
   // every curve is drawn by the deck itself, frame by frame (tween): the line of the current click reaches year
   // t of its span, at the same pace for all of them (75 years in 2.6 s) and from its own first year, without the
-  // lag of the ECharts entrance, which sweeps over the whole axis from 1950
-  tween: 2600, intro: 2600, linear: true, tip: { unit: '°C', dec: 2 },
+  // lag of the ECharts entrance, which sweeps over the whole axis from 1950; the opening picture sweeps once over the
+  // whole axis, the measurements and then the policy of today
+  tween: 2600, intro: 4400, linear: true, tip: { unit: '°C', dec: 2 },
   option(k, t = 1) {
   const C = window.CMIP7, Z = window.ZEIT, vl = Z.vl_c, P = ys => Z.jahre.map((y, i) => [y, ys[i]]);
   const upto = (from, to, at) => k === at ? from + (to - from) * t : (k > at ? to : from);
@@ -531,9 +532,9 @@ const EC_KURS = { steps: 3,
     if (l && n && x > l[0]) out.push([x, l[1] + (n[1] - l[1]) * (x - l[0]) / (n[0] - l[0])]);
     return out;
   };
-  const iPeak = vl.indexOf(Math.max(...vl));
+  const iPeak = vl.indexOf(Math.max(...vl)), sweep = k === 0 ? 1950 + 150 * t : 2100;
   const series = [{
-    id: 'obs', name: 'Beobachtung', type: 'line', showSymbol: false, data: cut(C.obs.y.map((y, i) => [y, C.obs.v[i]]), upto(1950, 2025, 0)), z: 5,
+    id: 'obs', name: 'Beobachtung', type: 'line', showSymbol: false, data: cut(C.obs.y.map((y, i) => [y, C.obs.v[i]]), Math.min(2025, sweep)), z: 5,
     lineStyle: { color: KURS_COL.obs, width: 2.4 }, itemStyle: { color: KURS_COL.obs },
     // the 1.5 deg C line, and today (2026, where the scenarios start; the measurements end a year earlier)
     markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.ink, width: 1.6, type: 'solid', opacity: .7 },
@@ -541,15 +542,15 @@ const EC_KURS = { steps: 3,
                 data: [{ yAxis: 1.5 }, { xAxis: 2026, lineStyle: { color: EC.muted, width: 1.4, type: [4, 5], opacity: 1 },
                                          label: { show: true, position: 'end', distance: 8, color: EC.ink, fontWeight: 600, formatter: 'heute' } }] }
   }];
-  if (k >= 1) {   // as today: CMIP7 Medium, about the policies in force now; its label rides on the tip of the line
+  if (sweep > 2026) {   // as today: CMIP7 Medium, about the policies in force now, straight on from the measurements; its label rides on the tip of the line
     const M = C.temp.M, pm = M.y.map((y, i) => [y, M.med[i]]).filter(p => p[0] >= 2026 && p[0] <= 2100);
-    series.push({ id: 'med', name: 'heutige Politik', type: 'line', showSymbol: false, data: cut(pm, upto(2026, 2100, 1)), z: 4,
-      lineStyle: { color: KURS_COL.med, width: 3, opacity: k >= 2 ? .45 : 1 }, itemStyle: { color: KURS_COL.med },
-      endLabel: { show: true, align: 'right', offset: [-6, -20], color: KURS_COL.med, opacity: k >= 2 ? .55 : 1, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+    series.push({ id: 'med', name: 'heutige Politik', type: 'line', showSymbol: false, data: cut(pm, sweep), z: 4,
+      lineStyle: { color: KURS_COL.med, width: 3, opacity: k >= 1 ? .45 : 1 }, itemStyle: { color: KURS_COL.med },
+      endLabel: { show: true, align: 'right', offset: [-6, -20], color: KURS_COL.med, opacity: k >= 1 ? .55 : 1, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
                   formatter: 'heutige Politik: 2,8 °C in 2100' } });   // the number is UNEP's (2.8), the curve CMIP7's (2.98)
   }
-  if (k >= 2) {
-    const x = upto(2026, 2100, 2);
+  if (k >= 1) {
+    const x = upto(2026, 2100, 1);
     series.push({ id: 'vl', name: 'Best Case', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
       lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
       // two lines, right-aligned above the tip: clear of the curve and of the peak's label at 2050
@@ -562,8 +563,8 @@ const EC_KURS = { steps: 3,
                             textBorderColor: '#f2ede2', textBorderWidth: 4, formatter: `Spitze ${Z.jahre[iPeak]}: ${ecNum(vl[iPeak], 2)} °C` },
                    data: x >= Z.jahre[iPeak] ? [{ coord: [Z.jahre[iPeak], vl[iPeak]] }] : [] } });
   }
-  if (k >= 3) {
-    const over = vl.map(v => Math.max(v - 1.5, 0)), x = upto(2026, 2100, 3), i = Z.jahre.indexOf(2068);
+  if (k >= 2) {
+    const over = vl.map(v => Math.max(v - 1.5, 0)), x = upto(2026, 2100, 2), i = Z.jahre.indexOf(2068);
     series.push({ id: 'rb', tip: false, type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(vl.map(() => 1.5)), x), showSymbol: false, silent: true, lineStyle: { width: 0 } },
       { id: 'rr', tipName: 'Lücke über 1,5 °C', type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(over), x), showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 },
         itemStyle: { color: KURS_COL.rot }, areaStyle: { color: KURS_COL.rot, opacity: .28 },
@@ -1251,11 +1252,11 @@ const EC_LANDDONUT = {
     // what share of each land use could carry forest (Walker et al. 2022: 15.8 % of its 2.06 Gha grazing land, 61.7 % of
     // its 1.81 Gha cropland pass the reforestation rule; results/_tools/land_shares.py), applied to the parts of this
     // ring: our own fields are 62 % of cropland, the feed crops 38 % of it (Poore & Nemecek 2018), the rest of the
-    // animals' land is pasture. Of the animals' afforestable land a vegan world frees V.frei_gha, the replacement crops
-    // take the rest
+    // animals' land is pasture. Here only what is afforestable: what a world without animals frees, and what its
+    // plant replacement needs, comes later in the talk
     const sWeide = 0.158, sAcker = 0.617, futter = L.acker * 0.38 / 0.62;
-    const aTier = sWeide * (L.tiere - futter) + sAcker * futter, ersatz = aTier - V.frei_gha, aUns = sAcker * L.acker;
-    const front = ['Tierhaltung', 'aufforstbar', 'Ersatzanbau', 'nicht aufforstbar'];   // at the answer only these stay in front (names, not labels)
+    const aTier = sWeide * (L.tiere - futter) + sAcker * futter;
+    const front = ['Tierhaltung', 'aufforstbar', 'nicht aufforstbar'];   // at the answer only these stay in front (names, not labels)
     const dim = name => k >= 1 && !front.includes(name);
     const item = (name, value, color, lab, ink, label) => ({ name, value, itemStyle: { color, opacity: dim(name) ? .25 : 1 },
             label: lab ? { position: lab === 'in' ? 'inside' : 'outside', formatter: `{n|${label || name.trim()}}\n{v|${gha(value)}}`, rich: rich(ink || '#f2ede2', dim(name) ? .35 : 1) }
@@ -1269,16 +1270,14 @@ const EC_LANDDONUT = {
       item('Tierhaltung', L.tiere, '#c98a2b', 'in', '#14181a', 'Futtermittel'),
       item('Lebensmittel', L.acker, '#e3c46e', 'out'),
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
-    // the second ring: what of each part of agriculture could carry forest; on the answer the animals' afforestable land
-    // splits into what is freed and what the plant replacement needs as cropland
+    // the second ring: what of the animals' land could carry forest
     const green = (name, v, c, lab, label) => item(name, v, c, lab, '#a6e3b4', label);
     // only agriculture gets the second ring: the rest stays an invisible spacer, so the ring lines up with the first
     const spacer = (name, v) => ({ name, value: v, itemStyle: { color: 'rgba(0, 0, 0, 0)' }, label: { show: false }, labelLine: { show: false }, tooltip: { show: false } });
     if (k >= 1) series.push(Object.assign({}, base, { id: 'ring', radius: ['75%', '86%'], animationType: 'scale', animationEasing: 'cubicOut', animationDuration: 900,
       data: [spacer('Wald ', L.wald), spacer('frei ', L.wiederbewaldbar),
-             // the animals' land: what a world without them frees for forest, what the plant replacement needs as
-             // cropland, what could not carry forest anyway
-             green('aufforstbar', V.frei_gha, '#8fe0a0', 'out'), green('Ersatzanbau', ersatz, '#5fae76', 'out'),
+             // the animals' land: what could carry forest, what could not anyway
+             green('aufforstbar', aTier, '#8fe0a0', 'out'),
              item('nicht aufforstbar', L.tiere - aTier, '#4a4a40', 'out', '#9aa39d'),
              spacer('Lebensmittel ', L.acker), spacer('übriges Land ', rest)] }));
     return {
@@ -1293,7 +1292,7 @@ const EC_LANDDONUT = {
 
 /* Holzweg: the donut on the left card, held while the right card has its clicks; what a world without animals frees
    comes after them */
-const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 7, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1, 1][k]) });
+const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 6, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1][k]) });
 const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
 
 class EChart {
@@ -1319,6 +1318,7 @@ class EChart {
   }
   set(k, animate, fresh) {
     if (!this.chart) return;
+    cancelAnimationFrame(this.raf);   // a tween still running (e.g. the opening sweep) must not paint over this picture
     k = Math.max(0, Math.min(k, this.nSteps));
     if (fresh) this.chart.clear();
     // the curves are drawn anew from the start: their names, already placed by the finished picture, go too and come
@@ -1382,6 +1382,7 @@ class EChart {
   }
   tween(k, dur) {
     cancelAnimationFrame(this.raf);
+    this.last = null;   // its frames are other pictures: a set() after it must always draw
     const t0 = performance.now(), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const frame = now => {
       // a tween that swaps its axes (spec.tweenAt) ends on the click's own picture, drawn afresh

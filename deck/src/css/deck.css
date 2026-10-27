@@ -1212,6 +1212,13 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .slide.fazit .grenz-line b { font-weight: 600; color: var(--ch); }
 .slide.fazit .grenzrow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; align-items: stretch; margin-top: 50px; position: relative; z-index: 2; }
 .slide.fazit .grenzrow .grenzen { grid-column: span 2; margin-top: 0; width: auto; max-width: none; }
+.slide.fazit .grenzrow .grenz-line { grid-column: span 2; margin-top: 0; width: auto; display: flex; align-items: center; }   /* limitations 2/3, Woodway 1/3, both as tall, the text centred */
+/* set like the takeaways above: the heading as their titles, then the three points, each led by its gist */
+.slide.fazit .grenzrow .grenz-line { padding: 14px 26px 16px; font: 400 19px/1.35 var(--serif); }
+.slide.fazit .grenz-line h4 { margin: 0 0 10px; font: 600 26px/1.2 var(--serif); color: var(--ch); }
+.slide.fazit .grenz-pts { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.slide.fazit .grenz-pts li { margin: 0; font: 400 18px/1.35 var(--serif); color: var(--ink-2); }
+.slide.fazit .grenz-pts b { margin-right: 10px; font: 600 20px/1.25 var(--serif); color: var(--ink); }
 /* in the third column the Woodway box is narrower than on the closing slide */
 
 .slide.fazit .grenzrow .ww-side > span, .ende-ww > span { min-width: 0; }
@@ -1349,6 +1356,7 @@ svg.mo .m-sway.back { animation: none; }
 .slide:has(.takeaway.shown) .flowsvg > g > [data-step] { filter: none; }
 .flow > [data-step].shown:has(~ [data-step].shown) { filter: brightness(.45) saturate(.5); }
 .slide:has(.takeaway.shown) .flow > [data-step] { filter: none; }
+.flow > .vz.end[data-step].shown:has(~ .nebenbei[data-step].shown) { filter: none; }   /* the net result stays lit beside what comes "nebenbei" */
 .takeaway .tq { font-weight: 600; white-space: nowrap; }
 .lq { margin: -22px 0 16px; font: 500 25px/1.3 var(--serif); color: var(--ch-soft); }
 /* focus: once a new part of a slide (.fs) is shown, the parts already explained (.fd) step back until the takeaway */
@@ -1828,7 +1836,9 @@ html.nocursor, html.nocursor * { cursor: none !important; }
 .slide:not(:has(.c9-line .gloss .enclosing[data-step].shown)) .c9-line .gloss .stretchy { opacity: 0; }
 
 /* slide 11: the albedo of the leaves, three examples instead of a worked drawing */
-.alx-def { margin-top: 18px; }
+.alx-defs { margin-top: 18px; }   /* the definitions under the three cases, one per click */
+.alx-defs .fline.head { margin: 0; }
+.alx-def { margin-top: 14px; }
 .alx-def .gloss { white-space: nowrap; }
 .alx { flex: 1; margin: 10px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 60px; align-content: center; }
 .alx-col { display: flex; flex-direction: column; align-items: center; }
@@ -1878,13 +1888,13 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.fazit.active { transition: opacity .35s var(--ease), background-color 1.8s var(--ease); }
 .slide.fazit svg.deco { transition: filter 1.8s var(--ease); }
 .slide.fazit .fz-sun { transition: opacity 1.4s var(--ease); }
-.slide.fazit :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line) { transition: filter .9s var(--ease); }
+.slide.fazit :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line, .ww-side) { transition: filter .9s var(--ease); }
 .slide.fazit .cols3 .col:last-child :is(h4, p, .big-n) { transition: color 1.4s var(--ease); }
 .slide.fazit .fz-k { transition: color 1.4s var(--ease), text-decoration-color 1.4s var(--ease); text-decoration: underline 3px transparent; text-underline-offset: 7px; }
 .slide.fazit:has(.fz-dusk.shown) { background-color: var(--night); }
 .slide.fazit:has(.fz-dusk.shown) svg.deco { filter: brightness(.3) saturate(.6); }
 .slide.fazit:has(.fz-dusk.shown) .fz-sun { opacity: 0; }
-.slide.fazit:has(.fz-dusk.shown) :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line) { filter: opacity(0); }
+.slide.fazit:has(.fz-dusk.shown) :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line, .ww-side) { filter: opacity(0); }
 .slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child :is(h4, .big-n) { color: #f2ede2; }
 .slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child p { color: #b9c0bb; }
 .slide.fazit:has(.fz-dusk.shown) .fz-k { color: #e8b866; text-decoration-color: #e8b866; }   /* colour only: a bolder weight would rewrap the text */
@@ -1934,3 +1944,10 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.ende:has(.ende-dank.shown) .ende-scene .e-dank.e-branch { transform: none; }
 .slide.ende:has(.ende-dank.shown) .ende-scene .e-dank:not(.e-branch) { transition-delay: .7s; }
 :is(.all, .embed) .ende-scene .e-dank.e-branch { transform: none; }
+
+/* vegan diet slide, last click: what it brings besides, under the net peak (moved from the Holzweg slide) */
+.nebenbei { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 34px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rule); font: 400 24px/1.25 var(--sans); color: var(--ink); }
+.nebenbei .nk { flex-basis: 100%; font: italic 400 22px/1.2 var(--serif); color: var(--muted); }
+.nebenbei .nc { display: inline-flex; align-items: center; gap: 12px; }
+.nebenbei .nc b { color: var(--gold); font-weight: 600; }
+.nebenbei .vgic { width: 30px; height: 30px; flex: none; stroke: none; }   /* drawn flat, as the scenes */
