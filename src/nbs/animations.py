@@ -605,44 +605,18 @@ def carbon_curve_figure(out_path: str) -> str:
     return out_path
 
 
-def albedo_annual_map_figure(out_path: str, *, vmin: float = 0.0, vmax: float = 100.0) -> str:
+def albedo_annual_map_figure(out_path: str) -> str:
     """B8: yearly extra shortwave per full-grown tree as a map.
 
-    The whole world across the slide (the formula stands above it, in HTML). Only locally measured cells are coloured; the
-    rest of the range is grey. The colour scale is stretched to vmin..vmax because
-    the annual values cluster at 30-100 W -- on a 0-based scale the north-south
-    difference vanishes, although 44 vs 65 W is worth 20 years of t*.
-    """
-    _heading_font, body_font = _register_fonts()
-    _style(body_font)
+    The same layout as the deck's other world maps (nbs.vergleich_figures._world_map_skeleton): the world at full
+    width, colour bar with its title and the grey layers' legend in a strip underneath. The deck draws the cells
+    (nbs.map_fields.absorbed_light, 1 deg blocks); the sites keep the value of their own cell, as in the talk."""
+    from nbs.vergleich_figures import _world_map_skeleton
 
     annual = -typical_light_product() * _STAND_AREA_M2
-    in_range = species_range_mask()
-    measured = in_range & albedo_watts_monthly()[1]
-    estimated = in_range & ~measured
-    outside = land_mask() & ~in_range
-
-    cmap = _ramp_cmap(RAMP_ABSORBED)
-    norm = mcolors.Normalize(vmin, vmax)
-    # the whole world across the slide, no title: the formula above it (in HTML) names the quantity
-    fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
-    ax_map = fig.add_axes((0.01, 0.12, 0.98, 0.86))
-    ax_cbar = fig.add_axes((0.33, 0.06, 0.34, 0.028))
-    _map_base(ax_map, outside, estimated, WORLD)
-    ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, annual), cmap=cmap, norm=norm,
-                      shading="auto", zorder=3)
-    _site_markers(ax_map, lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
-
-    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
-                      extend="both")
-    cb.outline.set_visible(False)
-    # the formula above the map names the quantity: the bar carries only its unit, to its right
-    ax_cbar.text(1.03, 0.5, "[W]", transform=ax_cbar.transAxes, ha="left", va="center", fontsize=11, color=C_INK)
-
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
-    fig.savefig(out_path, dpi=FIG_DPI)
-    plt.close(fig)
-    return out_path
+    return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum, Jahresmittel [W]",
+                               [0, 20, 40, 60, 80, 100], "kein Platz für Bäume", None,
+                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
 
 
 C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wie ein Baum aufs Klima wirkt" drawing

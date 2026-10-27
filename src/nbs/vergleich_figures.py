@@ -940,9 +940,11 @@ def de_num(v: float, nd: int = 0) -> str:
     return f"{v:.{nd}f}".replace(".", ",").replace("-", "−")
 
 
-def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text) -> str:
-    """Layout of a world hex map: the map at full width, colour bar and legend in a strip underneath; the three
-    sites with *site_text(value)* of their cell.
+def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text,
+                        site_label=None) -> str:
+    """Layout of a world hex map: the map at full width, colour bar and legend in a strip underneath (a patch for
+    the grey land, and one for every other labelled grey layer); the three sites with *site_text(value)* of their
+    cell, or *site_label(site)* where a site's text is not the map cell's value.
 
     The deck draws the map itself (nbs.map_fields + the HTML renderer, exported to the
     pptx as SVG); this figure supplies the layout, the borders and a reference picture."""
@@ -951,7 +953,8 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     data = M.MAPS[key]()
     layer = next(L for L in data["panels"][0]["layers"] if L["kind"] == "num")
     sc = M.SCALES[layer["scale"]]
-    grid = np.full((90, 180), np.nan)
+    g = data["panels"][0]["grid"]
+    grid = np.full((g["ny"], g["nx"]), np.nan)
     for r, c, v in layer["cells"]:
         grid[r, c] = v
     fig, ax = plt.subplots(figsize=(12.0, 5.4), dpi=FIG_DPI)   # 360 x 144 degrees on top, 0.6 in for the legend
@@ -959,13 +962,15 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     im = ax.imshow(np.ma.masked_invalid(grid), extent=(-180, 180, -90, 90), origin="upper", cmap=M.scale_cmap(sc),
                    norm=M.scale_norm(sc), interpolation="nearest")
     _map_axes(ax)
-    world_site_labels(ax, lambda s: None if (v := map_site_value(data, s)) is None else site_text(v))
+    world_site_labels(ax, site_label or (lambda s: None if (v := map_site_value(data, s)) is None else site_text(v)))
     cax = fig.add_axes([0.3, 0.03, 0.36, 0.02])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
     cb.set_label(cbar_label, fontsize=11)
     cb.ax.xaxis.set_label_position("top")
     cb.outline.set_visible(False)
-    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label)], loc="lower left", bbox_to_anchor=(0.69, -0.005),
+    grey = [Patch(facecolor=L["color"], label=L["label"]) for L in data["panels"][0]["layers"]
+            if L["kind"] == "mask" and L.get("label") and L["label"] != legend_label]
+    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left", bbox_to_anchor=(0.69, -0.005),
                frameon=False, fontsize=11)
     return _save(fig, out_path)
 

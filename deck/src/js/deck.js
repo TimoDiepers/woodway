@@ -537,33 +537,38 @@ const EC_KURS = { steps: 3,
     lineStyle: { color: KURS_COL.obs, width: 2.4 }, itemStyle: { color: KURS_COL.obs },
     // the 1.5 deg C line, and today (2026, where the scenarios start; the measurements end a year earlier)
     markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.ink, width: 1.6, type: 'solid', opacity: .7 },
-                label: { show: true, position: 'insideStartTop', color: EC.ink, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' },
+                label: { show: false, color: EC.ink, fontFamily: EC.font, fontSize: 19 },
                 data: [{ yAxis: 1.5 }, { xAxis: 2026, lineStyle: { color: EC.muted, width: 1.4, type: [4, 5], opacity: 1 },
-                                         label: { position: 'end', distance: 8, color: EC.ink, fontWeight: 600, formatter: 'heute' } }] }
+                                         label: { show: true, position: 'end', distance: 8, color: EC.ink, fontWeight: 600, formatter: 'heute' } }] }
   }];
   if (k >= 1) {   // as today: CMIP7 Medium, about the policies in force now; its label rides on the tip of the line
     const M = C.temp.M, pm = M.y.map((y, i) => [y, M.med[i]]).filter(p => p[0] >= 2026 && p[0] <= 2100);
     series.push({ id: 'med', name: 'heutige Politik', type: 'line', showSymbol: false, data: cut(pm, upto(2026, 2100, 1)), z: 4,
       lineStyle: { color: KURS_COL.med, width: 3, opacity: k >= 2 ? .45 : 1 }, itemStyle: { color: KURS_COL.med },
       endLabel: { show: true, align: 'right', offset: [-6, -20], color: KURS_COL.med, opacity: k >= 2 ? .55 : 1, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
-                  formatter: 'heutige Politik' } });   // the number stands in the text (UNEP 2.8), the curve is CMIP7's (2.98)
+                  formatter: 'heutige Politik: 2,8 °C in 2100' } });   // the number is UNEP's (2.8), the curve CMIP7's (2.98)
   }
   if (k >= 2) {
     const x = upto(2026, 2100, 2);
-    series.push({ id: 'vl', name: 'bestes Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
+    series.push({ id: 'vl', name: 'Best Case', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
       lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
+      // two lines, right-aligned above the tip: clear of the curve and of the peak's label at 2050
+      endLabel: { show: true, align: 'right', offset: [-6, -40], color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 23,
+                  formatter: 'Best Case*:\n1,7 °C in 2100' },   // UNEP's 2100 value, as for the policy line
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: KURS_COL.vl, borderColor: '#f2ede2', borderWidth: 2 },
-                   label: { show: true, position: 'top', distance: 9, color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
-                            formatter: `Spitze ${Z.jahre[iPeak]}: ${ecNum(vl[iPeak], 2)} °C` },
+                   // left of the point and lifted off the rising curve, on a paper halo where it crosses the faint
+                   // policy line: the curve's own label takes the space to the right
+                   label: { show: true, position: 'left', distance: 10, offset: [0, -16], color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600,
+                            textBorderColor: '#f2ede2', textBorderWidth: 4, formatter: `Spitze ${Z.jahre[iPeak]}: ${ecNum(vl[iPeak], 2)} °C` },
                    data: x >= Z.jahre[iPeak] ? [{ coord: [Z.jahre[iPeak], vl[iPeak]] }] : [] } });
   }
   if (k >= 3) {
-    const over = vl.map(v => Math.max(v - 1.5, 0)), x = upto(2026, 2100, 3), i = Z.jahre.indexOf(2075);
+    const over = vl.map(v => Math.max(v - 1.5, 0)), x = upto(2026, 2100, 3), i = Z.jahre.indexOf(2068);
     series.push({ id: 'rb', tip: false, type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(vl.map(() => 1.5)), x), showSymbol: false, silent: true, lineStyle: { width: 0 } },
       { id: 'rr', tipName: 'Lücke über 1,5 °C', type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(over), x), showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 },
         itemStyle: { color: KURS_COL.rot }, areaStyle: { color: KURS_COL.rot, opacity: .28 },
-        markPoint: { silent: true, symbol: 'circle', symbolSize: 0, data: x >= 2075 ? [{ coord: [2075, 1.5 + over[i] / 2] }] : [],
-                     label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'Lücke' } } });
+        markPoint: { silent: true, symbol: 'circle', symbolSize: 0, data: x >= 2096 ? [{ coord: [2068, 1.5 + over[i] / 2] }] : [],
+                     label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'Lücke: 320 Gt CO₂-Entnahme' } } });
   }
   const ax = { color: EC.muted, fontFamily: EC.font, fontSize: 19 };
   return {
