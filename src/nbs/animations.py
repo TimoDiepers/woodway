@@ -616,7 +616,7 @@ def albedo_annual_map_figure(out_path: str) -> str:
     annual = -typical_light_product() * _STAND_AREA_M2
     return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum, Jahresmittel [W]",
                                [0, 20, 40, 60, 80, 100], "kein Platz für Bäume", None,
-                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum")
+                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=8.7, lats=(-56, 80))
 
 
 C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wie ein Baum aufs Klima wirkt" drawing
@@ -658,6 +658,47 @@ def cloud_season_figure(out_path: str) -> str:
         ax.set_title(s.label, loc="left", fontsize=14, fontweight="bold", color=s.color)
     axes[0].set_ylabel("W je Baum")
     axes[-1].legend(loc="lower right", frameon=False, fontsize=12, ncol=3, bbox_to_anchor=(1.0, 1.08))
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=FIG_DPI)
+    plt.close(fig)
+    return out_path
+
+
+def light_parts_sites_figure(out_path: str) -> str:
+    """B8s: the extra absorbed light per tree at the three sites over time, 2026-2100 [W, annual mean]: it grows with
+    the canopy, A_Baum(t) = closure(t) x stand area, as in the model. One panel, the sites in their colours (as the
+    growth panel beside the forest-type map): dashed the darker leaves alone (Delta alpha_Baum), solid the net with
+    the clouds; the band between them, in the clouds' colour, is what the clouds give back (or add, where fewer clouds
+    warm). Sized for the side panel beside the map (as stock_panel_figure)."""
+    from nbs.storyline_figures import run_site
+
+    _heading_font, body_font = _register_fonts()
+    _style(body_font)
+    c_daw = "#d9822b"   # deck.css --s-daw (--ray)
+    fig, ax = plt.subplots(figsize=(3.45, 5.4), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.07, top=0.97)
+    _clean_axes(ax)
+    y = YEARS
+    for k, s in enumerate(SITES):
+        alb, cld, net = (float(v.mean()) for v in cloud_season_series(s))
+        f = np.asarray(run_site(s).trajectory.closure, dtype=float)
+        ax.fill_between(y, alb * f, net * f, color=c_daw, alpha=0.45, linewidth=0, label=None)
+        ax.plot(y, alb * f, color=s.color, linewidth=1.8, linestyle=(0, (5, 3)), label=None)
+        ax.plot(y, net * f, color=s.color, linewidth=2.8, label=None)
+        # the value in 2100: the canopy is not closed yet everywhere, so below the full-grown value of the map
+        below = s.name == "Marabá"
+        ax.annotate(f"{s.name}: {net * f[-1]:.0f} W", (y[-1], (alb if below else max(alb, net)) * f[-1] if not below else min(alb, net) * f[-1]),
+                    xytext=(0, -16 if below else 7), textcoords="offset points",
+                    ha="right", va="top" if below else "bottom", fontsize=12.5, fontweight="bold", color=s.color)
+    ax.axhline(0, color=C_INK_MUTED, linewidth=0.9)
+    ax.set_xlim(y[0], y[-1])
+    ax.set_ylim(0, None)
+    ax.set_xticks([T_START, 2060, 2100])
+    ax.set_ylabel("W je Baum, Jahresmittel")
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+    ax.legend([Line2D([], [], color=C_INK, linewidth=1.8, linestyle=(0, (5, 3))), Patch(color=c_daw, alpha=0.45), Line2D([], [], color=C_INK, linewidth=2.8)],
+              ["Laub", "Wolken", "netto"], loc="upper left", frameon=False, fontsize=12, handlelength=1.6)
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)
     plt.close(fig)

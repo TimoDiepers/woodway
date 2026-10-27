@@ -920,7 +920,7 @@ def map_site_value(data: dict, site):
     return M.CATEGORIES[layer["cats"]][cell[2]]["label"] if layer["kind"] == "cat" else cell[2]
 
 
-def world_site_labels(ax, text_of, marker=None) -> None:
+def world_site_labels(ax, text_of, marker=None, fairbanks_up: bool = True) -> None:
     """The three sites on a world map, each labelled with its name and, below it, *text_of(site)* (its value);
     *marker* overrides the marker style.
     Fairbanks's label above its marker, the others below."""
@@ -931,7 +931,7 @@ def world_site_labels(ax, text_of, marker=None) -> None:
                 **(dict(marker=s.marker, ms=9, mfc=s.color, mec="white", mew=2.0) | (marker or {})))
         value = text_of(s)
         text = s.label if value is None else f"{s.label}\n{value}"
-        up = s.name == "Fairbanks"
+        up = s.name == "Fairbanks" and fairbanks_up   # below it where the map is cut off just above Alaska
         ax.annotate(text, (s.lon, s.lat), xytext=(7, 6) if up else (7, -8), textcoords="offset points",
                     va="bottom" if up else "top", fontsize=11, fontweight="bold", color=C_INK, zorder=7)
 
@@ -941,7 +941,7 @@ def de_num(v: float, nd: int = 0) -> str:
 
 
 def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text,
-                        site_label=None) -> str:
+                        site_label=None, width: float = 12.0, lats=None) -> str:
     """Layout of a world hex map: the map at full width, colour bar and legend in a strip underneath (a patch for
     the grey land, and one for every other labelled grey layer); the three sites with *site_text(value)* of their
     cell, or *site_label(site)* where a site's text is not the map cell's value.
@@ -957,20 +957,28 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     grid = np.full((g["ny"], g["nx"]), np.nan)
     for r, c, v in layer["cells"]:
         grid[r, c] = v
-    fig, ax = plt.subplots(figsize=(12.0, 5.4), dpi=FIG_DPI)   # 360 x 144 degrees on top, 0.6 in for the legend
-    fig.subplots_adjust(left=0.0, right=1.0, bottom=0.6 / 5.4, top=1.0)
+    # 360 x 144 degrees on top (or the rows *lats*), the legend in a strip underneath; a narrow figure (*width* < 10 in,
+    # a map beside a chart) gets a deeper strip, its colour bar on the left and the grey patches beside it
+    narrow = width < 10
+    span = (lats[1] - lats[0]) if lats else 144
+    strip = 0.95 if narrow else 0.6
+    height = width * span / 360 + strip
+    fig, ax = plt.subplots(figsize=(width, height), dpi=FIG_DPI)
+    fig.subplots_adjust(left=0.0, right=1.0, bottom=strip / height, top=1.0)
     im = ax.imshow(np.ma.masked_invalid(grid), extent=(-180, 180, -90, 90), origin="upper", cmap=M.scale_cmap(sc),
                    norm=M.scale_norm(sc), interpolation="nearest")
     _map_axes(ax)
-    world_site_labels(ax, site_label or (lambda s: None if (v := map_site_value(data, s)) is None else site_text(v)))
-    cax = fig.add_axes([0.3, 0.03, 0.36, 0.02])
+    if lats:
+        ax.set_ylim(*lats)
+    world_site_labels(ax, site_label or (lambda s: None if (v := map_site_value(data, s)) is None else site_text(v)), fairbanks_up=not lats)
+    cax = fig.add_axes([0.05, 0.1 / height, 0.5, 0.11 / height] if narrow else [0.3, 0.03, 0.36, 0.02])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
     cb.set_label(cbar_label, fontsize=11)
     cb.ax.xaxis.set_label_position("top")
     cb.outline.set_visible(False)
     grey = [Patch(facecolor=L["color"], label=L["label"]) for L in data["panels"][0]["layers"]
             if L["kind"] == "mask" and L.get("label") and L["label"] != legend_label]
-    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left", bbox_to_anchor=(0.69, -0.005),
+    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left", bbox_to_anchor=(0.62, 0.0) if narrow else (0.69, -0.005),
                frameon=False, fontsize=11)
     return _save(fig, out_path)
 
