@@ -839,6 +839,120 @@ const EC_ZEIT = {
   }
 };
 
+/* slide 24, clicks 3 and 4 frame by frame, in K on one axis whose limits move: click 3 zooms out from the Delta T
+   picture ([-35, 0] mK) until Very Low is in view, the tree curves stay at 0, tiny now; click 4 zooms in on the warming
+   ([1.4, 1.9] deg C) while the tree curves move up onto Very Low minus their cooling. The ticks are recomputed every
+   frame, so the numbers move with the scale; they read in mK while the span is small */
+const AUF_TITLE = 'Alle Bäume 2026 gepflanzt', AUF_WIDE = [-.1, 2];
+// one y title through all of slide 24, in deg C from the start: only the scale moves, never the label
+const AUF_Y = { name: 'ΔT(t) [°C]', nameTex: '$\\dT(t)$ [°C]', nameLocation: 'middle', nameGap: 86 }, AUF_LEFT = 108;
+function aufMorph(phase, t) {
+  const D = window.ZEIT, p = D.pfade, vl = D.vl_c, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
+  const bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), ext = vl.concat(bk);
+  const lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+  const mix = (a, b) => a + (b - a) * t;
+  const [l0, l1] = phase === 3 ? [[-.035, 0], AUF_WIDE] : [AUF_WIDE, [lo, hi]];
+  const min = mix(l0[0], l1[0]), max = mix(l0[1], l1[1]), span = max - min;
+  const lift = phase === 3 ? 0 : t, on = d => vl.map((v, i) => lift * v - d[i] / 1000);   // 4: the tree curves move up onto Very Low
+  // a round step for the ticks every frame (1, 2, 5 x 10^n, about six of them), on its multiples
+  const step = (() => { const r = span / 6, e = Math.pow(10, Math.floor(Math.log10(r))), m = r / e; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * e; })();
+  const ticks = []; for (let v = Math.ceil(min / step - 1e-6) * step; v <= max + 1e-9; v += step) ticks.push(+v.toFixed(6));
+  const dec = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
+  // Very Low and the 1.5 deg C line fade in as they come into view (the top of the axis passes 1.5 deg C)
+  const muted = a => `rgba(93, 102, 95, ${a})`, vlIn = phase === 3 ? Math.max(0, Math.min(1, (max - 1.3) / .5)) : 1;
+  const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk], peak = phase === 4 ? Math.max(0, (t - .7) / .3) : 0;
+  const end = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
+  const named = phase === 4 || t >= .5;
+  return {
+    title: { text: AUF_TITLE, left: AUF_LEFT, top: 0, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
+    grid: { left: AUF_LEFT, right: 300, top: 50, bottom: 34 },
+    xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
+                    axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+    yAxis: [ecAxis(Object.assign({ type: 'value', min, max, axisTick: { show: false, customValues: ticks },
+                     axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: ticks,
+                                  formatter: v => Math.abs(v) < 1e-9 ? '0' : ecSigned(v, dec) },
+                     splitLine: { show: true, lineStyle: { color: EC.grid } } }, AUF_Y))],
+    series: [
+      { id: 'vl', type: 'line', data: P(vl), showSymbol: false, z: 4, labelLayout: { moveOverlap: 'shiftY' }, lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6], opacity: vlIn },
+        itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best-Case-Szenario', color: muted(vlIn), fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 },
+        markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2, opacity: peak },
+          label: { show: true, position: 'top', distance: 9, color: muted(peak), fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
+          data: [{ coord: [pv, tv] }] },
+        markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: '#1b2420', width: 1.6, type: 'solid', opacity: .7 * vlIn },
+          label: { show: true, position: 'insideStartBottom', color: `rgba(27, 36, 32, ${vlIn})`, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
+      { id: 'al', type: 'line', data: P(on(p.alle)), showSymbol: false, z: 5, labelLayout: { moveOverlap: 'shiftY' },
+        lineStyle: { color: EC.alb, width: 3, type: [8, 6] }, itemStyle: { color: EC.alb }, endLabel: end(named ? 'alle Flächen' : `alle Flächen: −${ecNum(p.alle.at(-1), 0)} mK`, EC.alb) },
+      { id: 'k', type: 'line', data: P(on(p.kuehlt)), showSymbol: false, z: 6, labelLayout: { moveOverlap: 'shiftY' },
+        lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: end(named ? 'kühlende Flächen' : `kühlende Flächen: −${ecNum(p.kuehlt.at(-1), 0)} mK`, '#2f7a45') },
+      ...(phase === 4 ? [
+        { id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(on(p.kuehlt)), showSymbol: false, silent: true, lineStyle: { width: 0 } },
+        { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - on(p.kuehlt)[i])), showSymbol: false, silent: true, z: 2,
+          lineStyle: { width: 0 }, areaStyle: { color: '#2f7a45', opacity: .3 * peak } }] : [])]
+  };
+}
+
+/* slide 24 in one chart: 0-2 the Delta T of the trees as before (all land, its turning point, the cooling land);
+   3 the axis turns into the warming in deg C, Very Low without its removal is drawn and the tree curves move straight
+   onto it, as Very Low minus their cooling (same series, so they glide there); 4 the cooling as a band, its size at
+   the peak, and what stays above 1.5 deg C */
+const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 1800, tweenAt: [3, 4],
+  option(k, t = 1) {
+  // one title through all pictures: the scenario stays, only the axis changes
+  if (k <= 2) {
+    const o = EC_ZEIT.option(k); o.title.text = AUF_TITLE; o.title.left = AUF_LEFT; o.grid.bottom = 34; o.grid.left = AUF_LEFT;
+    Object.assign(o.yAxis, AUF_Y);
+    o.yAxis.axisLabel.formatter = v => (v === 0 ? '0' : ecSigned(v / 1000, 3));   // the data in mK, read in deg C
+    return o;
+  }
+  const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), p = D.pfade, vl = D.vl_c;
+  if (k === 3) return aufMorph(3, t);          // zoomed out: the trees at 0, Very Low far above
+  if (k === 4 && t < 1) return aufMorph(4, t);
+  k--;                                          // from here the pictures as before: 3 the subtracted curves, 4 the band
+  const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk];
+  const ba = vl.map((v, i) => v - p.alle[i] / 1000), bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), tip = { unit: '°C', dec: 2 };
+  const lab = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
+  const series = [
+    { id: 'vl', name: 'Best-Case-Szenario', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
+      lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6] }, itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best-Case-Szenario',
+        color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' },
+      markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2 },
+        label: { show: true, position: 'top', distance: 9, color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
+        data: [{ coord: [pv, tv] }] },
+      markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.ink, width: 1.6, type: 'solid', opacity: .7 },
+        label: { show: true, position: 'insideStartBottom', color: EC.ink, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
+    { id: 'al', type: 'line', data: P(ba), showSymbol: false, z: 5, tip, tipName: 'alle Flächen', animationDurationUpdate: 1600,
+      lineStyle: { color: EC.alb, width: 3, type: [8, 6] }, itemStyle: { color: EC.alb }, endLabel: lab('alle Flächen', EC.alb), labelLayout: { moveOverlap: 'shiftY' } },
+    { id: 'k', type: 'line', data: P(bk), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
+      lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: lab('kühlende Flächen', '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' } }];
+  if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
+    const iK = bk.indexOf(Math.max(...bk));   // the new peak, with the trees
+    series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(bk), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
+                  markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#2f7a45', borderColor: '#f2ede2', borderWidth: 2 },
+                    label: { show: true, position: 'bottom', distance: 30, offset: [60, 0], color: '#2f7a45', fontFamily: EC.font, fontSize: 21, fontWeight: 600,
+                             formatter: `Spitze: ${ecNum(bk[iK], 2)} °C` }, data: [{ coord: [D.jahre[iK], bk[iK]] }] } },
+                { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - bk[i])), showSymbol: false, silent: true, z: 2,
+                  lineStyle: { width: 0 }, itemStyle: { color: '#2f7a45' }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 1200 });
+  }
+  if (k >= 4) {   // what stays above 1.5 deg C
+    series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
+                { id: 'rr', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(v => Math.max(v - 1.5, 0))), showSymbol: false, silent: true, z: 1,
+                  lineStyle: { width: 0 }, areaStyle: { color: '#c4121f', opacity: .16 }, animationDuration: 1200,
+                  markPoint: { silent: true, symbol: 'circle', symbolSize: 0, animationDelay: 500, data: [{ coord: [2075, 1.5 + (bk[D.jahre.indexOf(2075)] - 1.5) * .4] }],
+                    label: { show: true, color: '#8e0d16', fontFamily: EC.font, fontSize: 22, fontWeight: 600, formatter: 'reicht nicht: weiter über 1,5 °C' } } });
+  }
+  const ext = vl.concat(bk), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+  return {
+    animationDurationUpdate: 1600, animationEasingUpdate: 'cubicInOut',
+    title: { text: AUF_TITLE, left: AUF_LEFT, top: 0, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
+    grid: { left: AUF_LEFT, right: 300, top: 50, bottom: 34 },
+    xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
+                    axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
+    yAxis: ecAxis(Object.assign({ type: 'value', min: lo, max: hi, interval: .1,
+                    axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => ecNum(v, 1) }, splitLine: { show: true, lineStyle: { color: EC.grid } } }, AUF_Y)),
+    series
+  };
+} };
+
 /* the same chart on two slides: 27 builds it up to the cooling land (pictures 0-2), the forest slide stands on that
    picture, adds the managed forest (6), then what a harvest does to it (8) */
 const EC_ZEIT27 = { steps: 4, tip: EC_ZEIT.tip, option: k => EC_ZEIT.option(Math.min(k, 2)) };
@@ -1176,7 +1290,7 @@ const EC_LANDDONUT = {
 /* Holzweg: the donut on the left card, held while the right card has its clicks; what a world without animals frees
    comes after them */
 const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 7, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1, 1][k]) });
-const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
+const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
 
 class EChart {
   constructor(host) {
@@ -1216,6 +1330,7 @@ class EChart {
     this.k = k;
     if (this.spec.labels) this.placeLabels(k, animate);
     if (texAx.length) this.placeAxTex(texAx);
+    for (const el of this.host.querySelectorAll(':scope > .axlab')) if (!texAx.some(([i]) => el.dataset.key === 'y' + i)) el.remove();
   }
   placeAxTex(texAx) {
     if (!window.katex) { clearTimeout(this.axWait); this.axWait = setTimeout(() => this.placeAxTex(texAx), 300); return; }
@@ -1254,7 +1369,7 @@ class EChart {
     // (spec.intro ms: the first picture is drawn the same way, e.g. a curve and the labels it reaches)
     if (this.chart && this.spec.tween && !deckCalm.matches) {
       if (k === 0 && this.spec.intro) { this.chart.clear(); return this.tween(0, this.spec.intro); }
-      if (this.k !== null && k === this.k + 1 && k <= this.nSteps) return this.tween(k, this.spec.tween);
+      if (this.k !== null && k === this.k + 1 && k <= this.nSteps && (!this.spec.tweenAt || this.spec.tweenAt.includes(k))) return this.tween(k, this.spec.tween);
     }
     this.set(k, true, k === 0 || this.k === null || k < this.k);
   }
@@ -1262,6 +1377,8 @@ class EChart {
     cancelAnimationFrame(this.raf);
     const t0 = performance.now(), ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const frame = now => {
+      // a tween that swaps its axes (spec.tweenAt) ends on the click's own picture, drawn afresh
+      if (this.spec.tweenAt && now - t0 >= dur) { this.set(k, false, true); return; }
       const t = Math.min(1, (now - t0) / dur), opt = ecAutoTip(this.spec.option(k + this.k0, this.spec.linear ? t : ease(t)), this.spec);   // linear: a constant pace, e.g. years per second
       opt.animation = false;
       // a y title with a formula symbol is set as HTML (axTex), as in set(): the axis keeps only its gap
@@ -1269,6 +1386,8 @@ class EChart {
       for (const [, a] of texAx) a.name = '';
       this.chart.setOption(opt, { replaceMerge: ['series'] });
       if (texAx.length) this.placeAxTex(texAx);
+      for (const el of this.host.querySelectorAll(':scope > .axlab')) if (!texAx.some(([i]) => el.dataset.key === 'y' + i)) el.remove();
+      if (this.spec.frame) this.spec.frame(this.host, t, opt);
       if (t < 1) this.raf = requestAnimationFrame(frame); else this.last = JSON.stringify(ecAutoTip(this.spec.option(k + this.k0), this.spec));
     };
     this.k = k; this.raf = requestAnimationFrame(frame);
@@ -1355,6 +1474,15 @@ function mapRun(sc, v) {
   for (let q = 0; q <= n; q++) frames.push({ percent: (lead + q / n * span * MAP_PACE) / Math.max(1, dur), style: { fill: mapAt(sc, t0 + (t - t0) * q / n) } });
   return { frames, dur };
 }
+/* A map that grows out of the one before it (data-from on its host, same grid): each cell starts in its colour
+   there, holds it while the slide changes and then blends straight into its own colour, all cells together, so
+   the same land visibly changes meaning (not through the scale's pale middle: the whole map would blank out) */
+const MAP_HOLD = 600, MAP_BLEND = 1400;
+function mapFrom(c0, c1) {
+  const dur = MAP_HOLD + MAP_BLEND, n = 6;
+  return { dur, frames: [{ percent: 0, style: { fill: c0 } },
+    ...Array.from({ length: n + 1 }, (_, q) => ({ percent: (MAP_HOLD + q / n * MAP_BLEND) / dur, style: { fill: mapMix(c0, c1, (1 - Math.cos(Math.PI * q / n)) / 2) } }))] };
+}
 const MAP_PAPER = '#f2ede2';
 const mapFmt = (v, sc) => (sc.unit === '' ? String(Math.round(v)) : v.toLocaleString('de-DE', { maximumFractionDigits: Math.abs(v) >= 10 ? 0 : 2 }) + ' ' + sc.unit);
 
@@ -1398,8 +1526,41 @@ class MplChart {
     this.inner.style.cssText = 'position:absolute';
     host.appendChild(this.inner);
     this.size();
-    const svg = !this.isMap || host.dataset.renderer === 'svg';
-    this.chart = echarts.init(this.inner, null, svg ? { renderer: 'svg' } : { renderer: 'canvas', devicePixelRatio: 3 });
+    this.svg = !this.isMap || host.dataset.renderer === 'svg';
+    this.mount();
+    this.k = null;
+    this.timeLayer = this.mapSpec && this.mapSpec.panels[0].layers.find(L => L.frames);
+    if (this.timeLayer) { this.year = this.timeLayer.years[0]; if (host.dataset.renderer !== 'svg') this.player(); }
+    this.final(this.nSteps);
+    new ResizeObserver(() => { if (this.size()) { this.chart.resize(); this.final(this.k ?? this.nSteps); } }).observe(host);
+    if (!this.svg) {
+      // the deck scales with the window (a transform the host's own size does not show): a canvas map is drawn again
+      // at the new sharpness when the deck moves to another screen
+      let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { if (this.dprFit() !== this.dpr) { this.mount(); this.final(this.k ?? this.nSteps); } }, 300); });
+      // the cells' entrance worked out while the deck rests (a few hundred ms for a large map: never during an
+      // entrance, as the background chart builder), so the slide's arrival only replays it (replay)
+      if (!this.nSteps && !this.timeLayer && !this.stops) {
+        const later = () => {
+          if (this.runCache) return;
+          if (performance.now() - ((window.deck && window.deck.movedAt) || 0) < 2500) return setTimeout(later, 700);
+          (window.requestIdleCallback || setTimeout)(() => (performance.now() - ((window.deck && window.deck.movedAt) || 0) < 2500 ? later() : this.prepRuns()));
+        };
+        setTimeout(later, 700);
+      }
+    }
+  }
+
+  /* canvas pixels per CSS pixel: the screen's ratio times the deck's scale, in halves, 1 to 3 (a fixed 3 painted
+     up to 9x the pixels a projector needs, on every frame of a map's entrance) */
+  dprFit() {
+    const r = this.inner.getBoundingClientRect(), k = r.width && this.inner.offsetWidth ? r.width / this.inner.offsetWidth : 1;
+    return Math.min(3, Math.max(1, Math.ceil(2 * (window.devicePixelRatio || 1) * k) / 2));
+  }
+  mount() {
+    if (this.chart) { cancelAnimationFrame(this.runRaf); this.chart.dispose(); this.k = null; }
+    const host = this.host;
+    this.dpr = this.svg ? 1 : this.dprFit();
+    this.chart = echarts.init(this.inner, null, this.svg ? { renderer: 'svg' } : { renderer: 'canvas', devicePixelRatio: this.dpr });
     // a figure with bars or maps has an item tooltip; inside a panel of curves the pointer anywhere snaps to the
     // nearest x of its curves (hover on a desktop, tap or drag on a touch screen), as an axis tooltip would
     const snap = e => {
@@ -1423,11 +1584,6 @@ class MplChart {
     };
     this.chart.getZr().on('mousemove', snap);
     this.chart.getZr().on('click', snap);
-    this.k = null;
-    this.timeLayer = this.mapSpec && this.mapSpec.panels[0].layers.find(L => L.frames);
-    if (this.timeLayer) { this.year = this.timeLayer.years[0]; if (host.dataset.renderer !== 'svg') this.player(); }
-    this.final(this.nSteps);
-    new ResizeObserver(() => { if (this.size()) { this.chart.resize(); this.final(this.k ?? this.nSteps); } }).observe(host);
   }
 
   /* Maps with one frame per year (nbs.map_fields: "years" + "frames"): values glide between the years.
@@ -1499,6 +1655,7 @@ class MplChart {
   fresh(i, k) { return !this.stops && this.slotStep[this.slot[i]] === k; }
 
   option(k, animate) {
+    this.mapRuns = [];   // map cells with an entrance (hexSeries), played after the option is set
     const d = this.d, s = this.s, W = this.W, H = this.H;
     this.texs = [];
     const grid = [], xAxis = [], yAxis = [], series = [], graphic = [];
@@ -1646,6 +1803,10 @@ class MplChart {
     });
     d.texts.forEach((t, j) => graphic.push(this.textEl(`ft${j}`, t, font, W, H)));
     d.legends.forEach((lg, j) => graphic.push(this.legendEl(`lg${j}`, lg, W, H, s)));
+    if (this.isMap && !this.svg) {   // on a canvas map, everything but the cells is drawn once, on the top layer (hexSeries)
+      for (const sr of series) if (sr.zlevel === undefined) sr.zlevel = 2;
+      for (const g of graphic) if (!/bg$/.test(g.id || '')) g.zlevel = 2;
+    }
     return {
       // maps have more than ECharts' default 2000 shapes per series, above which it skips the entry animation
       animation: animate, animationThreshold: 100000, animationDurationUpdate: 600, grid, xAxis, yAxis, series, graphic,
@@ -1694,7 +1855,7 @@ class MplChart {
     return tipCard({ head: this.xText(+x, I.x.u), sub: [this.d.axes.length > 1 ? I.title : '', I.y.q].filter(Boolean).join(' · '), rows });
   }
   tip(p) {
-    if (p.seriesType === 'custom') return p.data && p.data.tip ? p.data.tip : '';
+    if (p.seriesType === 'custom') return !p.data ? '' : p.data.tip || (p.data.tipf ? p.data.tipf() : '');
     const v = Array.isArray(p.value) ? p.value : p.data && p.data.value;
     if (!v) return '';
     const i = +(/^a(\d+)_/.exec(p.seriesId || '') || [0, 0])[1], I = this.axisInfo(i), sr = this.series && this.series[p.seriesIndex];
@@ -1780,7 +1941,12 @@ class MplChart {
         lattice.push([x0 + (px - left) / bw * (x1 - x0), y1 - (py - top) / bh * (y1 - y0)]);
     const pts = Array.from({ length: 6 }, (_, k) => [Math.cos(Math.PI / 180 * (60 * k - 90)), Math.sin(Math.PI / 180 * (60 * k - 90))]);
     const Rr = R + .45;   // a hair of overlap, no seams between tiles
+    // canvas layers: the cells with an entrance (1) repaint alone; static cells below them (0), all else above (2)
+    const anim = L => L.kind === 'num' || L.kind === 'cat', firstAnim = panel.layers.findIndex(anim);
+    const F = enter && this.host.dataset.from && M.maps[this.host.dataset.from], fp = F && F.panels[this.mapSpec.panels.indexOf(panel)];
     panel.layers.forEach((L, li) => {
+      const FL = fp && fp.layers[li] && fp.layers[li].kind === 'num' ? fp.layers[li] : null;
+      const fromLook = FL && new Map(FL.cells.map((cell, j) => [cell[0] * g.nx + cell[1], j]));
       const look = new Map(L.cells.map((cell, j) => [cell[0] * g.nx + cell[1], j]));
       const items = [];
       for (const [lon, lat] of lattice) {
@@ -1802,12 +1968,15 @@ class MplChart {
           const sc = M.scales[L.scale], v = L.frames ? this.frameValue(L, j) : cell[2];
           col = mapScale(sc, v); tip = mapFmt(v, sc) + (L.frames ? ` (${Math.round(this.year ?? L.years[0])})` : '');
           if (enter) run = mapRun(sc, v);
+          const fj = FL ? fromLook.get(r * g.nx + c) : undefined;
+          if (run && fj !== undefined) run = mapFrom(mapScale(M.scales[FL.scale], FL.cells[fj][2]), col);
         }
-        const it = tip ? { value: [lon, lat], col, tip: this.mapTip(i, li, lon, lat, tip, col) } : { value: [lon, lat], col, tooltip: { show: false } };
+        const it = tip ? { value: [lon, lat], col, tipf: () => this.mapTip(i, li, lon, lat, tip, col) } : { value: [lon, lat], col, tooltip: { show: false } };
         if (run) it.run = run;
         items.push(it);
       }
       const hatch = L.kind === 'hatch';
+      if (items.some(it => it.run)) this.mapRuns.push({ sid: id('hex' + li), items, delay: base + 250 });
       series.push({
         id: id('hex' + li), type: 'custom', xAxisIndex: i, yAxisIndex: i, z: 3 + li, clip: true, silent: hatch || L.kind === 'mask' && !L.label,
         data: items,
@@ -1816,13 +1985,130 @@ class MplChart {
           if (hatch) return { type: 'line', shape: { x1: x - R * .6, y1: y + R * .6, x2: x + R * .6, y2: y - R * .6 }, style: { stroke: it.col, lineWidth: Math.max(.8, 1.1 * s), opacity: .75 } };
           const shape = { points: pts.map(([u, v]) => [x + Rr * u, y + Rr * v]) };
           if (!it.run) return { type: 'polygon', shape, style: { fill: it.col }, enterFrom: { style: { opacity: 0 } } };
-          // starts on the scale's neutral colour, so nothing shows its end colour before its turn
-          return { type: 'polygon', shape, style: { fill: it.run.frames[0].style.fill },
-                   keyframeAnimation: { duration: it.run.dur, delay: base + 250, easing: 'linear', keyframes: it.run.frames } };
+          // starts on the scale's neutral colour, so nothing shows its end colour before its turn (playRuns)
+          return { type: 'polygon', shape, style: { fill: it.run.frames[0].style.fill } };
         },
-        animationDuration: 450, animationDelay: base + li * 60, progressive: 0
+        animationDuration: 450, animationDelay: base + li * 60, progressive: 0,
+        zlevel: anim(L) ? 1 : li < firstAnim || firstAnim < 0 ? 0 : 2
       });
     });
+  }
+
+  /* The cells' entrances, driven here and not as ECharts keyframes: a few thousand keyframe animators parse their
+     colours anew every frame, and zrender fills every cell on its own (a 1-degree map has 8000 of them: 20-40 ms a
+     frame on a fast laptop). Here the colours come from precomputed RGB stops (same timing, same linear steps), and
+     the moving cells are painted straight onto their own canvas layer (hexSeries: zlevel 1), one fill per colour
+     (and per 48 cells), the colour rounded to 32 steps a channel while it moves; the last frame hands the exact colours back to zrender. */
+  stopRuns() {   // a run cut short still ends on the exact colours, drawn by zrender again
+    cancelAnimationFrame(this.runRaf);
+    if (this.runDone && this.chart && !this.chart.isDisposed()) this.runDone();
+    this.runDone = null;
+  }
+  playRuns(runs) {
+    this.stopRuns();
+    const model = this.chart.getModel(), zr = this.chart.getZr(), groups = [];
+    for (const { sid, items, delay } of runs) {
+      const sr = model.queryComponents({ mainType: 'series', id: sid })[0], data = sr && sr.getData(), jobs = [];
+      if (!data) continue;
+      items.forEach((it, q) => {
+        const el = it.run && data.getItemGraphicEl(q);
+        if (!el) return;
+        const fr = it.run.frames;
+        if (!fr.every(f => /^#[0-9a-f]{6}$/i.test(f.style.fill))) { el.style.fill = it.col; return; }
+        el.style.fill = fr[0].style.fill;
+        jobs.push({ el, p: el.shape.points, end: fr[fr.length - 1].style.fill, s: fr.map(f => [delay + f.percent * it.run.dur, ...mapHex(f.style.fill)]) });
+      });
+      const area = sr.coordinateSystem && sr.coordinateSystem.getArea && sr.coordinateSystem.getArea();
+      if (jobs.length) groups.push({ jobs, area });
+    }
+    const all = groups.flatMap(g => g.jobs), layer = zr.painter.getLayer && zr.painter.getLayer(1);
+    const done = () => { this.runDone = null; for (const j of all) { j.el.style.fill = j.end; j.el.markRedraw(); } zr.flush(); };
+    if (!all.length) return;
+    if (!layer || !layer.ctx) return done();   // no canvas layer to paint on: the finished picture at once
+    const ctx = layer.ctx, cv = layer.dom, dpr = layer.dpr || 1, t0 = performance.now(), end = Math.max(...all.map(j => j.s[j.s.length - 1][0]));
+    const frame = now => {
+      const t = now - t0;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      for (const { jobs, area } of groups) {
+        const buckets = new Map();
+        for (const j of jobs) {
+          const s = j.s, n = s.length - 1;
+          let r, g, b;
+          if (t <= s[0][0]) [, r, g, b] = s[0];
+          else if (t >= s[n][0]) [, r, g, b] = s[n];
+          else {
+            let q = 1; while (s[q][0] < t) q++;
+            const A = s[q - 1], B = s[q], f = (t - A[0]) / (B[0] - A[0] || 1);
+            r = A[1] + (B[1] - A[1]) * f; g = A[2] + (B[2] - A[2]) * f; b = A[3] + (B[3] - A[3]) * f;
+          }
+          const key = ((r | 0) >> 3) << 10 | ((g | 0) >> 3) << 5 | ((b | 0) >> 3);
+          let list = buckets.get(key); if (!list) buckets.set(key, list = []);
+          list.push(j.p);
+        }
+        ctx.save();
+        if (area) { ctx.beginPath(); ctx.rect(area.x, area.y, area.width, area.height); ctx.clip(); }
+        for (const [key, list] of buckets) {
+          ctx.fillStyle = `rgb(${(key >> 10 & 31) * 8 + 4},${(key >> 5 & 31) * 8 + 4},${(key & 31) * 8 + 4})`;
+          // at most 48 cells a path: one path of thousands of cells (all of them at the start) fills ~100x slower
+          for (let c = 0; c < list.length; c += 48) {
+            ctx.beginPath();
+            for (const p of list.slice(c, c + 48)) { ctx.moveTo(p[0][0], p[0][1]); for (let k = 1; k < p.length; k++) ctx.lineTo(p[k][0], p[k][1]); ctx.closePath(); }
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+      if (t < end && this.chart && !this.chart.isDisposed()) this.runRaf = requestAnimationFrame(frame);
+      else done();
+    };
+    this.runDone = done;
+    this.runRaf = requestAnimationFrame(frame);
+  }
+
+  /* data-pulse: once the cells have settled, two rings go out from each of the three sites, in the site's colour on
+     a paper halo (so the ring reads on cells of its own colour too), so the places of the slide before are found */
+  pulse() {
+    const S = (window.MAPDATA && window.MAPDATA.sites) || [], i = this.mapAxes[0], s = this.s, zr = this.chart.getZr();
+    if (!S.length || i === undefined) return;
+    const r0 = 6 * s, r1 = 48 * s, rings = [];
+    S.forEach((q, n) => {
+      const [x, y] = this.chart.convertToPixel({ gridIndex: i }, [q.lon, q.lat]);
+      for (const [stroke, lw] of [['#fbf8f1', 7.5], [q.color, 3.4]]) {
+        const c = new echarts.graphic.Circle({ shape: { cx: x, cy: y, r: r0 }, style: { fill: 'none', stroke, lineWidth: lw * s, opacity: 0 }, silent: true, zlevel: 2, z: 100 });
+        zr.add(c); rings.push({ c, at: 1900 + n * 220 });
+      }
+    });
+    const D = 2200, ease = t => 1 - Math.pow(1 - t, 3), t0 = performance.now();
+    const frame = now => {
+      let live = false;
+      for (const { c, at } of rings) {
+        const t = (now - t0 - at) / D;
+        if (t < 0) { live = true; continue; }
+        if (t >= 1) { c.attr({ style: { opacity: 0 } }); continue; }
+        live = true;
+        const u = t < .5 ? t / .5 : (t - .5) / .5, e = ease(u);   // two rings, one after the other
+        c.attr({ shape: { r: r0 + (r1 - r0) * e }, style: { opacity: .95 * (1 - e) } });
+      }
+      if (live && this.chart && !this.chart.isDisposed()) this.pulseRaf = requestAnimationFrame(frame);
+      else rings.forEach(({ c }) => zr.remove(c));
+    };
+    cancelAnimationFrame(this.pulseRaf);
+    this.pulseRaf = requestAnimationFrame(frame);
+  }
+
+  /* the entrance of a map already drawn: the same cells, set back to their first colour and run again (playRuns),
+     without clearing and building the figure anew (some 100 series: a frame of a few hundred ms on arrival) */
+  prepRuns() {
+    if (this.runCache || !this.chart) return;
+    const keep = [this.texs, this.series, this.legendName, this.siteSeries];
+    this.option(0, true);
+    this.runCache = this.mapRuns;
+    [this.texs, this.series, this.legendName, this.siteSeries] = keep;
+  }
+  replay() {
+    this.prepRuns();
+    this.playRuns(this.runCache);
+    if ('pulse' in this.host.dataset) this.pulse();
   }
 
   colourBar(series, id, i, a, panel, s) {
@@ -1919,9 +2205,12 @@ class MplChart {
 
   set(k, animate, fresh) {
     if (!this.chart) return;
+    this.stopRuns();
     if (fresh) { this.chart.clear(); for (const e of this.inner.querySelectorAll(':scope > .mtex')) e.remove(); }
     this.axTexs = [];
     this.chart.setOption(ecDraw(this.option(k, animate)), { replaceMerge: ['series', 'graphic', 'grid', 'xAxis', 'yAxis'] });
+    if (animate && this.mapRuns.length) this.playRuns(this.mapRuns);
+    if (animate && this.isMap && 'pulse' in this.host.dataset) this.pulse();
     this.placeAxTex();
     this.k = k;
     this.placeTex(animate);
@@ -1954,7 +2243,11 @@ class MplChart {
     }
     for (const e of old.values()) e.remove();
   }
-  play(k) { this.set(Math.min(k, this.nSteps), true, k === 0 || this.k === null || k < this.k); }
+  play(k) {
+    // a canvas map that already shows its one picture only runs its cells' entrance again (replay)
+    if (!this.svg && this.chart && k === 0 && this.k === 0 && !this.nSteps && !this.timeLayer && !this.stops) return this.replay();
+    this.set(Math.min(k, this.nSteps), true, k === 0 || this.k === null || k < this.k);
+  }
   final(k) { this.set(Math.max(0, Math.min(k, this.nSteps)), false, true); }
 
 }
@@ -2023,19 +2316,19 @@ function drawAlbedo(svg) {
   });
 }
 
-/* count-up numbers: <span class="count" data-to="3.6" data-dec="1"> */
+/* count-up numbers: <span class="count" data-to="3.6" data-dec="1">; data-from starts at an earlier value */
 function countUp(el, embed) {
-  const to = +el.dataset.to, dec = +(el.dataset.dec || 0), delay = +(el.dataset.delay || 0);
+  const to = +el.dataset.to, from = +(el.dataset.from || 0), dec = +(el.dataset.dec || 0), delay = +(el.dataset.delay || 0);
   const fmt = v => v.toLocaleString('de-DE', { minimumFractionDigits: dec, maximumFractionDigits: dec }).replace(/\./g, ' ');
   cancelAnimationFrame(el._raf);
   if (embed) { el.textContent = fmt(to); return; }
   const t0 = performance.now() + delay;
   const tick = now => {
     const p = easeOut(clamp01((now - t0) / 1400));
-    el.textContent = fmt(to * p);
+    el.textContent = fmt(from + (to - from) * p);
     if (p < 1) el._raf = requestAnimationFrame(tick);
   };
-  el.textContent = fmt(0); el._raf = requestAnimationFrame(tick);
+  el.textContent = fmt(from); el._raf = requestAnimationFrame(tick);
 }
 
 /* ===========================================================
@@ -2353,9 +2646,10 @@ class Deck {
       return el;
     };
     subDigits(this.deck);
+    const first = this.slides.findIndex(s => s.matches('.chapter'));   // before the first chapter (intro, overview): no chapters yet
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
-      if (h && !s.hasAttribute('data-nonav')) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
+      if (h && !s.hasAttribute('data-nonav') && n > first) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
       else if (s.matches('.chapter:not(.brk):not(.backup)')) s.appendChild(path(ch));
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
