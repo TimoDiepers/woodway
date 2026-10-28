@@ -307,7 +307,7 @@ function ecAxis(extra) {
    desktop, tap on a touch screen (triggerOn click); confine keeps them inside the chart. */
 function ecTooltip(extra) {
   return Object.assign({
-    confine: true, triggerOn: 'mousemove|click', transitionDuration: .15, enterable: false,
+    confine: true, triggerOn: 'mousemove|click', transitionDuration: .15, enterable: false, className: 'ectip',   // .ectip: H hides them (Deck.tips)
     backgroundColor: 'rgba(251,248,241,.97)', borderColor: EC.line, borderWidth: 1, padding: [8, 12],
     textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 17 },
     extraCssText: 'box-shadow:0 6px 18px -8px rgba(40,34,20,.35); border-radius:6px; font-size:calc(17px * var(--tipk, 1)) !important;'
@@ -2602,7 +2602,19 @@ class Deck {
     const h = parseInt(location.hash.slice(1), 10);
     this.go(Number.isFinite(h) ? h - 1 : 0, 0);
     this.booted = true;
-    setTimeout(() => document.getElementById('hint').classList.add('gone'), 5000);
+    this.hint(5000);
+  }
+  hint(ms) {
+    // the shortcut line at the top: on arrival, and again with I, then it fades
+    const h = document.getElementById('hint'); h.classList.remove('gone');
+    clearTimeout(this._hint); this._hint = setTimeout(() => h.classList.add('gone'), ms);
+  }
+  toast(text) {
+    // a toggle confirmed, small, bottom right, for a moment
+    let t = document.getElementById('toast');
+    if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = text; t.classList.add('on');
+    clearTimeout(this._toast); this._toast = setTimeout(() => t.classList.remove('on'), 1600);
   }
   onMessage(e) {
     const d = e.data;
@@ -2624,7 +2636,15 @@ class Deck {
   cursor(off) {
     // C: the mouse pointer off over the whole page (a laser pointer draws its own), kept for the session
     document.documentElement.classList.toggle('nocursor', off);
+    if (this.booted) this.toast(off ? 'Mauszeiger aus' : 'Mauszeiger an');
     try { sessionStorage.setItem('dv-nocursor', off ? '1' : ''); } catch (e) { /* private mode: only for this page */ }
+  }
+  tips(off) {
+    // H: the charts' hover effects off (presenting with a pointer): no tooltip, no dashed line, no hover dots. Kept for the session
+    document.documentElement.classList.toggle('notips', off);
+    if (off && this.hideTips) this.hideTips();
+    try { sessionStorage.setItem('dv-notips', off ? '1' : ''); } catch (e) { /* private mode: only for this page */ }
+    this.toast(off ? 'Hover-Effekte aus' : 'Hover-Effekte an');
   }
   sync() {
     // Tell the presenter window where we are and what comes next.
@@ -2862,6 +2882,7 @@ class Deck {
   prev() { if (this.flying) return; this.schedulePlan(); if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
   bind() {
     try { if (sessionStorage.getItem('dv-nocursor')) this.cursor(true); } catch (e) { /* no storage */ }
+    try { if (sessionStorage.getItem('dv-notips')) document.documentElement.classList.add('notips'); } catch (e) { /* no storage */ }
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
     addEventListener('keydown', e => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -2873,10 +2894,12 @@ class Deck {
       else if (k === 'End') this.go(this.mainEnd - 1, 0);
       else if (k === 'b' || k === 'B') this.go(this.mainEnd, 0);
       else if (k === 'r' || k === 'R') this.go(this.i, this.step);
-      else if (k === 'n' || k === 'N') this.drawer.inert = !this.drawer.classList.toggle('open');
+      else if (k === 'n' || k === 'N') { this.drawer.inert = !this.drawer.classList.toggle('open'); this.toast(this.drawer.inert ? 'Notizen aus' : 'Notizen an'); }
       else if (k === 'p' || k === 'P') this.openPresenter();
-      else if (k === 'f' || k === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+      else if (k === 'f' || k === 'F') { const on = !document.fullscreenElement; on ? document.documentElement.requestFullscreen?.() : document.exitFullscreen(); this.toast(on ? 'Vollbild an' : 'Vollbild aus'); }
+      else if (k === 'i' || k === 'I') this.hint(6000);
       else if (k === 'c' || k === 'C') this.cursor(!document.documentElement.classList.contains('nocursor'));
+      else if (k === 'h' || k === 'H') this.tips(!document.documentElement.classList.contains('notips'));
     });
     let lock = 0;
     addEventListener('wheel', e => {

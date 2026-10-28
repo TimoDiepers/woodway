@@ -643,6 +643,11 @@ body:has(#menu.open) #menu-fab { display: none; }
   display: flex; align-items: baseline; gap: 12px; padding: 10px 16px; border-radius: 8px; background: #1f2823; color: #e8e3d6;
   font: 400 17px/1.2 var(--sans); box-shadow: 0 10px 30px -10px rgba(0,0,0,.45); transition: opacity .2s var(--ease), transform .2s var(--ease); }
 #jump-badge.on { opacity: 1; transform: translate(-50%, 0); }
+/* a toggle confirmed (Deck.toast): small, bottom right, above the slide number's corner */
+#toast { position: fixed; right: 18px; bottom: 18px; z-index: 60; opacity: 0; pointer-events: none; transform: translateY(6px);
+  padding: 6px 12px; border-radius: 6px; background: #1f2823; color: #e8e3d6; font: 500 13px/1.2 var(--sans);
+  box-shadow: 0 6px 18px -8px rgba(0,0,0,.4); transition: opacity .2s var(--ease), transform .2s var(--ease); }
+#toast.on { opacity: 1; transform: none; }
 #jump-badge b { font: 600 28px/1 var(--sans); font-variant-numeric: tabular-nums; color: #fff; }
 #jump-badge span { max-width: 52ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b9c7b0; }
 #jump-badge.bad span { color: #e8a49b; }
@@ -1616,6 +1621,9 @@ svg.mo .m-sway.back { animation: none; }
 
 /* tooltips (all charts): head, grey line, rows of dot · name · value. Fixed colours, not the slide tokens: the
    tooltip is light paper on every slide, the dark ones included (their --ink is light) */
+/* H (Deck.tips): the charts and maps do not see the pointer: no tooltip, no dashed line, no hover dots */
+html.notips [_echarts_instance_] { pointer-events: none; }
+html.notips .ectip { display: none !important; }
 .tc { min-width: 9em; color: #1b2420; }
 .tc-h { font-weight: 600; color: #1b2420; }
 .tc-s { color: #5d665f; font-size: .86em; margin-top: .1em; }
