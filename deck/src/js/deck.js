@@ -2597,17 +2597,40 @@ class Deck {
     if (this.mainEnd < 0) this.mainEnd = this.slides.length;
     this.decorate();
     this.fit(); addEventListener('resize', () => this.fit());
+    if (window.visualViewport) visualViewport.addEventListener('resize', () => this.fit());   // mobile toolbars coming and going
     addEventListener('message', e => this.onMessage(e));
     if (!this.embed) { this.bind(); this.menu = new SlideMenu(this); }
     const h = parseInt(location.hash.slice(1), 10);
     this.go(Number.isFinite(h) ? h - 1 : 0, 0);
     this.booted = true;
     this.hint(5000);
+    this.rotateHint();
   }
   hint(ms) {
     // the shortcut line at the top: on arrival, and again with I, then it fades
     const h = document.getElementById('hint'); h.classList.remove('gone');
     clearTimeout(this._hint); this._hint = setTimeout(() => h.classList.add('gone'), ms);
+  }
+  tapCue(back) {
+    // where a tap went: a chevron at that edge, for a moment
+    const c = document.createElement('div'); c.className = `tapcue ${back ? 'l' : 'r'}`; c.setAttribute('aria-hidden', 'true');
+    c.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+    document.body.appendChild(c); c.addEventListener('animationend', () => c.remove());
+  }
+  rotateHint() {
+    // a phone held upright shows the 16:9 slide at a quarter of its size: say so once, gently
+    if (this.embed || !matchMedia('(pointer: coarse)').matches) return;
+    try { if (sessionStorage.getItem('dv-rotate')) return; } catch (e) { /* no storage */ }
+    const portrait = matchMedia('(orientation: portrait) and (max-width: 820px)');
+    const show = () => {
+      if (!portrait.matches || document.getElementById('rotate')) return;
+      const r = document.createElement('button'); r.id = 'rotate'; r.type = 'button';
+      r.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 13a9 9 0 0 0 7 8M21 11a9 9 0 0 0-7-8"/></svg>Quer halten für größere Folien';
+      const done = () => { r.classList.add('gone'); setTimeout(() => r.remove(), 400); try { sessionStorage.setItem('dv-rotate', '1'); } catch (e) { /* */ } };
+      r.addEventListener('click', done); setTimeout(done, 7000);
+      document.body.appendChild(r);
+    };
+    show(); portrait.addEventListener('change', () => { if (!portrait.matches) { const r = document.getElementById('rotate'); if (r) r.click(); } });
   }
   toast(text) {
     // a toggle confirmed, small, bottom right, for a moment
@@ -2703,7 +2726,10 @@ class Deck {
     document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
   }
   fit() {
-    const k = Math.min(innerWidth / 1600, innerHeight / 900);
+    // the visible viewport where there is one (mobile toolbars), the window otherwise
+    const W = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.width : innerWidth;
+    const H = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.height : innerHeight;
+    const k = Math.min(W / 1600, H / 900);
     this.deck.style.transform = `translate(-50%, -50%) scale(${k})`;
     document.documentElement.style.setProperty('--tipk', Math.min(2.6, Math.max(1, .8 / k)).toFixed(3));   // tooltips at least ~14px on screen
   }
@@ -2910,18 +2936,28 @@ class Deck {
     let x0 = null, y0 = null;
     const hideTips = () => { for (const h of this.slides[this.i].querySelectorAll('.chart')) h._chart && h._chart.chart && h._chart.chart.dispatchAction({ type: 'hideTip' }); };
     this.hideTips = hideTips;
+    // touch: swipe, or tap the left third to go back and anywhere else to go on; what has its own touch keeps it
+    // (a chart scrubs its tooltip, links, buttons, the chapter marks, the map player, the embedded Woodway)
+    const own = 'a, button, input, select, textarea, iframe, label, .path, .player, #menu, #menu-fab, .drawer, #rotate';
+    let t0 = 0, n0 = 0;
     addEventListener('touchstart', e => {
+      n0 = e.touches.length;
       const host = e.target.closest && e.target.closest('.chart');
-      if (host) {   // inside a chart: scrub its tooltip, no swipe; the other charts of the slide close theirs
+      if (host && !document.documentElement.classList.contains('notips')) {   // inside a chart: scrub its tooltip, no swipe; the other charts close theirs
         for (const h of this.slides[this.i].querySelectorAll('.chart')) if (h !== host && h._chart && h._chart.chart) h._chart.chart.dispatchAction({ type: 'hideTip' });
         x0 = null; return;
       }
-      hideTips(); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+      if (n0 > 1 || (e.target.closest && e.target.closest(own))) { x0 = null; return; }   // pinch, or a control
+      hideTips(); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
     }, { passive: true });
     addEventListener('touchend', e => {
-      if (x0 === null) return;
+      if (x0 === null || e.touches.length || n0 > 1 || (visualViewport && visualViewport.scale > 1.05)) { x0 = null; return; }   // zoomed in: the finger pans
       const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
       if (Math.max(Math.abs(dx), Math.abs(dy)) > 50) (Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? this.next() : this.prev();
+      else if (Math.hypot(dx, dy) < 12 && Date.now() - t0 < 450) {
+        const back = x0 < innerWidth / 3;
+        this.tapCue(back); back ? this.prev() : this.next();
+      }
       x0 = null;
     }, { passive: true });
     addEventListener('hashchange', () => { const h = parseInt(location.hash.slice(1), 10); if (h - 1 !== this.i) this.go(h - 1, 0); });

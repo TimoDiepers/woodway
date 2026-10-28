@@ -93,6 +93,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 /* the page takes the colour of the current slide, so the slide runs out to the screen edge */
 html, body { height: 100%; overflow: hidden; background: var(--stage, #f2ede2); transition: background-color .35s var(--ease); }
+html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }   /* taps at once: no double-tap zoom delay */
+body { -webkit-user-select: none; user-select: none; }   /* a long press does not select slide text */
+.drawer { -webkit-user-select: text; user-select: text; }
 body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: antialiased; }
 ::selection { background: var(--moss-soft); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--ch); outline-offset: 3px; }
@@ -648,6 +651,20 @@ body:has(#menu.open) #menu-fab { display: none; }
   padding: 6px 12px; border-radius: 6px; background: #1f2823; color: #e8e3d6; font: 500 13px/1.2 var(--sans);
   box-shadow: 0 6px 18px -8px rgba(0,0,0,.4); transition: opacity .2s var(--ease), transform .2s var(--ease); }
 #toast.on { opacity: 1; transform: none; }
+/* touch: where a tap went (Deck.tapCue) */
+.tapcue { position: fixed; top: 50%; z-index: 60; width: 44px; height: 44px; margin-top: -22px; border-radius: 50%; pointer-events: none;
+  display: grid; place-items: center; background: rgba(31, 40, 35, .55); animation: tapcue .45s var(--ease) both; }
+.tapcue.r { right: max(10px, env(safe-area-inset-right)); } .tapcue.l { left: max(10px, env(safe-area-inset-left)); }
+.tapcue.l svg { transform: scaleX(-1); }
+.tapcue svg { width: 22px; height: 22px; fill: none; stroke: #f2ede2; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes tapcue { from { opacity: 0; } 30% { opacity: 1; } to { opacity: 0; } }
+/* a phone held upright: once, a hint to turn it (Deck.rotateHint) */
+#rotate { position: fixed; left: 50%; bottom: max(84px, calc(env(safe-area-inset-bottom) + 72px)); transform: translateX(-50%); z-index: 64;
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px; border: 0; border-radius: 999px; background: #1f2823; color: #e8e3d6;
+  font: 500 15px/1.2 var(--sans); white-space: nowrap; box-shadow: 0 8px 24px -10px rgba(0,0,0,.5); animation: fadein .4s var(--ease) both; transition: opacity .35s; }
+#rotate.gone { opacity: 0; }
+#rotate svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .tapcue { animation-duration: .01s; } }
 #jump-badge b { font: 600 28px/1 var(--sans); font-variant-numeric: tabular-nums; color: #fff; }
 #jump-badge span { max-width: 52ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b9c7b0; }
 #jump-badge.bad span { color: #e8a49b; }
