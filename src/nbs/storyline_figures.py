@@ -1254,7 +1254,7 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     ax.axhline(-a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
     ax.text(horizon, -a0 + 0.04, f"{100 * a0:.0f} % dauerhaft entfernt", ha="right", va="bottom", fontsize=13.5, color=c_rm,
             fontweight="bold")
-    ax.text(horizon - 2, -0.96, "Land + Ozean gasen aus", ha="right", va="bottom", fontsize=13.5, color=c_back,
+    ax.text(horizon - 2, -0.96, "von Land + Ozean zurück", ha="right", va="bottom", fontsize=13.5, color=c_back,
             fontweight="bold")   # as large as the share that stays removed: the two parts of the same kilogram
     ax.set_xlim(0, horizon)
     ax.set_ylim(-1.12, 0.1)

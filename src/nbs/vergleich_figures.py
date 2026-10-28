@@ -8,9 +8,11 @@ V4 the same places over time as the grid decarbonises.
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
 
 import matplotlib
 
@@ -1012,15 +1014,23 @@ def feasibility_figure(out_path: str) -> str:
     return _save(fig, out_path)
 
 
+def de_signed(v: float, nd: int = 0) -> str:
+    """de_num with a plus sign on positive values (warming)."""
+    return ("+" if round(v, nd) > 0 else "") + de_num(v, nd)
+
+
 def tree_effect_figure(out_path: str) -> str:
-    """K15: temperature effect in 2100 of one tree of the local typical forest, planted in the start year."""
+    """K15: temperature effect in 2100 of one tree of the local typical forest, planted in the start year.
+    The sites carry their own value, the one on the slide before (deck/chart_data/tempsum.json), not their block's."""
+    sites = json.loads((Path(__file__).resolve().parents[2] / "deck/chart_data/tempsum.json").read_text())["sites"]
+    dt = {s["name"]: s["dt"][-1] for s in sites}   # 2100
     return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [fK]: grün kühlt, orange wärmt",
                                [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
-                               lambda v: f"{de_num(v)} fK")
+                               lambda v: f"{de_signed(v)} fK", site_label=lambda s: f"{de_signed(dt[s.name])} fK")
 
 
 def total_effect_figure(out_path: str) -> str:
     """K16: where reforestation pays: effect in 2100 of reforesting all free area, per land area."""
     return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [µK je Mio. ha Land]",
                                [-12, -8, -4, 0, 4, 8], "kein Platz für Bäume",
-                               lambda v: f"{de_num(v, 1)} µK")
+                               lambda v: f"{de_signed(v, 1)} µK")

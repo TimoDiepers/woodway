@@ -881,7 +881,7 @@ function aufMorph(phase, t) {
                      splitLine: { show: true, lineStyle: { color: EC.grid } } }, AUF_Y))],
     series: [
       { id: 'vl', type: 'line', data: P(vl), showSymbol: false, z: 4, labelLayout: { moveOverlap: 'shiftY' }, lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6], opacity: vlIn },
-        itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best-Case-Szenario', color: muted(vlIn), fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 },
+        itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case', color: muted(vlIn), fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 },
         markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2, opacity: peak },
           label: { show: true, position: 'top', distance: 9, color: muted(peak), fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
           data: [{ coord: [pv, tv] }] },
@@ -917,8 +917,8 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   const ba = vl.map((v, i) => v - p.alle[i] / 1000), bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), tip = { unit: '°C', dec: 2 };
   const lab = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
   const series = [
-    { id: 'vl', name: 'Best-Case-Szenario', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
-      lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6] }, itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best-Case-Szenario',
+    { id: 'vl', name: 'Best Case', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
+      lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6] }, itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case',
         color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' },
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2 },
         label: { show: true, position: 'top', distance: 9, color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
@@ -2362,12 +2362,15 @@ class SlideMenu {
   }
   get isOpen() { return this.el.classList.contains('open'); }
   build() {
-    const d = this.deck; let html = '', grid = false;
+    const d = this.deck, seen = new Set(); let html = '', grid = false;
+    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
     const open = t => { if (grid) html += '</div>'; html += `<h3>${t}</h3><div class="menu-grid">`; grid = true; };
     d.slides.forEach((s, i) => {
       if (i === 0) open('Vortrag');
       if (i === d.mainEnd) open('Backup');
       else if (s.classList.contains('chapter') && i > 0 && i < d.mainEnd) open(s.dataset.title || 'Kapitel');
+      else if (i < d.mainEnd && names[s.dataset.ch] && !seen.has(s.dataset.ch)) open(names[s.dataset.ch]);   // where a chapter begins
+      if (s.dataset.ch) seen.add(s.dataset.ch);
       const t = (s.dataset.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
       html += `<button class="card" type="button" data-i="${i}"><span class="pv"><b>${i + 1}</b></span><span class="cap"><i>${i + 1}</i><span>${t}</span></span></button>`;
     });
@@ -2640,13 +2643,14 @@ class Deck {
     // A click opens the chapter.
     const chapters0 = ['baeume', 'klima', 'vergleich'];
     const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
-    const opener = c => this.slides.findIndex(s => s.matches('.chapter') && s.dataset.ch === c);
+    const disc = { baeume: 'baeume', klima: 'klima', vergleich: 'potenzial' };   // the overview's discs (index.html #e-…)
+    const opener = c => this.slides.findIndex(s => s.dataset.ch === c);   // a chapter's first slide
     const path = ch0 => {
       const ch = ch0 === 'dac' ? 'vergleich' : ch0;   // the Holzweg part (dark, amber) still belongs to the chapter Potenzial
       const el = document.createElement('nav'); el.className = 'path'; el.setAttribute('aria-label', 'Kapitel');
       el.innerHTML = chapters0.map(c =>
         `<button type="button" class="pc${c === ch ? ' on' : ''}" data-ch="${c}" aria-label="Kapitel ${names[c]}"${c === ch ? ' aria-current="true"' : ''}>`
-        + `<svg viewBox="-24 -24 48 48" aria-hidden="true"><use href="#m-${c}" x="-24" y="-24" width="48" height="48"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</button>`).join('');
+        + `<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#e-${disc[c]}" width="100" height="100"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</button>`).join('');
       el.addEventListener('click', e => {
         const b = e.target.closest('.pc'); if (!b) return;
         e.stopPropagation(); const n = opener(b.dataset.ch); if (n >= 0) this.go(n, 0);
@@ -2654,7 +2658,7 @@ class Deck {
       return el;
     };
     subDigits(this.deck);
-    const first = this.slides.findIndex(s => s.matches('.chapter'));   // before the first chapter (intro, overview): no chapters yet
+    const first = this.slides.findIndex(s => s.dataset.ch) - 1;   // before the first chapter (intro, overview): no chapters yet
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
       if (h && !s.hasAttribute('data-nonav') && n > first) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
@@ -2670,11 +2674,13 @@ class Deck {
     // page background and mobile browser bar = colour of the current slide
     let bg = getComputedStyle(s).backgroundColor;
     if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') bg = '#f2ede2';
-    document.documentElement.style.setProperty('--stage', bg);
+    const plain = !s.matches('.chapter, .title'), cs = getComputedStyle(s);
+    const v = { '--stage': bg, '--ground': plain ? cs.getPropertyValue('--ch') : 'transparent',
+      '--bar': cs.getPropertyValue(plain && !s.matches('.dark') ? '--ch' : '--ch-soft') };
+    // set only what changed: a property on the root restyles the whole page
+    const root = document.documentElement.style;
+    for (const [k, x] of Object.entries(v)) if (root.getPropertyValue(k) !== x) root.setProperty(k, x);
     document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
-    const plain = !s.matches('.chapter, .title');
-    document.documentElement.style.setProperty('--ground', plain ? getComputedStyle(s).getPropertyValue('--ch') : 'transparent');
-    document.documentElement.style.setProperty('--bar', getComputedStyle(s).getPropertyValue(plain && !s.matches('.dark') ? '--ch' : '--ch-soft'));
   }
   fit() {
     const k = Math.min(innerWidth / 1600, innerHeight / 900);
@@ -2711,13 +2717,100 @@ class Deck {
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
+    this.schedulePlan();
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
-    this.stage(s);
+    if (this.flying) this.staged = s; else this.stage(s);   // in a flight: after the landing (Deck.flyHome)
     if (!this.embed) history.replaceState(null, '', `#${n + 1}`);
     if (!this.embed && n !== this.said) { this.said = n; document.getElementById('sr-status').textContent = `Folie ${n + 1} von ${this.slides.length}: ${s.dataset.title || ''}`; }
     const notes = s.querySelector('.notes');
     this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
+  }
+  onward() {
+    // the next slide; from the overview or a chapter's closing card its discs fly into the chapter marks of that
+    // slide first (top right), the big overview becoming the small one
+    if (this.flying) return;
+    const plan = this.plan && this.plan.i === this.i ? this.plan : this.planFlight();
+    if (plan) this.flyHome(plan); else this.go(this.i + 1, 0);
+  }
+  schedulePlan() {
+    // the flight prepared while the speaker talks: the next slide built (charts, formulas, media), every start and end
+    // measured; the click then only starts animations, nothing to compute or lay out
+    clearTimeout(this._planT); this.plan = null;
+    if (this.primed && !this.flying) { this.primed.classList.remove('primed'); this.primed = null; }
+    if (this.still || this.flying) return;
+    this._planT = setTimeout(() => { this.plan = this.planFlight(); }, 1100);   // after the disc row's own entrance
+  }
+  planFlight() {
+    const i = this.i, prev = this.slides[i], s = this.slides[i + 1];
+    if (!s || this.still || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    const path = s.querySelector('.path');
+    const discs = path ? [...prev.querySelectorAll('[data-fly]')].filter(e => !e.closest('[data-step]:not(.shown)')) : [];
+    if (!discs.length) return null;
+    if (window.__deckDataNow) window.__deckDataNow();
+    if (window.__ensureCharts) { window.__ensureCharts(s); delete s._steps; }
+    if (window.__ensureTex) window.__ensureTex(s);
+    deckMedia.around(this.slides, i + 1);
+    // deck coordinates: the deck is scaled to the window, these stay put when it is resized
+    const D = this.deck.getBoundingClientRect(), k = this.deck.offsetWidth / D.width;
+    const box = e => { const r = e.getBoundingClientRect(); return [(r.left - D.left) * k, (r.top - D.top) * k, r.width * k]; };
+    // the marks where the copies land: the current chapter still a bare disc, the three evenly spaced
+    s.classList.add('measure'); path.classList.add('landing');
+    const legs = discs.map(e => {
+      const m = path.querySelector(`.pc[data-ch="${e.dataset.fly}"] svg`);
+      return m && { disc: e, c: e.dataset.fly, from: box(e), to: box(m), o: +getComputedStyle(m.closest('.pc')).opacity };
+    }).filter(Boolean);
+    path.classList.remove('landing'); s.classList.remove('measure');
+    // and painted already, unseen under this one: at the hand-over it only has to become visible
+    s.classList.add('primed'); this.primed = s;
+    return { i, legs };
+  }
+  flyHome(plan) {
+    // one timeline, nothing but transforms and opacity:
+    //   0     the discs lift off on an arc (up first, then across to the corner), shrinking to their marks; the
+    //         slide left dissolves as one layer, its blur intact
+    //   ~90%  the next slide is there under them (painted beforehand), its content fading and rising in as they settle
+    //   land  the copies give way to the marks (the same drawing), the current chapter's pill grows out of its
+    //         disc and pushes the others aside
+    this.flying = true;
+    const prev = this.slides[this.i], s = this.slides[this.i + 1];
+    const path = s.querySelector('.path'), on = path.querySelector('.pc.on');
+    const sym = { baeume: 'e-baeume', klima: 'e-klima', vergleich: 'e-potenzial' };
+    const layer = document.createElement('div'); layer.className = 'flyer';
+    const DUR = 880, STAGGER = 60, opt = (d, easing) => ({ duration: DUR, delay: d, easing, fill: 'both' });
+    plan.legs.forEach(({ c, from: [x0, y0, w0], to: [x1, y1, w1], o }, n) => {
+      // three nested moves, so across, up and size each get their own pace: the arc
+      const f = document.createElement('div'); f.className = 'fly';
+      f.style.cssText = `left:${x0}px; top:${y0}px; width:${w0}px; height:${w0}px`;
+      f.innerHTML = `<div><div><svg viewBox="0 0 100 100"><use href="#${sym[c]}" width="100" height="100"/></svg></div></div>`;
+      layer.append(f);
+      const up = f.firstChild, size = up.firstChild, d = n * STAGGER;
+      f.animate([{ transform: 'none' }, { transform: `translateX(${x1 - x0}px)` }], opt(d, 'cubic-bezier(.55, 0, .25, 1)'));
+      up.animate([{ transform: 'none' }, { transform: `translateY(${y1 - y0}px)` }], opt(d, 'cubic-bezier(.25, .55, .25, 1)'));
+      size.animate([{ transform: 'none', opacity: 1 }, { transform: `scale(${w1 / w0})`, opacity: o }], opt(d, 'cubic-bezier(.4, 0, .2, 1)'));
+    });
+    this.deck.append(layer);
+    const last = DUR + STAGGER * (plan.legs.length - 1);
+    // the discs leave their places at once (on a card with their ring and tick, on the overview with their drawing)
+    const gone = plan.legs.flatMap(({ disc: e }) => e.closest('.ic') ? [e.closest('.ic')] : [e, e.nextElementSibling]);
+    gone.forEach(g => { g.style.visibility = 'hidden'; });
+    const fade = prev.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 340, easing: 'cubic-bezier(.3, 0, .2, 1)', fill: 'forwards' });
+    path.classList.add('landing');
+    const at = (ms, fn) => setTimeout(fn, ms);
+    at(last - 110, () => { s.classList.add('arrive'); this.go(this.i + 1, 0); s.classList.remove('primed'); this.primed = null; });
+    at(last, () => {
+      if (on) { on.style.width = '44px'; on.classList.add('grow'); }
+      path.classList.remove('landing'); layer.remove();
+      requestAnimationFrame(() => {
+        if (on) { on.style.width = `${on.scrollWidth}px`; on.classList.remove('grow'); }
+        at(560, () => {
+          if (on) on.style.width = '';
+          s.classList.remove('arrive'); gone.forEach(g => { g.style.visibility = ''; }); fade.cancel();
+          this.flying = false;
+          if (this.staged) { this.stage(this.staged); this.staged = null; }
+        });
+      });
+    });
   }
   dataReady() {
     // charts exist now: recount the clicks and draw the current slide in its present state
@@ -2765,8 +2858,8 @@ class Deck {
       a.pause();
     }
   }
-  next() { if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); } else if (this.i < this.slides.length - 1) this.go(this.i + 1, 0); }
-  prev() { if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
+  next() { if (this.flying) return; if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); this.schedulePlan(); } else if (this.i < this.slides.length - 1) this.onward(); }
+  prev() { if (this.flying) return; this.schedulePlan(); if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
   bind() {
     try { if (sessionStorage.getItem('dv-nocursor')) this.cursor(true); } catch (e) { /* no storage */ }
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
