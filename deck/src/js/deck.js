@@ -2611,12 +2611,6 @@ class Deck {
     const h = document.getElementById('hint'); h.classList.remove('gone');
     clearTimeout(this._hint); this._hint = setTimeout(() => h.classList.add('gone'), ms);
   }
-  tapCue(back) {
-    // where a tap went: a chevron at that edge, for a moment
-    const c = document.createElement('div'); c.className = `tapcue ${back ? 'l' : 'r'}`; c.setAttribute('aria-hidden', 'true');
-    c.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
-    document.body.appendChild(c); c.addEventListener('animationend', () => c.remove());
-  }
   rotateHint() {
     // a phone held upright shows the 16:9 slide at a quarter of its size: say so once, gently
     if (this.embed || !matchMedia('(pointer: coarse)').matches) return;
@@ -2956,7 +2950,7 @@ class Deck {
       if (Math.max(Math.abs(dx), Math.abs(dy)) > 50) (Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? this.next() : this.prev();
       else if (Math.hypot(dx, dy) < 12 && Date.now() - t0 < 450) {
         const back = x0 < innerWidth / 3;
-        this.tapCue(back); back ? this.prev() : this.next();
+        back ? this.prev() : this.next();
       }
       x0 = null;
     }, { passive: true });
