@@ -329,8 +329,9 @@ def _map_base(ax, field_mask_outside: NDArray, unmeasured: NDArray | None, exten
     lon0, lon1, lat0, lat1 = extent
     ax.set_xlim(lon0, lon1)
     ax.set_ylim(lat0, lat1)
-    # Europe: equal distances at its middle latitude; world: plain lon/lat like the other world maps
-    ax.set_aspect(1.0 / np.cos(np.deg2rad(0.5 * (lat0 + lat1))) if extent == EXTENT else 1.0)
+    # Europe: equal distances at its middle latitude; world: the deck's world projection (nbs.borders.MAP_ASPECT)
+    from nbs.borders import MAP_ASPECT
+    ax.set_aspect(1.0 / np.cos(np.deg2rad(0.5 * (lat0 + lat1))) if extent == EXTENT else MAP_ASPECT)
     ax.set_axis_off()
 
 
@@ -616,7 +617,7 @@ def albedo_annual_map_figure(out_path: str) -> str:
     annual = -typical_light_product() * _STAND_AREA_M2
     return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum, Jahresmittel [W]",
                                [0, 20, 40, 60, 80, 100], "kein Platz für Bäume", None,
-                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=8.7, lats=(-56, 80))
+                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=6.9, lats=(-56, 80), fit=True)
 
 
 C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wie ein Baum aufs Klima wirkt" drawing
@@ -675,8 +676,8 @@ def light_parts_sites_figure(out_path: str) -> str:
     _heading_font, body_font = _register_fonts()
     _style(body_font)
     c_daw = "#d9822b"   # deck.css --s-daw (--ray)
-    fig, ax = plt.subplots(figsize=(3.45, 5.4), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.2, right=0.97, bottom=0.07, top=0.97)
+    fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
+    fig.subplots_adjust(left=0.155, right=0.977, bottom=0.07, top=0.97)
     _clean_axes(ax)
     y = YEARS
     for k, s in enumerate(SITES):

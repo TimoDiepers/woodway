@@ -38,6 +38,14 @@ _FILES = {
 
 CITATION = "Grenzen: Natural Earth 1:110m (public domain)"
 
+# How the world maps are drawn: equidistant cylindrical with standard parallels at 37.5 deg (Gall's choice), i.e.
+# lon/lat with east-west shrunk by cos 37.5 deg. Plain lon/lat stretches the mid and high latitudes and makes the
+# map 26 % wider than it needs to be; this one keeps the height and gives the room back to what stands beside it.
+# Used for maps beside a chart and small crops; the full-width maps stay plain lon/lat (they fill the slide's
+# width better). Set as an axes aspect (latitude degrees drawn 1/cos 37.5 deg as long as longitude degrees).
+MAP_PARALLEL = 37.5
+MAP_ASPECT = float(1.0 / np.cos(np.deg2rad(MAP_PARALLEL)))
+
 _COLOR_COAST = "#333333"
 _COLOR_COUNTRY = "#666666"
 

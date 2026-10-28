@@ -1064,8 +1064,8 @@ def stock_panel_figure(out_path: str) -> str:
     _setup()
     # sized to its box on the slide (520 x 581 px) at the scale of the other model charts (~0.675 px per figure px),
     # so lines and type match them
-    fig, ax = plt.subplots(figsize=(3.45, 5.4), dpi=FIG_DPI)   # beside the 1010 px map
-    fig.subplots_adjust(left=0.18, right=0.97, bottom=0.07, top=0.98)
+    fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
+    fig.subplots_adjust(left=0.141, right=0.977, bottom=0.07, top=0.98)
     _clean_axes(ax)
     ax.set_xlim(YEARS[0], YEARS[-1])
     ax.set_xticks([T_START, 2060, 2100])
@@ -1460,12 +1460,15 @@ def forest_type_map_figure(out_path: str) -> str:
         rgba[sel, :3] = base + (rgb - base) * (0.12 + 0.88 * share[sel, None])
         rgba[sel, 3] = 1.0
 
-    # the left 1010 px of the slide, the three sites' curves beside it; legend in two rows underneath. The rows
+    # the left 905 px of the slide, the three sites' curves beside it; legend in two rows underneath. The rows
     # without reforestable land cut off (56 S to 80 N), so the map is as large as the column allows
-    fig, ax = plt.subplots(figsize=(8.7, 4.25), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.005, right=0.995, bottom=0.92 / 4.25, top=0.995)
+    from nbs.vergleich_figures import SIDE_MAP_SIZE, side_map_axes
+    fig = plt.figure(figsize=SIDE_MAP_SIZE, dpi=FIG_DPI)   # the same size and layout as the albedo map (nbs.vergleich_figures)
+    ax, _ = side_map_axes(fig, MAP_LATS)
     ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
     _map_axes(ax)
+    from nbs.borders import MAP_ASPECT
+    ax.set_aspect(MAP_ASPECT, adjustable="box")   # beside the curves: the narrower projection (nbs.borders)
     ax.set_ylim(*MAP_LATS)
     from nbs import map_fields as M
     from nbs.vergleich_figures import map_site_value, world_site_labels
@@ -1475,10 +1478,10 @@ def forest_type_map_figure(out_path: str) -> str:
     areas = {t: float(w[typ == t].sum() / 1e13) for t in TYPES}
     order = sorted(TYPES, key=lambda t: -areas[t])
     handles = [Patch(facecolor=TYPE_COLORS[t], label=f"{TYPE_NAMES[t]}\n{de_gha(areas[t])}") for t in order]
-    handles.append(Patch(facecolor=_COLOR_LAND, label="nicht wiederbewaldbar\n(Wald, Acker, Stadt, Savanne, …)"))
+    handles.append(Patch(facecolor=_COLOR_LAND, label="nicht wiederbewaldbar\n(Wald, Acker, Stadt, …)"))
     ax.text(0.995, 0.03, "Kräftige Farbe: ≥ 30 % der Fläche wiederbewaldbar", transform=ax.transAxes, ha="right",
             fontsize=10, color=C_INK_MUTED)
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=3, frameon=False,
+    fig.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.005, 0.0), ncol=3, frameon=False,
                fontsize=11, columnspacing=1.6, handlelength=1.3, handletextpad=0.5)
     return _save(fig, out_path)
 

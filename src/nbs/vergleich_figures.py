@@ -942,8 +942,22 @@ def de_num(v: float, nd: int = 0) -> str:
     return f"{v:.{nd}f}".replace(".", ",").replace("-", "−")
 
 
+# a world map beside a curve panel (slides "Wachstumskurven", "Netto-Energieänderung"): the same size and layout on
+# both, as large as the shorter slot allows (905 x 573 px); the map at full width, its key in the strip underneath
+SIDE_MAP_SIZE = (6.9, 6.9 * 573 / 905)
+
+
+def side_map_axes(fig, lats):
+    """The map axes of a side map: full width, the projected height, at the top; returns (ax, strip height in inches)."""
+    from nbs.borders import MAP_ASPECT
+    w, h = SIDE_MAP_SIZE
+    mh = w * (lats[1] - lats[0]) / 360 * MAP_ASPECT
+    ax = fig.add_axes([0, 1 - mh / h, 1, mh / h])
+    return ax, h - mh
+
+
 def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_label: str, site_text,
-                        site_label=None, width: float = 12.0, lats=None) -> str:
+                        site_label=None, width: float = 12.0, lats=None, fit: bool = False) -> str:
     """Layout of a world hex map: the map at full width, colour bar and legend in a strip underneath (a patch for
     the grey land, and one for every other labelled grey layer); the three sites with *site_text(value)* of their
     cell, or *site_label(site)* where a site's text is not the map cell's value.
@@ -963,25 +977,39 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     # a map beside a chart) gets a deeper strip, its colour bar on the left and the grey patches beside it
     narrow = width < 10
     span = (lats[1] - lats[0]) if lats else 144
-    strip = 0.95 if narrow else 0.6
-    height = width * span / 360 + strip
-    fig, ax = plt.subplots(figsize=(width, height), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.0, right=1.0, bottom=strip / height, top=1.0)
+    strip = 1.25 if narrow else 0.6   # narrow: colour bar with its title, the grey key in a row under it
+    # the map rows: plain lon/lat at this width, or, *fit* (a map beside a chart), the narrower projection's height
+    from nbs.borders import MAP_ASPECT
+    if fit:   # beside a chart: the shared side-map layout
+        width, height = SIDE_MAP_SIZE
+        fig = plt.figure(figsize=SIDE_MAP_SIZE, dpi=FIG_DPI)
+        ax, strip = side_map_axes(fig, lats)
+    else:
+        height = width * span / 360 + strip
+        fig, ax = plt.subplots(figsize=(width, height), dpi=FIG_DPI)
+        fig.subplots_adjust(left=0.0, right=1.0, bottom=strip / height, top=1.0)
     im = ax.imshow(np.ma.masked_invalid(grid), extent=(-180, 180, -90, 90), origin="upper", cmap=M.scale_cmap(sc),
                    norm=M.scale_norm(sc), interpolation="nearest")
     _map_axes(ax)
+    if fit:   # beside a chart: the narrower projection (nbs.borders.MAP_ASPECT); a full-width map stays plain lon/lat
+        ax.set_aspect(MAP_ASPECT, adjustable="box")
     if lats:
         ax.set_ylim(*lats)
     world_site_labels(ax, site_label or (lambda s: None if (v := map_site_value(data, s)) is None else site_text(v)), fairbanks_up=not lats)
-    cax = fig.add_axes([0.05, 0.1 / height, 0.5, 0.11 / height] if narrow else [0.3, 0.03, 0.36, 0.02])
+    cax = fig.add_axes([0.015, 0.58 / height, 0.5, 0.1 / height] if narrow else [0.3, 0.03, 0.36, 0.02])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
-    cb.set_label(cbar_label, fontsize=11)
-    cb.ax.xaxis.set_label_position("top")
+    if narrow:   # its title left-aligned over the bar, running on to the right: a narrow strip has no room to centre it
+        cb.ax.set_title(cbar_label, fontsize=11, loc="left", pad=4)
+    else:
+        cb.set_label(cbar_label, fontsize=11)
+        cb.ax.xaxis.set_label_position("top")
     cb.outline.set_visible(False)
     grey = [Patch(facecolor=L["color"], label=L["label"]) for L in data["panels"][0]["layers"]
             if L["kind"] == "mask" and L.get("label") and L["label"] != legend_label]
-    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left", bbox_to_anchor=(0.62, 0.0) if narrow else (0.69, -0.005),
-               frameon=False, fontsize=11)
+    # the grey layers' key: in the strip beside the colour bar, or, narrow, in one row under it
+    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left",
+               bbox_to_anchor=(0.005, 0.0) if narrow else (0.69, -0.005), ncol=2 if narrow else 1, frameon=False, fontsize=11,
+               handlelength=1.3, handletextpad=0.5, columnspacing=1.6)
     return _save(fig, out_path)
 
 

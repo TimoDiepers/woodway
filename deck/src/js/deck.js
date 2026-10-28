@@ -2893,7 +2893,7 @@ class Deck {
     const at = (ms, fn) => setTimeout(fn, ms);
     at(last - 110, () => { s.classList.add('arrive'); this.go(this.i + 1, 0); s.classList.remove('primed'); this.primed = null; });
     at(last, () => {
-      if (on) { on.style.width = '44px'; on.classList.add('grow'); }
+      if (on) { on.style.width = '40px'; on.classList.add('grow'); }
       path.classList.remove('landing'); layer.remove();
       requestAnimationFrame(() => {
         if (on) { on.style.width = `${on.scrollWidth}px`; on.classList.remove('grow'); }

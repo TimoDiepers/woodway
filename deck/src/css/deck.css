@@ -147,21 +147,20 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
 .path .pc:hover, .path .pc:focus-visible { opacity: 1; }
 .path .pc:focus-visible { outline: 2px solid var(--ch); outline-offset: 2px; }
 .path .pc svg { width: 40px; height: 40px; flex: none; }
-.path .pc.on { position: relative; isolation: isolate; opacity: 1; color: var(--paper); padding: 2px 18px 2px 2px; cursor: default; }
+/* the current chapter: its disc at the pill's left end, flush, the pill in the disc's own colour, so the disc runs
+   on into the name; no ring */
+.path .pc.on { position: relative; isolation: isolate; opacity: 1; color: var(--paper); height: 40px; padding: 0 17px 0 0; cursor: default; }
 /* the current chapter's pill: drawn behind, so it can unfold out of its disc (.landing, Deck.flyHome) */
-.path .pc.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 22px; background: var(--ch);
+.path .pc.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 20px; background: var(--ch);
   clip-path: inset(0 0 0 0 round 22px); }
-.path .pc.on svg { border-radius: 50%; box-shadow: 0 0 0 2px var(--paper); }
 .path .pc b { font: 600 20px/1 var(--sans); }
 .slide.dark .path .pc.on { color: var(--night); }
 .slide.dark .path .pc.on::before { background: var(--ch-soft); }
-.slide.dark .path .pc.on svg { box-shadow: 0 0 0 2px var(--night); }
 /* on a chapter opener: top left, above the title, light on the chapter's colour */
 .slide.chapter > .path { position: absolute; left: 120px; top: 108px; padding: 0; }
 .slide.chapter > .path .pc { opacity: .8; }
 .slide.chapter > .path .pc.on { opacity: 1; color: var(--ch); }
 .slide.chapter > .path .pc.on::before { background: var(--paper); }
-.slide.chapter > .path .pc.on svg { box-shadow: none; }
 
 /* ground line: every content slide stands on a thin strip of its chapter colour */
 /* the ground line sits at the bottom of the screen, not of the 16:9 box (see Deck.stage) */
@@ -1833,7 +1832,7 @@ html.notips .ectip { display: none !important; }
 .path .pc.on { overflow: hidden; white-space: nowrap; transition: width .5s cubic-bezier(.3, 0, .15, 1); }
 .path .pc.on b { transition: opacity .3s var(--ease) .16s; }
 .path.landing .pc svg { opacity: 0; }
-.path.landing .pc.on { width: 44px; transition: none; }
+.path.landing .pc.on { width: 40px; transition: none; }
 :is(.path.landing, .path .pc.grow) .pc.on b, .path .pc.on.grow b { opacity: 0; transition: none; }
 @media (prefers-reduced-motion: reduce) {
   .slide.active .ovl.shown :is(.ovb, .ovh, .ovf > *, .ovtrail .st) { animation: fadein .3s both; }
@@ -2057,32 +2056,17 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .nebenbei .vgic { width: 30px; height: 30px; flex: none; stroke: none; }   /* drawn flat, as the scenes */
 
 /* "Gemeinsame Währung": the energy balance in words beside the drawing, in the colours of its three flows */
-.bilanz { margin-top: 64px; padding: 16px 22px 18px; border-radius: 12px; background: var(--paper-deep); font: 400 21px/1.4 var(--sans); color: var(--ink-2); }
-.slide:has(.f-alb.shown) .bilanz { display: none; }   /* once the forcing is split up, its first formula takes the column */
-.bilanz .bl-k { margin: 0 0 6px; font: 600 18px/1.2 var(--sans); color: var(--muted); }
-.bilanz .bl-eq { margin: 0; font-size: 21px; color: var(--ink); white-space: nowrap; }
-.bilanz .bl-eq b { font-weight: 600; }
-.bilanz .bl-sun { color: var(--s-qin); font-weight: 600; } .bilanz .bl-ray { color: var(--ray); font-weight: 600; } .bilanz .bl-lw { color: #b2182b; font-weight: 600; }
-.bilanz .bl-then { margin: 4px 0 0; }
-.bilanz .bl-phi { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--paper-line); }
-.bilanz .bl-then { font-size: 19px; color: var(--ink-2); }
-.bilanz .bl-phi .mphi { color: var(--s-phi, #6a3d9a); font-weight: 600; }
-
-
 /* a world map beside a curve panel (growth, absorbed light): the map as wide as the curves allow */
-.split.sketch.mapwide { grid-template-columns: 1010px minmax(0, 1fr); gap: 30px; }
-/* the forcing as the change of the two flows out, each term named by its part of the forcing underneath */
-.bilanz .bl-term { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; }
-.bilanz .bl-as { margin-top: 2px; font: italic 600 19px/1 var(--serif); }
-.bilanz .bl-as.al { color: var(--s-phia, #c2410c); } .bilanz .bl-as.co { color: var(--s-phic, #2e7d4f); }
-.bilanz .bl-as sub { font-style: normal; font-size: .7em; }
-.bilanz:not(:has(.shown)) { visibility: hidden; }   /* the box comes with its first line */
-
-.bilanz { padding: 22px 28px 24px; }
-.bilanz .bl-k { font-size: 20px; }
-.bilanz .bl-f { margin: 6px 0 0; font-size: 30px; line-height: 1.2; }
-.bilanz .bl-d { margin: 10px 0 0; font: 400 20px/1.3 var(--sans); color: var(--ink-2); }
-.bilanz .bl-phi { margin-top: 18px; padding-top: 16px; }
+.split.sketch.mapwide { grid-template-columns: 905px minmax(0, 1fr); gap: 30px; }
+/* the energy balance in the right column: formulas on the paper, like every other right column (no card); labels as
+   the legends', formulas the size of the forcing formula that takes the column after it */
+.bilanz { margin-top: 146px; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }   /* its first formula where the forcing formula comes after it */
+.slide:has(.f-alb.shown) .bilanz { display: none; }   /* once the forcing is split up, its first formula takes the column */
+.bilanz:not(:has(.shown)) { visibility: hidden; }
+.bilanz .bl-k { margin: 0; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
+.bilanz .bl-f { margin: 4px 0 0; font-size: 28px; line-height: 1.25; color: var(--ink); }
+.bilanz .bl-d { margin: 8px 0 0; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
+.bilanz .bl-phi { margin-top: 34px; }
 
 /* "Strahlungsantrieb von CO₂": the general heat wave steps back once the two columns tell it (today, more CO₂);
    only the newest column moves, the first stays for the comparison */
