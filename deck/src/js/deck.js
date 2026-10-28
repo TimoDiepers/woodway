@@ -2617,7 +2617,7 @@ class Deck {
     if (this.mainEnd < 0) this.mainEnd = this.slides.length;
     this.decorate();
     this.fit(); addEventListener('resize', () => this.fit());
-    if (window.visualViewport) visualViewport.addEventListener('resize', () => this.fit());   // mobile toolbars coming and going
+    if (window.visualViewport) visualViewport.addEventListener('resize', () => this.fit());   // mobile toolbars, the phone's pinch zoom
     addEventListener('message', e => this.onMessage(e));
     if (!this.embed) { this.bind(); this.menu = new SlideMenu(this); }
     const h = parseInt(location.hash.slice(1), 10);
@@ -2746,9 +2746,12 @@ class Deck {
     document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
   }
   fit() {
-    // the visible viewport where there is one (mobile toolbars), the window otherwise
-    const W = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.width : innerWidth;
-    const H = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.height : innerHeight;
+    // the visible viewport where there is one (mobile toolbars), the window otherwise; never while the phone is
+    // pinch-zoomed in: iOS then reports the zoomed-in part as the window, and fitting the deck to it would undo the zoom
+    this.zoomState();
+    if (pinchZoomed() && this.k) return;
+    const W = window.visualViewport ? visualViewport.width : innerWidth;
+    const H = window.visualViewport ? visualViewport.height : innerHeight;
     const k = Math.min(W / 1600, H / 900);
     this.k = k; this.W = W; this.H = H;
     this.place();
@@ -2761,7 +2764,11 @@ class Deck {
     const cx = Math.max(0, (w - this.W) / 2), cy = Math.max(0, (h - this.H) / 2);
     this.tx = Math.max(-cx, Math.min(cx, this.tx || 0)); this.ty = Math.max(-cy, Math.min(cy, this.ty || 0));
     this.deck.style.transform = `translate(${this.tx}px, ${this.ty}px) translate(-50%, -50%) scale(${this.k * z})`;
-    document.documentElement.classList.toggle('zoomed', z > 1.001);
+    this.zoomState();
+  }
+  zoomState() {
+    // zoomed in, by the deck (laptop) or by the phone's own pinch: the charts let the pointer and fingers through
+    document.documentElement.classList.toggle('zoomed', (this.z || 1) > 1.001 || pinchZoomed());
   }
   zoomAt(f, x = this.W / 2, y = this.H / 2) {
     // zoom by f around the screen point (x, y): that point of the slide stays under it. Pinch on a trackpad,
@@ -2981,10 +2988,13 @@ class Deck {
       const now = Date.now(); if (now < lock || Math.abs(e.deltaY) < 12) return;
       lock = now + 650; e.deltaY > 0 ? this.next() : this.prev();
     }, { passive: false });
-    // Safari's own pinch (gesture events): the same zoom
-    let g0 = 1;
-    addEventListener('gesturestart', e => { e.preventDefault(); g0 = 1; });
-    addEventListener('gesturechange', e => { e.preventDefault(); this.zoomAt(e.scale / g0, e.clientX, e.clientY); g0 = e.scale; });
+    // Safari's trackpad pinch (gesture events): the same zoom; only without a touch screen (on an iPhone or iPad the
+    // pinch stays the browser's own)
+    if (!navigator.maxTouchPoints) {
+      let g0 = 1;
+      addEventListener('gesturestart', e => { e.preventDefault(); g0 = 1; });
+      addEventListener('gesturechange', e => { e.preventDefault(); this.zoomAt(e.scale / g0, e.clientX, e.clientY); g0 = e.scale; });
+    }
     // zoomed in: drag with the mouse to move the slide
     let drag = null;
     addEventListener('pointerdown', e => {
@@ -3004,19 +3014,13 @@ class Deck {
     // touch: swipe, or tap the left third to go back and anywhere else to go on; what has its own touch keeps it
     // (a chart scrubs its tooltip, links, buttons, the chapter marks, the map player, the embedded Woodway)
     const own = 'a, button, input, select, textarea, iframe, label, .path, .player, #menu, #menu-fab, .drawer, #rotate';
-    let t0 = 0, n0 = 0, pinch = null, hold = null, lastTap = 0;
-    const zoomed = () => (this.z || 1) > 1.001;
-    const two = t => ({ d: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY),
-                        x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
+    // Zoom on a touch screen is the browser's own pinch zoom (smooth, and always reversible); the deck keeps out of it:
+    // two fingers are never a swipe or a tap, and while zoomed in one finger moves the view, so nothing navigates
+    let t0 = 0, multi = false;
     addEventListener('touchstart', e => {
-      n0 = e.touches.length;
       if (this.menu && this.menu.isOpen) { x0 = null; return; }
-      // two fingers: the deck's own pinch zoom (the slide, not the page), whatever is under them
-      if (n0 === 2) { pinch = two(e.touches); hold = null; x0 = null; document.documentElement.classList.add('pinching'); hideTips(); return; }
-      if (n0 > 2) { x0 = null; return; }
-      if (e.target.closest && e.target.closest(own)) { x0 = null; return; }   // a control
-      // zoomed in: one finger moves the slide; a double tap zooms back out
-      if (zoomed()) { hold = [e.touches[0].clientX, e.touches[0].clientY, Date.now()]; x0 = null; return; }
+      if (e.touches.length > 1) { multi = true; x0 = null; document.documentElement.classList.add('pinching'); hideTips(); return; }
+      if (pinchZoomed() || (e.target.closest && e.target.closest(own))) { x0 = null; return; }   // zoomed in, or a control
       const host = e.target.closest && e.target.closest('.chart');
       if (host && !document.documentElement.classList.contains('notips')) {   // inside a chart: scrub its tooltip, no swipe; the other charts close theirs
         for (const h of this.slides[this.i].querySelectorAll('.chart')) if (h !== host && h._chart && h._chart.chart) h._chart.chart.dispatchAction({ type: 'hideTip' });
@@ -3024,40 +3028,26 @@ class Deck {
       }
       hideTips(); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
     }, { passive: true });
-    addEventListener('touchmove', e => {
-      if (pinch && e.touches.length === 2) {
-        e.preventDefault();
-        const q = two(e.touches);
-        if (pinch.d > 0) this.zoomAt(q.d / pinch.d, q.x, q.y);
-        this.pan(q.x - pinch.x, q.y - pinch.y); pinch = q; hideTips();
-      } else if (hold && e.touches.length === 1) {
-        e.preventDefault();
-        const t = e.touches[0]; this.pan(t.clientX - hold[0], t.clientY - hold[1]); hold = [t.clientX, t.clientY, hold[2], true];
-      }
-    }, { passive: false });
+    // a pinch is the browser's: the charts under the fingers do not see it (no tooltip scrubbing while zooming)
+    addEventListener('touchmove', e => { if (e.touches.length > 1) e.stopPropagation(); }, { passive: true, capture: true });
     addEventListener('touchend', e => {
-      if (pinch) {
-        if (e.touches.length < 2) { pinch = null; hideTips(); setTimeout(() => { document.documentElement.classList.remove('pinching'); hideTips(); }, 120); }
+      if (multi) {
+        if (!e.touches.length) { multi = false; setTimeout(() => { document.documentElement.classList.remove('pinching'); hideTips(); this.zoomState(); }, 150); }
         x0 = null; return;
       }
-      if (hold) {
-        if (!hold[3] && Date.now() - hold[2] < 300) {   // a tap while zoomed: two of them zoom back out
-          if (Date.now() - lastTap < 350) { this.zoomReset(); lastTap = 0; } else lastTap = Date.now();
-        }
-        hold = null; return;
-      }
-      if (x0 === null || e.touches.length || n0 > 1 || zoomed() || (visualViewport && visualViewport.scale > 1.05)) { x0 = null; return; }
+      if (x0 === null || e.touches.length || pinchZoomed()) { x0 = null; return; }
       const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
       if (Math.max(Math.abs(dx), Math.abs(dy)) > 50) (Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? this.next() : this.prev();
-      else if (Math.hypot(dx, dy) < 12 && Date.now() - t0 < 450) {
-        const back = x0 < innerWidth / 3;
-        back ? this.prev() : this.next();
-      }
+      else if (Math.hypot(dx, dy) < 12 && Date.now() - t0 < 450) (x0 < innerWidth / 3) ? this.prev() : this.next();
       x0 = null;
     }, { passive: true });
+    addEventListener('touchcancel', () => { x0 = null; multi = false; document.documentElement.classList.remove('pinching'); }, { passive: true });
     addEventListener('hashchange', () => { const h = parseInt(location.hash.slice(1), 10); if (h - 1 !== this.i) this.go(h - 1, 0); });
   }
 }
+
+// the browser's own pinch zoom (phones, tablets) is in: the visible part is smaller than the page
+function pinchZoomed() { return !!window.visualViewport && visualViewport.scale > 1.01; }
 
 addEventListener('DOMContentLoaded', () => {
   if (location.search.includes('presenter')) return new Presenter();

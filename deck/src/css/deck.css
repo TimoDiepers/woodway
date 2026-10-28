@@ -1930,8 +1930,7 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 .slide.active .trees-do [data-step="3"].shown .td-late { animation: fadein .7s var(--ease) 4s both; }
 
 /* C: no mouse pointer anywhere on the page, for a presentation with a laser pointer */
-.viewport { touch-action: none; }   /* pinch and pan on the slides are the deck's own (Deck.zoomAt), not the page's */
-html.zoomed .viewport { cursor: grab; }
+@media (pointer: fine) { html.zoomed .viewport { cursor: grab; } }   /* the laptop zoom (Deck.zoomAt): drag to move */
 html:is(.zoomed, .pinching) [_echarts_instance_] { pointer-events: none; }
 html:is(.zoomed, .pinching) .ectip { display: none !important; }   /* zoomed in, the fingers move the slide, the charts stay still */   /* the deck's own zoom (Deck.zoomAt): drag to move */
 html.nocursor, html.nocursor * { cursor: none !important; }
