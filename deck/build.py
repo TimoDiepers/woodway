@@ -56,8 +56,18 @@ def dacfilm_js() -> None:
 
 def assemble() -> str:
     page = (SRC / "index.html").read_text(encoding="utf-8")
-    page = re.sub(r"<!-- include (\S+) -->\n?",
-                  lambda m: (SRC / m.group(1)).read_text(encoding="utf-8"), page)
+    def include(m):
+        text = (SRC / m.group(1)).read_text(encoding="utf-8")
+        if m.group(1).startswith("slides/"):   # each slide tagged with its source (file and section number), its
+            from edit_targets import sections, tag   # editable texts numbered: for the editor of deck/serve.py
+            parts = [text[:sections(text)[0][0]] if sections(text) else text]
+            for k, (a, b) in enumerate(sections(text)):
+                sec = tag(text[a:b]); i = sec.index(">")   # at the end of the start tag: class stays first
+                parts.append(sec[:i] + f' data-src="{m.group(1)}:{k}"' + sec[i:])
+            text = "".join(parts)
+        return text
+
+    page = re.sub(r"<!-- include (\S+) -->\n?", include, page)
     values = data()
     page = re.sub(r"@@(\w+)@@", lambda m: values[m.group(1)], page)
     return page

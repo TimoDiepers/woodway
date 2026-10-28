@@ -64,8 +64,8 @@ The DAC life-cycle inputs (`data/dac/lca_vintages*.json`) come from premise data
 The talk is one HTML page, live at https://woodway.tidi.dev/slides/. Its sources are in `deck/src`, and one build puts it together:
 
 ```bash
-uv run python deck/build.py      # -> deck/dist/index.html (plus data/ and vendor/)
-cd deck/dist && python3 -m http.server 8765
+uv run python deck/serve.py      # builds, then serves it at http://localhost:8765 with editing (see below)
+uv run python deck/build.py      # only the build: deck/dist/index.html (plus data/ and vendor/)
 ```
 
 ```
@@ -81,7 +81,31 @@ deck/
   assets/data/        figure data: ec_charts.js, maps.js, cmip7.js
   assets/vendor/      ECharts, KaTeX, fonts (everything runs offline)
   export_charts.py    model figures -> assets/data (via mpl_to_echarts.py)
+  serve.py            local server: the built deck plus the save endpoint of the in-page editor
+  edit_targets.py     which texts and formulas are editable, and where they are in the sources
 ```
+
+### Editing in the page (local only)
+
+Run the deck with `uv run python deck/serve.py` and open http://localhost:8765. Then:
+
+- **E** switches edit mode on and off. Editable texts get a dashed frame: titles, paragraphs, list items, the words in
+  the boxes and chips. Click one and type.
+- **Formulas** (dotted purple frame) and **labels in the drawings**: a click opens a small window with their code
+  (TeX, or the SVG text with its `tspan`s). What you type shows at once; a TeX error is shown in the window instead.
+- **Notes**: open them with **N**; in edit mode they are editable too.
+- **Saving is automatic**, 0.7 s after you stop typing: straight into `deck/src/slides/*.html`, followed by a rebuild.
+  The badge at the top says *gespeichert*, *speichert …* or why something was not saved.
+- **⌘Z** undoes as usual; the undone state is saved the same way. **Esc** leaves a text (the arrows turn pages again)
+  or closes the code window.
+- The changes are ordinary source edits: review them with `git diff deck/src`, commit and push as usual.
+
+Not editable in the page, on purpose: text in charts and maps, and text that holds elements of its own (a highlighted
+term, a click step); edit those in `deck/src/slides`. Before it writes, the server checks that the source still reads
+what the page showed; if not, nothing is overwritten and the badge says so.
+
+Only `serve.py` has the save endpoint, and it listens on 127.0.0.1 only. The hosted deck is static files: no endpoint,
+so no edit mode there. The page looks for the endpoint only on localhost.
 
 To change slide text or layout, edit `deck/src` and rebuild. If the model changes, refresh the data first and then rebuild:
 
@@ -95,7 +119,7 @@ To change slide text or layout, edit `deck/src` and rebuild. If the model change
 
 Slide texts are typed in `deck/src/slides`, so check them against `fakten.json` after a model change. `tests/test_slide_numbers.py` recomputes the headline numbers.
 
-Keys in the deck: ← → to move, P for the presenter view, N for notes, R to replay the animation, M for the slide menu, B for the backup, F for fullscreen, and a number followed by Enter to jump to that slide. Pushes to `main` that touch `deck/` build and deploy it to GitHub Pages (`.github/workflows/pages.yml`).
+Keys in the deck: ← → to move, P for the presenter view, N for notes, R to replay the animation, M for the slide menu, B for the backup, F for fullscreen, H for the charts' hover effects, I to show the keys again, E for edit mode (with `serve.py`), and a number followed by Enter to jump to that slide. On a touch screen: tap the left third to go back, anywhere else to go on, or swipe; pinch to zoom; the slide menu (button bottom right) has the actions the keys have. Pushes to `main` that touch `deck/` build and deploy it to GitHub Pages (`.github/workflows/pages.yml`).
 
 ## Tests
 

@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#3b3024",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.001Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#5f7f48",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.074Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#6f8f55",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.144Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#7f9c64",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.221Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#fff",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.301Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "files": [
+          "deck/src/slides/03_klima.html"
+        ],
+        "createdAt": "2026-10-28T15:30:38.373Z",
+        "reason": "Claude: tree illustration palette (trunk, leaf greens, highlight/shade via color-mix) shared by every tree drawing in the deck; pre-existing, intentional"
+      }
+    ]
+  }
+}

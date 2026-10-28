@@ -226,6 +226,8 @@ strong { font-weight: 600; }
 .center { align-items: center; }
 .fill { flex: 1; min-height: 0; }
 .stack { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* numbered anchors beside a drawing: one breath apart */
+.stack > :has(> .nstep) + :has(> .nstep) { margin-top: 14px; }
 .body.middle { justify-content: center; }
 /* card: a panel on the slide. .solid = filled in its colour (--c, default the chapter's), light text;
    .line = an outline only. Padding and corners are the card's; a slide only sets size and placement */
@@ -461,7 +463,40 @@ table.tbl-lg td { font-size: 26px; padding: 20px 18px; }
   scrollbar-color: #56625a #1f2823;
 }
 .drawer.open { transform: none; }
-.drawer h5 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin-bottom: 12px; }
+.drawer h5 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; }
+.drawer .dr-head { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; min-height: 26px; }
+/* the notes editor (Deck.notesEditor): only where deck/serve.py runs */
+.drawer .dr-edit { display: flex; align-items: center; gap: 8px; }
+.drawer .dr-edit[hidden], .drawer .dr-edit [hidden] { display: none; }
+.drawer .dr-edit button { padding: 4px 12px; border: 1px solid #3c4a42; border-radius: 999px; background: none; color: #cfd6cf;
+  font: 500 13px/1.2 var(--sans); cursor: pointer; }
+.drawer .dr-edit button:hover { background: #2c3832; }
+.drawer .dr-edit [data-ed="save"] { background: #e8e3d6; border-color: #e8e3d6; color: #1f2823; }
+.drawer .dr-msg { font: italic 400 13px/1.2 var(--sans); color: #e9b48a; }
+.drawer .dr-msg.bad { color: #ff9f8a; }
+/* edit mode (Deck.edit, only with deck/serve.py): what can be edited shows a dashed frame; the one being typed in, a solid one */
+html.editmode .drawer { max-height: 50vh; }
+html.editmode .drawer .ned { outline: 1px dashed #56625a; outline-offset: 8px; border-radius: 4px; caret-color: #e8e3d6; }
+html.editmode .drawer .ned:focus { outline: 1.5px solid #9fb294; }
+html.editmode .slide.active svg [data-e] { cursor: pointer; }
+html.editmode .slide.active svg [data-e]:hover { fill-opacity: .7; text-decoration: underline dotted; }
+html.editmode .slide.active [data-e]:not(svg *) { outline: 1.5px dashed color-mix(in srgb, var(--ch) 45%, transparent); outline-offset: 3px; border-radius: 3px; cursor: text; }
+html.editmode .slide.active [data-e]:hover { outline-color: var(--ch); }
+html.editmode .slide.active [data-e]:focus { outline: 2px solid var(--ch); background: color-mix(in srgb, var(--paper) 70%, transparent); }
+#edit-badge { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 61; padding: 5px 12px; border-radius: 999px;
+  background: #1f2823; color: #e8e3d6; font: 500 13px/1.2 var(--sans); pointer-events: none; }
+#edit-badge:empty { display: none; }
+html.editmode .slide.active [data-tk] { outline: 1.5px dotted color-mix(in srgb, #6a3d9a 45%, transparent); outline-offset: 2px; border-radius: 3px; cursor: pointer; }
+html.editmode .slide.active [data-tk]:hover, html.editmode .slide.active [data-tk].tex-on { outline: 2px solid #6a3d9a; }
+#texed { position: fixed; z-index: 66; width: min(560px, calc(100vw - 20px)); padding: 10px; border-radius: 10px; background: #1f2823;
+  box-shadow: 0 12px 32px -12px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 6px; }
+#texed textarea { width: 100%; min-height: 44px; resize: vertical; border: 1px solid #3c4a42; border-radius: 6px; padding: 8px 10px;
+  background: #151c19; color: #e8e3d6; font: 400 14px/1.45 "IBM Plex Mono", ui-monospace, Menlo, monospace; outline: none; }
+#texed textarea:focus { border-color: #9fb294; }
+#texed .te-msg { font: 400 12px/1.3 var(--sans); color: #9aa79f; }
+#texed.bad .te-msg { color: #ff9f8a; }
+#texed.bad textarea { border-color: #c4574a; }
+#edit-badge.bad { background: #8a2a1c; }
 .drawer p { font-size: 17px; line-height: 1.55; margin-bottom: 10px; max-width: 110ch; }
 .drawer p.q { color: #b9c7b0; font-style: italic; }
 /* top centre: the bottom edge belongs to the slide number and the source line */
@@ -825,9 +860,7 @@ svg.cc > g > g:first-of-type > text:not(:nth-of-type(1)) { opacity: 0; }
 
 /* the radiation in this drawing stands still: here the topic is the energy balance, not the radiation */
 svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
-/* temperature slide: with R the heat radiation comes forward */
-svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease); }
-.slide:has(.ts2.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; }
+/* temperature slide: with R the heat radiation comes forward, and thins and cools (rules with the thermometer, slide "Vom Strahlungsantrieb zur Temperatur") */
 
 /* one highlight for formula terms everywhere (as on slide 17): a coloured, rounded frame with an even tint.
    A layer behind the term's own box (accents like the dot over Q do not bend it); it takes no space,
@@ -2070,7 +2103,52 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 
 /* "Strahlungsantrieb von CO₂": the general heat wave steps back once the two columns tell it (today, more CO₂);
    only the newest column moves, the first stays for the comparison */
-svg.s18 .lw-base { transition: opacity .5s var(--ease); }
-.slide:has(svg.s18 [data-step="2"].shown) svg.s18 .lw-base { opacity: 0; }
-.slide:has([data-step="2"].shown):not(:has([data-step="3"].shown)) svg.s18 :is(.gh-a .flow, .gh-a .mol) { animation-play-state: running; }
-.slide:has([data-step="3"].shown) svg.s18 :is(.gh-b .flow, .gh-b .mol) { animation-play-state: running; }
+.slide:has([data-step="2"].shown):not(:has([data-step="4"].shown)) svg.s18 :is(.gh-a .flow, .gh-a .mol) { animation-play-state: running; }
+.slide:has([data-step="4"].shown) svg.s18 :is(.gh-b .flow, .gh-b .mol) { animation-play-state: running; }
+/* the heat arrow: at each CO2 a part goes back down, and what goes on is sent from higher, colder air: the whole arrow
+   above a molecule gets thinner and cools (OKLab, from its red to the cold end of the temperature bar) the moment the
+   molecule comes in, in step with the molecules' --d. Today: one molecule (2), then the others (3); less CO2 (4): the
+   three lower ones only */
+svg.s18 .seg { stroke-width: 3.5px; stroke: #b2182b; transition: stroke-width .6s var(--ease), stroke .6s var(--ease); }
+.slide:has(svg.s18 [data-step="2"].shown) svg.s18 .hw :is(.s1, .s2, .s3, .s4, .s5) { stroke-width: 3.0px; stroke: #a63f47; transition-delay: .4s; }
+@keyframes hw2 { 0% { stroke-width: 3.0px; stroke: #a63f47; } 18.7% { stroke-width: 3.0px; stroke: #a63f47; } 40.6% { stroke-width: 2.5px; stroke: #985660; } 100% { stroke-width: 2.5px; stroke: #985660; } }
+.slide.active:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s2 { animation: hw2 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s2 { stroke-width: 2.5px; stroke: #985660; }
+@keyframes hw3 { 0% { stroke-width: 3.0px; stroke: #a63f47; } 18.7% { stroke-width: 3.0px; stroke: #a63f47; } 40.6% { stroke-width: 2.5px; stroke: #985660; } 35.0% { stroke-width: 2.5px; stroke: #985660; } 56.9% { stroke-width: 2.0px; stroke: #866977; } 100% { stroke-width: 2.0px; stroke: #866977; } }
+.slide.active:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s3 { animation: hw3 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s3 { stroke-width: 2.0px; stroke: #866977; }
+@keyframes hw4 { 0% { stroke-width: 3.0px; stroke: #a63f47; } 18.7% { stroke-width: 3.0px; stroke: #a63f47; } 40.6% { stroke-width: 2.5px; stroke: #985660; } 35.0% { stroke-width: 2.5px; stroke: #985660; } 56.9% { stroke-width: 2.0px; stroke: #866977; } 51.2% { stroke-width: 2.0px; stroke: #866977; } 73.1% { stroke-width: 1.5px; stroke: #70788f; } 100% { stroke-width: 1.5px; stroke: #70788f; } }
+.slide.active:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s4 { animation: hw4 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s4 { stroke-width: 1.5px; stroke: #70788f; }
+@keyframes hw5 { 0% { stroke-width: 3.0px; stroke: #a63f47; } 18.7% { stroke-width: 3.0px; stroke: #a63f47; } 40.6% { stroke-width: 2.5px; stroke: #985660; } 35.0% { stroke-width: 2.5px; stroke: #985660; } 56.9% { stroke-width: 2.0px; stroke: #866977; } 51.2% { stroke-width: 2.0px; stroke: #866977; } 73.1% { stroke-width: 1.5px; stroke: #70788f; } 67.5% { stroke-width: 1.5px; stroke: #70788f; } 89.4% { stroke-width: 1.1px; stroke: #4f86a6; } 100% { stroke-width: 1.1px; stroke: #4f86a6; } }
+.slide.active:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s5 { animation: hw5 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="3"].shown) svg.s18 .hw .s5 { stroke-width: 1.1px; stroke: #4f86a6; }
+@keyframes lw1 { 0% { stroke-width: 3.5px; stroke: #b2182b; } 25.0% { stroke-width: 3.5px; stroke: #b2182b; } 46.9% { stroke-width: 3.0px; stroke: #a63f47; } 100% { stroke-width: 3.0px; stroke: #a63f47; } }
+.slide.active:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s1 { animation: lw1 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s1 { stroke-width: 3.0px; stroke: #a63f47; }
+@keyframes lw2 { 0% { stroke-width: 3.5px; stroke: #b2182b; } 25.0% { stroke-width: 3.5px; stroke: #b2182b; } 46.9% { stroke-width: 3.0px; stroke: #a63f47; } 41.2% { stroke-width: 3.0px; stroke: #a63f47; } 63.1% { stroke-width: 2.5px; stroke: #985660; } 100% { stroke-width: 2.5px; stroke: #985660; } }
+.slide.active:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s2 { animation: lw2 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s2 { stroke-width: 2.5px; stroke: #985660; }
+@keyframes lw3 { 0% { stroke-width: 3.5px; stroke: #b2182b; } 25.0% { stroke-width: 3.5px; stroke: #b2182b; } 46.9% { stroke-width: 3.0px; stroke: #a63f47; } 41.2% { stroke-width: 3.0px; stroke: #a63f47; } 63.1% { stroke-width: 2.5px; stroke: #985660; } 57.5% { stroke-width: 2.5px; stroke: #985660; } 79.4% { stroke-width: 2.0px; stroke: #866977; } 100% { stroke-width: 2.0px; stroke: #866977; } }
+.slide.active:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s3 { animation: lw3 1.6s var(--ease) both; }
+.slide:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s3 { stroke-width: 2.0px; stroke: #866977; }
+
+/* slide "Vom Strahlungsantrieb zur Temperatur": the anchors take the column FaIR takes later; the thermometer in the
+   drawing sinks slowly with S (click 2), then slows and stops with R (click 3), its colour cooling as it goes */
+.split:has(> .ghsteps + .fflow) > :is(.ghsteps, .fflow) { grid-area: 1 / 2; }
+.split:has(> .ghsteps + .fflow) > .ghsteps { align-self: center; transition: opacity .5s var(--ease); }
+.slide:has(.fflow.shown) .ghsteps { opacity: 0; }
+svg.s21 .tp-merc { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(.88); }
+svg.s21 :is(.tp-merc, .tp-bulb) { transition: transform .6s var(--ease), fill .6s var(--ease); }
+/* S: sinks slowly and keeps sinking (as long as the click stays); R brakes it where it is (Deck: thermoBrake) */
+.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-merc { transform: scaleY(.1); transition: transform 30s linear .3s, fill 12s linear .3s; }
+.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-bulb { transition: fill 12s linear .3s; }
+.slide:has(svg.s21 .ts3.shown) svg.s21 :is(.tp-merc, .tp-bulb) { fill: #4f86a6; }
+/* the drawing: the store (land and upper ocean) cools with the thermometer; with R the heat arrow thins and cools */
+svg.s21 .tp-store { opacity: 0; transition: opacity 1.6s linear .3s; }
+.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-store { opacity: .5; }
+.slide:has(svg.s21 .ts2.shown) svg.s21 .tp-store { opacity: 1; transition-duration: 2.6s; }
+svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease), stroke 2.6s linear .3s, stroke-width 2.6s linear .3s; }
+.slide:has(.ts3.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; }
+svg.s21 .lw-root { transition: stroke 2.6s linear .3s, stroke-width 2.6s linear .3s; }
+.slide:has(.ts2.shown) svg.s21 :is(.cc > g > g:first-of-type > path.t-lw, .lw-root) { opacity: 1; stroke: #5f7f9d; stroke-width: 1.6px; }

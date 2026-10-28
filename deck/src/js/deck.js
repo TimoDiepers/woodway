@@ -114,6 +114,7 @@ function renderTex(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = [];
   while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$') && !walker.currentNode.parentElement.closest('.notes, svg')) nodes.push(walker.currentNode);
+  let tk = 0;   // each formula numbered in the slide, its source kept: the editor (Deck.texEdit, deck/serve.py) finds it again
   for (const node of nodes) {
     const parts = node.nodeValue.split(/(\$\$[\s\S]+?\$\$|\$[^$]+?\$)/g);
     if (parts.length === 1) continue;
@@ -123,6 +124,7 @@ function renderTex(root) {
       const display = part.startsWith('$$');
       if (part.startsWith('$') && part.endsWith('$') && part.length > 1) {
         const span = document.createElement('span');
+        span.dataset.tk = tk++; span.dataset.tsrc = part;
         try {
           katex.render(part.slice(display ? 2 : 1, display ? -2 : -1), span,
             { displayMode: display, macros: TEX_MACROS, throwOnError: false, strict: false, trust: ctx => ctx.command === '\\htmlData' || ctx.command === '\\htmlClass' });
@@ -163,6 +165,27 @@ function supText(root) {   // every text node outside drawings and formulas
     if (last < n.nodeValue.length) frag.append(n.nodeValue.slice(last));
     n.replaceWith(frag);
   }
+}
+/* Temperature slide: with S the thermometer sinks slowly and keeps sinking (CSS); with R it is braked where it is at that
+   moment and comes to rest a little lower, R's notch at that level. Undone when R goes again. */
+function thermoBrake(svg) {
+  const r = svg.querySelector('.ts2'), merc = svg.querySelector('.tp-merc'), bulb = svg.querySelector('.tp-bulb'), notch = svg.querySelector('.tp-notch');
+  if (!r || !merc) return;
+  const H = 154, BOTTOM = 458, NOTCH = 393;
+  new MutationObserver(() => {
+    const on = r.classList.contains('shown');
+    for (const e of [merc, bulb]) { e.style.transition = ''; e.style.transform = ''; e.style.fill = ''; }
+    if (notch) notch.style.transform = '';
+    if (!on) return;
+    const cur = new DOMMatrixReadOnly(getComputedStyle(merc).transform).d, col = getComputedStyle(merc).fill;
+    const k = Math.max(.1, Math.min(cur - .05, .7));   // a little lower than now (on a jump straight here: well cooled)
+    for (const e of [merc, bulb]) { e.style.transition = 'none'; e.style.fill = col; }
+    merc.style.transform = `scaleY(${cur})`;
+    void merc.getBoundingClientRect();
+    for (const e of [merc, bulb]) e.style.transition = 'transform 1.6s cubic-bezier(.1, .75, .25, 1), fill 1.6s cubic-bezier(.1, .75, .25, 1)';
+    merc.style.transform = `scaleY(${k})`;
+    if (notch) notch.style.transform = `translateY(${BOTTOM - H * k - NOTCH}px)`;
+  }).observe(r, { attributes: true, attributeFilter: ['class'] });
 }
 /* Holzweg slide: it opens on the summary's last picture, takeaway 3 with two phrases in gold. As each card comes in,
    its heading flies out of the matching phrase into place, growing from the phrase's size to the heading's.
@@ -2500,7 +2523,7 @@ class SlideMenu {
     return Math.max(1, Math.round((g.clientWidth + gap) / (w + gap)));
   }
   key(e) {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || e.target.isContentEditable || e.target.closest('input, textarea, select')) return;
     const k = e.key;
     if (!this.isOpen) { if (k === 'm' || k === 'M') { e.preventDefault(); e.stopImmediatePropagation(); this.open(); } return; }
     e.stopImmediatePropagation();
@@ -2625,6 +2648,7 @@ class Deck {
     this.booted = true;
     this.hint(5000);
     this.rotateHint();
+    this.notesEditor();
   }
   hint(ms) {
     // the shortcut line at the top: on arrival, and again with I, then it fades
@@ -2675,6 +2699,171 @@ class Deck {
     document.documentElement.classList.toggle('nocursor', off);
     if (this.booted) this.toast(off ? 'Mauszeiger aus' : 'Mauszeiger an');
     try { sessionStorage.setItem('dv-nocursor', off ? '1' : ''); } catch (e) { /* private mode: only for this page */ }
+  }
+  async notesEditor() {
+    // E: edit mode, when the deck is served by deck/serve.py on this computer: the notes and the texts on the slides
+    // become editable and are saved as you type, into the slide sources. The hosted deck has no such endpoint, so
+    // there is no edit mode there.
+    if (this.embed || !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;
+    try { const r = await fetch('/__notes', { cache: 'no-store' }); if (!r.ok || !(await r.json()).edit) return; } catch (e) { return; }
+    this.canEdit = true;
+    const bar = this.drawer.querySelector('.dr-edit'); bar.hidden = false;
+    bar.addEventListener('click', e => { if (e.target.closest('[data-ed="edit"]')) this.edit(!this.editing); });
+    // typing: each changed text saved shortly after the last key (Cmd+Z is the browser's own, and is saved the same way)
+    document.addEventListener('input', e => {
+      if (!this.editing) return;
+      const el = e.target.closest && e.target.closest('.slide [data-e], #drawer-body .ned');
+      if (el) this.queueSave(el);
+    }, true);
+    // Esc leaves the text (the arrows turn pages again); Enter in a slide text does not start a new block
+    document.addEventListener('keydown', e => {
+      if (!e.target.isContentEditable) return;
+      if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); }
+      else if (e.key === 'Enter' && e.target.closest('.slide [data-e]')) e.preventDefault();
+    }, true);
+    this.saveQ = Promise.resolve(); this.pending = new Map();
+    // a click on a formula opens its code
+    document.addEventListener('click', e => {
+      if (!this.editing || e.target.closest('#texed')) return;
+      const f = e.target.closest('.slide.active [data-tk]') || e.target.closest('.slide.active svg [data-e]');
+      if (f) { e.preventDefault(); e.stopPropagation(); this.texEdit(f); }
+    }, true);
+  }
+  texEdit(span) {
+    // a formula, or a drawing's label: its code in a small window beside it; typing shows it at once and saves like the texts
+    this.texClose();
+    const label = span instanceof SVGElement;
+    const src = label ? span.innerHTML : span.dataset.tsrc, disp = !label && src.startsWith('$$'), r = span.getBoundingClientRect();
+    const w = document.createElement('div'); w.id = 'texed';
+    w.innerHTML = '<textarea spellcheck="false"></textarea><span class="te-msg">Esc schließt · ⌘Z rückgängig</span>';
+    const ta = w.querySelector('textarea'); ta.value = label ? src.trim() : src.slice(disp ? 2 : 1, disp ? -2 : -1);
+    document.body.append(w);
+    const top = r.bottom + 10 + w.offsetHeight < innerHeight ? r.bottom + 10 : Math.max(10, r.top - 10 - w.offsetHeight);
+    w.style.left = `${Math.max(10, Math.min(innerWidth - w.offsetWidth - 10, r.left))}px`; w.style.top = `${top}px`;
+    ta.style.height = `${Math.min(220, ta.scrollHeight + 4)}px`;
+    ta.focus();
+    span.classList.add('tex-on');
+    let old = src, t;
+    const render = () => {
+      if (label) {   // the label as typed, saved as the text's content in the source
+        span.innerHTML = ta.value;
+        clearTimeout(t); t = setTimeout(() => {
+          if (!span.textContent.trim()) return;
+          const item = { src: span.closest('.slide').dataset.src, e: span.dataset.e, old: span._old, html: ta.value }, now = span.textContent;
+          this.editStatus('speichert …');
+          this.saveQ = this.saveQ.then(async () => {
+            try {
+              const q = await fetch('/__notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [item] }) });
+              const j = await q.json(); if (!q.ok) throw new Error(j.error || q.status);
+              span._old = now; this.editStatus('gespeichert');
+            } catch (e) { this.editStatus(`nicht gespeichert: ${e.message}`, true); }
+          });
+        }, 700);
+        return;
+      }
+      const code = ta.value, full = disp ? `$$${code}$$` : `$${code}$`, holder = document.createElement('span');
+      try { katex.render(code, holder, { displayMode: disp, macros: TEX_MACROS, throwOnError: true, strict: false, trust: c => c.command === '\\htmlData' || c.command === '\\htmlClass' }); }
+      catch (e) { w.querySelector('.te-msg').textContent = e.message.replace(/^KaTeX parse error: /, ''); w.classList.add('bad'); return; }
+      w.classList.remove('bad'); w.querySelector('.te-msg').textContent = 'Esc schließt · ⌘Z rückgängig';
+      span.replaceChildren(...holder.childNodes); span.dataset.tsrc = full;
+      for (const e of span.querySelectorAll('[data-step]')) e.classList.toggle('shown', (+e.dataset.step || 0) <= this.step);
+      clearTimeout(t); t = setTimeout(() => {
+        if (full === old) return;
+        const item = { src: span.closest('.slide').dataset.src, tk: span.dataset.tk, old, tex: full };
+        this.editStatus('speichert …');
+        this.saveQ = this.saveQ.then(async () => {
+          try {
+            const q = await fetch('/__notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [item] }) });
+            const j = await q.json(); if (!q.ok) throw new Error(j.error || q.status);
+            old = full; this.editStatus('gespeichert');
+          } catch (e) { this.editStatus(`nicht gespeichert: ${e.message}`, true); }
+        });
+      }, 700);
+    };
+    ta.addEventListener('input', render);
+    ta.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); this.texClose(); } });
+    this._texOff = e => { if (!w.contains(e.target) && !e.target.closest('[data-tk], svg [data-e]')) this.texClose(); };
+    setTimeout(() => document.addEventListener('pointerdown', this._texOff, true));
+    this._texSpan = span;
+  }
+  texClose() {
+    const w = document.getElementById('texed'); if (w) w.remove();
+    if (this._texSpan) this._texSpan.classList.remove('tex-on'); this._texSpan = null;
+    if (this._texOff) document.removeEventListener('pointerdown', this._texOff, true);
+  }
+  edit(on) {
+    if (!this.canEdit) return;
+    if (!on) this.texClose();
+    this.editing = on;
+    document.documentElement.classList.toggle('editmode', on);
+    this.drawer.querySelector('[data-ed="edit"]').textContent = on ? 'Fertig' : 'Bearbeiten';
+    if (!on) { this.flushSave(); if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur(); }
+    this.editSlide(this.slides[this.i], on);
+    if (!on) { const n = this.slides[this.i].querySelector('.notes'); this.drawerBody.innerHTML = n && n.innerHTML.trim() ? n.innerHTML : '<p class="q">Keine Notizen.</p>'; }
+    this.editStatus(on ? 'Bearbeiten: Texte und Notizen' : '');
+    this.toast(on ? 'Bearbeiten an' : 'Bearbeiten aus');
+  }
+  editSlide(s, on) {
+    // the slide's texts, and its notes in an editor of their own (kept per slide: Cmd+Z still has its history)
+    for (const el of s.querySelectorAll('[data-e]')) {
+      if (el instanceof SVGElement) { if (on && el._old === undefined) el._old = el.textContent; continue; }   // a drawing's label: its code in a window (texEdit)
+      el.contentEditable = on ? 'true' : 'false'; el.spellcheck = false;
+      if (on && el._old === undefined) el._old = el.textContent;
+    }
+    if (!on) return;
+    let box = this.drawerBody.querySelector(':scope > .neds');
+    if (!box) { this.drawerBody.innerHTML = '<div class="neds"></div>'; box = this.drawerBody.firstChild; }
+    for (const n of box.children) n.hidden = true;
+    let ed = [...box.children].find(n => n.dataset.src === s.dataset.src);
+    if (!ed) {
+      const n = s.querySelector('.notes');
+      ed = document.createElement('div'); ed.className = 'ned'; ed.dataset.src = s.dataset.src; ed.contentEditable = 'true'; ed.spellcheck = false;
+      ed.innerHTML = n && n.innerHTML.trim() ? n.innerHTML : '<p><br></p>';
+      box.append(ed);
+    }
+    ed.hidden = false;
+    document.execCommand('defaultParagraphSeparator', false, 'p');
+  }
+  clean(html) {
+    // the page's own additions taken out again: subscript digits (subDigits) back to the characters of the source
+    const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '+': '⁺', '−': '⁻' };
+    return html.replace(/<span class="subd">(\d+)<\/span>/g, (_, d) => [...d].map(c => String.fromCharCode(c.charCodeAt(0) + 0x2050)).join(''))
+      .replace(/<sup class="sx">([^<]+)<\/sup>/g, (_, d) => [...d].map(c => SUP[c] || c).join(''))   // supText's superscripts
+      .replace(/(<br>)+(?=<\/p>|$)/g, '').replace(/&nbsp;/g, ' ');
+  }
+  queueSave(el) {
+    this.pending.set(el, true); this.editStatus('ungespeichert …');
+    clearTimeout(this._saveT); this._saveT = setTimeout(() => this.flushSave(), 700);
+  }
+  flushSave() {
+    clearTimeout(this._saveT);
+    if (!this.pending || !this.pending.size) return;
+    const els = [...this.pending.keys()]; this.pending.clear();
+    const items = [], done = [];
+    for (const el of els) {
+      const html = this.clean(el.innerHTML);
+      if (el.classList.contains('ned')) { items.push({ src: el.dataset.src, html }); done.push(() => { const n = this.slides.find(x => x.dataset.src === el.dataset.src)?.querySelector('.notes'); if (n) n.innerHTML = html; }); }
+      else {
+        if (!el.textContent.trim()) continue;   // an emptied text is not saved (Cmd+Z brings it back)
+        const now = el.textContent;
+        items.push({ src: el.closest('.slide').dataset.src, e: el.dataset.e, old: el._old, html }); done.push(() => { el._old = now; });
+      }
+    }
+    if (!items.length) { this.editStatus('gespeichert'); return; }
+    this.editStatus('speichert …');
+    this.saveQ = this.saveQ.then(async () => {
+      try {
+        const r = await fetch('/__notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items }) });
+        const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+        done.forEach(f => f()); this.editStatus(this.pending.size ? 'ungespeichert …' : 'gespeichert');
+      } catch (e) { this.editStatus(`nicht gespeichert: ${e.message}`, true); }
+    });
+  }
+  editStatus(t, bad) {
+    const m = this.drawer.querySelector('.dr-msg'); m.textContent = t; m.classList.toggle('bad', !!bad);
+    let b = document.getElementById('edit-badge');
+    if (!b) { b = document.createElement('div'); b.id = 'edit-badge'; b.setAttribute('role', 'status'); document.body.appendChild(b); }
+    b.textContent = this.editing ? `Bearbeiten · ${t === 'Bearbeiten: Texte und Notizen' ? 'Text anklicken' : t}` : ''; b.classList.toggle('bad', !!bad);
   }
   notes() { this.drawer.inert = !this.drawer.classList.toggle('open'); this.toast(this.drawer.inert ? 'Notizen aus' : 'Notizen an'); }
   fullscreen() {
@@ -2817,13 +3006,15 @@ class Deck {
     if (!this.embed) history.replaceState(null, '', `#${n + 1}`);
     if (!this.embed && n !== this.said) { this.said = n; document.getElementById('sr-status').textContent = `Folie ${n + 1} von ${this.slides.length}: ${s.dataset.title || ''}`; }
     const notes = s.querySelector('.notes');
-    this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
+    if (this.editing) { if (prev && prev !== s) { this.texClose(); this.flushSave(); this.editSlide(prev, false); } this.editSlide(s, true); }   // editing goes on here
+    else this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
   }
   onward() {
     // the next slide; from the overview or a chapter's closing card its discs fly into the chapter marks of that
     // slide first (top right), the big overview becoming the small one
     if (this.flying) return;
+    clearTimeout(this._planT);   // a plan still pending from the last step must not run in the middle of the flight
     const plan = this.plan && this.plan.i === this.i ? this.plan : this.planFlight();
     if (plan) this.flyHome(plan); else this.go(this.i + 1, 0);
   }
@@ -2837,7 +3028,7 @@ class Deck {
   }
   planFlight() {
     const i = this.i, prev = this.slides[i], s = this.slides[i + 1];
-    if (!s || this.still || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    if (this.flying || !s || this.still || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
     const path = s.querySelector('.path');
     const discs = path ? [...prev.querySelectorAll('[data-fly]')].filter(e => !e.closest('[data-step]:not(.shown)')) : [];
     if (!discs.length) return null;
@@ -2959,6 +3150,7 @@ class Deck {
     try { if (sessionStorage.getItem('dv-notips')) document.documentElement.classList.add('notips'); } catch (e) { /* no storage */ }
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
     addEventListener('keydown', e => {
+      if (e.target.isContentEditable || e.target.closest('input, textarea, select')) return;   // typing in a text or field
       const k = e.key;
       if ((e.metaKey || e.ctrlKey) && !e.altKey && ['+', '=', '-', '0'].includes(k)) {   // the browser's zoom keys zoom the slide
         e.preventDefault(); k === '0' ? this.zoomReset() : this.zoomAt(k === '-' ? 1 / 1.25 : 1.25); return;
@@ -2978,6 +3170,7 @@ class Deck {
       else if (k === 'i' || k === 'I') this.hint(6000);
       else if (k === 'c' || k === 'C') this.cursor(!document.documentElement.classList.contains('nocursor'));
       else if (k === 'h' || k === 'H') this.tips(!document.documentElement.classList.contains('notips'));
+      else if ((k === 'e' || k === 'E') && this.canEdit) this.edit(!this.editing);
     });
     let lock = 0;
     addEventListener('wheel', e => {
@@ -3013,7 +3206,7 @@ class Deck {
     this.hideTips = hideTips;
     // touch: swipe, or tap the left third to go back and anywhere else to go on; what has its own touch keeps it
     // (a chart scrubs its tooltip, links, buttons, the chapter marks, the map player, the embedded Woodway)
-    const own = 'a, button, input, select, textarea, iframe, label, .path, .player, #menu, #menu-fab, .drawer, #rotate';
+    const own = 'a, button, input, select, textarea, iframe, label, .path, .player, #menu, #menu-fab, .drawer, #rotate, [contenteditable="true"]';
     // Zoom on a touch screen is the browser's own pinch zoom (smooth, and always reversible); the deck keeps out of it:
     // two fingers are never a swipe or a tap, and while zoomed in one finger moves the view, so nothing navigates
     let t0 = 0, multi = false;
@@ -3076,6 +3269,7 @@ addEventListener('DOMContentLoaded', () => {
   supText(deckEl);
   for (const s of deckEl.querySelectorAll('.slide.holzweg')) holzwegFly(s);
   for (const svg of deckEl.querySelectorAll('svg.ende-scene')) endeStage(svg);
+  for (const svg of deckEl.querySelectorAll('svg.s21')) thermoBrake(svg);
   window.deck = new Deck();
   // formulas, typeset one slide per task (the current one first): they carry click steps, so the slide counts again
   const texed = new WeakSet(), texOne = s => {
