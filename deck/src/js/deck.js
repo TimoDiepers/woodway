@@ -1586,7 +1586,7 @@ class MplChart {
         let j = 0, best = Infinity;
         d.forEach((q, n) => { if (q && isFinite(q[0]) && Math.abs(q[0] - x) < best) { best = Math.abs(q[0] - x); j = n; } });
         clearTimeout(this.snapT);   // after ECharts' own (throttled) hide of the item tooltip, not before it
-        this.snapT = setTimeout(() => c.dispatchAction({ type: 'showTip', seriesIndex: k, dataIndex: j }), 30);
+        this.snapT = setTimeout(() => { if (!document.documentElement.matches('.zoomed, .pinching')) c.dispatchAction({ type: 'showTip', seriesIndex: k, dataIndex: j }); }, 30);
         return;
       }
     };
@@ -2354,6 +2354,20 @@ class SlideMenu {
     this.fab = document.getElementById('menu-fab'); this.built = false; this.thumbs = false;
     this.fab.addEventListener('click', () => this.toggle());
     this.el.querySelector('.menu-close').addEventListener('click', () => this.close());
+    // what the keys do, for a touch screen: replay, full screen, hover effects, notes, backup
+    this.acts = this.el.querySelector('.menu-acts');
+    if (!document.documentElement.requestFullscreen) this.acts.querySelector('[data-act="full"]').remove();   // iPhone Safari
+    this.acts.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const d = this.deck, a = b.dataset.act;
+      if (a === 'replay') { this.close(); d.go(d.i, d.step); }
+      else if (a === 'full') d.fullscreen();
+      else if (a === 'hover') d.tips(!document.documentElement.classList.contains('notips'));
+      else if (a === 'notes') { this.close(); d.notes(); }
+      else if (a === 'backup') { this.close(); d.go(d.mainEnd, 0); }
+      this.state();
+    });
+    addEventListener('fullscreenchange', () => this.state());
     this.body.addEventListener('click', e => { const c = e.target.closest('.card'); if (c) this.jump(+c.dataset.i); });
     // keep the deck's wheel and swipe navigation out of the overview
     for (const t of ['wheel', 'touchstart', 'touchend']) this.el.addEventListener(t, e => e.stopPropagation(), { passive: true });
@@ -2361,6 +2375,12 @@ class SlideMenu {
     addEventListener('resize', () => { if (this.isOpen) this.scale(); });
   }
   get isOpen() { return this.el.classList.contains('open'); }
+  state() {
+    const q = a => this.acts.querySelector(`[data-act="${a}"]`), set = (a, on) => q(a) && q(a).setAttribute('aria-pressed', on);
+    set('hover', !document.documentElement.classList.contains('notips'));
+    set('notes', this.deck.drawer.classList.contains('open'));
+    set('full', !!document.fullscreenElement);
+  }
   build() {
     const d = this.deck, seen = new Set(); let html = '', grid = false;
     const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
@@ -2459,7 +2479,7 @@ class SlideMenu {
     this.loadThumbs();
     this.cards.forEach((c, i) => c.classList.toggle('cur', i === this.deck.i));
     this.back = document.activeElement;
-    this.el.classList.add('open'); this.fab.setAttribute('aria-expanded', 'true');
+    this.el.classList.add('open'); this.fab.setAttribute('aria-expanded', 'true'); this.state();
     document.querySelector('main').inert = true;
     this.scale();
     const cur = this.cards[this.deck.i];
@@ -2656,6 +2676,12 @@ class Deck {
     if (this.booted) this.toast(off ? 'Mauszeiger aus' : 'Mauszeiger an');
     try { sessionStorage.setItem('dv-nocursor', off ? '1' : ''); } catch (e) { /* private mode: only for this page */ }
   }
+  notes() { this.drawer.inert = !this.drawer.classList.toggle('open'); this.toast(this.drawer.inert ? 'Notizen aus' : 'Notizen an'); }
+  fullscreen() {
+    const on = !document.fullscreenElement;
+    on ? document.documentElement.requestFullscreen?.() : document.exitFullscreen();
+    this.toast(on ? 'Vollbild an' : 'Vollbild aus');
+  }
   tips(off) {
     // H: the charts' hover effects off (presenting with a pointer): no tooltip, no dashed line, no hover dots. Kept for the session
     document.documentElement.classList.toggle('notips', off);
@@ -2724,9 +2750,29 @@ class Deck {
     const W = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.width : innerWidth;
     const H = window.visualViewport && visualViewport.scale <= 1.01 ? visualViewport.height : innerHeight;
     const k = Math.min(W / 1600, H / 900);
-    this.deck.style.transform = `translate(-50%, -50%) scale(${k})`;
+    this.k = k; this.W = W; this.H = H;
+    this.place();
     document.documentElement.style.setProperty('--tipk', Math.min(2.6, Math.max(1, .8 / k)).toFixed(3));   // tooltips at least ~14px on screen
   }
+  place() {
+    // fitted to the window, then the deck's own zoom (z, around the deck centre shifted by tx, ty), the shift kept so
+    // the slide never leaves an empty edge
+    const z = this.z || 1, w = 1600 * this.k * z, h = 900 * this.k * z;
+    const cx = Math.max(0, (w - this.W) / 2), cy = Math.max(0, (h - this.H) / 2);
+    this.tx = Math.max(-cx, Math.min(cx, this.tx || 0)); this.ty = Math.max(-cy, Math.min(cy, this.ty || 0));
+    this.deck.style.transform = `translate(${this.tx}px, ${this.ty}px) translate(-50%, -50%) scale(${this.k * z})`;
+    document.documentElement.classList.toggle('zoomed', z > 1.001);
+  }
+  zoomAt(f, x = this.W / 2, y = this.H / 2) {
+    // zoom by f around the screen point (x, y): that point of the slide stays under it. Pinch on a trackpad,
+    // Ctrl/Cmd + wheel, Ctrl/Cmd + plus/minus; 1 to 6 times
+    const z0 = this.z || 1, z = Math.max(1, Math.min(6, z0 * f)), r = z / z0;
+    const px = x - this.W / 2, py = y - this.H / 2;
+    this.tx = px - (px - (this.tx || 0)) * r; this.ty = py - (py - (this.ty || 0)) * r;
+    this.z = z; this.place();
+  }
+  zoomReset() { if ((this.z || 1) > 1.001) { this.z = 1; this.tx = this.ty = 0; this.place(); } }
+  pan(dx, dy) { this.tx = (this.tx || 0) + dx; this.ty = (this.ty || 0) + dy; this.place(); }
   steps(s) {
     // clicks on this slide: the highest data-step, including chart panels behind their host's step
     if (s._steps === undefined) {
@@ -2754,6 +2800,7 @@ class Deck {
       // that stays) does not dip in brightness; what differs still cross-fades
       prev.classList.add('hold');
     }
+    if (n !== this.i) this.zoomReset();   // a new slide starts whole
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
@@ -2905,47 +2952,101 @@ class Deck {
     try { if (sessionStorage.getItem('dv-notips')) document.documentElement.classList.add('notips'); } catch (e) { /* no storage */ }
     const jumper = slideJumper(() => this.slides.length, n => this.slides[n].dataset.title, n => this.go(n, 0));
     addEventListener('keydown', e => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key;
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && ['+', '=', '-', '0'].includes(k)) {   // the browser's zoom keys zoom the slide
+        e.preventDefault(); k === '0' ? this.zoomReset() : this.zoomAt(k === '-' ? 1 / 1.25 : 1.25); return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (jumper(e)) { e.preventDefault(); return; }
+      if (k === 'Escape' && (this.z || 1) > 1.001) { this.zoomReset(); return; }
       if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); this.next(); }
       else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); this.prev(); }
       else if (k === 'Home') this.go(0, 0);
       else if (k === 'End') this.go(this.mainEnd - 1, 0);
       else if (k === 'b' || k === 'B') this.go(this.mainEnd, 0);
       else if (k === 'r' || k === 'R') this.go(this.i, this.step);
-      else if (k === 'n' || k === 'N') { this.drawer.inert = !this.drawer.classList.toggle('open'); this.toast(this.drawer.inert ? 'Notizen aus' : 'Notizen an'); }
+      else if (k === 'n' || k === 'N') this.notes();
       else if (k === 'p' || k === 'P') this.openPresenter();
-      else if (k === 'f' || k === 'F') { const on = !document.fullscreenElement; on ? document.documentElement.requestFullscreen?.() : document.exitFullscreen(); this.toast(on ? 'Vollbild an' : 'Vollbild aus'); }
+      else if (k === 'f' || k === 'F') this.fullscreen();
       else if (k === 'i' || k === 'I') this.hint(6000);
       else if (k === 'c' || k === 'C') this.cursor(!document.documentElement.classList.contains('nocursor'));
       else if (k === 'h' || k === 'H') this.tips(!document.documentElement.classList.contains('notips'));
     });
     let lock = 0;
     addEventListener('wheel', e => {
-      if (this.drawer.contains(e.target)) return;
+      if (this.drawer.contains(e.target) || (this.menu && this.menu.isOpen)) return;
+      // a trackpad pinch and Ctrl/Cmd + wheel arrive as a wheel with ctrlKey: zoom the slide, not the page
+      if (e.ctrlKey || e.metaKey) { e.preventDefault(); this.zoomAt(Math.exp(-e.deltaY * (e.deltaMode ? .05 : .01)), e.clientX, e.clientY); return; }
+      if ((this.z || 1) > 1.001) { e.preventDefault(); this.pan(-e.deltaX, -e.deltaY); return; }   // zoomed in: the wheel moves the slide
       const now = Date.now(); if (now < lock || Math.abs(e.deltaY) < 12) return;
       lock = now + 650; e.deltaY > 0 ? this.next() : this.prev();
-    }, { passive: true });
+    }, { passive: false });
+    // Safari's own pinch (gesture events): the same zoom
+    let g0 = 1;
+    addEventListener('gesturestart', e => { e.preventDefault(); g0 = 1; });
+    addEventListener('gesturechange', e => { e.preventDefault(); this.zoomAt(e.scale / g0, e.clientX, e.clientY); g0 = e.scale; });
+    // zoomed in: drag with the mouse to move the slide
+    let drag = null;
+    addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0 || (this.z || 1) <= 1.001 || e.target.closest('a, button, input, .drawer, #menu')) return;
+      drag = [e.clientX, e.clientY];
+    });
+    addEventListener('pointermove', e => { if (!drag) return; this.pan(e.clientX - drag[0], e.clientY - drag[1]); drag = [e.clientX, e.clientY]; });
+    addEventListener('pointerup', () => { drag = null; });
     let x0 = null, y0 = null;
-    const hideTips = () => { for (const h of this.slides[this.i].querySelectorAll('.chart')) h._chart && h._chart.chart && h._chart.chart.dispatchAction({ type: 'hideTip' }); };
+    const hideTips = () => {   // tooltip and pointer line, on every chart of the slide
+      for (const h of this.slides[this.i].querySelectorAll('.chart')) {
+        const c = h._chart && h._chart.chart; if (!c) continue;
+        c.dispatchAction({ type: 'hideTip' }); c.dispatchAction({ type: 'updateAxisPointer', currTrigger: 'leave' });
+      }
+    };
     this.hideTips = hideTips;
     // touch: swipe, or tap the left third to go back and anywhere else to go on; what has its own touch keeps it
     // (a chart scrubs its tooltip, links, buttons, the chapter marks, the map player, the embedded Woodway)
     const own = 'a, button, input, select, textarea, iframe, label, .path, .player, #menu, #menu-fab, .drawer, #rotate';
-    let t0 = 0, n0 = 0;
+    let t0 = 0, n0 = 0, pinch = null, hold = null, lastTap = 0;
+    const zoomed = () => (this.z || 1) > 1.001;
+    const two = t => ({ d: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY),
+                        x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 });
     addEventListener('touchstart', e => {
       n0 = e.touches.length;
+      if (this.menu && this.menu.isOpen) { x0 = null; return; }
+      // two fingers: the deck's own pinch zoom (the slide, not the page), whatever is under them
+      if (n0 === 2) { pinch = two(e.touches); hold = null; x0 = null; document.documentElement.classList.add('pinching'); hideTips(); return; }
+      if (n0 > 2) { x0 = null; return; }
+      if (e.target.closest && e.target.closest(own)) { x0 = null; return; }   // a control
+      // zoomed in: one finger moves the slide; a double tap zooms back out
+      if (zoomed()) { hold = [e.touches[0].clientX, e.touches[0].clientY, Date.now()]; x0 = null; return; }
       const host = e.target.closest && e.target.closest('.chart');
       if (host && !document.documentElement.classList.contains('notips')) {   // inside a chart: scrub its tooltip, no swipe; the other charts close theirs
         for (const h of this.slides[this.i].querySelectorAll('.chart')) if (h !== host && h._chart && h._chart.chart) h._chart.chart.dispatchAction({ type: 'hideTip' });
         x0 = null; return;
       }
-      if (n0 > 1 || (e.target.closest && e.target.closest(own))) { x0 = null; return; }   // pinch, or a control
       hideTips(); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
     }, { passive: true });
+    addEventListener('touchmove', e => {
+      if (pinch && e.touches.length === 2) {
+        e.preventDefault();
+        const q = two(e.touches);
+        if (pinch.d > 0) this.zoomAt(q.d / pinch.d, q.x, q.y);
+        this.pan(q.x - pinch.x, q.y - pinch.y); pinch = q; hideTips();
+      } else if (hold && e.touches.length === 1) {
+        e.preventDefault();
+        const t = e.touches[0]; this.pan(t.clientX - hold[0], t.clientY - hold[1]); hold = [t.clientX, t.clientY, hold[2], true];
+      }
+    }, { passive: false });
     addEventListener('touchend', e => {
-      if (x0 === null || e.touches.length || n0 > 1 || (visualViewport && visualViewport.scale > 1.05)) { x0 = null; return; }   // zoomed in: the finger pans
+      if (pinch) {
+        if (e.touches.length < 2) { pinch = null; hideTips(); setTimeout(() => { document.documentElement.classList.remove('pinching'); hideTips(); }, 120); }
+        x0 = null; return;
+      }
+      if (hold) {
+        if (!hold[3] && Date.now() - hold[2] < 300) {   // a tap while zoomed: two of them zoom back out
+          if (Date.now() - lastTap < 350) { this.zoomReset(); lastTap = 0; } else lastTap = Date.now();
+        }
+        hold = null; return;
+      }
+      if (x0 === null || e.touches.length || n0 > 1 || zoomed() || (visualViewport && visualViewport.scale > 1.05)) { x0 = null; return; }
       const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
       if (Math.max(Math.abs(dx), Math.abs(dy)) > 50) (Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? this.next() : this.prev();
       else if (Math.hypot(dx, dy) < 12 && Date.now() - t0 < 450) {

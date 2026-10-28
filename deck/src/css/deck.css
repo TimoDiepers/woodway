@@ -607,13 +607,23 @@ body:has(#menu.open) #menu-fab { display: none; }
   display: flex; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity .2s var(--ease), visibility 0s .2s;
   font-family: var(--sans); }
 #menu.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease); }
-#menu .menu-head { display: flex; align-items: center; gap: 16px; padding: 18px 28px 14px; border-bottom: 1px solid #34413a; }
+#menu .menu-head { display: flex; align-items: center; gap: 16px; padding: 18px 28px 14px; border-bottom: 1px solid #34413a; background: #171e1b; }
 #menu .menu-head h2 { font: 600 20px/1 var(--sans); margin: 0; color: #fff; }
 #menu .menu-head span { font-size: 13px; color: #9aa79f; }
 #menu .menu-head span kbd { border-color: #56625a; color: #cfd6cf; }
 #menu .menu-close { margin-left: auto; background: none; border: 0; color: #cfd6cf; font: 400 30px/1 var(--sans);
   width: 44px; height: 44px; border-radius: 8px; cursor: pointer; }
 #menu .menu-close:hover { background: #2c3832; }
+/* what the keys do, as buttons (touch screens have no keys); pressed = on */
+#menu .menu-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+#menu .menu-acts + .menu-close { margin-left: 4px; }
+#menu .menu-acts button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 12px; border: 1px solid #3c4a42;
+  border-radius: 999px; background: none; color: #cfd6cf; font: 500 14px/1 var(--sans); cursor: pointer; }
+#menu .menu-acts button:hover { background: #2c3832; }
+#menu .menu-acts button[aria-pressed="true"] { background: #e8e3d6; border-color: #e8e3d6; color: #1f2823; }
+#menu .menu-acts svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+@media (hover: none), (pointer: coarse), (max-width: 900px) { #menu .menu-head > span { display: none; } }   /* the key hints: no keys here */
+@media (max-width: 700px) { #menu .menu-head { flex-wrap: wrap; } #menu .menu-acts { order: 3; width: 100%; margin-left: 0; } }
 #menu .menu-body { flex: 1; overflow-y: auto; padding: 8px 28px 40px; scrollbar-color: #56625a transparent; overscroll-behavior: contain; }
 #menu h3 { font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #9fb294; margin: 22px 0 12px; }
 #menu .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 18px 16px; }
@@ -647,7 +657,7 @@ body:has(#menu.open) #menu-fab { display: none; }
   font: 400 17px/1.2 var(--sans); box-shadow: 0 10px 30px -10px rgba(0,0,0,.45); transition: opacity .2s var(--ease), transform .2s var(--ease); }
 #jump-badge.on { opacity: 1; transform: translate(-50%, 0); }
 /* a toggle confirmed (Deck.toast): small, bottom right, above the slide number's corner */
-#toast { position: fixed; right: 18px; bottom: 18px; z-index: 60; opacity: 0; pointer-events: none; transform: translateY(6px);
+#toast { position: fixed; right: 18px; bottom: 18px; z-index: 80; opacity: 0; pointer-events: none; transform: translateY(6px);
   padding: 6px 12px; border-radius: 6px; background: #1f2823; color: #e8e3d6; font: 500 13px/1.2 var(--sans);
   box-shadow: 0 6px 18px -8px rgba(0,0,0,.4); transition: opacity .2s var(--ease), transform .2s var(--ease); }
 #toast.on { opacity: 1; transform: none; }
@@ -1920,6 +1930,10 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 .slide.active .trees-do [data-step="3"].shown .td-late { animation: fadein .7s var(--ease) 4s both; }
 
 /* C: no mouse pointer anywhere on the page, for a presentation with a laser pointer */
+.viewport { touch-action: none; }   /* pinch and pan on the slides are the deck's own (Deck.zoomAt), not the page's */
+html.zoomed .viewport { cursor: grab; }
+html:is(.zoomed, .pinching) [_echarts_instance_] { pointer-events: none; }
+html:is(.zoomed, .pinching) .ectip { display: none !important; }   /* zoomed in, the fingers move the slide, the charts stay still */   /* the deck's own zoom (Deck.zoomAt): drag to move */
 html.nocursor, html.nocursor * { cursor: none !important; }
 
 /* slide 10: the braces of the balance come with their labels (the label carries the click step, the brace follows it) */
