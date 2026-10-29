@@ -620,7 +620,7 @@ def albedo_annual_map_figure(out_path: str) -> str:
                                site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=6.9, lats=(-56, 80), fit=True)
 
 
-C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wie ein Baum aufs Klima wirkt" drawing
+C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wodurch ein Baum aufs Klima wirkt" drawing
 
 
 def cloud_season_series(site: Site) -> tuple[NDArray, NDArray, NDArray]:

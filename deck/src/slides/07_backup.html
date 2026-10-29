@@ -307,6 +307,27 @@
   </aside>
 </section>
 
+<section class="slide backup" data-ch="klima" data-title="Energiebilanz Jahr für Jahr">
+  <header class="sh"><h2>Energiebilanz Jahr für Jahr: ein Jahr Antrieb</h2></header>
+  <div class="body">
+    <div class="split center">
+      <div class="chart" data-ec="tbal" data-step="0" style="height:520px" data-label="Energiebilanz Jahr für Jahr für ein Jahr Antrieb von −1 W/m² (−31,6 MJ/m²): oben je Jahr der Antrieb (nach unten) und die Rückkopplung (nach oben: die kühlere Erde strahlt weniger ab), daneben die Änderung im Wärmespeicher, ihre Summe; unten die Temperatur. Nur mit dem Speicher sinkt sie um 0,27 K und bleibt dort; mit der Rückkopplung holt die Erde die Energie Jahr für Jahr zurück und die Temperatur kehrt in wenigen Jahren auf heute zurück"></div>
+      <div class="stack" style="align-self:center">
+        <div class="rise" style="--d:300"><p class="nstep"><b class="badge c-phi">1</b>Antrieb <span class="tex">$\phit$</span>: ein Jahr, −31,6 MJ/m²</p></div>
+        <div class="rise" data-step="1" style="--d:200"><p class="nstep"><b class="badge c-sk">2</b>Speicher <span class="tex">$\Sk$</span>: puffert, −0,27 K</p></div>
+        <div class="rise" data-step="2" style="--d:200"><p class="nstep"><b class="badge c-rf">3</b>Rückkopplung <span class="tex">$\Rf$</span>: holt die Energie zurück</p></div>
+      </div>
+    </div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.5194/gmd-14-3007-2021" target="_blank" rel="noopener">Leach et al. 2021</a>; <a href="https://doi.org/10.5194/gmd-17-8569-2024" target="_blank" rel="noopener">Smith et al. 2024</a> (oberste Schicht des FaIR-Mitglieds 787474: Wärmekapazität 3,7 W·a/(m²·K) ≈ 117 MJ/(m²·K), R ≈ 1,2 W/m² je K)</span><span><i>Eigene Rechnung</i> (Energiebilanz mit einer Schicht, Jahressummen aus der exakten Lösung)</span></p>
+  <aside class="notes" data-n="46">
+    <p>Für Fragen: dieselbe Rechnung Jahr für Jahr, wie FaIR sie macht, für den einfachsten Fall: ein einziges Jahr Antrieb, −1 W/m², dann nichts mehr. Das ist die Antwort f aus der Formel. Oben die Energiebilanz je Jahr in Megajoule je Quadratmeter, plus heißt, die Erde behält Energie, minus, sie verliert. Je Jahr links der Antrieb und die Rückkopplung, daneben die Änderung im Speicher, ihre Summe. Unten die Temperatur am Ende jedes Jahres. Im ersten Jahr verliert die Erde 31,6 MJ/m².</p>
+    <p>Klick: Nur der Speicher: Er verliert genau das. Für ein Kelvin braucht er rund 117 MJ/m², also sinkt die Temperatur um 0,27 K, und ohne Rückkopplung bliebe sie dort, gestrichelt.</p>
+    <p>Klick: Mit der Rückkopplung: Die kühlere Erde strahlt weniger ab; jedes Jahr behält sie etwas Energie, die Balken nach oben, und genau das kommt in den Speicher zurück. Die Temperatur ist nach wenigen Jahren zurück auf heute; über alle Jahre holt die Rückkopplung genau die 31,6 MJ/m² zurück, die der Antrieb genommen hat. S legt fest, wie tief es geht; S und R zusammen, wie schnell es zurückkommt, rund drei Jahre.</p>
+    <p class="q">Falls Fragen kommen — Die Balken jedes Jahres gehen genau auf: Antrieb plus Rückkopplung gleich Änderung im Speicher (erster Hauptsatz je Jahr), aus der exakten Lösung über das Jahr integriert. FaIR rechnet mit drei Schichten; die tiefe Schicht gibt einen kleinen Rest über Jahrhunderte, hier nicht gezeigt. Der Baum hat jedes Jahr seinen eigenen, wachsenden Antrieb; seine Temperaturwirkung ist die Summe solcher Antworten.</p>
+  </aside>
+</section>
+
 <section class="slide backup" data-ch="klima" data-title="Lösung der Energiebilanz">
   <header class="sh"><h2>Die Antwort f genau: Lösung der Energiebilanz</h2></header>
   <div class="body">
@@ -315,7 +336,7 @@
       <div class="drow rise" data-step="1" style="--d:0"><p class="nstep"><b class="badge">2</b>Alles mit <span class="tex">$\T$</span> nach links</p><div class="eq tex">$$\frac{\mathrm{d}\T}{\mathrm{d}t} + \Sk\Rf\,\T(t) = \Sk\,\phit(t)$$</div></div>
       <div class="drow rise" data-step="2" style="--d:0"><p class="nstep"><b class="badge">3</b>Mal <span class="tex">$e^{\Sk\Rf t}$</span>; links Produktregel rückwärts:<br>Ableitung von <span class="tex">$e^{\Sk\Rf t}\,\T$</span>, denn <span class="tex">$\tfrac{\mathrm{d}}{\mathrm{d}t}\,e^{\Sk\Rf t} = \Sk\Rf\,e^{\Sk\Rf t}$</span></p><div class="eq tex">$$\underbrace{e^{\Sk\Rf t}\,\frac{\mathrm{d}\T}{\mathrm{d}t} + \Sk\Rf\,e^{\Sk\Rf t}\,\T(t)}_{\textstyle \frac{\mathrm{d}}{\mathrm{d}t}\big(e^{\Sk\Rf t}\,\T(t)\big)} = \Sk\,\phit(t)\,e^{\Sk\Rf t}$$</div></div>
       <div class="drow rise" data-step="3" style="--d:0"><p class="nstep"><b class="badge">4</b>Links steht eine Ableitung: von <span class="tex">$t_0$</span> bis <span class="tex">$t$</span><br>integrieren (Laufvariable <span class="tex">$t'$</span>), <span class="tex">$\T(t_0) = 0$</span></p><div class="eq tex">$$e^{\Sk\Rf t}\,\T(t) = \int_{t_0}^{t} \Sk\,\phit(t')\,e^{\Sk\Rf t'}\,\mathrm{d}t'$$</div></div>
-      <div class="drow rise" data-step="4" style="--d:0"><p class="nstep"><b class="badge">5</b>Durch <span class="tex">$e^{\Sk\Rf t}$</span> teilen: das <span class="tex">$\fT$</span> von Folie „Vom Strahlungsantrieb zur Temperatur“</p><div class="eq tex">$$\hl{dt on}{\dT(t) = \int_{t_0}^{t} \underbrace{\Sk\,\phit(t')\; e^{-\Sk\Rf(t-t')}}_{A(\phit,\, \Rf,\, \Sk)}\,\mathrm{d}t'}$$</div></div>
+      <div class="drow rise" data-step="4" style="--d:0"><p class="nstep"><b class="badge">5</b>Durch <span class="tex">$e^{\Sk\Rf t}$</span> teilen: das <span class="tex">$\fT$</span> von Folie „Vom Strahlungsantrieb zur Temperatur“</p><div class="eq tex">$$\hl{dt on}{\dT(t) = \int_{t_0}^{t} \underbrace{\Sk\,\phit(t')\; e^{-\Sk\Rf(t-t')}}_{A(\phit,\, \Sk,\, \Rf)}\,\mathrm{d}t'}$$</div></div>
       <div class="drow rise" data-step="5" style="--d:0"><p class="nstep"><b class="badge">6</b>Probe mit konstantem Antrieb <span class="tex">$\phio$</span></p><div class="eq tex">$$\dT(t) = \frac{\phio}{\Rf}\Big(1 - e^{-\Sk\Rf(t-t_0)}\Big) \;\longrightarrow\; \frac{\phio}{\Rf}$$</div></div>
     </div>
     <p class="takeaway" data-step="6" style="--d:0">R legt den Endwert fest (φ₀/R), S nur das Tempo: nach 1/(SR) ≈ 3&nbsp;Jahren sind knapp zwei Drittel erreicht.</p>

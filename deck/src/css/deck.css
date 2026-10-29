@@ -45,7 +45,8 @@
   --sun: #e8b84f; --sun-ray: #d9a441; --amber: #e0a83e;
 
   /* symbol colours (FORMULAS): hue = channel, shade = symbol. CO₂ greens and teals, albedo and energy oranges
-     and browns, temperature crimson and wine, growth parameters ochre, disturbance rust, total forcing purple */
+     and browns, temperature crimson and wine (its feedback R blue: the cooler Earth's answer, apart from the store S),
+     growth parameters ochre, disturbance rust, total forcing purple */
   --s-mb: #1d5b30;  --s-ps: var(--ps);  --s-re: var(--re);  --s-zs: var(--zs);  --s-st: var(--st);
   --s-mmax: #8a6a1e; --s-kw: #a0522d;  --s-pw: #556b2f;   --s-md: #4a6b12;
   --s-sz: #d0502a;  --s-gam: #7a2e0e;  --s-pd: #b83a1e;   --s-pdo: #8a2c12;
@@ -54,7 +55,7 @@
   --s-phi: #6a3d9a; --s-phio: #8a6bb5; --s-phia: #d95f02; --s-phic: #1b7837;
   --s-eps: #4d8b1f; --s-dm: #00695c;   --s-mdc: #5a8a2a;  --s-gc: #1f7a8c;   --s-conc: #2b6cb0; --s-conco: #5f86b0;
   --s-matm: #5d665f; --s-katm: #7f5f2a; --s-ch4: #2b7bba;
-  --s-dt: #b2182b;  --s-rf: #8e0152;   --s-sk: #a23b72;   --s-ft: #9c2a48;   --s-par: #8a6a1e;
+  --s-dt: #b2182b;  --s-rf: #1f5b94;   --s-sk: #a23b72;   --s-ft: #9c2a48;   --s-par: #8a6a1e;
   --vapor: #17808a;                    /* water vapour and mixing over the forest (slide 15, step 1) */
   --layer: #5a4fa0;                    /* the rising mixed air layer (slide 15, step 2) */
   --land: #8c6d5a;                     /* ocean and land taking CO₂ back */
@@ -370,6 +371,7 @@ strong { font-weight: 600; }
 .legend { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; align-items: baseline; }
 .legend dt { font-size: 24px; text-align: right; }
 .legend dd { margin: 0; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
+.legend dd .dd2 { display: block; font-size: .85em; color: var(--muted); }   /* a second, quieter line: the caveat */
 .legend.sm { gap: 2px 14px; margin-top: 10px; }
 .legend.sm dt { font-size: 23px; }
 .legend.sm dd { font-size: 19px; line-height: 1.28; }
@@ -860,7 +862,7 @@ svg.cc > g > g:first-of-type > text:not(:nth-of-type(1)) { opacity: 0; }
 
 /* the radiation in this drawing stands still: here the topic is the energy balance, not the radiation */
 svg.s21 :is(.flow, .rays) { animation-play-state: paused !important; }
-/* temperature slide: with R the heat radiation comes forward, and thins and cools (rules with the thermometer, slide "Vom Strahlungsantrieb zur Temperatur") */
+/* temperature slide: with R the heat radiation comes forward, and thins and cools (rules with the store, slide "Vom Strahlungsantrieb zur Temperatur") */
 
 /* one highlight for formula terms everywhere (as on slide 17): a coloured, rounded frame with an even tint.
    A layer behind the term's own box (accents like the dot over Q do not bend it); it takes no space,
@@ -1909,7 +1911,9 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 .trees-do :is(.tg-branch, .tg-tuft) { transform-box: fill-box; }
 .trees-do .tg-branch { transform-origin: 50% 100%; }
 .trees-do .tg-tuft { transform-origin: 50% 50%; }
-.slide:not(:has(.trees-do [data-step="1"].shown)) .trees-do:not(.recap) .tg-trunk { d: path("M-2 0 C -2 -10 -1 -24 -1 -44 L 1 -44 C 1 -24 2 -10 2 0Z"); fill: #5a4a38; }
+/* the trunk grows by a transform from its foot (Safari has no CSS d): a sprout's stem, 4 x 44, is the trunk, 28 x 266, scaled */
+.trees-do .tg-trunk { transform-box: fill-box; transform-origin: 50% 100%; }
+.slide:not(:has(.trees-do [data-step="1"].shown)) .trees-do:not(.recap) .tg-trunk { transform: scale(.143, .165); fill: #5a4a38; }
 .slide:not(:has(.trees-do [data-step="1"].shown)) .trees-do:not(.recap) :is(.tg-branch, .tg-young, .tg-leaf) { opacity: 0; }
 .slide:not(:has(.trees-do [data-step="1"].shown)) .trees-do:not(.recap) .tg-sprout { opacity: 1; }
 .slide.active:has(.trees-do [data-step="1"].shown):not(:has(.trees-do [data-step="2"].shown)) .trees-do:not(.recap) .tg-trunk { animation: tg-trunk 5s cubic-bezier(.45, .05, .3, 1) 1.5s both; }
@@ -1918,7 +1922,7 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 .slide.active:has(.trees-do [data-step="1"].shown):not(:has(.trees-do [data-step="2"].shown)) .trees-do:not(.recap) .tg-branch { animation: tg-ride-br 5s cubic-bezier(.45, .05, .3, 1) 1.5s both, tg-br-in 5s linear 1.5s both; }
 .slide.active:has(.trees-do [data-step="1"].shown):not(:has(.trees-do [data-step="2"].shown)) .trees-do:not(.recap) .tg-tuft { animation: tg-tuft 2.4s cubic-bezier(.2, .8, .3, 1.1) 3.4s both; }
 .slide.active:has(.trees-do [data-step="1"].shown):not(:has(.trees-do [data-step="2"].shown)) .trees-do:not(.recap) .tg-leaf { animation: tg-leaf 1.5s cubic-bezier(.2, .8, .3, 1.1) both; animation-delay: calc(4.6s + var(--i) * .26s); }
-@keyframes tg-trunk { from { d: path("M-2 0 C -2 -10 -1 -24 -1 -44 L 1 -44 C 1 -24 2 -10 2 0Z"); fill: #5a4a38; } to { d: path("M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z"); fill: #3b3024; } }
+@keyframes tg-trunk { from { transform: scale(.143, .165); fill: #5a4a38; } to { transform: none; fill: #3b3024; } }
 @keyframes tg-sprout { from { transform: none; } to { transform: translateY(-222px) scale(1.8); } }
 @keyframes tg-sprout-out { 0%, 30% { opacity: 1; } 50%, 100% { opacity: 0; } }
 @keyframes tg-young { from { transform: translateY(150px) scale(.12); } to { transform: none; } }
@@ -1930,7 +1934,7 @@ svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--
 @keyframes tg-leaf { from { transform: scale(0); opacity: 1; } to { transform: none; opacity: 1; } }
 .embed .trees-do :is(.tg-trunk, .tg-branch, .tg-tuft, .tg-young, .tg-leaf, .tg-sprout), .all .trees-do :is(.tg-trunk, .tg-branch, .tg-tuft, .tg-young, .tg-leaf, .tg-sprout) { animation: none !important; }
 .embed .trees-do :is(.tg-branch, .tg-young, .tg-leaf), .all .trees-do :is(.tg-branch, .tg-young, .tg-leaf) { opacity: 1 !important; }
-.embed .trees-do .tg-trunk, .all .trees-do .tg-trunk { d: path("M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z") !important; fill: #3b3024 !important; }
+.embed .trees-do .tg-trunk, .all .trees-do .tg-trunk { transform: none !important; fill: #3b3024 !important; }
 .embed .trees-do .tg-sprout, .all .trees-do .tg-sprout { opacity: 0 !important; }
 /* the numbers of the two effects, as on the overview */
 /* slide 8: once the light comes in, the CO2 rests in the background */
@@ -2133,22 +2137,27 @@ svg.s18 .seg { stroke-width: 3.5px; stroke: #b2182b; transition: stroke-width .6
 .slide.active:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s3 { animation: lw3 1.6s var(--ease) both; }
 .slide:has(svg.s18 [data-step="4"].shown) svg.s18 .lw .s3 { stroke-width: 2.0px; stroke: #866977; }
 
-/* slide "Vom Strahlungsantrieb zur Temperatur": the anchors take the column FaIR takes later; the thermometer in the
-   drawing sinks slowly with S (click 2), then slows and stops with R (click 3), its colour cooling as it goes */
+/* slide "Vom Strahlungsantrieb zur Temperatur": the anchors take the column FaIR takes later */
 .split:has(> .ghsteps + .fflow) > :is(.ghsteps, .fflow) { grid-area: 1 / 2; }
 .split:has(> .ghsteps + .fflow) > .ghsteps { align-self: center; transition: opacity .5s var(--ease); }
 .slide:has(.fflow.shown) .ghsteps { opacity: 0; }
-svg.s21 .tp-merc { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(.88); }
-svg.s21 :is(.tp-merc, .tp-bulb) { transition: transform .6s var(--ease), fill .6s var(--ease); }
-/* S: sinks slowly and keeps sinking (as long as the click stays); R brakes it where it is (Deck: thermoBrake) */
-.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-merc { transform: scaleY(.1); transition: transform 30s linear .3s, fill 12s linear .3s; }
-.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-bulb { transition: fill 12s linear .3s; }
-.slide:has(svg.s21 .ts3.shown) svg.s21 :is(.tp-merc, .tp-bulb) { fill: #4f86a6; }
-/* the drawing: the store (land and upper ocean) cools with the thermometer; with R the heat arrow thins and cools */
-svg.s21 .tp-store { opacity: 0; transition: opacity 1.6s linear .3s; }
-.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-store { opacity: .5; }
-.slide:has(svg.s21 .ts2.shown) svg.s21 .tp-store { opacity: 1; transition-duration: 2.6s; }
-svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease), stroke 2.6s linear .3s, stroke-width 2.6s linear .3s; }
-.slide:has(.ts3.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; }
-svg.s21 .lw-root { transition: stroke 2.6s linear .3s, stroke-width 2.6s linear .3s; }
-.slide:has(.ts2.shown) svg.s21 :is(.cc > g > g:first-of-type > path.t-lw, .lw-root) { opacity: 1; stroke: #5f7f9d; stroke-width: 1.6px; }
+/* the drawing, the energy balance.
+   φ (1): more goes out than comes in: the heat arrow comes forward, thicker.
+   S (2): it comes out of the store: an arrow of its own, in S's colour, flows up out of the ocean, a thinner, slower one
+   from the deep sea below; the store cools, slowly.
+   R (3): the cooler Earth radiates less: the arrow thins and cools back to as much as comes in; the store's arrow
+   thins, its cooling slows and stops. */
+svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease), stroke-width .9s var(--ease), stroke 2.6s linear .3s; }
+.slide:has(svg.s21 [data-step="1"].shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; stroke-width: 6px; }
+svg.s21 .lw-root { transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }
+.slide:has(svg.s21 .ts2.shown) svg.s21 .lw-root { stroke-width: 3px; }   /* the store gives off less and less */
+svg.s21 .lw-deep { animation-duration: 3.2s; transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }   /* the deep sea: slower */
+.slide:has(svg.s21 .ts2.shown) svg.s21 .lw-deep { stroke-width: 2.5px; }
+.slide:has(svg.s21 .ts3.shown) svg.s21 path.flow.t-lw { animation-play-state: running !important; }   /* the heat flows out of the store */
+.slide:has(svg.s21 .ts2.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { stroke-width: 2px; stroke: #90606c;
+  transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s, stroke 2.6s linear .3s; }
+svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
+.slide:has(svg.s21 .ts3.shown) svg.s21 .tp-store { opacity: .55; }
+.slide:has(svg.s21 .ts2.shown) svg.s21 .tp-store { opacity: .75; transition: opacity 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }
+/* the energy balance per year (backup "Energiebilanz Jahr für Jahr"): its key and names a size smaller, the key fits in one row */
+.chart[data-ec="tbal"] .mtex.ectex { font-size: 15px; padding: 3px 7px 4px; }

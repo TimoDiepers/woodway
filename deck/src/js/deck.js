@@ -166,27 +166,6 @@ function supText(root) {   // every text node outside drawings and formulas
     n.replaceWith(frag);
   }
 }
-/* Temperature slide: with S the thermometer sinks slowly and keeps sinking (CSS); with R it is braked where it is at that
-   moment and comes to rest a little lower, R's notch at that level. Undone when R goes again. */
-function thermoBrake(svg) {
-  const r = svg.querySelector('.ts2'), merc = svg.querySelector('.tp-merc'), bulb = svg.querySelector('.tp-bulb'), notch = svg.querySelector('.tp-notch');
-  if (!r || !merc) return;
-  const H = 154, BOTTOM = 458, NOTCH = 393;
-  new MutationObserver(() => {
-    const on = r.classList.contains('shown');
-    for (const e of [merc, bulb]) { e.style.transition = ''; e.style.transform = ''; e.style.fill = ''; }
-    if (notch) notch.style.transform = '';
-    if (!on) return;
-    const cur = new DOMMatrixReadOnly(getComputedStyle(merc).transform).d, col = getComputedStyle(merc).fill;
-    const k = Math.max(.1, Math.min(cur - .05, .7));   // a little lower than now (on a jump straight here: well cooled)
-    for (const e of [merc, bulb]) { e.style.transition = 'none'; e.style.fill = col; }
-    merc.style.transform = `scaleY(${cur})`;
-    void merc.getBoundingClientRect();
-    for (const e of [merc, bulb]) e.style.transition = 'transform 1.6s cubic-bezier(.1, .75, .25, 1), fill 1.6s cubic-bezier(.1, .75, .25, 1)';
-    merc.style.transform = `scaleY(${k})`;
-    if (notch) notch.style.transform = `translateY(${BOTTOM - H * k - NOTCH}px)`;
-  }).observe(r, { attributes: true, attributeFilter: ['class'] });
-}
 /* Holzweg slide: it opens on the summary's last picture, takeaway 3 with two phrases in gold. As each card comes in,
    its heading flies out of the matching phrase into place, growing from the phrase's size to the heading's.
    Only when stepping forward on the open slide; a jump to the slide (or backwards) just shows the end state. */
@@ -1316,7 +1295,100 @@ const EC_LANDDONUT = {
 /* Holzweg: the donut on the left card, held while the right card has its clicks; what a world without animals frees
    comes after them */
 const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 6, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1][k]) });
-const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU };
+/* backup "Energiebilanz Jahr für Jahr": the energy balance year by year, as FaIR counts it, for one year of
+   forcing (a pulse: φ = −1 W/m² in year 1, i.e. −31,6 MJ/m², then nothing): the response f of the formula above it, the
+   tree's ΔT being the sum of such responses over its years. One layer, the FaIR member: heat capacity 1/S = 3,7 W·a/(m²·K)
+   ≈ 117 MJ/(m²·K), feedback R = 1,2 W/(m²·K).
+   Top, energy per year and m² (+ the Earth keeps it, − it loses it), two columns a year: at the boundary the forcing φ
+   (down) and the feedback −R·ΔT (up: a cooler Earth radiates less); beside them the change of the store's heat content,
+   exactly their sum (first law for each year). Bottom: ΔT, dots at each year's end; S turns the store's change into it.
+   Click 1: the pulse. 2 (S, no feedback): the store takes it, ΔT drops by S·φ ≈ −0,27 K and stays there. 3 (R): from the
+   cooler Earth less heat leaves, year by year; the store gets it back, ΔT returns to today's in a few years
+   (1/(S·R) ≈ 3,1 a), and over the years the feedback brings back exactly what φ took. Exact integrals of the
+   continuous solution, so the columns add up. */
+const EC_TBAL = {
+  steps: 2, tip: { unit: '', dec: 1 }, drawMs: 2400, x0: 0, x1: 12,
+  P: { C: 3.7, R: 1.2, phi: -1, Y: 12, MJ: 31.557 },
+  T(k) {   // ΔT [K] over time [a], and its integral, for the pulse in year 1; without the feedback (k < 2) or with it
+    const { C, R, phi } = this.P, tau = C / R, Teq = phi / R, T1 = Teq * (1 - Math.exp(-1 / tau));
+    if (k < 2) return { at: t => phi / C * Math.min(t, 1), int: (a, b) => 0 };
+    const at = t => t <= 1 ? Teq * (1 - Math.exp(-t / tau)) : T1 * Math.exp(-(t - 1) / tau);
+    const int = (a, b) => a >= 1 ? T1 * tau * (Math.exp(-(a - 1) / tau) - Math.exp(-(b - 1) / tau)) : Teq * (1 - tau * (1 - Math.exp(-1 / tau))) + int(1, b);
+    return { at, int };
+  },
+  model(k) {
+    const { C, R, phi, Y, MJ } = this.P, T = this.T(k);
+    return Array.from({ length: Y }, (_, i) => {
+      const n = i + 1;
+      return { n, phi: n === 1 ? phi * MJ : 0, fb: -R * T.int(n - 1, n) * MJ, store: C * (T.at(n) - T.at(n - 1)) * MJ, T: T.at(n) };
+    });
+  },
+  option(k) {
+    const { Y } = this.P, STEP = 180, DELAY = 300;
+    const sk = cssColor('--s-sk', '#a23b72'), rf = cssColor('--s-rf', '#1f5b94'), ph = cssColor('--s-phi', '#6a3d9a');
+    const font = { fontFamily: EC.font, fontSize: 18 }, E = { unit: 'MJ/m²', dec: 1 }, K = { unit: 'K', dec: 2 };
+    const yrs = this.model(k);
+    const bar = (id, tipName, x, ys, style, extra) => Object.assign({ id, tipName, tip: E, type: 'bar', xAxisIndex: 0, yAxisIndex: 0,
+      barWidth: 11, barGap: '-100%', data: yrs.map(d => [d.n - x, ys(d)]), itemStyle: style }, extra || {});
+    const series = [];
+    // top: at the boundary φ (down) and the feedback (up), one column; the store's change beside it
+    series.push(bar('phi', 'Antrieb φ', .68, d => d.phi, { color: ph }, { animationDuration: 500, z: 4 }));
+    if (k >= 2) series.push(bar('fb', 'Rückkopplung R', .68, d => d.fb, { color: rf, opacity: .55, borderColor: rf, borderWidth: 1.5 },
+      { animationDuration: 420, animationDelay: i => DELAY + i * STEP, z: 4 }));
+    if (k >= 1) series.push(bar('store', 'Speicher S: Änderung', .32, d => d.store, { color: sk },
+      { animationDuration: 420, animationDelay: i => DELAY + i * STEP, animationDurationUpdate: 420, animationDelayUpdate: i => DELAY + i * STEP, z: 5 }));
+    // bottom: ΔT, the curve and a dot at each year's end (under its year)
+    const curve = (id, tipName, T, style, extra) => Object.assign({ id, tipName, tip: K, type: 'line', xAxisIndex: 1, yAxisIndex: 1, keepPace: true,
+      showSymbol: false, z: 6, data: Array.from({ length: 241 }, (_, i) => { const x = Y * i / 240; return [x, T.at(x)]; }),
+      lineStyle: style, animationDuration: DELAY + Y * STEP, animationEasing: 'linear' }, extra || {});
+    const dots = (id, rows, color) => ({ id, tip: false, type: 'scatter', xAxisIndex: 1, yAxisIndex: 1, silent: true, z: 8, symbolSize: 9,
+      data: [{ value: [0, 0], itemStyle: { color: color(0) } }, ...rows.map((d, i) => ({ value: [d.n, d.T], itemStyle: { color: color(i + 1) } }))],
+      animationDuration: 260, animationDelay: i => i === 0 ? 0 : DELAY + (i - 1) * STEP + STEP * .7 });
+    if (k >= 1) {
+      const fade = k >= 2 ? .45 : 1;
+      series.push(curve('S', 'ΔT nur mit Speicher', this.T(1), { color: sk, width: 2.4, type: [8, 6], opacity: fade }));
+      series.push(dots('Sd', this.model(1), () => k >= 2 ? 'rgba(162,59,114,.45)' : sk));
+    } else series.push({ id: 'T0', tip: false, type: 'scatter', xAxisIndex: 1, yAxisIndex: 1, silent: true, symbolSize: 9, data: [[0, 0]], itemStyle: { color: '#b2182b' } });
+    if (k >= 2) {
+      // it cools and warms back: blue at the dip, red again as it returns
+      const tone = v => { const f = Math.min(1, -v / .27), a = [178, 24, 43], b = [79, 134, 166];
+        return `rgb(${a.map((c, j) => Math.round(c + (b[j] - c) * f)).join(',')})`; };
+      series.push(curve('T', 'ΔT mit Rückkopplung', this.T(2), { width: 3.4, color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: '#b2182b' }, { offset: 1, color: '#4f86a6' }] } }, { z: 7 }));
+      series.push(dots('Td', yrs, i => tone(i === 0 ? 0 : yrs[i - 1].T)));
+    }
+    const L = 96, Rr = 18, yLab = Object.assign({ color: EC.muted, showMinLabel: true }, font);
+    const ytitle = text => ({ name: text, nameLocation: 'middle', nameGap: 62, nameTextStyle: Object.assign({ color: EC.ink }, font) });
+    const xa = (gi, shown) => ecAxis(Object.assign({ type: 'value', gridIndex: gi, min: 0, max: Y, interval: 1,
+      axisLabel: shown ? Object.assign({ color: EC.muted, formatter: v => v % 5 === 0 ? String(v) : '', showMinLabel: true, showMaxLabel: false }, font) : { show: false },
+      splitLine: { show: true, lineStyle: { color: EC.grid, opacity: .6 } }, axisTick: { show: false } },
+      shown ? { name: 'Jahr', nameLocation: 'middle', nameGap: 30, nameTextStyle: Object.assign({ color: EC.muted }, font) } : {}));
+    return {
+      animationEasing: 'cubicOut', animationEasingUpdate: 'cubicInOut', animationDurationUpdate: 600,
+      grid: [{ left: L, right: Rr, top: 40, height: 150 }, { left: L, right: Rr, top: 226, bottom: 50 }],
+      xAxis: [xa(0, false), xa(1, true)],
+      yAxis: [ecAxis(Object.assign({ type: 'value', gridIndex: 0, min: -40, max: 20, interval: 10,
+                axisLabel: Object.assign({ formatter: v => v === 0 ? '0' : v % 20 ? '' : (v > 0 ? '+' : '−') + Math.abs(v) }, yLab),
+                splitLine: { show: true, lineStyle: { color: EC.grid } } }, ytitle('Energie je Jahr [MJ/m²]'))),
+              ecAxis(Object.assign({ type: 'value', gridIndex: 1, min: -0.3, max: 0, interval: .1,
+                axisLabel: Object.assign({ formatter: v => Math.abs(v) < 1e-9 ? '0' : ecNum(v, 1).replace('-', '−') }, yLab),
+                splitLine: { show: true, lineStyle: { color: EC.grid } } }, ytitle('ΔT [K]'), { nameTex: '$\\dT$ [K]' }))],
+      series
+    };
+  },
+  // a key above the balance (the symbols' boxes), and the names of the temperature curves
+  labels(k) {
+    const top = 33, T2 = this.T(2);
+    const out = [{ key: 'phi', grid: 0, x: 1.25, y: top, tex: '\\phit\\ \\text{Antrieb}', role: 'phi' }];
+    if (k >= 1) out.push({ key: 'S', grid: 0, x: 4.5, y: top, tex: '\\Sk\\ \\text{Speicher}', role: 'sk' });
+    if (k >= 2) out.push({ key: 'R', grid: 0, x: 8.8, y: top, tex: '\\Rf\\ \\text{Rückkopplung}', role: 'rf' });
+    if (k >= 1) out.push({ key: 'onlyS', grid: 1, x: 9.4, y: this.T(1).at(9.4), tex: '\\text{nur }\\Sk', role: 'sk', side: 'above' });
+    if (k >= 2) out.push({ key: 'withR', grid: 1, x: 7.6, y: T2.at(7.6), tex: '\\Sk\\text{ und }\\Rf', role: 'dt', side: 'below' });
+    return out;
+  }
+};
+
+const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU, tbal: EC_TBAL };
 
 class EChart {
   constructor(host) {
@@ -3269,7 +3341,6 @@ addEventListener('DOMContentLoaded', () => {
   supText(deckEl);
   for (const s of deckEl.querySelectorAll('.slide.holzweg')) holzwegFly(s);
   for (const svg of deckEl.querySelectorAll('svg.ende-scene')) endeStage(svg);
-  for (const svg of deckEl.querySelectorAll('svg.s21')) thermoBrake(svg);
   window.deck = new Deck();
   // formulas, typeset one slide per task (the current one first): they carry click steps, so the slide counts again
   const texed = new WeakSet(), texOne = s => {
