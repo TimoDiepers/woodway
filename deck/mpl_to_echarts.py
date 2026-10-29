@@ -124,6 +124,17 @@ def _math_runs(s: str, shift: int = 0, italic: bool = True) -> list[list]:
     return runs
 
 
+def _steps_of(artist) -> dict:
+    """Clicks of a single artist, from its gid: "step:N" appears with the chart's click N, "fade:N" steps back from
+    click N on, "step:A fade:B" both."""
+    out = {}
+    for part in (artist.get_gid() or "").split():
+        key, _, n = part.partition(":")
+        if n.isdigit() and key in ("step", "fade"):
+            out["stp" if key == "step" else "fade"] = int(n)
+    return out
+
+
 def text_runs(s: str) -> list[list]:
     """Plain text with $...$ math into runs; a run is [text, shift, italic]."""
     parts = re.split(r"(?<!\\)\$", s)
@@ -229,6 +240,7 @@ class DataScene:
             y = (bb.y0 + bb.y1) / 2
         w = t.get_weight()
         d = {"s": plain(s), "c": _col(t.get_color()) or "#000000", "fs": round(t.get_fontsize() * self.px, 2), "al": align}
+        d.update(_steps_of(t))
         if sub := sub_runs(s):
             d["sub"] = sub
         if re.fullmatch(r"\$[^$]+\$", s.strip()):   # a formula symbol on its own: the deck sets it with KaTeX
@@ -272,6 +284,7 @@ class DataScene:
         lab = ln.get_label()
         if lab and not lab.startswith("_"):
             d["name"] = plain(lab)
+        d.update(_steps_of(ln))
         if not ln.get_clip_on():
             d["noclip"] = 1
         if has_mk:
@@ -379,7 +392,7 @@ class DataScene:
                 out.append({"t": "poly", "pts": polys, "fc": _col(fc), "fa": _alpha(fc),
                             "ec": _col(ec) if (ec is not None and lw) else None, "ew": round(lw * self.px, 2),
                             "z": c.get_zorder(), "hatch": c.get_hatch() or None,
-                            "hc": _col(getattr(c, "_hatch_color", "#000000")) if c.get_hatch() else None})
+                            "hc": _col(getattr(c, "_hatch_color", "#000000")) if c.get_hatch() else None, **_steps_of(c)})
         if many:  # merge borders into one item per style
             merged = {}
             for it in out:

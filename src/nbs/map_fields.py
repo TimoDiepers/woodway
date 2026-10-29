@@ -49,7 +49,7 @@ SCALES = {
                     "domain": [-90, 45], "mid": 0, "unit": "fK"},
     # what reforesting all free area of a block brings in 2100, per land area: same diverging palette
     "lohnt": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
-              "domain": [-12, 8], "mid": 0, "unit": "µK je Mha"},
+              "domain": [-12, 8], "mid": 0, "unit": "µK je 10 000 km²"},
     # year from which DAC beats the tree: diverging around 2037, early = deep teal, late = ochre
     "umstieg": {"stops": ["#0d4f57", "#3f9a96", "#e7e0cc", "#d8a24f", "#94591a"], "domain": [T_START, 2050],
                 "mid": 2037.5, "unit": ""},

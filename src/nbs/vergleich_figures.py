@@ -95,8 +95,8 @@ def availability_map_figure(out_path: str) -> str:
     a_cool = float(w[(w > 0) & (eff > 0)].sum() / 1e13)
     a_warm = float(w[(w > 0) & ~(eff > 0)].sum() / 1e13)
     handles = [
-        Patch(facecolor=C_TREE, label=f"Baum kühlt ({a_cool:.2f} Gha)".replace(".", ",")),
-        Patch(facecolor=C_WARM, label=f"Baum möglich, wärmt aber (Albedo, {a_warm:.2f} Gha)".replace(".", ",")),
+        Patch(facecolor=C_TREE, label=f"Baum kühlt ({10 * a_cool:.1f}".replace(".", ",") + " Mio. km²)"),
+        Patch(facecolor=C_WARM, label=f"Baum möglich, wärmt aber (Albedo, {10 * a_warm:.1f}".replace(".", ",") + " Mio. km²)"),
         Patch(facecolor=_COLOR_LAND, label="kein Platz für Bäume (Wald, Acker, Stadt, …)"),
     ]
     fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=len(handles), frameon=False,
@@ -675,12 +675,12 @@ def planting_rank_figure(out_path: str) -> str:
         ax.plot(q, v, "o", ms=7, color=C_INK, mec="white", mew=1.5, zorder=5)
         ax.text(q + 0.006, 1.2, f"{100 * v / c0[i0]:.0f} %", fontsize=13, color=C_INK, fontweight="bold")
     ax.plot(a[i], peak, "o", ms=9, color=C_TREE, mec="white", mew=1.8, zorder=6)
-    ax.annotate(f"{de(a[i], 2)} Gha: {peak:.0f} mK, größte Kühlung", (a[i], peak), xytext=(0, 12),
+    ax.annotate(f"{de(10 * a[i], 1)} Mio. km²: {peak:.0f} mK, größte Kühlung", (a[i], peak), xytext=(0, 12),
                 textcoords="offset points", ha="center", fontsize=13, color=C_TREE, fontweight="bold")
     ax.plot(a[-1], c[-1], "o", ms=9, color=C_WARM, mec="white", mew=1.8, zorder=6)
-    ax.annotate(f"alle {de(a[-1], 2)} Gha: {c[-1]:.0f} mK", (a[-1], c[-1]), xytext=(-8, 12),
+    ax.annotate(f"alle {de(10 * a[-1], 1)} Mio. km²: {c[-1]:.0f} mK", (a[-1], c[-1]), xytext=(-8, 12),
                 textcoords="offset points", ha="right", fontsize=13, color=C_WARM, fontweight="bold")
-    ax.text(0.64, 2.5, "ab hier wärmt jeder weitere Hektar:\nNorden, Trockengebiete", fontsize=12.5,
+    ax.text(0.64, 2.5, "ab hier wärmt jeder weitere Quadratkilometer:\nNorden, Trockengebiete", fontsize=12.5,
             color=C_WARM, ha="center")
     for label, (x, y, col, mk) in r["sites"].items():
         ax.plot(x, y, marker=mk, ms=9, mfc=col, mec="white", mew=1.8, zorder=7, linestyle="none")
@@ -690,8 +690,8 @@ def planting_rank_figure(out_path: str) -> str:
     ax.set_xlim(0, 0.88)
     ax.set_ylim(0, peak * 1.22)
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
-    ax.set_xticklabels(["0", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "0,7", "0,8"])
-    ax.set_xlabel("bepflanzte Fläche [Gha], die am stärksten kühlenden Flächen zuerst")
+    ax.set_xticklabels([str(k) for k in range(9)])   # Gha on the axis, written as Mio. km²
+    ax.set_xlabel("bepflanzte Fläche [Mio. km²], die am stärksten kühlenden Flächen zuerst")
     ax.set_ylabel("Kühlung 2100 [mK]")
     ax.text(0.006, peak * 1.16, "Prozent: Anteil an der größten Kühlung", fontsize=11.5, color=C_MUTED)
     for sp in ("top", "right"):
@@ -724,8 +724,8 @@ def need_figure(out_path: str) -> str:
         ax.barh(yi, net, color=col, height=0.6)
         ax.text(gross + 15, yi, f"{net:.0f} netto · {gross:.0f} brutto", va="center", fontsize=13, color=C_INK)
     ax.set_yticks(y)
-    ax.set_yticklabels(names + [f"Bäume, nur wo sie kühlen\n({c['kuehlt']['flaeche_gha']:.2f} Gha)".replace(".", ","),
-                                f"Bäume überall\n({c['alle']['flaeche_gha']:.2f} Gha)".replace(".", ",")], fontsize=13)
+    ax.set_yticklabels(names + [f"Bäume, nur wo sie kühlen\n({10 * c['kuehlt']['flaeche_gha']:.1f}".replace(".", ",") + " Mio. km²)",
+                                f"Bäume überall\n({10 * c['alle']['flaeche_gha']:.1f}".replace(".", ",") + " Mio. km²)"], fontsize=13)
     ax.set_xlim(0, 1600)
     ax.set_xlabel("CO$_2$-Entnahme 2024–2100 [Gt CO$_2$]")
     for s in ("top", "right"):
@@ -996,10 +996,10 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     if lats:
         ax.set_ylim(*lats)
     world_site_labels(ax, site_label or (lambda s: None if (v := map_site_value(data, s)) is None else site_text(v)), fairbanks_up=not lats)
-    cax = fig.add_axes([0.015, 0.58 / height, 0.5, 0.1 / height] if narrow else [0.3, 0.03, 0.36, 0.02])
+    cax = fig.add_axes([0.25, 0.58 / height, 0.5, 0.1 / height] if narrow else [0.3, 0.03, 0.36, 0.02])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=ticks)
     if narrow:   # its title left-aligned over the bar, running on to the right: a narrow strip has no room to centre it
-        cb.ax.set_title(cbar_label, fontsize=11, loc="left", pad=4)
+        cb.ax.set_title(cbar_label, fontsize=11, loc="center", pad=4)
     else:
         cb.set_label(cbar_label, fontsize=11)
         cb.ax.xaxis.set_label_position("top")
@@ -1007,8 +1007,8 @@ def _world_map_skeleton(out_path: str, key: str, cbar_label: str, ticks, legend_
     grey = [Patch(facecolor=L["color"], label=L["label"]) for L in data["panels"][0]["layers"]
             if L["kind"] == "mask" and L.get("label") and L["label"] != legend_label]
     # the grey layers' key: in the strip beside the colour bar, or, narrow, in one row under it
-    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower left",
-               bbox_to_anchor=(0.005, 0.0) if narrow else (0.69, -0.005), ncol=2 if narrow else 1, frameon=False, fontsize=11,
+    fig.legend(handles=[Patch(facecolor=M.LAND, label=legend_label), *grey], loc="lower center" if narrow else "lower left",
+               bbox_to_anchor=(0.5, 0.0) if narrow else (0.69, -0.005), ncol=2 if narrow else 1, frameon=False, fontsize=11,
                handlelength=1.3, handletextpad=0.5, columnspacing=1.6)
     return _save(fig, out_path)
 
@@ -1059,6 +1059,6 @@ def tree_effect_figure(out_path: str) -> str:
 
 def total_effect_figure(out_path: str) -> str:
     """K16: where reforestation pays: effect in 2100 of reforesting all free area, per land area."""
-    return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [µK je Mio. ha Land]",
+    return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [µK je 10 000 km² Land]",
                                [-12, -8, -4, 0, 4, 8], "kein Platz für Bäume",
                                lambda v: f"{de_signed(v, 1)} µK")

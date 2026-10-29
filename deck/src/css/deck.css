@@ -203,7 +203,7 @@ strong { font-weight: 600; }
 
 .src {
   position: absolute; left: 150px; right: 88px; bottom: 14px;
-  font: 400 13px/1.4 var(--sans); color: var(--muted); text-wrap: pretty;
+  font: 400 15px/1.4 var(--sans); color: var(--muted); text-wrap: pretty;
 }
 /* one item per source: linked reference in bold, what it supplies in brackets; italic = own work or assumption */
 .src > span + span::before { content: "·"; margin: 0 .6em; font-weight: 700; color: var(--paper-line); }
@@ -320,6 +320,8 @@ strong { font-weight: 600; }
   background: color-mix(in srgb, var(--c, var(--ch)) var(--box-tint), var(--paper)); }
 .chip .tex { font-size: 30px; color: inherit; }
 .chip .katex .f { color: inherit; }
+/* the unit of the quantity a chip names, small beside its symbol */
+.chip .u { font: 400 .62em/1 var(--sans); opacity: .75; margin-left: -2px; white-space: nowrap; }
 .chip.sm { gap: 6px; padding: 7px 12px; font-size: 17px; }
 
 /* formula line: a chip, then the formula or words; wraps under itself */
@@ -768,6 +770,10 @@ body:has(#menu.open) #menu-fab { display: none; }
 .alb-intro { position: relative; }   /* slide 10: the recap drawing, the tick on carbon in its own layer on top */
 .alb-stage { position: absolute; inset: 0; z-index: 1; }
 .alb-stage > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the finished carbon formula under its heading */
+.recap-eq { position: absolute; z-index: 2; left: 0; top: 212px; }
+.recap-eq .card { display: flex; flex-direction: column; gap: 6px; font-size: 21px; }
+.recap-eq-h { font: 600 17px/1 var(--sans); color: var(--muted); }
 .trees-do.recap *, .alb-check { animation: none !important; }
 .trees-do.recap :is(.pop, .grow) { opacity: 1; transform: none; }
 .trees-do.recap :is(.td-co2 > g, .td-vapor path) { opacity: .85; }
@@ -1508,7 +1514,7 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg .hwnext { position: absolute; left: 80px; right: 80px; bottom: 82px; text-align: center; }
 .slide.holzweg .hwnext p { margin: 0; font: 500 34px/1.3 var(--serif); color: var(--ink); }
 .slide.holzweg .why .no { color: #e07a5f; font: 700 26px/1 var(--sans); flex: none; }
-.slide.holzweg p.src { margin-top: 0; font: 400 13px/1.45 var(--sans); font-style: normal; color: var(--src); opacity: 0; transition: opacity .6s var(--ease); }
+.slide.holzweg p.src { margin-top: 0; font: 400 15px/1.45 var(--sans); font-style: normal; color: var(--src); opacity: 0; transition: opacity .6s var(--ease); }
 .slide.holzweg:has(.hwk3.shown) p.src { opacity: 1; }
 .slide.holzweg p.src > span[data-step]:not(.shown) { display: none; }   /* a source only once its part is there */
 /* the opener after the summary: speed and space as the two pictures of the vegan slide, then the answer and, smaller,
@@ -1646,7 +1652,7 @@ svg.mo .m-sway.back { animation: none; }
 .kurs-side { display: flex; flex-direction: column; gap: 26px; font-family: var(--sans); position: relative; }
 .kurs-txt { flex: 1; display: flex; flex-direction: column; gap: 26px; transition: opacity .5s var(--ease); }
 /* the best case's footnote at the foot of the column, level with the chart's axis */
-.kurs-fn { margin-top: auto; margin-bottom: 30px; font: 400 17px/1.4 var(--sans); color: var(--muted); }
+.kurs-fn { margin-top: auto; margin-bottom: 30px; font: 400 19px/1.4 var(--sans); color: var(--muted); }
 .takeaway.stay { animation: none !important; opacity: 1 !important; top: 0 !important; }   /* stands as on the slide before */
 .kurs .clip.kurs-clip { position: relative; margin: auto 0 6px; }   /* news and date centred in the column, the footnote at its foot */   /* the news of the day opens the talk */
 .kurs-clip .cl-h { font-size: 27px; }
@@ -1891,12 +1897,10 @@ html.notips .ectip { display: none !important; }
 .lit-sum .t-stat.lg { font-size: 72px; margin-top: 70px !important; }
 .lit-sum .t-note { font-size: 20px; }
 .lit-sum .t-note { margin-top: 10px; }
-.c10-row { display: grid; grid-template-columns: 389px 1fr; align-items: center; gap: 0 10px; }
+.c10-row { display: grid; grid-template-columns: 482px 1fr; align-items: center; gap: 0 16px; }   /* the stock's chip as wide as the one above, so the two "=" line up */
+.c10-row > .chip { justify-content: flex-start; }
 .c10-body { grid-template-columns: 540px minmax(0, 1fr); margin-top: 10px; }
 .figcap { text-align: center; margin-bottom: 2px; }
-/* slide 17: the CO2 box of the carbon-cycle slide turns red on the greenhouse question */
-svg.s17 .co2box .cbx { transition: fill .6s var(--ease), fill-opacity .6s var(--ease), stroke .6s var(--ease); }
-.slide:has(.f-co2.shown) svg.s17 .co2box .cbx { fill: #b2182b; fill-opacity: .14; stroke: #b2182b; stroke-dasharray: none; }
 .fflow .ffair code { font: 600 1em/1 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: .02em; padding: 2px 8px; border-radius: 6px; background: rgba(255, 255, 255, .14); }
 .fflow .ffair p { font: 400 20px/1.35 var(--sans); color: var(--paper); }
 
@@ -1981,7 +1985,13 @@ html.nocursor, html.nocursor * { cursor: none !important; }
 .alx-def { margin-top: 14px; }
 .alx-def .gloss { white-space: nowrap; }
 .alx { flex: 1; margin: 10px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 60px; align-content: center; }
-.alx-col { display: flex; flex-direction: column; align-items: center; }
+.alx-col { position: relative; display: flex; flex-direction: column; align-items: center; }
+/* the albedos written onto the picture: the ground's beside its surface, the tree's beside its crown */
+.alx-a { position: absolute; left: 71%; font: 600 23px/1 var(--sans); color: var(--ink); white-space: nowrap; }
+.alx-col:last-child .alx-a { left: 60%; }
+   /* the fir is narrow at the top and leaves room at the left */
+.alx-a.t { top: 44px; }
+.alx-a.g { top: 196px; }
 .alx-ico { width: 448px; height: 280px; }
 .alx-name { margin-top: 14px; font: 600 26px/1.2 var(--sans); color: var(--ink); }
 .alx-d { margin-top: 16px; font: 600 30px/1 var(--sans); color: var(--ink); white-space: nowrap; }
@@ -2161,3 +2171,73 @@ svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 .slide:has(svg.s21 .ts2.shown) svg.s21 .tp-store { opacity: .75; transition: opacity 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }
 /* the energy balance per year (backup "Energiebilanz Jahr für Jahr"): its key and names a size smaller, the key fits in one row */
 .chart[data-ec="tbal"] .mtex.ectex { font-size: 15px; padding: 3px 7px 4px; }
+
+/* slide 10: from the balance to the model, beside the balance so it holds for all four fluxes: measured, averaged over the year */
+.c10-how { display: flex; flex-direction: column; justify-content: center; gap: 4px; align-self: stretch; margin-left: 18px;
+  padding-left: 18px; border-left: 3px solid var(--par); font: 500 22px/1.25 var(--sans); color: var(--par); }
+.c10-how b { font-weight: 500; white-space: nowrap; }
+
+/* slide 3: what the simple sum leaves out, over the clippings: the two things the trees chapter then models */
+.ue-lit { position: relative; }
+.ue-miss { position: absolute; inset: -18px -10px 0; z-index: 5; display: flex; align-items: center; justify-content: center;
+  border-radius: 20px; backdrop-filter: blur(8px) saturate(.6); -webkit-backdrop-filter: blur(8px) saturate(.6);
+  background: color-mix(in srgb, var(--paper) 72%, transparent); opacity: 0; transition: opacity .6s var(--ease); }
+.ue-miss.shown { opacity: 1; }
+.ue-mc { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; padding: 30px 44px 34px; border-radius: 20px; background: var(--paper);
+  box-shadow: 0 30px 70px -28px rgba(30, 26, 18, .5), 0 0 0 1.5px var(--paper-line); max-width: 1320px; }
+.ue-mc > .ue-tag { grid-column: 1 / -1; }
+.ue-mi { position: relative; display: flex; gap: 16px; align-items: flex-start; }
+.ue-mi .badge { flex: none; margin-top: 4px; }
+.ue-mh { font: 600 28px/1.2 var(--serif); color: var(--ink); }
+.ue-mt { margin-top: 8px; font: 400 21px/1.4 var(--sans); color: var(--ink-2); }
+.ue-mw { margin-top: 8px; font: 400 16px/1.3 var(--sans); color: var(--muted); }
+.slide.active .ue-miss.shown .ue-mi { animation: rise .6s var(--ease) both; }
+.slide.active .ue-miss.shown .ue-mi + .ue-mi { animation-delay: .25s; }
+
+/* the recap before the reflection slides: the two parts of the reflection named under its label, right of the tree */
+.refl-two { position: absolute; z-index: 2; left: 930px; top: 176px; width: 494px; display: grid; gap: 22px; }
+.refl-two .rt { position: relative; display: flex; gap: 12px; align-items: flex-start; }
+.refl-two .badge { flex: none; margin-top: 3px; }
+.rt-h { font: 600 23px/1.25 var(--serif); color: var(--ink); }
+.rt-t { margin-top: 4px; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
+.rt-s { font-weight: 600; white-space: nowrap; }
+.rt-s.warm { color: #b2182b; } .rt-s.cool { color: var(--fjord); }
+/* f13: the forcing with the evaluation bars (mit / ohne) on one line in the column */
+.bilanz .bl-phi .bl-f { font-size: 25px; white-space: nowrap; }
+.bilanz .bl-d .tex { display: inline-block; vertical-align: middle; font-size: 22px; margin-right: 4px; }
+
+/* chapter openers: the overview's disc opened up, its scene in the corner (x-* in index.html; Deck.zoomInto flies
+   from the disc into exactly this picture), the title and the chapter's goal on the left: what goes in, what comes out */
+.cscene { position: absolute; inset: 0; width: 1600px; height: 900px; pointer-events: none; }
+.slide.chapter .ctext { top: 160px; max-width: 900px; }
+.cgoal { position: absolute; left: 120px; top: 400px; display: flex; align-items: center; gap: 16px; color: var(--paper);
+  --line: color-mix(in srgb, var(--paper) 60%, var(--ch)); }
+.cgoal .g-colw { display: flex; flex-direction: column; gap: 10px; }
+.cgoal .g-k { margin: 0; font: 600 16px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--paper) 62%, var(--ch)); }
+.cgoal .g-col { display: flex; flex-direction: column; gap: 14px; }
+/* the cards tinted into the chapter colour, light text: part of the page, not stuck on it */
+.gcard { position: relative; display: grid; grid-template-columns: auto auto; gap: 4px 20px; align-items: center;
+  padding: 14px 20px 12px; border-radius: 16px; background: color-mix(in srgb, var(--paper) 12%, var(--ch));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--paper) 30%, var(--ch)); }
+.gcard .g-h { grid-column: 1 / -1; }
+.gcard.g-v { grid-template-columns: auto; justify-items: start; }
+.g-h { margin: 0; font: 600 21px/1.2 var(--sans); color: var(--paper); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.g-f { font-size: 30px; white-space: nowrap; }
+.cgoal .katex, .cgoal .katex * { color: var(--paper) !important; }
+.g-mini { display: block; overflow: visible; zoom: 1.1; }
+.g-mini .g-ax { stroke: var(--line); stroke-width: 2; fill: none; }
+.g-mini .g-zero { stroke-dasharray: 5 5; }
+.g-mini .g-ln { stroke: var(--ch-soft); stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.g-mini .g-faint { stroke: var(--line); stroke-width: 2.2; }
+.g-mini .g-tx { fill: var(--line); font: 500 12px var(--sans); }
+.g-step { position: relative; flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 24px;
+  font: 600 17px/1.2 var(--sans); text-align: center; color: color-mix(in srgb, var(--paper) 80%, var(--ch)); }
+.g-step svg { width: 48px; height: 24px; display: block; }
+.g-step path { stroke: var(--line); stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cgoal .g-out { box-shadow: inset 0 0 0 2.5px var(--ch-soft); }
+.cgoal .badge { --c: color-mix(in srgb, var(--paper) 88%, var(--ch)); color: var(--ch); }
+
+/* the zoom into a chapter (Deck.zoomInto): the opened scene in a circle that is first exactly the disc, then grows
+   until it covers the stage while the scene moves to its place in the opener's corner */
+.zoomer { position: absolute; inset: 0; z-index: 50; pointer-events: none; width: 1600px; height: 900px; }
+.slide.arrive > .cscene { animation: none; }   /* the opener's scene is the zoom's last frame: no fade under it */

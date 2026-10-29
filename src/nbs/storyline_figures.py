@@ -1323,7 +1323,7 @@ def tree_temperature_figure(out_path: str) -> str:
         ax.plot(YEARS, r.delta_t * scale, color=s.color, linewidth=3.2)
         ax.annotate(s.label, (YEARS[-1], r.delta_t[-1] * scale), xytext=(8, 0), textcoords="offset points", va="center",
                     fontsize=12.5, color=s.color, fontweight="bold", annotation_clip=False)
-    ax.set_title("Je Baum: sein Antrieb φ(t) → ΔT(t)", loc="left", fontsize=13, color=C_INK)
+    ax.set_title("Je Baum: sein Antrieb φ → ΔT", loc="left", fontsize=13, color=C_INK)
     ax.text(2028, ax.get_ylim()[0] * 0.92, "unter null: kühlt", fontsize=12, color=C_INK_MUTED)
     return _save(fig, out_path)
 
@@ -1487,7 +1487,8 @@ def forest_type_map_figure(out_path: str) -> str:
 
 
 def de_gha(x: float) -> str:
-    return f"{x:.2f} Gha".replace(".", ",")
+    """An area given in Gha, written in million km² (1 Gha = 10 Mio. km²)."""
+    return f"{10 * x:.1f}".replace(".", ",") + " Mio. km²"
 
 
 # --------------------------------------------------------------------------
@@ -1500,7 +1501,7 @@ LITERATURE_REMAINING = (
     ("Weber et al. 2024", "Erdsystemmodell, Albedo + Luftchemie, 4-°C-Welt", 2.0 / 3.0, True),
     ("Fahrenbach et al. 2026", "CESM2, Bastin-Fläche, SSP2-4.5, bis 2100", 0.13 / 0.22, False),
     ("Hasler et al. 2024", "Bastin-Fläche, statisch (max. CO$_2$e)", 101.0 / 214.0, False),
-    ("Liang et al. 2025", "0,88 Gha, bis 2100, SSP1-2.6, Feuer + Albedo", 37.5 / 125.0, False),
+    ("Liang et al. 2025", "8,8 Mio. km², bis 2100, SSP1-2.6, Feuer + Albedo", 37.5 / 125.0, False),
     ("Rohatyn et al. 2022", "Trockengebiete, bis 2100", (32.3 - 22.6) / 32.3, False),
 )
 """Riley: Nat. Commun. 16, 8810 (median albedo deduction 18 % over 172 ARR
@@ -1556,8 +1557,8 @@ def literature_comparison_figure(out_path: str) -> str:
     rows = [(lab, det, v, lb, False) for lab, det, v, lb in LITERATURE_REMAINING]
     rows += [
         ("Dieses Modell", "Haslers Formel auf unseren Zellen", own["statisch"], False, True),
-        ("Dieses Modell", f"ΔT 2100, SSP2-4.5, alle {de(own['flaeche_alle_gha'], 2)} Gha", own["alle"], False, True),
-        ("Dieses Modell", f"ΔT 2100, nur kühlende {de(own['flaeche_kuehlend_gha'], 2)} Gha", own["kuehlend"], False,
+        ("Dieses Modell", f"ΔT 2100, SSP2-4.5, alle {de(10 * own['flaeche_alle_gha'], 1)} Mio. km²", own["alle"], False, True),
+        ("Dieses Modell", f"ΔT 2100, nur kühlende {de(10 * own['flaeche_kuehlend_gha'], 1)} Mio. km²", own["kuehlend"], False,
          True),
     ]
     fig, ax = plt.subplots(figsize=WIDE, dpi=FIG_DPI)

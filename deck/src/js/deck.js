@@ -14,10 +14,11 @@ const TEX_MACROS = {
   // the symbols of the talk: one macro and one colour each (deck.css, "Symbol colours"); hue = channel, shade = symbol
   // carbon in the tree
   "\\mB":   "\\q{mb}{m^{c}_{\\mathrm{Baum}}}",
-  "\\mPS":  "\\q{ps}{m^{c}_{\\mathrm{PS}}}",
-  "\\mRE":  "\\q{re}{m^{c}_{\\mathrm{RE}}}",
-  "\\mZS":  "\\q{zs}{m^{c}_{\\mathrm{ZS}}}",
-  "\\mST":  "\\q{st}{m^{c}_{\\mathrm{ST}}}",
+  "\\mBd":  "\\q{mb}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{Baum}}}{\\mathrm{d}t}}",   // the balance, as a rate
+  "\\mPS":  "\\q{ps}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{PS}}}{\\mathrm{d}t}}",   // a flux: kg C per year
+  "\\mRE":  "\\q{re}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{RE}}}{\\mathrm{d}t}}",   // a flux: kg C per year
+  "\\mZS":  "\\q{zs}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{ZS}}}{\\mathrm{d}t}}",   // a flux: kg C per year
+  "\\mST":  "\\q{st}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{ST}}}{\\mathrm{d}t}}",   // a flux: kg C per year
   "\\mmax": "\\q{mmax}{m^{c}_{\\mathrm{max}}}",
   "\\kw":   "\\q{kw}{k}",                             // growth rate
   "\\pw":   "\\q{pw}{p}",                             // shape parameter
@@ -25,15 +26,15 @@ const TEX_MACROS = {
   "\\gam":  "\\q{gam}{\\gamma}",                      // rise of the disturbance rate
   "\\pd":   "\\q{pd}{p}",                             // disturbance probability
   "\\pdo":  "\\q{pdo}{p_0}",
-  "\\md":   "\\q{md}{\\dot m}",                       // the tree's carbon uptake
+  "\\md":   "\\q{md}{\\dfrac{\\mathrm{d}m^{c}}{\\mathrm{d}t}}",                       // the tree's carbon uptake
   // sunlight, energy, albedo
-  "\\qin":  "\\q{qin}{\\dot q_{\\mathrm{ein}}}",
+  "\\qin":  "\\q{qin}{\\dfrac{\\mathrm{d}q_{\\mathrm{ein}}}{\\mathrm{d}t}}",
   "\\alb":  "\\q{alb}{\\alpha}",
   "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{Baum}}}",
   "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{Wolke}}}",
   "\\alw":  "\\q{alw}{\\alpha_{\\mathrm{Wolke}}}",
   "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{Wolke}}}",
-  "\\dQ":   "\\q{dq}{\\Delta\\dot Q_{\\mathrm{Albedo}}}",
+  "\\dQ":   "\\q{dq}{\\dfrac{\\mathrm{d}Q^{\\mathrm{diff}}_{\\mathrm{Albedo}}}{\\mathrm{d}t}}",
   "\\Ab":   "\\q{ab}{A_{\\mathrm{Baum}}}",
   "\\Ae":   "\\q{ae}{A_{\\mathrm{Erde}}}",
   "\\tatm": "\\q{tau}{\\tau_{\\mathrm{atm}}}",
@@ -46,7 +47,7 @@ const TEX_MACROS = {
   "\\eps":  "\\q{eps}{\\varepsilon_{\\mathrm{CO_2}}}",
   "\\dm":   "\\q{dm}{\\Delta m_{\\mathrm{CO_2}}}",
   "\\mco":  "\\q{dm}{m_{\\mathrm{CO_2}}}",
-  "\\mdc":  "\\q{mdc}{\\dot m_{\\mathrm{CO_2}}}",
+  "\\mdc":  "\\q{mdc}{\\dfrac{\\mathrm{d}m_{\\mathrm{CO_2}}}{\\mathrm{d}t}}",
   "\\gC":   "\\q{gc}{g_C}",
   "\\cc":   "\\q{conc}{c}",
   "\\cz":   "\\q{conco}{c_0}",
@@ -677,7 +678,7 @@ const EC_TEMPSUM = {
       `Ein Jahr Antrieb (${A.name}, ${D.one.year})`,
       `Jedes ${D.every}. Jahr: Der Baum wächst, sein Antrieb wird größer`,
       'Summe aller Jahre = ΔT des Baums',
-      'Je Baum: sein Antrieb φ(t) → ΔT(t)'];
+      'Je Baum: sein Antrieb φ → ΔT'];
     return {
       animationEasing: 'cubicOut', animationEasingUpdate: 'cubicInOut', animationDurationUpdate: 900,
       title: { text: titles[k], left: 96, top: 4, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 19, fontWeight: 400 } },
@@ -840,7 +841,7 @@ const EC_ZEIT = {
       grid: { left: 74, right: 300, top: 50, bottom: 46 },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisTick: { show: true, customValues: [2026, 2050, 2075, 2100] },
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: -35, max: 0, interval: 5, name: 'ΔT(t) [mK]', nameTex: '$\\dT(t)$ [mK]', nameLocation: 'middle', nameGap: 52,
+      yAxis: ecAxis({ type: 'value', min: -35, max: 0, interval: 5, name: 'ΔT [mK]', nameTex: '$\\dT$ [mK]', nameLocation: 'middle', nameGap: 52,
                       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => v < 0 ? `−${ecNum(-v, 0)}` : String(v) }, splitLine: { show: true, lineStyle: { color: EC.grid } } }),
       series
     };
@@ -853,7 +854,7 @@ const EC_ZEIT = {
    frame, so the numbers move with the scale; they read in mK while the span is small */
 const AUF_TITLE = 'Alle Bäume 2026 gepflanzt', AUF_WIDE = [-.1, 2];
 // one y title through all of slide 24, in deg C from the start: only the scale moves, never the label
-const AUF_Y = { name: 'ΔT(t) [°C]', nameTex: '$\\dT(t)$ [°C]', nameLocation: 'middle', nameGap: 86 }, AUF_LEFT = 108;
+const AUF_Y = { name: 'ΔT [°C]', nameTex: '$\\dT$ [°C]', nameLocation: 'middle', nameGap: 86 }, AUF_LEFT = 108;
 function aufMorph(phase, t) {
   const D = window.ZEIT, p = D.pfade, vl = D.vl_c, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
   const bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), ext = vl.concat(bk);
@@ -1244,11 +1245,11 @@ const EC_DACCS_AUSBAU = { steps: 0, tip: { unit: 'Gt CO₂/a', dec: 2 }, option(
    merges and only the new ring enters. */
 const EC_LANDDONUT = {
   steps: 1,
-  tip: { item: p => p.name ? tipCard({ head: p.name.trim(), sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value, p.value < 1 ? 2 : 1, 'Gha') }] }) : '' },
+  tip: { item: p => p.name ? tipCard({ head: p.name.trim(), sub: 'Landfläche', rows: [{ c: p.color, v: tipVal(p.value * 10, p.value < 1 ? 1 : 0, 'Mio. km²') }] }) : '' },
   option(k) {
     const V = window.ZEIT.vegan, L = V.land;
     const rest = L.gesamt - L.wald - L.tiere - L.acker - L.wiederbewaldbar;
-    const gha = v => `${ecNum(v, v < 1 ? 2 : 1)} Gha`;
+    const gha = v => `${ecNum(v * 10, v < 1 ? 1 : 0)} Mio. km²`;   // the data in Gha, shown in million km²
     const rich = (c, op = 1) => ({ n: { color: c, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 22, opacity: op },
                          v: { color: c, fontFamily: EC.font, fontSize: 18, lineHeight: 20, opacity: .85 * op } });
     // what share of each land use could carry forest (Walker et al. 2022: 15.8 % of its 2.06 Gha grazing land, 61.7 % of
@@ -1284,7 +1285,7 @@ const EC_LANDDONUT = {
              spacer('Lebensmittel ', L.acker), spacer('übriges Land ', rest)] }));
     return {
       animationDurationUpdate: 700,
-      title: { text: `${ecNum(L.gesamt, 0)} Gha`, subtext: 'Land', left: '53%', textAlign: 'center', top: '37%',
+      title: { text: `${ecNum(L.gesamt * 10, 0)} Mio. km²`, subtext: 'Land', left: '53%', textAlign: 'center', top: '37%',
                textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 28, fontWeight: 600 },
                subtextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } },
       series
@@ -1610,6 +1611,8 @@ class MplChart {
     const given = (host.dataset.slotSteps || '').split(',').filter(s => s.trim() !== '').map(Number);
     this.slotStep = slots.map((_, k) => given[k] ?? 0);
     this.nSteps = Math.max(0, ...this.slotStep);
+    // single lines and labels can wait for a click of their own (gid "step:N" in the figure)
+    for (const a of d.axes) for (const it of [...(a.items || []), ...(a.texts || [])]) if (it.stp) this.nSteps = Math.max(this.nSteps, it.stp);
     if (host.dataset.stops === 'auto') {
       // category positions of the first panel, from its markers and bars
       const xs = [];
@@ -1808,6 +1811,8 @@ class MplChart {
       const bars = [], cells = [];
       a.items.forEach((it, j) => {
         if (it.t === 'line') {
+          if (it.stp > k) return;   // waits for its click
+          const faded = it.fade !== undefined && it.fade <= k;   // the other places step back (gid "fade:N")
           const pts = it.xy.filter(p => p[0] === null || inX(p[0])).map(p => (p[0] === null || p[1] === null) ? [NaN, NaN] : p);
           if (!pts.length) return;
           const mk = it.mk, onlyMk = !it.lw;
@@ -1819,7 +1824,7 @@ class MplChart {
           series.push({
             id: id('l' + j), name: it.name || ' ', tipLine: !(pts.length <= 2 && !it.name && !legendName[String(it.c).toLowerCase()] && !this.textName(i, it.c)), tipName: it.name || legendName[String(it.c).toLowerCase()] || this.textName(i, it.c), type: onlyMk ? 'scatter' : 'line', xAxisIndex: i, yAxisIndex: i, z: Z(it),
             data: dataPts, showSymbol: !!mk, symbol: sym, symbolSize: mk ? mk.size * s : 0, itemStyle: symStyle,
-            lineStyle: { color: it.c, width: it.lw * s, type: it.dash ? it.dash.map(v => v * s) : 'solid', opacity: it.a ?? 1, cap: 'round' },
+            lineStyle: { color: it.c, width: it.lw * s, type: it.dash ? it.dash.map(v => v * s) : 'solid', opacity: (it.a ?? 1) * (faded ? .22 : 1), cap: 'round' },
             connectNulls: false, clip: !it.noclip, smooth: false, emphasis: { disabled: true },
             ...(mixed && !mk && it.lw ? { showSymbol: true, symbol: 'circle', symbolSize: 22 * s, itemStyle: { color: it.c, opacity: 0 } } : {}),
             animationDuration: onlyMk ? 500 : 1500, animationEasing: 'cubicInOut', animationDelay: base + (site ? 0 : onlyMk ? 900 : 0)
@@ -1830,6 +1835,7 @@ class MplChart {
         } else if (it.t === 'cells') {
           if (!this.mapSpec) cells.push(it);
         } else if (it.t === 'poly') {
+          if (it.stp > k) return;   // waits for its click
           if (this.mapSpec && (this.cbarAxes.includes(i) || this.mapAxes.includes(i))) return;   // old colour-bar ends and hatching: the map layers draw their own
           const rings = it.pts.filter(r => r.length > 2);
           if (!rings.length) return;
@@ -1896,7 +1902,7 @@ class MplChart {
       };
       // a formula symbol on its own goes over the chart in KaTeX, in the slides' formula face (placeTex)
       for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
-      const shown = a.texts.filter(t => inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
+      const shown = a.texts.filter(t => !(t.stp > k) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
       const texts = shown.filter(t => !siteText(t));
       if (texts.length) series.push(textSeries(id('t'), texts, base + 1300));
       if (siteTexts().length) {
@@ -2005,6 +2011,12 @@ class MplChart {
     }
     if (lg.title) { const r = supRichText(lg.title.s, { fontSize: lg.title.fs * s, fontFamily: MPL_FONT, fontWeight: 600, fontStyle: 'normal' }, lg.title.c) || {};
       children.push({ type: 'text', x: lg.title.f[0] * W, y: lg.title.f[1] * H, style: { text: r.formatter || lg.title.s, rich: r.rich, fill: lg.title.c, textAlign: lg.title.al, textVerticalAlign: 'middle', font: `600 ${lg.title.fs * s}px ${MPL_FONT}` } }); }
+    if (!this.isMap && !this.host.closest('.dark, .brk') && lg.entries.length && !lg.title) {   // a line chart's legend sits on top of the grid lines: a paper-coloured plate hides them
+      const fs = lg.fs * s, xs = lg.entries.map(e => e.f[0] * W), ys = lg.entries.map(e => e.f[1] * H);
+      const x0 = Math.min(...xs) - lg.pad * s - lg.hl * s - 6, x1 = Math.max(...lg.entries.map(e => e.f[0] * W + String(e.s).length * fs * .42)) + 4;
+      children.unshift({ type: 'rect', shape: { x: x0, y: Math.min(...ys) - fs * .7, width: x1 - x0, height: Math.max(...ys) - Math.min(...ys) + fs * 1.4, r: 4 }, style: { fill: 'rgba(242, 237, 226, .92)' } });
+    }
+    if (!this.isMap && !this.host.closest('.dark, .brk')) children.forEach(c => { c.z = 3000; });   // graphic children take their own z
     return { id, type: 'group', silent: true, z: 40, children };
   }
 
@@ -2963,7 +2975,7 @@ class Deck {
   }
   decorate() {
     // Where the talk stands: the chapters as on the overview slide, each its disc in its own colour, the current
-    // one named. Content slides carry it top right, the chapter openers top left (on their colour, inverted).
+    // one named. Content slides carry it top right; the chapter openers need none, their title says it.
     // A click opens the chapter.
     const chapters0 = ['baeume', 'klima', 'vergleich'];
     const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
@@ -2986,7 +2998,6 @@ class Deck {
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
       if (h && !s.hasAttribute('data-nonav') && n > first) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
-      else if (s.matches('.chapter:not(.brk):not(.backup)')) s.appendChild(path(ch));
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
       }
@@ -3087,6 +3098,8 @@ class Deck {
     // slide first (top right), the big overview becoming the small one
     if (this.flying) return;
     clearTimeout(this._planT);   // a plan still pending from the last step must not run in the middle of the flight
+    const disc = this.zoomDisc();   // into a chapter opener: its disc grows until its colour fills the stage
+    if (disc) return this.zoomInto(disc, this.slides[this.i + 1]);
     const plan = this.plan && this.plan.i === this.i ? this.plan : this.planFlight();
     if (plan) this.flyHome(plan); else this.go(this.i + 1, 0);
   }
@@ -3101,7 +3114,7 @@ class Deck {
   planFlight() {
     const i = this.i, prev = this.slides[i], s = this.slides[i + 1];
     if (this.flying || !s || this.still || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
-    const path = s.querySelector('.path');
+    const path = s.matches('.chapter') ? null : s.querySelector('.path');   // a chapter opener is zoomed into (Deck.zoomInto)
     const discs = path ? [...prev.querySelectorAll('[data-fly]')].filter(e => !e.closest('[data-step]:not(.shown)')) : [];
     if (!discs.length) return null;
     if (window.__deckDataNow) window.__deckDataNow();
@@ -3121,6 +3134,44 @@ class Deck {
     // and painted already, unseen under this one: at the hand-over it only has to become visible
     s.classList.add('primed'); this.primed = s;
     return { i, legs };
+  }
+  zoomDisc() {
+    // on the overview or a chapter's closing card, before a chapter opener: the disc of that chapter, if it is shown
+    const prev = this.slides[this.i], s = this.slides[this.i + 1];
+    if (!s || this.still || !s.matches('.chapter:not(.brk):not(.backup)') || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    return [...prev.querySelectorAll(`[data-fly="${s.dataset.ch}"]`)].find(e => !e.closest('[data-step]:not(.shown)')) || null;
+  }
+  zoomInto(e, s) {
+    // the disc opens up into the opener: the same drawing (x-*, the disc's scene with its ground carried on) in a
+    // circle that is at first exactly the disc; the circle grows until it covers the stage while the drawing moves and
+    // scales to its place in the opener's corner (.cscene). The last frame is the opener's own picture: it is put
+    // under it, the title and the goal rise in
+    this.flying = true;
+    const D = this.deck.getBoundingClientRect(), k = this.deck.offsetWidth / D.width, r = e.getBoundingClientRect();
+    const w = r.width * k, x = (r.left - D.left) * k, y = (r.top - D.top) * k, k0 = w / 236;   // the disc: viewBox -118 72 236 236
+    const sc = s.querySelector('.cscene'), S = +sc.dataset.s, X = +sc.dataset.x, Y = +sc.dataset.y;
+    const far = Math.max(...[[0, 0], [1600, 0], [0, 900], [1600, 900]].map(([px, py]) => Math.hypot(px - X, py - Y))) / S + 30;
+    const ch = s.dataset.ch === 'vergleich' ? 'potenzial' : s.dataset.ch;
+    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    layer.setAttribute('class', 'zoomer'); layer.setAttribute('viewBox', '0 0 1600 900');
+    layer.innerHTML = `<defs><clipPath id="zoom-clip"><circle cx="0" cy="190" r="118"/></clipPath></defs>`
+      + `<g><circle cx="0" cy="190" r="118" fill="${getComputedStyle(s).backgroundColor}"/><g clip-path="url(#zoom-clip)"><use href="#x-${ch}"/></g></g>`;
+    this.deck.append(layer);
+    const g = layer.querySelector(':scope > g'), DUR = 1150, opt = { duration: DUR, easing: 'cubic-bezier(.6, 0, .3, 1)', fill: 'forwards' };
+    g.animate([{ transform: `translate(${x + 118 * k0}px, ${y - 72 * k0}px) scale(${k0})` },
+               { transform: `translate(${X}px, ${Y - 190 * S}px) scale(${S})` }], opt);
+    for (const c of layer.querySelectorAll('circle')) c.animate([{ r: '118px' }, { r: `${far}px` }], opt);
+    const gone = e.closest('.ic') || e; gone.style.visibility = 'hidden';
+    setTimeout(() => {
+      s.classList.add('arrive'); this.go(this.i + 1, 0);
+      setTimeout(() => {   // the opener painted under the last frame: the layer goes
+        layer.remove(); gone.style.visibility = '';
+        setTimeout(() => {
+          s.classList.remove('arrive'); this.flying = false;
+          if (this.staged) { this.stage(this.staged); this.staged = null; }
+        }, 600);
+      }, 120);
+    }, DUR);
   }
   flyHome(plan) {
     // one timeline, nothing but transforms and opacity:
