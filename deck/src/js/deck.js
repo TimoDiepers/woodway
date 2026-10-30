@@ -3122,6 +3122,8 @@ class Deck {
       prev.classList.add('hold');
     }
     if (n !== this.i) this.zoomReset();   // a new slide starts whole
+    // slides of one drawing (data-carry): what the previous slide already shows stays as it is, it does not enter again
+    s.classList.toggle('carry', !!(prev && prev !== s && !this.still && s.dataset.carry && s.dataset.carry === prev.dataset.carry));
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     if (prev && prev !== s && !this.still) this.swapPart(prev, s);
     s.classList.toggle('settled', step === 'end' || !!this.still || !s.classList.contains('arrive') && n !== this.i + 1);   // a chapter opener reached backwards or by a jump: its entrance stays still

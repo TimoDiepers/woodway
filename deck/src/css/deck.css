@@ -2381,3 +2381,6 @@ svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: 
 .fflow .fin.big .katex { font-size: 2.1em; }
 .fline.head > .part > .hl > [data-step]:not(.shown) { display: none; }   /* the unfinished f(…) takes no room */
 .slide:has(.fline.head .sx.shown) .fline.head .d1, .slide:has(.fline.head .rx.shown) .fline.head .d2 { display: none; }   /* the dots give way to the next argument */
+
+/* a drawing that goes on across slides (data-carry): its fixed parts do not enter again, only the clicks do */
+.slide.carry :is(.pop, .grow, .draw):not([data-step]) { animation: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
