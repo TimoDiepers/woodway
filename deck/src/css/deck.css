@@ -2380,3 +2380,4 @@ svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: 
 .fflow .fin.big { padding: 22px 18px; }
 .fflow .fin.big .katex { font-size: 2.1em; }
 .fline.head > .part > .hl > [data-step]:not(.shown) { display: none; }   /* the unfinished f(…) takes no room */
+.slide:has(.fline.head .sx.shown) .fline.head .d1, .slide:has(.fline.head .rx.shown) .fline.head .d2 { display: none; }   /* the dots give way to the next argument */
