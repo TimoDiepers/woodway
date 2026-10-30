@@ -25,23 +25,33 @@
   --paper: #f2ede2;
   --paper-deep: #e7e0d0;
   --paper-line: #d6ccb6;
+  --track: #b3aa97;           /* the parts of a chapter ring that are not lit */
   --ink: #1b2420;
   --ink-2: #3f4a44;
   --muted: #5d665f;           /* 5.2:1 on paper */
 
-  --moss: #3d552d;            /* Bäume */
+  --moss: #304620;            /* Bäume */
   --moss-soft: #a9bc8f;
-  --clay: #6e3d3a;            /* Klima */
+  --clay: #612f2d;            /* Klima */
   --clay-soft: #d2a597;
   --olive: #5c5a24;           /* Potenziale */
   --olive-soft: #c7c08a;
-  --fjord: #1e536d;           /* Vergleich */
+  --fjord: #04455f;           /* Potenzial */
+
+  /* the six parts, two per chapter: fill (icons, ring arcs, areas) and a darker text tone (symbols, labels, chart
+     lines). Muted, so the chapters stay the darkest; each colour is the physical quantity of its part, everywhere */
+  --p-co2: #437d61;  --t-co2: #105b3e;     /* Kohlenstoff-Aufnahme */
+  --p-refl: #9d945f; --t-refl: #787136;    /* Reflexionsänderung */
+  --p-bal: #ba8d66;  --t-bal: #96683e;     /* Strahlungsbilanz */
+  --p-temp: #985248; --t-temp: #762c26;    /* Temperaturkurve */
+  --p-one: #4690a1;  --t-one: #006e81;     /* Kühlung eines Baums */
+  --p-world: #316491; --t-world: #004474;  /* Kühlung der Welt */
   --fjord-soft: #9dbfcf;
 
   --ps: #2f7a45;  --re: #7e4a74;  --zs: #3d6698;  --st: #c0392b;
   --par: #8a6a1e;
-  --co2: #2e7d4f; --alb: #c8602a;   /* = EC.alb in the charts */
-  --ray: #d9822b;             /* reflected sunlight in the schemata */
+  --co2: var(--p-co2); --alb: var(--p-refl);   /* = EC.alb in the charts */
+  --ray: var(--p-refl);       /* reflected sunlight in the schemata */
   --sun: #e8b84f; --sun-ray: #d9a441; --amber: #e0a83e;
 
   /* symbol colours (FORMULAS): hue = channel, shade = symbol. CO₂ greens and teals, albedo and energy oranges
@@ -50,12 +60,12 @@
   --s-mb: #1d5b30;  --s-ps: var(--ps);  --s-re: var(--re);  --s-zs: var(--zs);  --s-st: var(--st);
   --s-mmax: #8a6a1e; --s-kw: #a0522d;  --s-pw: #556b2f;   --s-md: #4a6b12;
   --s-sz: #d0502a;  --s-gam: #7a2e0e;  --s-pd: #b83a1e;   --s-pdo: #8a2c12;
-  --s-qin: #a8740b; --s-alb: #e0701a;  --s-albb: #9a3d0c; --s-albw: #c96f0f; --s-dal: #c2410c; --s-daw: var(--ray);
-  --s-alw: #a0601a; --s-dfw: #7c5a2e;  --s-dq: #6b4a2b;   --s-ab: #4f7a3a;   --s-ae: #3f5a73;  --s-tau: #5b6f8a;
-  --s-phi: #6a3d9a; --s-phio: #8a6bb5; --s-phia: #d95f02; --s-phic: #1b7837;
-  --s-eps: #4d8b1f; --s-dm: #00695c;   --s-mdc: #5a8a2a;  --s-gc: #1f7a8c;   --s-conc: #2b6cb0; --s-conco: #5f86b0;
+  --s-qin: #a8740b; --s-alb: var(--t-refl);  --s-albb: var(--t-refl); --s-albw: var(--t-refl); --s-dal: var(--t-refl); --s-daw: var(--p-refl);
+  --s-alw: var(--t-refl); --s-dfw: #7c5a2e;  --s-dq: var(--t-refl);   --s-ab: #4f7a3a;   --s-ae: #3f5a73;  --s-tau: #5b6f8a;
+  --s-phi: var(--t-bal); --s-phio: var(--p-bal); --s-phia: var(--t-refl); --s-phic: var(--t-co2);
+  --s-eps: var(--t-co2); --s-dm: var(--t-co2);   --s-mdc: var(--t-co2);  --s-gc: #1f7a8c;   --s-conc: #2b6cb0; --s-conco: #5f86b0;
   --s-matm: #5d665f; --s-katm: #7f5f2a; --s-ch4: #2b7bba;
-  --s-dt: #b2182b;  --s-rf: #1f5b94;   --s-sk: #a23b72;   --s-ft: #9c2a48;   --s-par: #8a6a1e;
+  --s-dt: var(--t-temp);  --s-rf: #1f5b94;   --s-sk: #a23b72;   --s-ft: var(--t-temp);   --s-par: #8a6a1e;
   --vapor: #17808a;                    /* water vapour and mixing over the forest (slide 15, step 1) */
   --layer: #5a4fa0;                    /* the rising mixed air layer (slide 15, step 2) */
   --land: #8c6d5a;                     /* ocean and land taking CO₂ back */
@@ -141,27 +151,32 @@ body { font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: ant
   font-size: 50px; line-height: 1.08; font-weight: 600; letter-spacing: -0.015em;
   font-variation-settings: "opsz" 72; color: var(--ch); text-wrap: balance; max-width: 1180px;
 }
-/* chapter marker: one disc per chapter in its own colour, the current one a filled pill with its name */
+/* where we are: the three chapter discs in order, the others faded; the current one in its ring, in a pill tinted in
+   the chapter's colour with the chapter and the part beside it (Deck.decorate, ringSvg). On a new part the pill
+   takes its new width, the name rises in and its arc draws (Deck.swapPart) */
 .path { display: flex; align-items: center; gap: 8px; padding-top: 6px; flex: none; }
-.path .pc { display: flex; align-items: center; gap: 10px; height: 44px; padding: 2px; border: 0; border-radius: 22px; background: none;
-  color: var(--ch); font: inherit; cursor: pointer; opacity: .62; transition: opacity .2s var(--ease); }
-.path .pc:hover, .path .pc:focus-visible { opacity: 1; }
-.path .pc:focus-visible { outline: 2px solid var(--ch); outline-offset: 2px; }
-.path .pc svg { width: 40px; height: 40px; flex: none; }
-/* the current chapter: its disc at the pill's left end, flush, the pill in the disc's own colour, so the disc runs
-   on into the name; no ring */
-.path .pc.on { position: relative; isolation: isolate; opacity: 1; color: var(--paper); height: 40px; padding: 0 17px 0 0; cursor: default; }
-/* the current chapter's pill: drawn behind, so it can unfold out of its disc (.landing, Deck.flyHome) */
-.path .pc.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 20px; background: var(--ch);
-  clip-path: inset(0 0 0 0 round 22px); }
-.path .pc b { font: 600 20px/1 var(--sans); }
-.slide.dark .path .pc.on { color: var(--night); }
-.slide.dark .path .pc.on::before { background: var(--ch-soft); }
-/* on a chapter opener: top left, above the title, light on the chapter's colour */
-.slide.chapter > .path { position: absolute; left: 120px; top: 108px; padding: 0; }
-.slide.chapter > .path .pc { opacity: .8; }
-.slide.chapter > .path .pc.on { opacity: 1; color: var(--ch); }
-.slide.chapter > .path .pc.on::before { background: var(--paper); }
+.path .pc { position: relative; display: flex; align-items: center; padding: 0; border: 0; background: none; font: inherit;
+  cursor: pointer; line-height: 0; opacity: .45; transition: opacity .2s var(--ease); }
+.path .pc:hover, .path .pc:focus-visible { opacity: .75; }
+.path .pc:focus-visible { outline: 2px solid var(--ch); outline-offset: 3px; border-radius: 40px; }
+.path .pc .ring { width: 54px; height: 54px; display: block; flex: none; }   /* every chapter the same size, the others faded */
+.path .pc.on { opacity: 1; cursor: default; isolation: isolate; gap: 4px; padding: 0 18px 0 0; overflow: hidden; }   /* as wide as its words */
+.path .pc.on::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 40px;
+  background: color-mix(in srgb, var(--ch) 11%, var(--paper)); }
+.path .where { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; white-space: nowrap; line-height: 1.15; }
+.path .where i { font: 500 14px/1.15 var(--sans); font-style: normal; color: var(--ch); }
+.path .where b { font: 600 17px/1.15 var(--sans); color: var(--ink); }
+.slide.dark .path .pc.on::before { background: color-mix(in srgb, var(--ch-soft) 18%, transparent); }
+.slide.dark .path .where b { color: var(--paper); }
+/* a new part: its name rises in, its arc draws */
+/* the ring around a chapter disc: two arcs, one per part (ringSvg) */
+.ring { overflow: visible; }
+.ring .arc { fill: none; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 172 360; stroke-dashoffset: 0;
+  transition: stroke .6s var(--ease), stroke-dashoffset .9s var(--ease), opacity .4s var(--ease); }
+.ring .arc.track { stroke: var(--track); }
+.ring .arc.on { stroke: var(--a); }
+.ring .arc.done { stroke: var(--c); }
+.ring .arc.off { stroke: var(--a); stroke-dashoffset: 172; }
 
 /* ground line: every content slide stands on a thin strip of its chapter colour */
 /* the ground line sits at the bottom of the screen, not of the 16:9 box (see Deck.stage) */
@@ -452,8 +467,6 @@ table.tbl-lg td { font-size: 26px; padding: 20px 18px; }
 .slide.title .ctext { position: absolute; left: 120px; top: 230px; max-width: 860px; }
 .slide.title .q { font-size: 44px; font-style: italic; color: var(--clay); font-variation-settings: "opsz" 48; }
 .slide.title h1 { margin-top: 18px; font-size: 84px; line-height: 1.04; font-weight: 600; color: var(--moss); letter-spacing: -0.02em; font-variation-settings: "opsz" 72; text-wrap: balance; }
-.slide.title .who { position: absolute; left: 120px; bottom: 72px; font: 400 20px/1.5 var(--sans); color: var(--ink-2); }
-.slide.title .who b { font-weight: 600; color: var(--ink); }
 
 /* ===========================================================
    CHROME: progress, notes drawer, hint
@@ -572,6 +585,7 @@ kbd { font: 500 11px/1 var(--sans); border: 1px solid #a9a28e; border-radius: 3p
   .deck { position: static; transform: none !important; box-shadow: none; width: auto; height: auto; background: none; }
   .slide { position: relative; visibility: visible; opacity: 1; content-visibility: visible !important; width: 1600px; height: 900px; page-break-after: always; background: var(--paper); }
   .slide.chapter { background: var(--ch); }
+  .slide.chapter:has(> .cdisc) { background: var(--paper); }
   .frag { opacity: 1 !important; }
   .progress, .drawer, .hint { display: none; }
   @page { size: 1600px 900px; margin: 0; }
@@ -797,7 +811,7 @@ body:has(#menu.open) #menu-fab { display: none; }
 .fa-eqs { display: grid; } .fa-eqs > .eq { grid-area: 1 / 1; transition: opacity .4s var(--ease); }
 .slide:has(.fa2.shown) .fa1, .slide:has(.fa3.shown) .fa2 { opacity: 0; }
 /* the three flows, one colour each in the drawing: sunlight in, reflection and heat out */
-svg.s17 text.fx-in { fill: #a8761f; font-weight: 600; } svg.s17 text.fx-refl { fill: #c25e14; font-weight: 600; } svg.s17 text.fx-heat { fill: #b2182b; font-weight: 600; }
+svg.s17 text.fx-in { fill: #a8761f; font-weight: 600; } svg.s17 text.fx-refl { fill: var(--t-refl); font-weight: 600; } svg.s17 text.fx-heat { fill: #b2182b; font-weight: 600; }
 svg:has(.f-chk.shown) .albmark { opacity: 0; transition: opacity .5s; }   /* ticked off: the labels go, the formula keeps it */
 /* last click: the two factors of the CO2 term framed, they come next */
 
@@ -1380,13 +1394,15 @@ svg.mo .m-sway.back { animation: none; }
 .title-scene .tt-hare { transform: translate(1680px, 822px); }
 @media (prefers-reduced-motion: reduce) { .title-scene .tt-hare { animation: none !important; transform: translate(1400px, 830px); } }
 
-/* title: type alone carries it. The word stands upright in moss; the claim leans in italic clay,
-   its quotation marks drawn a size up so the doubt is legible from the back row */
-.slide.title h1 .af { display: block; width: max-content; font-size: 124px; line-height: 1; letter-spacing: -0.025em; padding-bottom: 14px; }
-.slide.title h1 .af-rest { display: block; margin-top: 10px; font-size: 62px; font-style: italic; font-weight: 500; color: var(--clay); letter-spacing: -0.005em; }
-.slide.title h1 .af-q { font-size: 1.15em; line-height: 0; position: relative; }
-.slide.title h1 .af-q:first-child { margin-left: .06em; }
-.slide.title h1 .af-q:last-child { top: .1em; margin-left: .03em; }
+/* title: one voice. Both lines of the question the same size, weight, style and tracking (Literata 600, upright,
+   the display optical size); the only accent is Klima in clay. The speaker block set in one size, only the name in
+   bold; both blocks share the left edge. */
+.slide.title .ctext { top: 190px; max-width: 880px; }
+.slide.title h1 { margin: 0; font-size: 104px; line-height: 1.04; font-weight: 600; letter-spacing: -0.025em; font-variation-settings: "opsz" 72; color: var(--moss); }
+.slide.title h1 .af, .slide.title h1 .af-rest { display: block; width: max-content; font: inherit; letter-spacing: inherit; color: inherit; }
+.slide.title h1 .af-red { color: var(--clay); }
+.slide.title .who { position: absolute; left: 120px; bottom: 68px; font: 400 25px/1.5 var(--sans); color: var(--ink-2); }
+.slide.title .who b { font-size: inherit; font-weight: 600; color: var(--ink); }
 
 /* DAC chapter, result of the optimisation: a still map of the capacity in 2100 (dacMap) with numbers beside it */
 .dmap { position: relative; width: 100%; aspect-ratio: 1424 / 483; overflow: hidden; }
@@ -1825,13 +1841,13 @@ html.notips .ectip { display: none !important; }
   border-radius: 2px; background: color-mix(in srgb, var(--muted) 50%, transparent); }
 .ovtrail .ic { position: relative; width: 82px; height: 82px; border-radius: 50%; }
 .ovtrail .ic > svg:first-child { width: 100%; height: 100%; display: block; }
+.ovtrail .ic > .ring { width: 128%; height: 128%; margin: -14%; }   /* the disc keeps its size, the ring around it */
 .ovtrail .later .ic { filter: grayscale(1); opacity: .4; }
 /* under the next chapter: the question it answers, thin, in its colour; hangs below, the row keeps its spacing */
 .ovtrail .st .q { position: absolute; top: calc(100% + 14px); left: 50%; width: max-content; max-width: 520px;
   translate: -50% 0; font: italic 300 26px/1.25 var(--serif); color: var(--c); text-align: center; }
 .slide.active .ovtrail:has(.go.shown) .st .q { animation: fadein .8s var(--ease) .55s both; }   /* not rise: that moves `top` */   /* not on .st: its entrance animates opacity */
 .ovtrail .later { color: color-mix(in srgb, var(--c) 40%, var(--paper)); }
-.ovtrail .next .ic::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 3px solid var(--c); }
 .ovtrail .ok { position: absolute; right: -6px; bottom: -4px; width: 30px; height: 30px; padding: 7px 6px 6px 7px; border-radius: 50%;
   background: var(--c); color: var(--paper); box-shadow: 0 0 0 3px var(--paper); }
 /* the order: card, its lines, the tick; then the row of discs, one after the other, the ring last */
@@ -1851,11 +1867,8 @@ html.notips .ectip { display: none !important; }
 .ovtrail .next .ic { transition: filter .7s var(--ease), opacity .7s var(--ease); }
 .ovtrail:not(:has(.go.shown)) .next { color: color-mix(in srgb, var(--muted) 70%, var(--paper)); }
 .ovtrail:not(:has(.go.shown)) .next .ic { filter: grayscale(1); opacity: .4; }
-.ovtrail:not(:has(.go.shown)) .next .ic::after, .ovtrail:not(:has(.go.shown)) .q { opacity: 0; }
-.slide.active .ovtrail:has(.go.shown) .next .ic::after { animation: ring-in .7s var(--ease) .3s both, breathe 2.4s ease-in-out 1.1s infinite; }
+.ovtrail:not(:has(.go.shown)) .q { opacity: 0; }
 @keyframes tick { to { stroke-dashoffset: 0; } }
-@keyframes ring-in { from { opacity: 0; transform: scale(1.35); } to { opacity: 1; transform: none; } }
-@keyframes breathe { 50% { transform: scale(1.07); opacity: .55; } }
 /* on from the overview or a closing card: the discs fly into the chapter marks top right (Deck.flyHome); the marks
    wait under them, then the current chapter's label unfolds */
 .flyer { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
@@ -1868,16 +1881,9 @@ html.notips .ectip { display: none !important; }
 .slide.primed:not(.active) { visibility: visible; opacity: 0; pointer-events: none; transition: none; }   /* Deck.planFlight */
 .slide.arrive.active { transition: none; }
 .slide.arrive > :not(.notes):not(.sh), .slide.arrive > .sh > :not(.path) { animation: fadein .55s var(--ease) both; }
-/* landing (Deck.flyHome): the marks hidden under the flown copies, the current chapter only its disc; then its pill
-   grows to its full width (.grow: the name still out), the name fading in as it gets room */
-.path .pc.on { overflow: hidden; white-space: nowrap; transition: width .5s cubic-bezier(.3, 0, .15, 1); }
-.path .pc.on b { transition: opacity .3s var(--ease) .16s; }
-.path.landing .pc svg { opacity: 0; }
-.path.landing .pc.on { width: 40px; transition: none; }
-:is(.path.landing, .path .pc.grow) .pc.on b, .path .pc.on.grow b { opacity: 0; transition: none; }
+.ring > use { transform-box: view-box; transform-origin: 50px 50px; }   /* the coin turn (Deck.flyHome) turns about the disc's centre */
 @media (prefers-reduced-motion: reduce) {
   .slide.active .ovl.shown :is(.ovb, .ovh, .ovf > *, .ovtrail .st) { animation: fadein .3s both; }
-  .slide.active .ovtrail:has(.go.shown) .next .ic::after { animation: none; }
 }
 .slide:has(> .ovl) > .num { z-index: 7; }   /* the slide number stays sharp above the blur */
 /* slide 9 (.c9): the balance builds up in the definition line (hidden terms take no room); the line stays:
@@ -2006,7 +2012,7 @@ html.nocursor, html.nocursor * { cursor: none !important; }
 .ue2 { gap: 30px; justify-content: center; }
 .ue2 .ue-box { padding: 16px 22px 18px; }
 .ue2 .ue-ico { width: 72px; height: 48px; margin-bottom: 8px; }
-.ue2 .ue-modell .ue-ico { width: 150px; }
+.ue2 .ue-modell .ue-ico { width: 170px; }   /* the four gaps the model closes */
 .ue2 .ue-new .ue-erg .ue-ico { width: 190px; height: 76px; margin-top: -24px; }
 .ue2 .t-stat.lg { font-size: 46px; }
 .ue2 .ue-c { margin-top: 6px; }
@@ -2206,38 +2212,136 @@ svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 .bilanz .bl-phi .bl-f { font-size: 25px; white-space: nowrap; }
 .bilanz .bl-d .tex { display: inline-block; vertical-align: middle; font-size: 22px; margin-right: 4px; }
 
-/* chapter openers: the overview's disc opened up, its scene in the corner (x-* in index.html; Deck.zoomInto flies
-   from the disc into exactly this picture), the title and the chapter's goal on the left: what goes in, what comes out */
-.cscene { position: absolute; inset: 0; width: 1600px; height: 900px; pointer-events: none; }
-.slide.chapter .ctext { top: 160px; max-width: 900px; }
-.cgoal { position: absolute; left: 120px; top: 400px; display: flex; align-items: center; gap: 16px; color: var(--paper);
-  --line: color-mix(in srgb, var(--paper) 60%, var(--ch)); }
-.cgoal .g-colw { display: flex; flex-direction: column; gap: 10px; }
-.cgoal .g-k { margin: 0; font: 600 16px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--paper) 62%, var(--ch)); }
-.cgoal .g-col { display: flex; flex-direction: column; gap: 14px; }
-/* the cards tinted into the chapter colour, light text: part of the page, not stuck on it */
-.gcard { position: relative; display: grid; grid-template-columns: auto auto; gap: 4px 20px; align-items: center;
-  padding: 14px 20px 12px; border-radius: 16px; background: color-mix(in srgb, var(--paper) 12%, var(--ch));
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--paper) 30%, var(--ch)); }
-.gcard .g-h { grid-column: 1 / -1; }
-.gcard.g-v { grid-template-columns: auto; justify-items: start; }
-.g-h { margin: 0; font: 600 21px/1.2 var(--sans); color: var(--paper); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-.g-f { font-size: 30px; white-space: nowrap; }
-.cgoal .katex, .cgoal .katex * { color: var(--paper) !important; }
-.g-mini { display: block; overflow: visible; zoom: 1.1; }
-.g-mini .g-ax { stroke: var(--line); stroke-width: 2; fill: none; }
-.g-mini .g-zero { stroke-dasharray: 5 5; }
-.g-mini .g-ln { stroke: var(--ch-soft); stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.g-mini .g-faint { stroke: var(--line); stroke-width: 2.2; }
-.g-mini .g-tx { fill: var(--line); font: 500 12px var(--sans); }
-.g-step { position: relative; flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 24px;
-  font: 600 17px/1.2 var(--sans); text-align: center; color: color-mix(in srgb, var(--paper) 80%, var(--ch)); }
-.g-step svg { width: 48px; height: 24px; display: block; }
-.g-step path { stroke: var(--line); stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.cgoal .g-out { box-shadow: inset 0 0 0 2.5px var(--ch-soft); }
-.cgoal .badge { --c: color-mix(in srgb, var(--paper) 88%, var(--ch)); color: var(--ch); }
 
-/* the zoom into a chapter (Deck.zoomInto): the opened scene in a circle that is first exactly the disc, then grows
-   until it covers the stage while the scene moves to its place in the opener's corner */
-.zoomer { position: absolute; inset: 0; z-index: 50; pointer-events: none; width: 1600px; height: 900px; }
-.slide.arrive > .cscene { animation: none; }   /* the opener's scene is the zoom's last frame: no fade under it */
+
+/* the signs of a tree's two effects (p-co2, p-refl in index.html): the same disc wherever the effect comes up */
+.ico { display: inline-block; flex: none; width: 1.25em; height: 1.25em; vertical-align: -.28em; }
+.ovf .lab .ico { width: 26px; height: 26px; margin-right: 8px; vertical-align: -7px; }
+.recap-eq-h .ico { width: 22px; height: 22px; margin-right: 8px; vertical-align: -6px; }
+.fin { position: relative; }
+.fin > .ico { position: absolute; left: 14px; top: 14px; width: 34px; height: 34px; }
+.phi-sign { transition: opacity .4s var(--ease); }
+.slide:has(.fline.head > .next.shown) .phi-sign { opacity: 0; }   /* the next formula line takes the row */
+
+/* Klima chapter: one picture that grows over the five slides (03_klima.html). What the slides before built stays,
+   muted; each finished part leaves its formula sign where it sits. The part being explained is in full colour. */
+svg .km-past { opacity: .15; }
+svg .km-recede { transition: opacity .6s var(--ease); }
+/* the greenhouse slide needs the whole heat arrow: the carbon box and cycle step back while it is told */
+.slide:has(svg.s18 [data-step="1"].shown):not(:has(.fline.head > .next.shown)) svg .km-recede { opacity: .05; }
+/* and on its last click the explanation folds into what stays: the molecules on the heat arrow and ε */
+svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { transition: filter .6s var(--ease); }
+.slide:has(.fline.head > .next.shown) svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { filter: opacity(0); }
+/* the carbon cycle's words go once its sign is there */
+svg .km-txt { transition: opacity .6s var(--ease); }
+.slide:has(.fline.head > .next.shown) svg.s19 .km-txt { opacity: 0; }
+/* what a slide is not about steps far back: the parts of the base drawing it names in data-km-off, and the signs
+   of earlier parts (chips); the signs a slide makes itself stay */
+svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: opacity .6s var(--ease); }
+.slide[data-km-off~="sun"] svg .kb-sun, .slide[data-km-off~="refl"] svg .kb-refl, .slide[data-km-off~="heat"] svg .kb-heat { opacity: .15; }
+.slide[data-km-off~="chips"] svg > g > :is(.km-chip, .km-recede) { opacity: .3; }
+/* within a slide: on "Gemeinsame Währung" the light steps back once the CO₂ comes; on the greenhouse slide the
+   sunlight once it has passed (click 2 on); the question on the tree only leads where φ is the subject */
+.slide:has(svg.s17 .co2box.shown) svg.s17 :is(.kb-sun, .kb-refl) { opacity: .15; }
+.slide:has(svg.s18 .pop[data-step="2"].shown) svg.s18 .kb-sun { opacity: .15; }
+svg .km-phi { transition: opacity .6s var(--ease); }
+.slide[data-km-off] svg .km-phi { opacity: .3; }
+.slide:has(svg.s17 .f-chk.shown) svg .km-phi, .slide[data-title^="Vom Strahlungsantrieb"] svg .km-phi { opacity: 1; }
+
+.ovh .ico { width: 34px; height: 34px; vertical-align: -6px; }
+
+/* slide 3, last click: what the simple sum lacked, in one line over the clippings (the chapters take it up) */
+.ue-miss2 { position: absolute; inset: -18px -10px 0; z-index: 5; display: flex; align-items: center; justify-content: center; border-radius: 20px;
+  backdrop-filter: blur(8px) saturate(.6); -webkit-backdrop-filter: blur(8px) saturate(.6); background: color-mix(in srgb, var(--paper) 72%, transparent); }
+.ue-miss2 p { margin: 0; padding: 22px 40px; border-radius: 18px; background: var(--paper); white-space: nowrap;
+  box-shadow: 0 30px 70px -28px rgba(30, 26, 18, .5), 0 0 0 1.5px var(--paper-line); text-align: center; }
+.ue-miss2 b { display: block; font: 600 44px/1.15 var(--serif); color: var(--ink); }   /* the talk's question: the overview's title next */
+.ue-miss2 span { display: block; margin-top: 10px; font: 400 23px/1.3 var(--sans); color: var(--muted); }
+.slide.active .ue-miss2[data-step].shown { animation-name: fadein; }
+
+/* chapter openers: the overview's disc, grown (Deck.enterChapter flies it here), on paper; right of it the title, the
+   chapter's goal and its two parts. The ring draws itself arc by arc, each part's line opening with its arc */
+.slide.chapter:has(> .cdisc) { background: var(--paper); color: var(--ink); }
+.cdisc { position: absolute; left: 120px; top: 168px; width: 564px; height: 564px; }   /* the disc 440 px, its ring around it */
+.cdisc .ring { width: 100%; height: 100%; display: block; }
+.slide.chapter.arrive > .cdisc { animation: none; }   /* the flown copy hands over to it: no fade under it (outranks the arrival fade) */
+.cdisc .ring .arc { stroke-width: 3.4; stroke: var(--a); }
+.slide.chapter:has(> .cdisc) .ctext { left: 780px; top: 0; bottom: 0; max-width: 700px; display: flex; flex-direction: column; justify-content: center; }
+.slide.chapter:has(> .cdisc) h1 { color: var(--ch); }
+.slide.chapter .ctext > .cgoal { margin: 22px 0 46px; font: 400 28px/1.4 var(--sans); color: var(--ink-2); }
+.cpart { display: grid; grid-template-columns: 76px 1fr; gap: 24px; align-items: center; margin-top: 26px; }
+.cpart > svg { width: 76px; height: 76px; display: block; }
+.cpart > div > b { display: block; font: 600 29px/1.25 var(--sans); color: var(--ink); }
+.cpart > div > span { display: block; margin-top: 3px; font: 400 21px/1.4 var(--sans); color: var(--muted); }
+/* the entrance: the title and the goal rise and fade in once the disc has arrived (not when reached backwards or by a
+   jump: .settled); each part on its own click: its line wipes in as its arc of the ring draws */
+.slide.chapter.active:not(.settled) :is(.ctext h1, .ctext > .cgoal) { animation: ct-in 1s var(--ease) .25s both; }
+.slide.chapter.active:not(.settled) .ctext > .cgoal { animation-delay: .55s; }
+@keyframes ct-in { from { opacity: 0; transform: translateY(22px); filter: blur(5px); } to { opacity: 1; transform: none; filter: blur(0); } }
+.cdisc .arc { stroke-dashoffset: 172; opacity: 0; transition: stroke-dashoffset 1s var(--ease), opacity .15s linear; }
+.slide:has(.cpart[data-step="1"].shown) .cdisc .arc:nth-of-type(1), .slide:has(.cpart[data-step="2"].shown) .cdisc .arc:nth-of-type(2) { stroke-dashoffset: 0; opacity: 1; }
+.cpart[data-step] { opacity: 0; clip-path: inset(0 100% 0 0); transition: clip-path .8s var(--ease), opacity .4s ease; }
+.cpart[data-step].shown { opacity: 1; clip-path: inset(0 0 0 0); }
+.all .slide.chapter :is(.ctext h1, .cgoal), .embed .slide.chapter :is(.ctext h1, .cgoal) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .slide.chapter :is(.ctext h1, .cgoal) { animation: none !important; } .cdisc .arc, .cpart[data-step] { transition: none; } }
+
+/* slide 4, the overview built up: Baum-Modell alone in the middle, what went wrong there; Klima-Modell beside it,
+   the pair in the middle, what went wrong there; then the result chapter after an arrow, and the title turns from the
+   critique into the talk's question. Columns 410 px: centres 205, 647, 1211 of 1416, so alone +503, as a pair +282.
+   What went wrong: neutral cards (no part signs yet: they come with the chapters) */
+.ovw-row { flex: 1; display: grid; grid-template-columns: 410px 410px 90px 410px; gap: 0 32px; justify-content: center; align-content: center; align-items: start; padding-bottom: 24px; }
+.ovw .kc { display: flex; flex-direction: column; align-items: center; transition: transform .9s var(--ease); }
+.ovw :is(.kc-b, .kc-k) { transform: translateX(282px); }   /* both models, as a pair, from the start */
+.ovw:has(.kc-r.shown) :is(.kc-b, .kc-k) { transform: none; }   /* the critique goes, the row stays at its height */
+.ovw .kdisc { width: 230px; height: 230px; }
+.ovw .kdisc svg { width: 100%; height: 100%; display: block; }
+.ovw .kc > b { margin-top: 16px; display: flex; align-items: center; font: 600 44px/1.1 var(--serif); color: var(--ch); letter-spacing: -.01em; }
+/* the critique goes when the result chapter comes (filter: the cards' own entrance holds their opacity) */
+.ovw .kc-l { transition: filter .5s var(--ease); }
+/* last click: the chapters numbered, the agenda; each number grows in before its name */
+.ovw .kn { display: inline-block; max-width: 0; margin-right: 0; opacity: 0; overflow: hidden; flex: none;
+  transition: max-width .6s var(--ease), margin-right .6s var(--ease), opacity .4s var(--ease) .15s; }
+.ovw .kn.shown { max-width: 60px; margin-right: 14px; opacity: 1; }
+.ovw .kn i { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ch);
+  color: var(--paper); font: 600 24px/1 var(--sans); font-style: normal; }
+.ovw .kc-l { margin-top: 24px; display: grid; gap: 12px; justify-self: stretch; align-self: stretch; }
+.ovw .kc-l { margin-top: 28px !important; gap: 18px !important; width: max-content; max-width: 100%; justify-self: center !important; align-self: center !important; }
+/* a limit of the calculation we start from: a small red cross; on the click of the result chapter each turns into a
+   green tick and its "Ohne" into "Mit" (same width: nothing after it moves) */
+.kp { display: grid; grid-template-columns: 30px auto; gap: 14px; align-items: center; text-align: left; }
+.kp > b { display: block; font: 600 25px/1.2 var(--serif); color: var(--ink); white-space: nowrap; }
+.kx { width: 30px; height: 30px; overflow: visible; }
+.kx path { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: stroke-dashoffset .6s var(--ease), opacity .3s ease; }
+.kx-c { fill: color-mix(in srgb, #a8483c 14%, var(--paper)); stroke: color-mix(in srgb, #a8483c 55%, var(--paper)); stroke-width: 1.5; transition: fill .6s ease, stroke .6s ease; }
+.kx-x { stroke: #a8483c; }
+.kx-v { stroke: var(--p-co2); stroke-dasharray: 24; stroke-dashoffset: 24; }
+.ovw:has(.kc-r.shown) .kx-c { fill: color-mix(in srgb, var(--p-co2) 16%, var(--paper)); stroke: color-mix(in srgb, var(--p-co2) 60%, var(--paper)); }
+.ovw:has(.kc-r.shown) .kx-x { opacity: 0; }
+.ovw:has(.kc-r.shown) .kx-v { stroke-dashoffset: 0; transition-delay: .25s; }
+.sw { display: inline-block; position: relative; vertical-align: baseline; white-space: nowrap; transition: width .6s var(--ease); }   /* width set in Deck.syncSw: it takes the new word's width, what follows glides */
+.sw > span { transition: opacity .5s ease, transform .5s var(--ease); }
+.sw-m { position: absolute; left: 0; top: 0; }
+.sw-m { opacity: 0; transform: translateY(.35em); }
+.ovw:has(.kc-r.shown) .sw-o { opacity: 0; transform: translateY(-.35em); }
+.ovw:has(.kc-r.shown) .sw-m { opacity: 1; transform: none; transition-delay: .15s; }
+.kp > div > span { display: block; margin-top: 2px; font: 400 18px/1.3 var(--sans); color: var(--muted); }
+.ovw-arr { width: 120px; height: 36px; justify-self: center; margin-top: 97px; overflow: visible; }   /* at the discs' middle */
+.ovw-arr path { fill: none; stroke: var(--ink); stroke-opacity: .4; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.ovw-arr-l, .ovw-arr-h { stroke-dasharray: 120; stroke-dashoffset: 120; transition: stroke-dashoffset .7s var(--ease); }
+.ovw-arr-h { transition-delay: .35s; }
+.ovw-arr.shown .ovw-arr-l, .ovw-arr.shown .ovw-arr-h { stroke-dashoffset: 0; }   /* drawn on its click */
+.ovw .sh h2 { display: grid; }
+.ovw .sh h2 > span { grid-area: 1 / 1; transition: opacity .5s var(--ease); }
+.ovw .sh h2 > .t1, .ovw:has(.kc-r.shown) .sh h2 > .t0 { opacity: 0; }
+.ovw:has(.kc-r.shown) .sh h2 > .t1 { opacity: 1; }
+.hl-w { display: inline-block; padding: 0 .2em .06em; border-radius: 10px; background: var(--moss); color: var(--paper); }
+
+.path .where { position: relative; }
+.path .where b.swap-tmp { position: absolute; left: 0; bottom: 0; white-space: nowrap; }   /* the two part names while they swap (Deck.swapPart) */
+
+.ovw .ovw-src { transition: opacity .5s var(--ease); }
+.ovw .ovw-src { opacity: 0; }
+.ovw:has(.kp.shown):not(:has(.kc-r.shown)) .ovw-src { opacity: 1; }   /* the sources come with the first limit and go with the critique */
+
+.kp[data-step] { opacity: 0; transition: opacity .7s var(--ease); }
+.kp[data-step].shown { opacity: 1; }   /* the limits one by one */

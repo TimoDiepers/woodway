@@ -675,7 +675,7 @@ def light_parts_sites_figure(out_path: str) -> str:
 
     _heading_font, body_font = _register_fonts()
     _style(body_font)
-    c_baum, c_wolke = "#c2410c", "#d9822b"   # deck.css --s-dal, --s-daw
+    c_baum, c_wolke = "#787136", "#9d945f"   # deck.css --s-dal, --s-daw
     fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
     fig.subplots_adjust(left=0.141, right=0.977, bottom=0.07, top=0.98)
     _clean_axes(ax)
@@ -750,7 +750,7 @@ def cloud_brightening_map_figure(out_path: str) -> str:
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{_pp(field[site_cell(s)])} %")
-    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{Wolke}}$", "#d95f02")
+    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{Wolke}}$", "#787136")
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
@@ -791,9 +791,9 @@ def light_ingredients_figure(out_path: str) -> str:
         (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
          "#8a6a1e"),
         (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{Baum}}$",
-         "#d95f02"),
+         "#787136"),
         (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
-         r"$\Delta\alpha_{\mathrm{Wolke}}$", "#d95f02"),
+         r"$\Delta\alpha_{\mathrm{Wolke}}$", "#787136"),
     ]
     for k, (field, ok, scale, ticks, unit, fmt, title, symbol, symbol_color) in enumerate(panels):
         ax = fig.add_axes((0.005 + k * 0.333, 0.16, 0.323, 0.73))
@@ -845,7 +845,7 @@ def albedo_ingredients_figure(out_path: str) -> str:
          r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
          (0.0, 18.0), "[%]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Baum}}$", "#d95f02"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Baum}}$", "#787136"),
     ]
     units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

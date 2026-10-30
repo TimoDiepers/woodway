@@ -45,8 +45,9 @@ from nbs.site_factor import site_factor  # noqa: E402
 from nbs.species import get_species  # noqa: E402
 from nbs.tree import simulate_deterministic  # noqa: E402
 
-C_CARBON = "#1b7837"  # same as nbs.plots: phi_CO2 / Delta T_CO2
-C_ALBEDO = "#d95f02"  # same as nbs.plots: phi_alpha / Delta T_alpha
+C_CARBON = "#105b3e"  # same as nbs.plots: phi_CO2 / Delta T_CO2
+C_ALBEDO = "#787136"  # same as nbs.plots: phi_alpha / Delta T_alpha
+C_TEMP = "#762c26"  # same as nbs.plots: the temperature response
 C_NET = "#252525"
 C_WARM_FILL = "#e7b7a8"
 C_COOL_FILL = "#b9cfe3"
@@ -689,7 +690,7 @@ def forcing_to_temperature_figure(out_path: str) -> str:
     ax_s.axhline(eq, color=C_INK_MUTED, linewidth=1.4, linestyle=(0, (5, 4)))
     ax_s.text(124, eq + 0.015, f"Gleichgewicht φ/Λ = {eq:.2f} K".replace(".", ","), ha="right", va="bottom",
               fontsize=12, color=C_INK_MUTED)
-    ax_s.plot(t, step, color="#b2182b", linewidth=3.0)
+    ax_s.plot(t, step, color=C_TEMP, linewidth=3.0)
     i5 = 5
     ax_s.annotate(f"nach {i5} Jahren {step[i5]:.2f} K:\nOberfläche und Mischschicht".replace(".", ","),
                   (i5, step[i5]), xytext=(18, -46), textcoords="offset points", fontsize=12, color=C_INK,
@@ -701,8 +702,8 @@ def forcing_to_temperature_figure(out_path: str) -> str:
     ax_s.set_ylabel("Erwärmung [K]")
     ax_s.set_title("Herdplatte an: 1 W/m² dauerhaft", loc="left", fontsize=14, color=C_INK)
 
-    ax_p.fill_between(t, 0, g, color="#b2182b", alpha=0.15, linewidth=0)
-    ax_p.plot(t, g, color="#b2182b", linewidth=3.0)
+    ax_p.fill_between(t, 0, g, color=C_TEMP, alpha=0.15, linewidth=0)
+    ax_p.plot(t, g, color=C_TEMP, linewidth=3.0)
     ax_p.annotate(f"{g[0]:.2f} K im selben Jahr".replace(".", ","), (0, g[0]), xytext=(14, -4),
                   textcoords="offset points", fontsize=12, color=C_INK)
     ax_p.annotate(f"nach 20 Jahren noch {100 * g[20] / g[0]:.0f} % davon —\nklein, aber lang: das summiert sich",
@@ -722,8 +723,8 @@ def temperature_response_figure(out_path: str) -> str:
     fig, ax = plt.subplots(figsize=(9.0, 3.86), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.11, right=0.97, bottom=0.2, top=0.93)
     _clean_axes(ax)
-    ax.fill_between(t, 0, g, color="#b2182b", alpha=0.15, linewidth=0)
-    ax.plot(t, g, color="#b2182b", linewidth=3.0)
+    ax.fill_between(t, 0, g, color=C_TEMP, alpha=0.15, linewidth=0)
+    ax.plot(t, g, color=C_TEMP, linewidth=3.0)
     ax.set_xlim(0, 125)
     ax.set_ylim(0, g[0] * 1.15)
     ax.set_xlabel("Jahre nach einem Jahr mit 1 W/m² Antrieb")
@@ -948,9 +949,9 @@ def inertia_result_figure(out_path: str) -> str:
     ax_l.axhline(eq, color=C_INK_MUTED, linewidth=1.2, linestyle=(0, (5, 4)))
     ax_l.text(t[-1] - 1, eq + 0.02, f"Gleichgewicht {eq:.1f} K".replace(".", ","), ha="right", va="bottom", fontsize=12,
               color=C_INK_MUTED)
-    ax_l.plot(t, step, color="#b2182b", linewidth=3.0)
+    ax_l.plot(t, step, color=C_TEMP, linewidth=3.0)
     for yr, off in ((5, (14, -18)), (int(t[-1]) - 5, (-4, -40))):
-        ax_l.plot(yr, step[yr], "o", ms=8, color="#b2182b", mec="white", mew=1.5)
+        ax_l.plot(yr, step[yr], "o", ms=8, color=C_TEMP, mec="white", mew=1.5)
         ax_l.annotate(f"nach {yr} Jahren: {step[yr]:.1f} K".replace(".", ","), (yr, step[yr]), xytext=off,
                       textcoords="offset points", fontsize=12, color=C_INK, ha="left" if yr < 50 else "right")
     ax_l.set_xlim(0, t[-1])
@@ -1144,7 +1145,7 @@ def irf_figure(out_path: str, horizon: int = 150, figsize: tuple[float, float] =
     _setup()
     g = green_carbon_preindustrial(horizon + 1)
     t = np.arange(horizon + 1)
-    c_em, c_rm = "#8c6d5a", "#2e7d4f"  # emission: earth brown; removal: the deck's CO2 green
+    c_em, c_rm = "#8c6d5a", C_CARBON  # emission: earth brown; removal: the deck's carbon colour
     fig, ax = plt.subplots(figsize=figsize, dpi=FIG_DPI)  # sized to its place on the slide: ticks ~19 px
     fig.subplots_adjust(left=left, right=0.97, bottom=0.17, top=0.95)
     _clean_axes(ax)
@@ -1234,7 +1235,7 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     _setup()
     g = green_carbon_preindustrial(horizon + 1)
     t = np.arange(horizon + 1)
-    c_rm, c_back = "#2e7d4f", "#8c6d5a"
+    c_rm, c_back = C_CARBON, "#8c6d5a"
     # sized to its slot on the slide (530 x 360 px) at the scale of the other model charts (~0.675 px per figure px),
     # so lines and type match them
     fig, ax = plt.subplots(figsize=(4.9, 3.33), dpi=FIG_DPI)
@@ -1284,9 +1285,9 @@ def step_response_figure(out_path: str) -> str:
     ax.axhline(eq, color=C_INK_MUTED, linewidth=1.2, linestyle=(0, (5, 4)))
     ax.text(t[-1] - 1, eq + 0.02, f"Gleichgewicht φ/Λ ≈ {eq:.1f} K".replace(".", ","), ha="right", va="bottom", fontsize=12.5,
             color=C_INK_MUTED)
-    ax.plot(t, step, color="#b2182b", linewidth=3.2)
+    ax.plot(t, step, color=C_TEMP, linewidth=3.2)
     for yr, off, ha in ((5, (14, -6), "left"), (int(t[-1]) - 5, (0, -30), "right")):
-        ax.plot(yr, step[yr], "o", ms=9, color="#b2182b", mec="white", mew=1.6, zorder=5)
+        ax.plot(yr, step[yr], "o", ms=9, color=C_TEMP, mec="white", mew=1.6, zorder=5)
         ax.annotate(f"nach {yr} Jahren: {step[yr]:.1f} K".replace(".", ","), (yr, step[yr]), xytext=off,
                     textcoords="offset points", fontsize=12.5, color=C_INK, ha=ha)
     ax.set_xlim(0, t[-1])
@@ -1340,10 +1341,10 @@ def co2_efficiency_figure(out_path: str) -> str:
     fig, ax = plt.subplots(figsize=(7.3, 4.6), dpi=FIG_DPI)  # replaces the 860 px drawing: ticks ~19 px
     fig.subplots_adjust(left=0.13, right=0.95, bottom=0.12, top=0.9)
     _clean_axes(ax)
-    ax.plot(YEARS, a_kg, color="#1b7837", linewidth=3.2)
+    ax.plot(YEARS, a_kg, color=C_CARBON, linewidth=3.2)
     for yr, off, ha in ((T_START, (10, 8), "left"), (2100, (0, 14), "right")):
         i = yr - YEARS[0]
-        ax.plot(yr, a_kg[i], "o", ms=9, color="#1b7837", mec="white", mew=1.6, zorder=5)
+        ax.plot(yr, a_kg[i], "o", ms=9, color=C_CARBON, mec="white", mew=1.6, zorder=5)
         ax.annotate(f"{a_kg[i]:.2f}".replace(".", ",") + f"\n{yr}: {cbg[i]:.0f} ppm CO$_2$", (yr, a_kg[i]), xytext=off,
                     textcoords="offset points", ha=ha, va="bottom", fontsize=12.5, color=C_INK, fontweight="bold")
     ax.set_xlim(YEARS[0], YEARS[-1])

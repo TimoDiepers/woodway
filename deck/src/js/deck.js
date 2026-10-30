@@ -143,6 +143,22 @@ function renderTex(root) {
    play(k) animates up to click k, final(k) shows it at once.
    =========================================================== */
 const SVGNS = 'http://www.w3.org/2000/svg';
+// The talk's three chapters, two parts each (data-ch, data-part on the slides). The disc is the overview's (index.html
+// #e-…), the part icons #p-…; each part's colour is --p-<key> (fill) and --t-<key> (text)
+const CHAPTERS = {
+  baeume: { name: 'Baum-Modell', disc: 'e-baeume', col: 'var(--moss)', parts: [['co2', 'Kohlenstoff-Aufnahme'], ['refl', 'Reflexionsänderung']] },
+  klima: { name: 'Klima-Modell', disc: 'e-klima', col: 'var(--clay)', parts: [['bal', 'Strahlungsbilanz'], ['temp', 'Temperaturkurve']] },
+  vergleich: { name: 'Potenziale', disc: 'e-potenzial', col: 'var(--fjord)', parts: [['one', 'Kühlung eines Baums'], ['world', 'Kühlung der Welt']] },
+};
+// A chapter's disc in its ring of two arcs, one per part (right: the first, left: the second). Each arc 'off' (not
+// drawn yet), 'track' (still to come, pale), 'on' (the part we are in, in its colour) or 'done' (chapter colour).
+// With a part (1, 2) the disc is that part's sign instead (#p-…, the same circle): the corner indicator
+function ringSvg(ch, arcs, part) {
+  const c = CHAPTERS[ch], sym = part ? `p-${c.parts[part - 1][0]}` : c.disc;
+  return `<svg class="ring" viewBox="-14 -14 128 128" aria-hidden="true" style="--c:${c.col}"><use href="#${sym}" width="100" height="100"/>`
+    + c.parts.map(([k], j) => `<circle class="arc ${arcs[j]}" style="--a:var(--p-${k})" cx="50" cy="50" r="57" pathLength="360" transform="rotate(${j ? 94 : -86} 50 50)"/>`).join('')
+    + '</svg>';
+}
 function E(tag, attrs, parent) {
   const e = document.createElementNS(SVGNS, tag);
   for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
@@ -277,7 +293,7 @@ let chartUid = 0;
    goes. SVG renderer, so text stays sharp when the deck scales.
    =========================================================== */
 const EC = {
-  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#c8602a',   // = --alb
+  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#787136',   // = --t-refl (the reflection's text tone: a chart line needs the contrast)
   font: "'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif"
 };
 /* one pace for every curve in the deck: a line or area is drawn in from the left in DRAW_MS at a constant speed
@@ -634,7 +650,7 @@ window.TEMPSUM = @@TEMPSUM@@;
 const EC_TEMPSUM = {
   steps: 3, tip: { unit: 'fK', dec: 1 },
   option(k) {
-    const D = window.TEMPSUM, A = D.sites[0], red = '#b2182b';
+    const D = window.TEMPSUM, A = D.sites[0], red = '#762c26';   // = --t-temp
     const pulse = p => [[p.year, 0], ...p.v.map((v, i) => [p.year + i, v])];
     const font = { fontFamily: EC.font, fontSize: 19 };
     const series = [];
@@ -706,8 +722,8 @@ const EC_ORTE3 = {
   // the curves and the name each carries on the plot
   parts: [
     { key: 'co2', name: 'CO₂', role: 'phic' },
-    { key: 'laub', name: 'Albedo (Baum)', role: 'dal' },
-    { key: 'wolke', name: 'Albedo (Wolken)', role: 'daw' },
+    { key: 'laub', name: 'Albedo direkt (Laub)', role: 'dal' },
+    { key: 'wolke', name: 'Albedo indirekt (Wolken)', role: 'daw' },
     { key: 'dt', name: 'netto', role: 'ink', net: true }],
   // a name on each curve, outside its area: CO2 under its curve, the leaves above theirs, the clouds, which stay near
   // zero, just under the zero line, the net late above its line; never on each other
@@ -2974,19 +2990,19 @@ class Deck {
     this.peer = window.open(location.href.split(/[?#]/)[0] + '?presenter', 'dv-presenter', 'width=1440,height=900');
   }
   decorate() {
-    // Where the talk stands: the chapters as on the overview slide, each its disc in its own colour, the current
-    // one named. Content slides carry it top right; the chapter openers need none, their title says it.
-    // A click opens the chapter.
-    const chapters0 = ['baeume', 'klima', 'vergleich'];
-    const names = { baeume: 'Bäume', klima: 'Klima', vergleich: 'Potenzial' };
-    const disc = { baeume: 'baeume', klima: 'klima', vergleich: 'potenzial' };   // the overview's discs (index.html #e-…)
+    // Where the talk stands, top right: the three chapter discs in order, the current one larger in its ring with the
+    // part we are in lit, and left of them the chapter and the part by name. Only in the three chapters' main slides;
+    // a click opens the chapter
     const opener = c => this.slides.findIndex(s => s.dataset.ch === c);   // a chapter's first slide
-    const path = ch0 => {
-      const ch = ch0 === 'dac' ? 'vergleich' : ch0;   // the Holzweg part (dark, amber) still belongs to the chapter Potenzial
+    const path = (ch, part) => {
       const el = document.createElement('nav'); el.className = 'path'; el.setAttribute('aria-label', 'Kapitel');
-      el.innerHTML = chapters0.map(c =>
-        `<button type="button" class="pc${c === ch ? ' on' : ''}" data-ch="${c}" aria-label="Kapitel ${names[c]}"${c === ch ? ' aria-current="true"' : ''}>`
-        + `<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#e-${disc[c]}" width="100" height="100"/></svg>${c === ch ? `<b>${names[c]}</b>` : ''}</button>`).join('');
+      const at = Object.keys(CHAPTERS).indexOf(ch);
+      el.dataset.at = `${ch}:${part}`;
+      el.innerHTML = Object.keys(CHAPTERS).map((c, k) => {
+        const arcs = k !== at ? ['track', 'track'] : part === 1 ? ['on', 'track'] : ['track', 'on'];   // only the part we are in lit
+        const where = k === at ? `<span class="where"><i>${CHAPTERS[ch].name}</i><b>${CHAPTERS[ch].parts[part - 1][1]}</b></span>` : '';
+        return `<button type="button" class="pc${k === at ? ' on' : ''}" data-ch="${c}" aria-label="Kapitel ${CHAPTERS[c].name}"${k === at ? ' aria-current="true"' : ''}>${ringSvg(c, arcs, k === at ? part : 0)}${where}</button>`;
+      }).join('');
       el.addEventListener('click', e => {
         const b = e.target.closest('.pc'); if (!b) return;
         e.stopPropagation(); const n = opener(b.dataset.ch); if (n >= 0) this.go(n, 0);
@@ -2994,10 +3010,24 @@ class Deck {
       return el;
     };
     subDigits(this.deck);
-    const first = this.slides.findIndex(s => s.dataset.ch) - 1;   // before the first chapter (intro, overview): no chapters yet
+    // the chapter discs on the closing cards in their rings too: a finished chapter's closed, the others pale
+    for (const d of this.deck.querySelectorAll('.ovtrail .ic > svg[data-fly]')) {
+      const c = d.dataset.fly, done = d.closest('.st').classList.contains('done');
+      d.insertAdjacentHTML('beforebegin', ringSvg(c, done ? ['done', 'done'] : ['track', 'track']));
+      d.previousElementSibling.querySelector('use').dataset.fly = c; d.remove();
+    }
+    // a chapter's disc in its ring: on an opener both parts in their colours (it flies on into the corner of the
+    // first slide); each disc can fly into its chapter
+    for (const d of this.deck.querySelectorAll('[data-ring]')) {
+      d.innerHTML = ringSvg(d.dataset.ring, ['on', 'on']);
+      d.querySelector('use').dataset.fly = d.dataset.ring;
+    }
+    for (const d of this.deck.querySelectorAll('[data-disc]')) {   // the bare disc, no ring yet (slide 4)
+      d.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#${CHAPTERS[d.dataset.disc].disc}" width="100" height="100" data-fly="${d.dataset.disc}"/></svg>`;
+    }
     this.slides.forEach((s, n) => {
       const ch = s.dataset.ch, h = s.querySelector('.sh');
-      if (h && !s.hasAttribute('data-nonav') && n > first) h.appendChild(path(ch));   // data-nonav: the conclusion stands above the chapters
+      if (h && CHAPTERS[ch] && s.dataset.part && !s.hasAttribute('data-nonav') && n < this.mainEnd) h.appendChild(path(ch, +s.dataset.part));
       if (!s.classList.contains('chapter') && !s.classList.contains('title')) {
         const num = document.createElement('span'); num.className = 'num'; num.textContent = n + 1; s.appendChild(num);
       }
@@ -3081,6 +3111,8 @@ class Deck {
     }
     if (n !== this.i) this.zoomReset();   // a new slide starts whole
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
+    if (prev && prev !== s && !this.still) this.swapPart(prev, s);
+    s.classList.toggle('settled', step === 'end' || !!this.still || !s.classList.contains('arrive') && n !== this.i + 1);   // a chapter opener reached backwards or by a jump: its entrance stays still
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
     this.schedulePlan();
@@ -3093,13 +3125,46 @@ class Deck {
     else this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
   }
+  swapPart(prev, s) {
+    // the corner indicator, from one slide to the next in the same chapter: when the part changes, right away the sign
+    // turns like a coin to the new part's, the old arc goes pale and the new one lights up, the name changes and the
+    // pill takes its new width. The old slide's pill, still under the new one while that fades in, plays the same, so
+    // the two stay one picture
+    const a = prev.querySelector('.sh > .path'), b = s.querySelector('.sh > .path');
+    for (const p of [a, b]) if (p && p._swap) { p._swap.forEach(x => x.cancel()); p.querySelectorAll('.swap-tmp').forEach(x => x.remove()); p._swap = null; }
+    if (!a || !b || a.dataset.at === b.dataset.at || a.dataset.at.split(':')[0] !== b.dataset.at.split(':')[0]) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const A = a.querySelector('.pc.on'), B = b.querySelector('.pc.on');
+    const oldHref = A.querySelector('.ring > use').getAttribute('href'), newHref = B.querySelector('.ring > use').getAttribute('href');
+    const oldName = A.querySelector('.where b').textContent, newName = B.querySelector('.where b').textContent;
+    const arcFrom = [...A.querySelectorAll('.arc')].map(c => getComputedStyle(c).stroke), arcTo = [...B.querySelectorAll('.arc')].map(c => getComputedStyle(c).stroke);
+    const w0 = A.offsetWidth, w1 = B.offsetWidth, HALF = 240, ease = 'cubic-bezier(.45, 0, .2, 1)';
+    for (const [p, P] of [[a, A], [b, B]]) {
+      const all = [], anim = (e, kf, o) => all.push(e.animate(kf, { fill: 'both', ...o }));
+      // both signs and both names in this pill, the real ones hidden underneath until it is over
+      const use = P.querySelector('.ring > use'), mk = h => { const u = use.cloneNode(); u.setAttribute('href', h); u.classList.add('swap-tmp'); use.before(u); return u; };
+      const uOld = mk(oldHref), uNew = mk(newHref);
+      anim(use, [{ opacity: 0 }, { opacity: 0 }], { duration: HALF * 2 + 60 });
+      anim(uOld, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: HALF, easing: 'cubic-bezier(.5, 0, 1, 1)' });
+      anim(uNew, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: HALF + 60, delay: HALF, easing: 'cubic-bezier(0, 0, .3, 1)' });
+      P.querySelectorAll('.arc').forEach((c, k) => anim(c, [{ stroke: arcFrom[k] }, { stroke: arcTo[k] }], { duration: 600, easing: 'ease' }));
+      const nb = P.querySelector('.where b'), mb = t => { const x = nb.cloneNode(); x.textContent = t; x.classList.add('swap-tmp'); nb.before(x); return x; };
+      const bOld = mb(oldName), bNew = mb(newName);
+      anim(nb, [{ opacity: 0 }, { opacity: 0 }], { duration: 700 });
+      anim(bOld, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-10px)' }], { duration: 260, easing: 'ease-in' });
+      anim(bNew, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 200, easing: 'ease-out' });
+      if (Math.abs(w0 - w1) > 1) anim(P, [{ width: `${w0}px` }, { width: `${w1}px` }], { duration: 520, easing: ease });
+      p._swap = all;
+      setTimeout(() => { if (p._swap === all) { all.forEach(x => x.cancel()); p.querySelectorAll('.swap-tmp').forEach(x => x.remove()); p._swap = null; } }, 760);
+    }
+  }
   onward() {
     // the next slide; from the overview or a chapter's closing card its discs fly into the chapter marks of that
     // slide first (top right), the big overview becoming the small one
     if (this.flying) return;
     clearTimeout(this._planT);   // a plan still pending from the last step must not run in the middle of the flight
-    const disc = this.zoomDisc();   // into a chapter opener: its disc grows until its colour fills the stage
-    if (disc) return this.zoomInto(disc, this.slides[this.i + 1]);
+    const disc = this.chapterDisc();   // into a chapter opener: its disc glides to its place there and grows
+    if (disc) return this.enterChapter(disc, this.slides[this.i + 1]);
     const plan = this.plan && this.plan.i === this.i ? this.plan : this.planFlight();
     if (plan) this.flyHome(plan); else this.go(this.i + 1, 0);
   }
@@ -3114,110 +3179,134 @@ class Deck {
   planFlight() {
     const i = this.i, prev = this.slides[i], s = this.slides[i + 1];
     if (this.flying || !s || this.still || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
-    const path = s.matches('.chapter') ? null : s.querySelector('.path');   // a chapter opener is zoomed into (Deck.zoomInto)
+    const path = s.matches('.chapter') ? null : s.querySelector('.path');   // a chapter opener is entered otherwise (Deck.enterChapter)
     const discs = path ? [...prev.querySelectorAll('[data-fly]')].filter(e => !e.closest('[data-step]:not(.shown)')) : [];
     if (!discs.length) return null;
     if (window.__deckDataNow) window.__deckDataNow();
     if (window.__ensureCharts) { window.__ensureCharts(s); delete s._steps; }
     if (window.__ensureTex) window.__ensureTex(s);
     deckMedia.around(this.slides, i + 1);
-    // deck coordinates: the deck is scaled to the window, these stay put when it is resized
-    const D = this.deck.getBoundingClientRect(), k = this.deck.offsetWidth / D.width;
-    const box = e => { const r = e.getBoundingClientRect(); return [(r.left - D.left) * k, (r.top - D.top) * k, r.width * k]; };
-    // the marks where the copies land: the current chapter still a bare disc, the three evenly spaced
-    s.classList.add('measure'); path.classList.add('landing');
+    // the marks where the copies land
+    s.classList.add('measure');
     const legs = discs.map(e => {
-      const m = path.querySelector(`.pc[data-ch="${e.dataset.fly}"] svg`);
-      return m && { disc: e, c: e.dataset.fly, from: box(e), to: box(m), o: +getComputedStyle(m.closest('.pc')).opacity };
+      const m = path.querySelector(`.pc[data-ch="${e.dataset.fly}"] .ring > use`);   // the disc inside its ring
+      return m && { disc: e, c: e.dataset.fly, from: this.discBox(e), to: this.discBox(m), o: +getComputedStyle(m.closest('.pc')).opacity };
     }).filter(Boolean);
-    path.classList.remove('landing'); s.classList.remove('measure');
+    // where the current chapter's disc first lands: as it stands with its pill still folded to the disc (the indicator
+    // right-aligned, so the disc and what is left of it sit further right by the pill's width); the unfolding pill
+    // then pushes them into place (Deck.flyHome)
+    const k = this.deck.offsetWidth / this.deck.getBoundingClientRect().width, on = path.querySelector('.pc.on');
+    const shift = on ? (on.getBoundingClientRect().width - on.querySelector('.ring').getBoundingClientRect().width) * k : 0;
+    s.classList.remove('measure');
     // and painted already, unseen under this one: at the hand-over it only has to become visible
     s.classList.add('primed'); this.primed = s;
-    return { i, legs };
+    return { i, legs, shift };
   }
-  zoomDisc() {
+  discBox(e) {
+    // where a chapter disc is drawn, in deck coordinates: the circle, not the bounding box of its drawing (whose trees
+    // and ground reach past the clip); in a ring (viewBox -14 -14 128 128) the inner 100 of 128
+    const D = this.deck.getBoundingClientRect(), k = this.deck.offsetWidth / D.width;
+    const svg = e.closest('svg'), r = (e.tagName === 'use' ? svg : e).getBoundingClientRect();
+    const f = svg && svg.classList.contains('ring') ? 100 / 128 : 1, w = r.width * f, pad = (r.width - w) / 2;
+    return [(r.left + pad - D.left) * k, (r.top + pad - D.top) * k, w * k];
+  }
+  chapterDisc() {
     // on the overview or a chapter's closing card, before a chapter opener: the disc of that chapter, if it is shown
     const prev = this.slides[this.i], s = this.slides[this.i + 1];
-    if (!s || this.still || !s.matches('.chapter:not(.brk):not(.backup)') || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    if (!s || this.still || !s.querySelector(':scope > .cdisc') || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
     return [...prev.querySelectorAll(`[data-fly="${s.dataset.ch}"]`)].find(e => !e.closest('[data-step]:not(.shown)')) || null;
   }
-  zoomInto(e, s) {
-    // the disc opens up into the opener: the same drawing (x-*, the disc's scene with its ground carried on) in a
-    // circle that is at first exactly the disc; the circle grows until it covers the stage while the drawing moves and
-    // scales to its place in the opener's corner (.cscene). The last frame is the opener's own picture: it is put
-    // under it, the title and the goal rise in
+  enterChapter(e, s) {
+    // one element, one move: the chapter's disc glides from where it is (overview, closing card) to its place on the
+    // opener and grows there, while the slide left fades; the opener's own entrance (title, ring, parts) follows
     this.flying = true;
-    const D = this.deck.getBoundingClientRect(), k = this.deck.offsetWidth / D.width, r = e.getBoundingClientRect();
-    const w = r.width * k, x = (r.left - D.left) * k, y = (r.top - D.top) * k, k0 = w / 236;   // the disc: viewBox -118 72 236 236
-    const sc = s.querySelector('.cscene'), S = +sc.dataset.s, X = +sc.dataset.x, Y = +sc.dataset.y;
-    const far = Math.max(...[[0, 0], [1600, 0], [0, 900], [1600, 900]].map(([px, py]) => Math.hypot(px - X, py - Y))) / S + 30;
-    const ch = s.dataset.ch === 'vergleich' ? 'potenzial' : s.dataset.ch;
-    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    layer.setAttribute('class', 'zoomer'); layer.setAttribute('viewBox', '0 0 1600 900');
-    layer.innerHTML = `<defs><clipPath id="zoom-clip"><circle cx="0" cy="190" r="118"/></clipPath></defs>`
-      + `<g><circle cx="0" cy="190" r="118" fill="${getComputedStyle(s).backgroundColor}"/><g clip-path="url(#zoom-clip)"><use href="#x-${ch}"/></g></g>`;
+    const prev = this.slides[this.i];
+    const [x0, y0, w0] = this.discBox(e);
+    s.classList.add('measure'); const [x1, y1, w1] = this.discBox(s.querySelector('.cdisc .ring > use')); s.classList.remove('measure');
+    const layer = document.createElement('div'); layer.className = 'flyer';
+    layer.innerHTML = `<div class="fly" style="left:${x0}px; top:${y0}px; width:${w0}px; height:${w0}px; transform-origin: 0 0">`
+      + `<svg viewBox="0 0 100 100"><use href="#${CHAPTERS[s.dataset.ch].disc}" width="100" height="100"/></svg></div>`;
     this.deck.append(layer);
-    const g = layer.querySelector(':scope > g'), DUR = 1150, opt = { duration: DUR, easing: 'cubic-bezier(.6, 0, .3, 1)', fill: 'forwards' };
-    g.animate([{ transform: `translate(${x + 118 * k0}px, ${y - 72 * k0}px) scale(${k0})` },
-               { transform: `translate(${X}px, ${Y - 190 * S}px) scale(${S})` }], opt);
-    for (const c of layer.querySelectorAll('circle')) c.animate([{ r: '118px' }, { r: `${far}px` }], opt);
+    const DUR = 1000;
+    layer.firstChild.animate([{ transform: 'none' }, { transform: `translate(${x1 - x0}px, ${y1 - y0}px) scale(${w1 / w0})` }],
+      { duration: DUR, easing: 'cubic-bezier(.45, 0, .2, 1)', fill: 'forwards' });   // even: starts gently, settles softly
     const gone = e.closest('.ic') || e; gone.style.visibility = 'hidden';
+    const fade = prev.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 340, easing: 'cubic-bezier(.3, 0, .2, 1)', fill: 'forwards' });
     setTimeout(() => {
       s.classList.add('arrive'); this.go(this.i + 1, 0);
-      setTimeout(() => {   // the opener painted under the last frame: the layer goes
-        layer.remove(); gone.style.visibility = '';
+      setTimeout(() => {   // the opener's disc painted under the copy: the copy goes
+        layer.remove(); gone.style.visibility = ''; fade.cancel();
         setTimeout(() => {
           s.classList.remove('arrive'); this.flying = false;
           if (this.staged) { this.stage(this.staged); this.staged = null; }
         }, 600);
       }, 120);
-    }, DUR);
+    }, DUR - 120);
   }
   flyHome(plan) {
-    // one timeline, nothing but transforms and opacity:
-    //   0     the discs lift off on an arc (up first, then across to the corner), shrinking to their marks; the
-    //         slide left dissolves as one layer, its blur intact
-    //   ~90%  the next slide is there under them (painted beforehand), its content fading and rising in as they settle
-    //   land  the copies give way to the marks (the same drawing), the current chapter's pill grows out of its
-    //         disc and pushes the others aside
+    // From a chapter opener into its first slide, one timeline, every move scheduled at once on the elements that stay
+    // (nothing hands over half-way):
+    //   0     the opener's disc, in its ring, glides into the corner, far right; the parts' colours go pale on the way;
+    //         the opener dissolves, the slide comes up under the copy
+    //   flight the other chapters fade in, so they are there when the disc lands
+    //   land  the copy gives way to the indicator, which stands exactly there: its pill folded to the disc, the
+    //         chapter's drawing on the disc
+    //   then  together: the disc turns like a coin, the first part's sign comes round from the other side and its arc
+    //         lights up; the pill unfolds with its words and pushes the disc and what is left of it into place
+    const leg = plan.legs.find(l => l.disc.closest('.cdisc'));
+    if (!leg) return this.go(this.i + 1, 0);
     this.flying = true;
     const prev = this.slides[this.i], s = this.slides[this.i + 1];
-    const path = s.querySelector('.path'), on = path.querySelector('.pc.on');
-    const sym = { baeume: 'e-baeume', klima: 'e-klima', vergleich: 'e-potenzial' };
+    const path = s.querySelector('.path'), on = path.querySelector('.pc.on'), ring = on.querySelector('.ring');
+    const part = ring.querySelector(':scope > use'), where = on.querySelector('.where');
+    const others = [...path.querySelectorAll('.pc:not(.on)')], arcs = [...on.querySelectorAll('.arc')];
+    const { c, from: [x0, y0, w0], to: [x1, y1, w1] } = leg, dx = plan.shift;
+    const ease = 'cubic-bezier(.4, 0, .25, 1)', push = 'cubic-bezier(.25, .6, .2, 1)', FLY = 900, LAND = FLY, HOLD = 150, GO = LAND + HOLD, HALF = 220, PUSH = 700;
+    const all = [], anim = (e, kf, o) => { const a = e.animate(kf, { fill: 'both', ...o }); all.push(a); return a; };
+    // the copy: the opener's ring, moved and scaled in one go (ring box = disc box widened by 14 / 100 each side)
+    const R = 1.28, X0 = x0 - w0 * .14, Y0 = y0 - w0 * .14, X1 = x1 + dx - w1 * .14, Y1 = y1 - w1 * .14;
     const layer = document.createElement('div'); layer.className = 'flyer';
-    const DUR = 880, STAGGER = 60, opt = (d, easing) => ({ duration: DUR, delay: d, easing, fill: 'both' });
-    plan.legs.forEach(({ c, from: [x0, y0, w0], to: [x1, y1, w1], o }, n) => {
-      // three nested moves, so across, up and size each get their own pace: the arc
-      const f = document.createElement('div'); f.className = 'fly';
-      f.style.cssText = `left:${x0}px; top:${y0}px; width:${w0}px; height:${w0}px`;
-      f.innerHTML = `<div><div><svg viewBox="0 0 100 100"><use href="#${sym[c]}" width="100" height="100"/></svg></div></div>`;
-      layer.append(f);
-      const up = f.firstChild, size = up.firstChild, d = n * STAGGER;
-      f.animate([{ transform: 'none' }, { transform: `translateX(${x1 - x0}px)` }], opt(d, 'cubic-bezier(.55, 0, .25, 1)'));
-      up.animate([{ transform: 'none' }, { transform: `translateY(${y1 - y0}px)` }], opt(d, 'cubic-bezier(.25, .55, .25, 1)'));
-      size.animate([{ transform: 'none', opacity: 1 }, { transform: `scale(${w1 / w0})`, opacity: o }], opt(d, 'cubic-bezier(.4, 0, .2, 1)'));
-    });
+    layer.innerHTML = `<div class="fly" style="left:${X0}px; top:${Y0}px; width:${w0 * R}px; height:${w0 * R}px; transform-origin: 0 0">${ringSvg(c, ['on', 'on'])}</div>`;
     this.deck.append(layer);
-    const last = DUR + STAGGER * (plan.legs.length - 1);
-    // the discs leave their places at once (on a card with their ring and tick, on the overview with their drawing)
-    const gone = plan.legs.flatMap(({ disc: e }) => e.closest('.ic') ? [e.closest('.ic')] : [e, e.nextElementSibling]);
-    gone.forEach(g => { g.style.visibility = 'hidden'; });
+    const track = getComputedStyle(document.documentElement).getPropertyValue('--track').trim();
+    anim(layer.firstChild, [{ transform: 'none' }, { transform: `translate(${X1 - X0}px, ${Y1 - Y0}px) scale(${w1 / w0})` }], { duration: FLY, easing: ease });
+    for (const a of layer.querySelectorAll('.arc')) anim(a, [{ stroke: getComputedStyle(a).stroke }, { stroke: track }], { duration: FLY, easing: 'ease-in-out' });
+    // the indicator, set up as it will stand when the copy lands, and its moves after
+    const chap = document.createElementNS(SVGNS, 'use');   // the chapter's drawing on the coin's front
+    chap.setAttribute('href', `#${CHAPTERS[c].disc}`); chap.setAttribute('width', '100'); chap.setAttribute('height', '100');
+    part.before(chap);
+    const ringW = ring.getBoundingClientRect().width * this.deck.offsetWidth / this.deck.getBoundingClientRect().width;
+    const pcs = [...path.querySelectorAll('.pc')], left = pcs.slice(0, pcs.indexOf(on) + 1);   // the pill and what is left of it move
+    for (const e of left) anim(e, [{ transform: `translateX(${dx}px)` }, { transform: 'none' }], { duration: PUSH, delay: GO, easing: push });
+    anim(on, [{ clipPath: `inset(0 calc(100% - ${ringW}px) 0 0 round 40px)` }, { clipPath: 'inset(0 0 0 0 round 40px)' }], { duration: PUSH, delay: GO, easing: push });
+    anim(where, [{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: GO + 260, easing: 'ease' });
+    // the other chapters are there when the disc lands: the slide (and its indicator) only comes up at the end, so
+    // they fade in as copies on this layer, where they stand at first, and give way to the real ones with the disc
+    const D = this.deck.getBoundingClientRect(), kk = this.deck.offsetWidth / D.width;
+    const layer2 = document.createElement('div'); layer2.className = 'flyer'; this.deck.append(layer2);
+    others.forEach((o, n) => {
+      const r = o.querySelector('.ring').getBoundingClientRect();   // measured with the pill's moves already applied
+      const cp = document.createElement('div'); cp.className = 'fly';
+      cp.style.cssText = `left:${(r.left - D.left) * kk}px; top:${(r.top - D.top) * kk}px; width:${r.width * kk}px; height:${r.height * kk}px`;
+      cp.innerHTML = ringSvg(o.dataset.ch, ['track', 'track']); layer2.append(cp);
+      anim(cp, [{ opacity: 0 }, { opacity: +getComputedStyle(o).opacity }], { duration: 450, delay: 220 + n * 80, easing: 'ease-out' });
+      // the real one stays out until the copy goes: the same animation, so the swap is one frame (no brighter overlap)
+      o.animate([{ opacity: 0 }, { opacity: 0 }], { duration: LAND, fill: 'backwards' }).finished.then(() => { if (n === others.length - 1) layer2.remove(); }, () => layer2.remove());
+    });
+    anim(chap, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: HALF, delay: GO, easing: 'cubic-bezier(.5, 0, 1, 1)' });
+    anim(part, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: HALF + 60, delay: GO + HALF, easing: 'cubic-bezier(0, 0, .3, 1)' });
+    for (const a of arcs) anim(a, [{ stroke: track }, { stroke: getComputedStyle(a).stroke }], { duration: 600, delay: GO + HALF, easing: 'ease' });
+    // the slide left goes, the new one comes up under the copy; the copy goes when the indicator stands under it
     const fade = prev.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 340, easing: 'cubic-bezier(.3, 0, .2, 1)', fill: 'forwards' });
-    path.classList.add('landing');
+    leg.disc.closest('.ring').style.visibility = 'hidden';
     const at = (ms, fn) => setTimeout(fn, ms);
-    at(last - 110, () => { s.classList.add('arrive'); this.go(this.i + 1, 0); s.classList.remove('primed'); this.primed = null; });
-    at(last, () => {
-      if (on) { on.style.width = '40px'; on.classList.add('grow'); }
-      path.classList.remove('landing'); layer.remove();
-      requestAnimationFrame(() => {
-        if (on) { on.style.width = `${on.scrollWidth}px`; on.classList.remove('grow'); }
-        at(560, () => {
-          if (on) on.style.width = '';
-          s.classList.remove('arrive'); gone.forEach(g => { g.style.visibility = ''; }); fade.cancel();
-          this.flying = false;
-          if (this.staged) { this.stage(this.staged); this.staged = null; }
-        });
-      });
+    at(LAND - 120, () => { s.classList.add('arrive'); this.go(this.i + 1, 0); s.classList.remove('primed'); this.primed = null; });
+    at(LAND, () => layer.remove());
+    at(GO + PUSH + 80, () => {
+      all.forEach(a => a.cancel()); chap.remove();   // everything at its own resting state now
+      s.classList.remove('arrive'); leg.disc.closest('.ring').style.visibility = ''; fade.cancel();
+      this.flying = false;
+      if (this.staged) { this.stage(this.staged); this.staged = null; }
     });
   }
   dataReady() {
@@ -3246,7 +3335,16 @@ class Deck {
       if (k > this.step) continue;
       countUp(c, !(animate && k === this.step) || deckCalm.matches);
     }
+    this.syncSw(s);
     this.sync();
+  }
+  syncSw(s) {
+    // the Ohne / Mit words (slide 4): the word's box has the width of the one showing, so what follows it moves when
+    // they swap (a width transition)
+    for (const w of s.querySelectorAll('.sw')) {
+      const mit = !!w.closest('.ovw')?.querySelector('.kc-r.shown'), o = w.querySelector('.sw-o'), m = w.querySelector('.sw-m');
+      w.style.width = `${(mit ? m : o).offsetWidth}px`;
+    }
   }
   rest(s) {
     // only the newest click moves: endless loops of earlier clicks (and of the opening picture) stop in a still
