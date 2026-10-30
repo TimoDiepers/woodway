@@ -10,44 +10,56 @@ const TEX_MACROS = {
   "\\fc":   "\\htmlClass{f c-#1}{#2}",
   "\\q":    "\\fc{#1}{\\boldsymbol{#2}}",
   "\\hl":   "\\htmlClass{hl c-#1}{#2}",              // lit by .on or a slide trigger (deck.css, "Highlight")
+  "\\tm":   "\\boldsymbol{t}",                    // the time, a symbol like the others
+  "\\tp":   "\\boldsymbol{t'}",                   // an earlier time (the integrals of the backup)
+  "\\tz":   "\\boldsymbol{t_0}",                   // the start
   "\\st":   "\\htmlData{step=#1}{#2}",               // \st{2}{…}: this term appears on click 2
-  // the symbols of the talk: one macro and one colour each (deck.css, "Symbol colours"); hue = channel, shade = symbol
+  // the symbols of the talk: one macro and one colour each (deck.css, "Symbol colours"); only the variable is coloured,
+  // with its indices; d, dt, the brackets and (t) stay in ink. The heat flows are dotted (q̇, Q̇), the other rates written
+  // bare (dm/dt); a function carries its argument (m(t)). Indices: B tree, W cloud, Bo ground, atm atmosphere, PS RE ZS ST the four carbon fluxes
+  "\\rate":  "\\dfrac{\\mathbf{d}\\,#1}{\\mathbf{d}\\tm}",   // \rate{\mB} = dm_B/dt
   // carbon in the tree
-  "\\mB":   "\\q{mb}{m^{c}_{\\mathrm{Baum}}}",
-  "\\mBd":  "\\q{mb}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{Baum}}}{\\mathrm{d}t}}",   // the balance, as a rate
-  "\\mPS":  "\\q{ps}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{PS}}}{\\mathrm{d}t}}",   // a flux: kg C per year
-  "\\mRE":  "\\q{re}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{RE}}}{\\mathrm{d}t}}",   // a flux: kg C per year
-  "\\mZS":  "\\q{zs}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{ZS}}}{\\mathrm{d}t}}",   // a flux: kg C per year
-  "\\mST":  "\\q{st}{\\dfrac{\\mathrm{d}m^{c}_{\\mathrm{ST}}}{\\mathrm{d}t}}",   // a flux: kg C per year
-  "\\mmax": "\\q{mmax}{m^{c}_{\\mathrm{max}}}",
+  "\\mB":   "\\q{mb}{m_{\\mathrm{B}}}",
+  "\\mBd":  "\\rate{\\mB}",                         // the balance, as a rate
+  "\\mPS":  "\\rate{\\q{ps}{m_{\\mathrm{PS}}}}",     // a flux: kg C per year
+  "\\mRE":  "\\rate{\\q{re}{m_{\\mathrm{RE}}}}",
+  "\\mZS":  "\\rate{\\q{zs}{m_{\\mathrm{ZS}}}}",
+  "\\mST":  "\\rate{\\q{st}{m_{\\mathrm{ST}}}}",
+  "\\mmax": "\\q{mmax}{m_{\\mathrm{max}}}",
   "\\kw":   "\\q{kw}{k}",                             // growth rate
   "\\pw":   "\\q{pw}{p}",                             // shape parameter
   "\\sz":   "\\q{sz}{s_{0}}",                         // disturbance rate, pre-industrial
   "\\gam":  "\\q{gam}{\\gamma}",                      // rise of the disturbance rate
   "\\pd":   "\\q{pd}{p}",                             // disturbance probability
   "\\pdo":  "\\q{pdo}{p_0}",
-  "\\md":   "\\q{md}{\\dfrac{\\mathrm{d}m^{c}}{\\mathrm{d}t}}",                       // the tree's carbon uptake
+  "\\md":   "\\rate{\\q{md}{m}}",                    // the tree's carbon uptake
   // sunlight, energy, albedo
-  "\\qin":  "\\q{qin}{\\dfrac{\\mathrm{d}q_{\\mathrm{ein}}}{\\mathrm{d}t}}",
+  "\\qin":  "\\q{qin}{\\dot{q}_{\\mathrm{ein}}}",
   "\\alb":  "\\q{alb}{\\alpha}",
-  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{Baum}}}",
-  "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{Wolke}}}",
-  "\\alw":  "\\q{alw}{\\alpha_{\\mathrm{Wolke}}}",
-  "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{Wolke}}}",
-  "\\dQ":   "\\q{dq}{\\dfrac{\\mathrm{d}Q^{\\mathrm{diff}}_{\\mathrm{Albedo}}}{\\mathrm{d}t}}",
-  "\\Ab":   "\\q{ab}{A_{\\mathrm{Baum}}}",
-  "\\Ae":   "\\q{ae}{A_{\\mathrm{Erde}}}",
-  "\\tatm": "\\q{tau}{\\tau_{\\mathrm{atm}}}",
-  // radiative forcing: the sum in purple, its two parts in their channel's colour
-  "\\phit": "\\q{phi}{\\varphi}",
-  "\\phio": "\\q{phio}{\\varphi_0}",
-  "\\phia": "\\q{phia}{\\varphi_\\alpha}",
-  "\\phic": "\\q{phic}{\\varphi_{\\mathrm{CO_2}}}",
+  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{B}}}",
+  "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{W}}}",
+  "\\alw":  "\\q{alw}{\\alpha_{\\mathrm{W}}}",
+  "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{W}}}",
+  "\\dQ":   "\\q{dq}{\\dot{Q}_{\\alpha}}",
+  "\\Ab":   "\\q{ab}{A_{\\mathrm{B}}}",
+  "\\Ae":   "\\q{ae}{A_{\\mathrm{atm}}}",
+  "\\tatm": "\\q{tau}{\\tau}",
+  // radiative forcing: the sum, its two parts in their channel's colour
+  "\\phit": "\\q{phi}{\\Delta\\varphi_{\\mathrm{B}}}",
+  "\\phio": "\\q{phio}{\\Delta\\varphi_0}",
+  "\\phia": "\\q{phia}{\\Delta\\varphi_\\alpha}",
+  "\\phic": "\\q{phic}{\\Delta\\varphi_{\\mathrm{CO_2}}}",
+  // the energy balance of the atmosphere (the system boundary at its top): E, the flux densities in and out, their difference
+  "\\Een":  "\\q{e}{E}",
+  "\\pin":  "\\q{pin}{\\varphi^{\\mathrm{kw}}_{\\mathrm{ein}}}",     // sunlight in, shortwave
+  "\\pkw":  "\\q{pkw}{\\varphi^{\\mathrm{kw}}_{\\mathrm{aus}}}",     // reflected, shortwave out
+  "\\plw":  "\\q{pout}{\\varphi^{\\mathrm{lw}}_{\\mathrm{aus}}}",    // heat radiation, longwave out
+  "\\dphi": "\\q{dphi}{\\Delta\\varphi}",
   // CO2 in the atmosphere
   "\\eps":  "\\q{eps}{\\varepsilon_{\\mathrm{CO_2}}}",
   "\\dm":   "\\q{dm}{\\Delta m_{\\mathrm{CO_2}}}",
-  "\\mco":  "\\q{dm}{m_{\\mathrm{CO_2}}}",
-  "\\mdc":  "\\q{mdc}{\\dfrac{\\mathrm{d}m_{\\mathrm{CO_2}}}{\\mathrm{d}t}}",
+  "\\mco":  "\\q{mdc}{m_{\\mathrm{CO_2}}}",
+  "\\mdc":  "\\rate{\\mco}",
   "\\gC":   "\\q{gc}{g_C}",
   "\\cc":   "\\q{conc}{c}",
   "\\cz":   "\\q{conco}{c_0}",
@@ -76,8 +88,8 @@ const TEX_MACROS = {
 
 // the figures' own formula labels (mpl texts that are one $…$) and the colour role of the symbol they show
 const CHART_TEX_ROLE = {
-  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{Baum}}': 'dal',
-  '\\Delta\\alpha_{\\mathrm{Wolke}}': 'daw', '\\Delta\\dot{Q}_{\\mathrm{Albedo}}': 'dq'
+  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{B}}': 'dal',
+  '\\Delta\\alpha_{\\mathrm{W}}': 'daw', '\\dot{Q}_{\\alpha}': 'dq'
 };
 
 /* y-axis titles: an HTML label (.axlab) in the deck's axis face (Plex, muted, 17-19px), set with KaTeX, so a symbol on
@@ -147,7 +159,7 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 // #e-…), the part icons #p-…; each part's colour is --p-<key> (fill) and --t-<key> (text)
 const CHAPTERS = {
   baeume: { name: 'Baum-Modell', disc: 'e-baeume', col: 'var(--moss)', parts: [['co2', 'Kohlenstoff-Aufnahme'], ['refl', 'Reflexionsänderung']] },
-  klima: { name: 'Klima-Modell', disc: 'e-klima', col: 'var(--clay)', parts: [['bal', 'Strahlungsbilanz'], ['temp', 'Temperaturkurve']] },
+  klima: { name: 'Klima-Modell', disc: 'e-klima', col: 'var(--clay)', parts: [['bal', 'Strahlungsantrieb'], ['temp', 'Temperaturkurve']] },
   vergleich: { name: 'Potenziale', disc: 'e-potenzial', col: 'var(--fjord)', parts: [['one', 'Kühlung eines Baums'], ['world', 'Kühlung der Welt']] },
 };
 // A chapter's disc in its ring of two arcs, one per part (right: the first, left: the second). Each arc 'off' (not
@@ -293,7 +305,7 @@ let chartUid = 0;
    goes. SVG renderer, so text stays sharp when the deck scales.
    =========================================================== */
 const EC = {
-  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#787136',   // = --t-refl (the reflection's text tone: a chart line needs the contrast)
+  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#706a19',   // = --s-phia
   font: "'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif"
 };
 /* one pace for every curve in the deck: a line or area is drawn in from the left in DRAW_MS at a constant speed
@@ -650,7 +662,7 @@ window.TEMPSUM = @@TEMPSUM@@;
 const EC_TEMPSUM = {
   steps: 3, tip: { unit: 'fK', dec: 1 },
   option(k) {
-    const D = window.TEMPSUM, A = D.sites[0], red = '#762c26';   // = --t-temp
+    const D = window.TEMPSUM, A = D.sites[0], red = '#902b3c';   // = --s-dt
     const pulse = p => [[p.year, 0], ...p.v.map((v, i) => [p.year + i, v])];
     const font = { fontFamily: EC.font, fontSize: 19 };
     const series = [];

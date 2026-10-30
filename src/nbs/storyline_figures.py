@@ -45,9 +45,10 @@ from nbs.site_factor import site_factor  # noqa: E402
 from nbs.species import get_species  # noqa: E402
 from nbs.tree import simulate_deterministic  # noqa: E402
 
-C_CARBON = "#105b3e"  # same as nbs.plots: phi_CO2 / Delta T_CO2
-C_ALBEDO = "#787136"  # same as nbs.plots: phi_alpha / Delta T_alpha
-C_TEMP = "#762c26"  # same as nbs.plots: the temperature response
+C_CARBON = "#067a3c"  # same as nbs.plots: phi_CO2 / Delta T_CO2
+C_ALBEDO = "#706a19"  # same as nbs.plots: phi_alpha / Delta T_alpha
+C_TEMP = "#902b3c"  # same as nbs.plots: the temperature response
+C_DM = "#007391"  # deck.css --s-dm: the CO2 change of the atmosphere (Delta m)
 C_NET = "#252525"
 C_WARM_FILL = "#e7b7a8"
 C_COOL_FILL = "#b9cfe3"
@@ -1235,7 +1236,7 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     _setup()
     g = green_carbon_preindustrial(horizon + 1)
     t = np.arange(horizon + 1)
-    c_rm, c_back = C_CARBON, "#8c6d5a"
+    c_rm, c_back = C_DM, "#8c6d5a"
     # sized to its slot on the slide (530 x 360 px) at the scale of the other model charts (~0.675 px per figure px),
     # so lines and type match them
     fig, ax = plt.subplots(figsize=(4.9, 3.33), dpi=FIG_DPI)

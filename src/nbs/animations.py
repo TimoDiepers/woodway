@@ -110,7 +110,7 @@ SITES = (
     Site("Aachen", 50.78, 6.08, "#8a5596", "o", "DE"),
     # interior Alaska: boreal conifer forest, snow half the year, much reforestable land -- a site where the tree
     # warms by 2100 (replaced Joensuu, boreal mixed forest, 2026-10-22)
-    Site("Fairbanks", 64.84, -147.72, "#1e5b57", "s", "US"),
+    Site("Fairbanks", 64.84, -147.72, "#243f8f", "s", "US"),
     # south-eastern Amazon (Pará), "arc of deforestation": much reforestable land, much sun, a typical
     # tropical carbon potential (Walker et al. 2022: 139 Mg C/ha; Belém, tried first, has only 80) -- 2026-10-06
     Site("Marabá", -5.37, -49.12, "#3d8a42", "D", "BR"),
@@ -675,7 +675,7 @@ def light_parts_sites_figure(out_path: str) -> str:
 
     _heading_font, body_font = _register_fonts()
     _style(body_font)
-    c_baum, c_wolke = "#787136", "#9d945f"   # deck.css --s-dal, --s-daw
+    c_baum, c_wolke = "#5c7200", "#056fab"   # deck.css --s-dal, --s-daw
     fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
     fig.subplots_adjust(left=0.141, right=0.977, bottom=0.07, top=0.98)
     _clean_axes(ax)
@@ -684,15 +684,15 @@ def light_parts_sites_figure(out_path: str) -> str:
     for s in SITES:
         alb, cld, net = (float(v.mean()) for v in cloud_season_series(s))
         f = np.asarray(run_site(s).trajectory.closure, dtype=float)
-        aachen = s.name == "Aachen"
-        fade = "" if aachen else " fade:2"   # at the last click the other places step back
+        shown = s.name == "Aachen"
+        fade = "" if shown else " fade:2"   # at the last click the other places step back
         ax.plot(y, net * f, color=s.color, linewidth=2.8, label=None, gid="step:0" + fade)
         # the canopy is not closed yet everywhere in 2100: the value is that of the curve
         below = s.name == "Marabá"   # lowest curve: its name below it
         off = -22 if below else {"Fairbanks": 28}.get(s.name, 18)
         ax.annotate(f"{s.label}: {net * f[-1]:.0f} W", (xl, float(np.interp(xl, y, net * f))), xytext=(0, off), textcoords="offset points",
                     ha="center", va="top" if below else "bottom", fontsize=13.5, fontweight="bold", color=s.color, gid="step:0 fade:2")   # at the last click the parts have the room
-        if aachen:
+        if shown:
             for part, col, name, xn, yn, up in ((alb * f, c_baum, "Albedo (Baum)", 2042, 10.5, True), (cld * f, c_wolke, "Albedo (Wolken)", 2054, -5.0, False)):
                 ax.fill_between(y, 0, part, color=col, alpha=0.22, linewidth=0, gid="step:2")
                 ax.plot(y, part, color=col, linewidth=2.2, label=None, gid="step:2")
@@ -750,7 +750,7 @@ def cloud_brightening_map_figure(out_path: str) -> str:
     ax_map.pcolormesh(grid_lons(), grid_lats(), np.ma.masked_where(~measured, field), cmap=cmap, norm=norm,
                       shading="auto", zorder=3)
     _site_markers(ax_map, lambda s: f"{_pp(field[site_cell(s)])} %")
-    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{Wolke}}$", "#787136")
+    _title_with_symbol(ax_map, "Zusätzliche Reflexion durch Wolken", r"$\Delta\alpha_{\mathrm{W}}$", "#056fab")
 
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax_cbar, orientation="horizontal",
                       extend="both")
@@ -789,11 +789,11 @@ def light_ingredients_figure(out_path: str) -> str:
     fig = plt.figure(figsize=(12.0, 5.6), dpi=FIG_DPI)
     panels = [
         (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
-         "#8a6a1e"),
-        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{Baum}}$",
-         "#787136"),
+         "#a55500"),
+        (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{B}}$",
+         "#5c7200"),
         (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
-         r"$\Delta\alpha_{\mathrm{Wolke}}$", "#787136"),
+         r"$\Delta\alpha_{\mathrm{W}}$", "#056fab"),
     ]
     for k, (field, ok, scale, ticks, unit, fmt, title, symbol, symbol_color) in enumerate(panels):
         ax = fig.add_axes((0.005 + k * 0.333, 0.16, 0.323, 0.73))
@@ -842,10 +842,10 @@ def albedo_ingredients_figure(out_path: str) -> str:
     panels = [
         (fig.add_axes((0.01, 0.16, 0.48, 0.73)), fig.add_axes((0.08, 0.085, 0.34, 0.028)), q, RAMP_SUN,
          (90.0, 260.0), "[W/m²]", "Einstrahlung an der Oberfläche",
-         r"$\dot{q}_{\mathrm{ein}}$", "#8a6a1e"),
+         r"$\dot{q}_{\mathrm{ein}}$", "#a55500"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
          (0.0, 18.0), "[%]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{Baum}}$", "#787136"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{B}}$", "#5c7200"),
     ]
     units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

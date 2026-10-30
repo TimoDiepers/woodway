@@ -54,18 +54,19 @@
   --ray: var(--p-refl);       /* reflected sunlight in the schemata */
   --sun: #e8b84f; --sun-ray: #d9a441; --amber: #e0a83e;
 
-  /* symbol colours (FORMULAS): hue = channel, shade = symbol. CO₂ greens and teals, albedo and energy oranges
-     and browns, temperature crimson and wine (its feedback R blue: the cooler Earth's answer, apart from the store S),
-     growth parameters ochre, disturbance rust, total forcing purple */
-  --s-mb: #1d5b30;  --s-ps: var(--ps);  --s-re: var(--re);  --s-zs: var(--zs);  --s-st: var(--st);
-  --s-mmax: #8a6a1e; --s-kw: #a0522d;  --s-pw: #556b2f;   --s-md: #4a6b12;
-  --s-sz: #d0502a;  --s-gam: #7a2e0e;  --s-pd: #b83a1e;   --s-pdo: #8a2c12;
-  --s-qin: #a8740b; --s-alb: var(--t-refl);  --s-albb: var(--t-refl); --s-albw: var(--t-refl); --s-dal: var(--t-refl); --s-daw: var(--p-refl);
-  --s-alw: var(--t-refl); --s-dfw: #7c5a2e;  --s-dq: var(--t-refl);   --s-ab: #4f7a3a;   --s-ae: #3f5a73;  --s-tau: #5b6f8a;
-  --s-phi: var(--t-bal); --s-phio: var(--p-bal); --s-phia: var(--t-refl); --s-phic: var(--t-co2);
-  --s-eps: var(--t-co2); --s-dm: var(--t-co2);   --s-mdc: var(--t-co2);  --s-gc: #1f7a8c;   --s-conc: #2b6cb0; --s-conco: #5f86b0;
-  --s-matm: #5d665f; --s-katm: #7f5f2a; --s-ch4: #2b7bba;
-  --s-dt: var(--t-temp);  --s-rf: #1f5b94;   --s-sk: #a23b72;   --s-ft: var(--t-temp);   --s-par: #8a6a1e;
+  /* symbol colours (FORMULAS): one colour per quantity, spaced so that the symbols of one slide stay apart (CIELAB
+   distance 22 or more) and each reads on the paper at 4.5:1 or better; carbon greens, albedo ochres and olives,
+   clouds blues, temperature wine; the charts take the same colours (src/nbs/plots.py C_CARBON, C_ALBEDO, C_TEMP) */
+  --s-mb: #2e4925;  --s-ps: #007a4f;  --s-re: #911779;  --s-zs: #006cbd;  --s-st: #d1075c;
+  --s-mmax: #7e6700; --s-kw: #007589;  --s-pw: #007c00;   --s-md: #3e6a01;
+  --s-sz: #be3b10;  --s-gam: #6d54ce;  --s-pd: #b34644;   --s-pdo: #9d3339;
+  --s-qin: #a55500; --s-alb: #635f48;  --s-albb: #017a52; --s-albw: #b94021; --s-dal: #5c7200; --s-daw: #056fab;
+  --s-alw: #7638a4; --s-dfw: #057769;  --s-dq: #7b402b;   --s-ab: #007a52;   --s-ae: #045b5d;  --s-tau: #8654a5;
+  --s-phi: #ba4300; --s-phio: #615400; --s-phia: #706a19; --s-phic: #067a3c;
+  --s-eps: #057772; --s-dm: #007391;   --s-mdc: #007c00;  --s-gc: #005388;   --s-conc: #006e90; --s-conco: #0e6c8c;
+  --s-matm: #535c54; --s-katm: #055b49; --s-ch4: #015193;
+  --s-e: #076db0;   --s-dphi: #753c66; --s-pin: #9c5700;  --s-pout: #b21132; --s-pkw: #546f4a;
+  --s-dt: #902b3c;  --s-rf: #015b9b;   --s-sk: #904997;   --s-ft: #564337;   --s-par: #935433;
   --vapor: #17808a;                    /* water vapour and mixing over the forest (slide 15, step 1) */
   --layer: #5a4fa0;                    /* the rising mixed air layer (slide 15, step 2) */
   --land: #8c6d5a;                     /* ocean and land taking CO₂ back */
@@ -90,7 +91,7 @@
 .c-pdo { --c: var(--s-pdo); } .c-qin { --c: var(--s-qin); } .c-alb { --c: var(--s-alb); }
 .c-albb { --c: var(--s-albb); } .c-albw { --c: var(--s-albw); } .c-dal { --c: var(--s-dal); }
 .c-daw { --c: var(--s-daw); } .c-alw { --c: var(--s-alw); } .c-dfw { --c: var(--s-dfw); } .c-dq { --c: var(--s-dq); }
-.c-ab { --c: var(--s-ab); } .c-ae { --c: var(--s-ae); } .c-tau { --c: var(--s-tau); } .c-phi { --c: var(--s-phi); }
+.c-ab { --c: var(--s-ab); } .c-ae { --c: var(--s-ae); } .c-tau { --c: var(--s-tau); } .c-phi { --c: var(--s-phi); } .c-e { --c: var(--s-e); } .c-dphi { --c: var(--s-dphi); } .c-pin { --c: var(--s-pin); } .c-pout { --c: var(--s-pout); } .c-pkw { --c: var(--s-pkw); }
 .c-phio { --c: var(--s-phio); } .c-phia { --c: var(--s-phia); } .c-phic { --c: var(--s-phic); }
 .c-eps { --c: var(--s-eps); } .c-dm { --c: var(--s-dm); } .c-mdc { --c: var(--s-mdc); } .c-gc { --c: var(--s-gc); }
 .c-conc { --c: var(--s-conc); } .c-conco { --c: var(--s-conco); } .c-matm { --c: var(--s-matm); }
@@ -372,6 +373,7 @@ strong { font-weight: 600; }
 .slide:has(.locstep.shown) .hl.loc::before,                              /* total forcing: the two local terms */
 .slide:has(.f-alb.shown):not(:has(.f-chk.shown)) .hl.at-falb::before,   /* forcing: the albedo term, until ticked off */
 .slide:has(.f-co2.shown) .hl.at-fco2::before,                            /* forcing: the CO₂ term */
+.slide:has(.f-dm.shown) .hl.at-dm4::before,                              /* CO₂ forcing: the remaining CO₂ amount */
 .slide:has(.ghsteps > [data-step="1"].shown) .hl.late::before            /* CO₂ forcing: once the steps begin */ { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
 /* the same frame on a symbol a figure carries (MplChart.placeTex) */
 .chart .mtex { position: absolute; z-index: 2; pointer-events: none; white-space: nowrap; line-height: 1;
@@ -1167,10 +1169,7 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 /* a formula symbol in a slide title: the math font, without making the title line taller */
 .sh h2 .katex { font-size: 1.08em; line-height: 0; }
 /* climate: which way the radiative forcing points */
-.phi-sign { display: flex; gap: 10px; }
 /* forcing slide: the sign key stands in the row of the definition line, over the formula column (out of the stack, so the formula centres) */
-.slide:has(.phi-sign) .body { position: relative; }
-.phi-sign { position: absolute; left: 900px; top: 12px; }   /* the left edge of the formula column below, clear of the definition line */
 .sh h2 .katex .strut { display: none !important; }   /* KaTeX's strut would still add a few px to the line */
 
 .ww-side { display: flex; align-items: center; gap: 18px; padding: 14px 18px 14px 14px; border-radius: 14px; background: rgba(255, 255, 255, .6);
@@ -2115,7 +2114,6 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
    the legends', formulas the size of the forcing formula that takes the column after it */
 .bilanz { margin-top: 146px; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }   /* its first formula where the forcing formula comes after it */
 .slide:has(.f-alb.shown) .bilanz { display: none; }   /* once the forcing is split up, its first formula takes the column */
-.bilanz:not(:has(.shown)) { visibility: hidden; }
 .bilanz .bl-k { margin: 0; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
 .bilanz .bl-f { margin: 4px 0 0; font-size: 28px; line-height: 1.25; color: var(--ink); }
 .bilanz .bl-d { margin: 8px 0 0; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
@@ -2220,8 +2218,6 @@ svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 .recap-eq-h .ico { width: 22px; height: 22px; margin-right: 8px; vertical-align: -6px; }
 .fin { position: relative; }
 .fin > .ico { position: absolute; left: 14px; top: 14px; width: 34px; height: 34px; }
-.phi-sign { transition: opacity .4s var(--ease); }
-.slide:has(.fline.head > .next.shown) .phi-sign { opacity: 0; }   /* the next formula line takes the row */
 
 /* Klima chapter: one picture that grows over the five slides (03_klima.html). What the slides before built stays,
    muted; each finished part leaves its formula sign where it sits. The part being explained is in full colour. */
@@ -2245,7 +2241,7 @@ svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: opacity .6s var(--ease); }
 .slide:has(svg.s17 .co2box.shown) svg.s17 :is(.kb-sun, .kb-refl) { opacity: .15; }
 .slide:has(svg.s18 .pop[data-step="2"].shown) svg.s18 .kb-sun { opacity: .15; }
 svg .km-phi { transition: opacity .6s var(--ease); }
-.slide[data-km-off] svg .km-phi { opacity: .3; }
+.slide[data-km-off] svg .km-phi { opacity: 1; }
 .slide:has(svg.s17 .f-chk.shown) svg .km-phi, .slide[data-title^="Vom Strahlungsantrieb"] svg .km-phi { opacity: 1; }
 
 .ovh .ico { width: 34px; height: 34px; vertical-align: -6px; }
@@ -2345,3 +2341,42 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 
 .kp[data-step] { opacity: 0; transition: opacity .7s var(--ease); }
 .kp[data-step].shown { opacity: 1; }   /* the limits one by one */
+.c10-body .legend.lg { gap: 5px 22px; }   /* the taller rate fractions above (t in the numerator) leave less room */
+/* f13: the rates carry their (t) in the numerator now: set one size down, the balance on one line */
+.bilanz .bl-f { font-size: 24px; white-space: nowrap; }
+.bilanz .bl-phi .bl-f { font-size: 22px; }
+
+.bilanz .bl-gap { margin-top: 14px; }
+.bilanz .bl-phi { margin-top: 26px; }
+
+/* slide 13, right column: the balance and the same balance with its bracket lie on top of each other; the symbols'
+   definitions stand under the formula, spaced out */
+.bilanz { margin-top: 6px; }
+.bl-swap { display: grid; }
+.bl-swap > * { grid-area: 1 / 1; }
+.bl-swap .v1 { transition: opacity .4s var(--ease); }
+.bl-swap:has(.v2.shown) .v1 { opacity: 0; }
+.bilanz .bl-leg { gap: 3px 18px; margin-top: 8px; }
+.bilanz .bl-leg dt { font-size: 21px; }
+.bilanz .bl-leg dd { font-size: 18px; }
+.bilanz .bl-gap { margin-top: 12px; }
+.bilanz .bl-phi { margin-top: 12px; }
+.bilanz .bl-phi .bl-d { margin-top: 4px; }
+
+/* slide 13, right column: the formulas above, the legend at the bottom (it is there from the start) */
+.bilanz { display: flex; flex-direction: column; height: 600px; margin-top: 0; }
+.bilanz .bl-leg { margin-top: auto; }
+
+/* the forcing of the tree: on the click with the CO₂ box everything else of the drawing steps back */
+svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: opacity .6s var(--ease); }
+.slide:has(.km-fade.shown) svg :is(.km-bound, .kb-sun, .kb-refl, .kb-heat) { opacity: .12 !important; }
+/* slide 13: the formulas stand apart, as the column has room */
+.bilanz .bl-top { display: flex; flex-direction: column; gap: 30px; }
+.bilanz .bl-gap, .bilanz .bl-phi { margin-top: 0; }
+
+/* slide 18: ΔT(t) = ? gives way to f(…) as the numbered steps come */
+.slide:has(.fline.head [data-step="1"].shown) .fline.head .qm { display: none; }
+/* the inputs of FaIR: the two forcings, large, nothing else */
+.fflow .fin.big { padding: 22px 18px; }
+.fflow .fin.big .katex { font-size: 2.1em; }
+.fline.head > .part > .hl > [data-step]:not(.shown) { display: none; }   /* the unfinished f(…) takes no room */

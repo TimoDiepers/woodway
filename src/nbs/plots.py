@@ -25,9 +25,9 @@ from nbs.species import get_species  # noqa: E402
 C_COHORT = ("#08519c", "#3182bd", "#e6550d", "#a63603")
 """One colour per planting cohort, cool (early) to warm (late)."""
 
-C_CARBON = "#105b3e"  # deck.css --t-co2 (Kohlenstoff-Aufnahme)
-C_ALBEDO = "#787136"  # deck.css --t-refl (Reflexionsänderung)
-C_TEMP = "#762c26"  # deck.css --t-temp (Temperaturkurve)
+C_CARBON = "#067a3c"  # deck.css --s-phic (phi_CO2)
+C_ALBEDO = "#706a19"  # deck.css --s-phia (Delta phi_alpha)
+C_TEMP = "#902b3c"  # deck.css --s-dt (Delta T)
 C_NET = "#252525"
 DPI = 300
 

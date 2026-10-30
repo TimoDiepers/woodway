@@ -70,7 +70,7 @@ NEITHER = "#7b6e62"      # d0/d4: neither the tree nor DAC cools (warm taupe, ap
 CATEGORIES = {
     "waldtyp": [  # Hasler et al. 2024 types, ordered like the legend
         {"key": "dbf", "label": "Sommergrüner Laubwald", "color": "#9fae3f"},
-        {"key": "enf", "label": "Immergrüner Nadelwald", "color": "#1e5b57"},
+        {"key": "enf", "label": "Immergrüner Nadelwald", "color": "#243f8f"},
         {"key": "ebf", "label": "Immergrüner Laubwald", "color": "#3d8a42"},
         {"key": "dnf", "label": "Lärchenwald", "color": "#cf9536"},
         {"key": "mf", "label": "Mischwald", "color": "#8a5596"},

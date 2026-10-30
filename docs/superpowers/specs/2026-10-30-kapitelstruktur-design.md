@@ -26,16 +26,16 @@ Stand 2026-10-30, abgestimmt mit Timo im Gespräch (visueller Begleiter, Prototy
 | Kapitel | Teil 1 | Teil 2 |
 |---|---|---|
 | Bäume | Kohlenstoff-Aufnahme | Reflexionsänderung |
-| Klima | Strahlungsbilanz | Temperaturkurve |
+| Klima | Strahlungsantrieb | Temperaturkurve |
 | Potenzial | Kühlung eines Baums | Kühlung der Welt |
 
-Logik als Kette: Bäume liefert Aufnahme und Reflexionsänderung eines Baums, Klima macht daraus (über die Strahlungsbilanz) seine Temperaturkurve, Potenzial macht aus der Temperaturkurve die Kühlung eines Baums an jedem Ort und dann die der Welt.
+Logik als Kette: Bäume liefert Aufnahme und Reflexionsänderung eines Baums, Klima macht daraus (über die Strahlungsantrieb) seine Temperaturkurve, Potenzial macht aus der Temperaturkurve die Kühlung eines Baums an jedem Ort und dann die der Welt.
 
 Zuordnung der bestehenden Folien (`data-title`):
 
 - **Bäume / Kohlenstoff-Aufnahme:** Kohlenstoff-Aufnahme, Modellierung der Kohlenstoff-Aufnahme, Wachstumskurven im globalen Vergleich, (die Zwischenstand-Folie entfällt).
 - **Bäume / Reflexionsänderung:** Reflexion, direkt: dunkles Laub; Reflexion, indirekt: Wolkenbildung; Netto-Energieänderung ΔQ̇ durch Albedo.
-- **Klima / Strahlungsbilanz:** Gemeinsame Währung, Kohlenstoffkreislauf, Strahlungsantrieb von CO₂, Strahlungsantrieb der Albedo.
+- **Klima / Strahlungsantrieb:** Gemeinsame Währung, Kohlenstoffkreislauf, Strahlungsantrieb von CO₂, Strahlungsantrieb der Albedo.
 - **Klima / Temperaturkurve:** Vom Strahlungsantrieb zur Temperatur (einschließlich „Temperaturwirkung je Baum“).
 - **Potenzial / Kühlung eines Baums:** Ein Baum an drei Orten, Ein Baum an jedem Ort.
 - **Potenzial / Kühlung der Welt:** Wiederbewaldbare Fläche, Wo Aufforstung sich lohnt, Kühlende Wirkung globaler Aufforstung, Überschlagsrechnung noch einmal, Fazit *(meine Entscheidung: Fazit gehört zu Teil 2)*.
@@ -67,7 +67,7 @@ Ablauf wie `prototype-flow-v4.html`, Schritt `in0/in1/in2`:
 3. Der Ring zeichnet sich Bogen für Bogen (ab 700 ms und 1500 ms), jeder Bogen in seiner Teilfarbe. Mit jedem Bogen öffnet sich daneben eine Teilzeile per Wischblende von links (`clip-path`, 700 ms): Teil-Icon 56 px, Teilname (600, 22 px), eine Zeile darunter (16 px, muted):
    - Kohlenstoff-Aufnahme: „Wann bindet er wie viel CO₂?“
    - Reflexionsänderung: „Wie ändert er die Reflexion, über Laub und Wolken?“
-   - Strahlungsbilanz: „Wie viel Wärme bleibt dadurch auf der Erde?“
+   - Strahlungsantrieb: „Wie viel Wärme bleibt dadurch auf der Erde?“
    - Temperaturkurve: „Wie reagiert die Temperatur, Jahr für Jahr?“
    - Kühlung eines Baums: „Wie viel kühlt ein Baum, an jedem Ort?“
    - Kühlung der Welt: „Wie viel kühlen alle Bäume zusammen?“
@@ -89,7 +89,7 @@ Sechs runde Icons im Stil der Kapitelscheiben: Kreis in Teilfarbe, Zeichnung in 
 
 - Kohlenstoff-Aufnahme: großes O=C=O, Pfeil hinab in eine Krone.
 - Reflexionsänderung: Sonne und großer V-Strahl über einer Fläche.
-- Strahlungsbilanz: gestrichelte Bilanzgrenze, Sonnenstrahl hinein, Wärmewelle hinaus.
+- Strahlungsantrieb: gestrichelte Bilanzgrenze, Sonnenstrahl hinein, Wärmewelle hinaus.
 - Temperaturkurve: Thermometer links, daneben große ΔT-Kurve unter die gestrichelte Nulllinie.
 - Kühlung eines Baums: Baum mit Thermometer und Pfeil nach unten.
 - Kühlung der Welt: Erdausschnitt voller Bäume.
@@ -105,7 +105,7 @@ Kapitelfarbe = Struktur (Titel, Scheibe, Anzeige). Teilfarbe = die physikalische
 | | Kapitel | Teil 1 (Fläche / Text) | Teil 2 (Fläche / Text) |
 |---|---|---|---|
 | Bäume | `#304620` | Kohlenstoff `#437d61` / `#105b3e` | Reflexion `#9d945f` / `#787136` |
-| Klima | `#612f2d` | Strahlungsbilanz `#ba8d66` / `#96683e` | Temperatur `#985248` / `#762c26` |
+| Klima | `#612f2d` | Strahlungsantrieb `#ba8d66` / `#96683e` | Temperatur `#985248` / `#762c26` |
 | Potenzial | `#04455f` | Baum `#4690a1` / `#006e81` | Welt `#316491` / `#004474` |
 
 Flächenton für Icons, Ringbögen, Kurven, Flächen in Diagrammen; Textton für Formelsymbole, Beschriftungen, dünne Linien. (Erzeugt in LCh; Kapitel L≈27, Teile L 41–62, Chroma 24–34.)
@@ -115,7 +115,7 @@ Durchziehen (CSS-Variablen in `deck/src/css/deck.css`, KaTeX-Makros, Python-Graf
 - `--moss`, `--clay`, `--fjord` → neue Kapitelfarben.
 - Kohlenstoff: `--co2`, `--s-phic`, `--s-dm`, `--s-eps`, CO₂-Kurven und -Reihen → Kohlenstoff-Töne.
 - Reflexion/Albedo: `--alb`, `--s-phia`, `--s-dq`, Albedo-Reihen (`EC.alb`) → Reflexion-Töne.
-- Strahlungsantrieb: `--s-phi`, `--s-phio` → Strahlungsbilanz-Töne.
+- Strahlungsantrieb: `--s-phi`, `--s-phio` → Strahlungsantrieb-Töne.
 - Temperatur: `--s-dt` und ΔT-Kurven → Temperatur-Töne.
 - Potenzial-Karten/Reihen je Baum bzw. global → Baum- bzw. Welt-Töne.
 - Sonne und Sonnenstrahlen in Zeichnungen (`--sun`, `--sun-ray`) bleiben gelb: das ist Licht, keine Größe *(meine Entscheidung)*. Der reflektierte Strahl `--ray` wird Reflexion-Ton.
