@@ -158,8 +158,8 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 // The talk's three chapters, two parts each (data-ch, data-part on the slides). The disc is the overview's (index.html
 // #e-…), the part icons #p-…; each part's colour is --p-<key> (fill) and --t-<key> (text)
 const CHAPTERS = {
-  baeume: { name: 'Baum-Modell', disc: 'e-baeume', col: 'var(--moss)', parts: [['co2', 'Kohlenstoff-Aufnahme'], ['refl', 'Reflexionsänderung']] },
-  klima: { name: 'Klima-Modell', disc: 'e-klima', col: 'var(--clay)', parts: [['bal', 'Strahlungsantrieb'], ['temp', 'Temperaturkurve']] },
+  baeume: { name: 'Baum-Modell', disc: 'e-baeume', col: 'var(--moss)', parts: [['co2', 'Zeitverlauf'], ['refl', 'Reflexionsänderung']] },
+  klima: { name: 'Klima-Modell', disc: 'e-klima', col: 'var(--clay)', parts: [['bal', 'Strahlungshaushalt'], ['temp', 'Temperaturantwort']] },
   vergleich: { name: 'Potenziale', disc: 'e-potenzial', col: 'var(--fjord)', parts: [['one', 'Kühlung eines Baums'], ['world', 'Kühlung der Welt']] },
 };
 // A chapter's disc in its ring of two arcs, one per part (right: the first, left: the second). Each arc 'off' (not
