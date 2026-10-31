@@ -3129,6 +3129,11 @@ class Deck {
     s.classList.toggle('settled', step === 'end' || !!this.still || !s.classList.contains('arrive') && n !== this.i + 1);   // a chapter opener reached backwards or by a jump: its entrance stays still
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
+    // data-auto="k": on arrival the slide plays its clicks up to k by itself (a change that belongs to the transition)
+    clearTimeout(this._auto);
+    if (s.dataset.auto && !this.still && step === 0) this._auto = setTimeout(() => {
+      if (this.i === n && this.step < +s.dataset.auto) { this.step = +s.dataset.auto; this.applyStep(true, false); this.schedulePlan(); }
+    }, 650);
     this.schedulePlan();
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
     if (this.flying) this.staged = s; else this.stage(s);   // in a flight: after the landing (Deck.flyHome)
@@ -3379,7 +3384,7 @@ class Deck {
     }
   }
   next() { if (this.flying) return; if (window.__deckDataNow) window.__deckDataNow(); if (this.step < this.steps(this.slides[this.i])) { this.step++; this.applyStep(!this.still, false); this.schedulePlan(); } else if (this.i < this.slides.length - 1) this.onward(); }
-  prev() { if (this.flying) return; this.schedulePlan(); if (this.step > 0) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
+  prev() { if (this.flying) return; this.schedulePlan(); if (this.step > +(this.slides[this.i].dataset.auto || 0)) { this.step--; this.applyStep(false, false); } else if (this.i > 0) this.go(this.i - 1, 'end'); }
   bind() {
     try { if (sessionStorage.getItem('dv-nocursor')) this.cursor(true); } catch (e) { /* no storage */ }
     try { if (sessionStorage.getItem('dv-notips')) document.documentElement.classList.add('notips'); } catch (e) { /* no storage */ }

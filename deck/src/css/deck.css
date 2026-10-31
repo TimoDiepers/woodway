@@ -2393,3 +2393,7 @@ svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: 
 /* slide 18: the CO₂ on the heat arrow stays in view; with less CO₂ (click 1) the upper two leave */
 svg .mol-off { transition: opacity .7s var(--ease); }
 .slide:has(svg.s18 [data-step="1"].shown) svg .mol-off, .slide:has(svg [data-step="1"].shown) svg .mol-off { opacity: 0; }
+/* the two titles of the overview lie on top of each other: only the one showing takes clicks (the editor) */
+.ovw .sh h2 > .t1 { pointer-events: none; }
+.ovw:has(.kc-r.shown) .sh h2 > .t1 { pointer-events: auto; }
+.ovw:has(.kc-r.shown) .sh h2 > .t0 { pointer-events: none; }
