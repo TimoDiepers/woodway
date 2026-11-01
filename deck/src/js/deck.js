@@ -924,8 +924,8 @@ function aufMorph(phase, t) {
         lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: end(named ? 'kühlende Flächen' : `kühlende Flächen: −${ecNum(p.kuehlt.at(-1), 0)} mK`, '#2f7a45') },
       ...(phase !== 3 ? [
         { id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(on(p.kuehlt)), showSymbol: false, silent: true, lineStyle: { width: 0 } },
-        { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - on(p.kuehlt)[i])), showSymbol: false, silent: true, z: 2,
-          lineStyle: { width: 0 }, areaStyle: { color: '#2f7a45', opacity: .3 * peak } }] : [])]
+        { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => (phase === 'direct' ? lift * v : v) - on(p.kuehlt)[i])), showSymbol: false, silent: true, z: 2,
+          lineStyle: { width: 0 }, areaStyle: { color: '#2f7a45', opacity: .3 * (phase === 'direct' ? 1 : peak) } }] : [])]
   };
 }
 
@@ -991,6 +991,23 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
 
 /* the same chart on two slides: 27 builds it up to the cooling land (pictures 0-2), the forest slide stands on that
    picture, adds the managed forest (6), then what a harvest does to it (8) */
+/* slide 25 builds the cooling of all trees up (pictures 0-2); the next slide stands on that picture and goes on to the warming
+   in deg C and what stays above 1.5 deg C (pictures 3-4 of the full chart) */
+// the cooling of the cooling land as an area from 0 down to its curve: the band the next slide moves under the warming
+function aufFill(o) {
+  const k = o.series.find(x => x.id === 'k');
+  if (!k) return o;
+  const mid = k.data[Math.round(k.data.length * .72)];
+  o.series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: k.data, showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 } },
+    { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: k.data.map(([x, y]) => [x, -y]), showSymbol: false, silent: true, z: 2,
+      lineStyle: { width: 0 }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 900,
+      markPoint: { silent: true, symbol: 'circle', symbolSize: 0, data: [{ coord: [mid[0], mid[1] / 2] }],
+        label: { show: true, color: '#1f5e33', fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: 'Kühlung der Bäume' } } });
+  return o;
+}
+const EC_AUFF1 = { steps: 3, tip: EC_ZEIT.tip, option: k => k < 3 ? EC_AUFF.option(k) : aufFill(EC_AUFF.option(2)) };
+const EC_AUFF2 = { steps: 2, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
+
 const EC_ZEIT27 = { steps: 4, tip: EC_ZEIT.tip, option: k => EC_ZEIT.option(Math.min(k, 2)) };
 const EC_ZEIT28 = { steps: 4, tip: EC_ZEIT.tip, calmStart: true, option: k => EC_ZEIT.option([2, 2, 2, 6, 8][k]) };
 
@@ -1417,7 +1434,7 @@ const EC_TBAL = {
   }
 };
 
-const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU, tbal: EC_TBAL };
+const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, auff1: EC_AUFF1, auff2: EC_AUFF2, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU, tbal: EC_TBAL };
 
 class EChart {
   constructor(host) {
@@ -2118,6 +2135,7 @@ class MplChart {
         if (run) it.run = run;
         items.push(it);
       }
+      (this.hexItems ||= {})[id('hex' + li)] = { i, items, kind: L.kind, R };   // for Deck.gather: the cells as drawn
       const hatch = L.kind === 'hatch';
       if (items.some(it => it.run)) this.mapRuns.push({ sid: id('hex' + li), items, delay: base + 250 });
       series.push({
@@ -3129,6 +3147,7 @@ class Deck {
     s.classList.toggle('settled', step === 'end' || !!this.still || !s.classList.contains('arrive') && n !== this.i + 1);   // a chapter opener reached backwards or by a jump: its entrance stays still
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
+    if (s.dataset.gather && prev && prev !== s && this.slides.indexOf(prev) === n - 1 && step === 0 && !this.still && !deckCalm.matches) this.gather(prev, s);
     // data-auto="k": on arrival the slide plays its clicks up to k by itself (a change that belongs to the transition)
     clearTimeout(this._auto);
     if (s.dataset.auto && !this.still && step === 0) this._auto = setTimeout(() => {
@@ -3143,6 +3162,60 @@ class Deck {
     if (this.editing) { if (prev && prev !== s) { this.texClose(); this.flushSave(); this.editSlide(prev, false); } this.editSlide(s, true); }   // editing goes on here
     else this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
+  }
+  gather(prev, s) {
+    // the map of the slide before is summed up: its cells fly together into one point, the cooling of all of them in
+    // 2100 at the end of the curve; then the curve is drawn through the years up to that point (data-gather)
+    const src = prev.querySelector('.chart[data-chart]')?._chart, dst = s.querySelector('.chart[data-ec]')?._chart;
+    if (!src || !src.hexItems || !src.chart || !dst || !dst.chart) return;
+    const S = s.getBoundingClientRect(), sc = S.width / s.offsetWidth, rel = (el, [x, y]) => {
+      const r = el.getBoundingClientRect(); return [(r.left - S.left) / sc + x, (r.top - S.top) / sc + y]; };
+    const al = (dst.chart.getOption().series || []).find(x => x.id === 'al');
+    if (!al) return;
+    const end = al.data[al.data.length - 1], T = rel(dst.host, dst.chart.convertToPixel({ xAxisIndex: 0, yAxisIndex: 0 }, end));
+    const cells = [];
+    const land = [];   // the grey land stays where it is and fades, only the cells with a value fly
+    for (const g of Object.values(src.hexItems)) {
+      if (g.kind !== 'num' && g.kind !== 'mask') continue;
+      for (const it of g.items) { const p = src.chart.convertToPixel({ xAxisIndex: g.i, yAxisIndex: g.i }, it.value); if (p) (g.kind === 'num' ? cells : land).push({ p: rel(src.inner, p), c: it.col, R: g.R }); }
+    }
+    if (!cells.length) return;
+    const dmax = Math.max(...cells.map(c => Math.hypot(c.p[0] - T[0], c.p[1] - T[1])));
+    const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio || 1), W = s.offsetWidth, H = s.offsetHeight;
+    cv.className = 'gather'; cv.width = W * dpr; cv.height = H * dpr; s.append(cv);
+    const cx = cv.getContext('2d'); cx.scale(dpr, dpr);
+    dst.host.style.transition = 'none'; dst.host.style.opacity = 0;
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, FLY = 1500, HOLD = 450, t0 = performance.now();
+    const hex = (x, y, r) => { cx.beginPath(); for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 90); cx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a)); } cx.closePath(); cx.fill(); };
+    let started = false;
+    const frame = now => {
+      const e = now - t0;
+      cx.clearRect(0, 0, W, H);
+      if (e < 500) { cx.globalAlpha = 1 - e / 500; for (const c of land) { cx.fillStyle = c.c; hex(c.p[0], c.p[1], c.R); } }
+      if (e < FLY) {
+        for (const c of cells) {
+          const d = Math.hypot(c.p[0] - T[0], c.p[1] - T[1]) / dmax, u = ease(Math.max(0, Math.min(1, (e - 150 - d * 500) / (FLY - 650))));   // the far cells start last: the map pours into the point
+          cx.globalAlpha = 1 - .55 * u; cx.fillStyle = u > .6 ? EC.alb : c.c;
+          hex(c.p[0] + (T[0] - c.p[0]) * u, c.p[1] + (T[1] - c.p[1]) * u, c.R * (1 - .8 * u));
+        }
+      }
+      // the sum: one point, then the curve comes through the years to it
+      const a = e < FLY ? Math.max(0, (e - FLY * .7) / (FLY * .3)) : e < FLY + HOLD + 1600 ? 1 : Math.max(0, 1 - (e - FLY - HOLD - 1600) / 400);
+      cx.globalAlpha = a; cx.fillStyle = EC.alb; cx.beginPath(); cx.arc(T[0], T[1], 8, 0, 2 * Math.PI); cx.fill();
+      cx.font = `600 21px ${EC.font}`; cx.textAlign = 'right'; cx.textBaseline = 'middle';
+      if (e < FLY + HOLD + 300) cx.fillText('alle Kacheln zusammen, 2100', T[0] - 18, T[1]);
+      if (!started && e >= FLY + HOLD) {
+        started = true; dst.host.style.transition = 'opacity .35s'; dst.host.style.opacity = 1; dst.set(0, true, true);
+      }
+      if (e < FLY + HOLD + 2000) this._gather.raf = requestAnimationFrame(frame); else this.endGather();
+    };
+    this._gather = { cv, host: dst.host, raf: requestAnimationFrame(frame), chart: dst, started: () => started };
+  }
+  endGather() {
+    const g = this._gather; if (!g) return;
+    this._gather = null; cancelAnimationFrame(g.raf); g.cv.remove();
+    if (!g.started()) { g.host.style.transition = ''; g.host.style.opacity = ''; g.chart.final(g.chart.k ?? 0); }
+    else { g.host.style.transition = ''; g.host.style.opacity = ''; }
   }
   swapPart(prev, s) {
     // the corner indicator, from one slide to the next in the same chapter: when the part changes, right away the sign
@@ -3336,6 +3409,7 @@ class Deck {
     if (!this.embed) setTimeout(() => deckMedia.rest(this.slides), 300);
   }
   applyStep(animate, entering, late) {
+    this.endGather();
     // late: the charts were not there when the slide came up; they play their entrance now, the rest stays put
     if (animate) this.movedAt = performance.now();   // the background chart builder waits until this has played
     // everything with data-step <= step is shown; charts run the part that belongs to this click
