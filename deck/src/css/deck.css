@@ -2285,10 +2285,10 @@ svg .km-phi { transition: opacity .6s var(--ease); }
    the pair in the middle, what went wrong there; then the result chapter after an arrow, and the title turns from the
    critique into the talk's question. Columns 410 px: centres 205, 647, 1211 of 1416, so alone +503, as a pair +282.
    What went wrong: neutral cards (no part signs yet: they come with the chapters) */
-.ovw-row { flex: 1; display: grid; grid-template-columns: 410px 410px 90px 410px; gap: 0 32px; justify-content: center; align-content: center; align-items: start; padding-bottom: 24px; }
+.ovw-row { flex: 1; display: grid; grid-template-columns: 380px 80px 380px 80px 380px; gap: 0 24px; justify-content: center; align-content: center; align-items: start; padding-bottom: 24px; }
 .ovw .kc { display: flex; flex-direction: column; align-items: center; transition: transform .9s var(--ease); }
-.ovw :is(.kc-b, .kc-k) { transform: translateX(282px); }   /* both models, as a pair, from the start */
-.ovw:has(.kc-r.shown) :is(.kc-b, .kc-k) { transform: none; }   /* the critique goes, the row stays at its height */
+.ovw :is(.kc-b, .kc-k, .ovw-arr-b) { transform: translateX(254px); }   /* both models, as a pair, from the start */
+.ovw:has(.kc-r.shown) :is(.kc-b, .kc-k, .ovw-arr-b) { transform: none; }   /* the critique goes, the row stays at its height */
 .ovw .kdisc { width: 230px; height: 230px; }
 .ovw .kdisc svg { width: 100%; height: 100%; display: block; }
 .ovw .kc > b { margin-top: 16px; display: flex; align-items: center; font: 600 44px/1.1 var(--serif); color: var(--ch); letter-spacing: -.01em; }
@@ -2397,3 +2397,13 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .ovw .sh h2 > .t1 { pointer-events: none; }
 .ovw:has(.kc-r.shown) .sh h2 > .t1 { pointer-events: auto; }
 .ovw:has(.kc-r.shown) .sh h2 > .t0 { pointer-events: none; }
+
+/* the first arrow (Baum-Modell -> Klima-Modell: what the tree model gives is what the climate model takes in) is there from the start */
+.ovw .ovw-arr-b { transition: transform .9s var(--ease); }
+.ovw .ovw-arr-b .ovw-arr-l, .ovw .ovw-arr-b .ovw-arr-h { stroke-dashoffset: 0; }
+
+/* key message of a result map: a soft card (as the beige cards of the rough estimate), the headline in the chapter colour, in the map's empty ocean corner */
+.mapmsg { position: absolute; left: 0; top: auto !important; bottom: var(--mb, 100px); width: 336px; z-index: 2;
+  display: flex; flex-direction: column; gap: 8px; padding: 18px 22px 20px; border-radius: 12px; background: var(--paper-deep); }
+.mapmsg b { font: 600 29px/1.18 var(--serif); letter-spacing: -.01em; color: var(--ch); text-wrap: balance; }
+.mapmsg span { font: 400 20px/1.4 var(--sans); color: var(--ink-2); text-wrap: pretty; }
