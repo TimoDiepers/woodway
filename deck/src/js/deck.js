@@ -1811,7 +1811,8 @@ class MplChart {
     this.texs = [];
     const grid = [], xAxis = [], yAxis = [], series = [], graphic = [];
     const stopX = this.stops ? this.stops[Math.max(0, Math.min(k, this.stops.length - 1))] : Infinity;
-    const font = (it, base) => ({ fontFamily: it.serif ? MPL_SERIF : MPL_FONT, fontSize: (it.fs || base) * s,
+    // a map's legend and labels in the deck's face and the size of the other charts' labels (a full-width map would scale them up)
+    const font = (it, base) => ({ fontFamily: it.serif ? MPL_SERIF : this.isMap ? EC.font : MPL_FONT, fontSize: this.isMap ? Math.min((it.fs || base) * s, 19) : (it.fs || base) * s,
                                   fontWeight: it.b ? 600 : 400, fontStyle: it.i ? 'italic' : 'normal' });
     const legendLabel = {}, legendName = {};
     for (const lg of d.legends) for (const e of lg.entries) { if (e.k === 'patch' && e.col) legendLabel[e.col] = e.s; if (e.col) legendName[String(e.col).toLowerCase()] = e.s; }
@@ -1829,7 +1830,7 @@ class MplChart {
         axisLine: { show: !!A.line, onZero: false, lineStyle: { color: A.line || '#8a918c', width: Math.max(1, 1.1 * s) } },
         axisTick: { show: A.tick, customValues: vals, length: 5 * s, lineStyle: { color: A.line || '#8a918c' } },
         axisLabel: { show: vals.length > 0, customValues: vals, formatter: v => labels[v] ?? labels[Math.round(v * 1e6) / 1e6] ?? '',
-                     color: A.lc || '#5d665f', fontFamily: MPL_FONT, fontSize: (A.lfs || 17) * s, margin: 7 * s, hideOverlap: false },
+                     color: A.lc || '#5d665f', fontFamily: this.isMap ? EC.font : MPL_FONT, fontSize: this.isMap ? Math.min((A.lfs || 17) * s, 19) : (A.lfs || 17) * s, margin: 7 * s, hideOverlap: false },
         splitLine: { show: !!A.grid, lineStyle: { color: A.grid ? A.grid.c : '#ddd', width: A.grid ? Math.max(.6, A.grid.lw * s) : 1 } },
         splitArea: { show: false }, silent: true, animation: false
       };
@@ -2051,10 +2052,10 @@ class MplChart {
         if (e.hatch) children.push(mplHatchLines(e.hatch, e.hc || '#000', s, { type: 'rect', shape: r }, [r.x, r.y, r.x + r.width, r.y + r.height]));
       }
       if (e.k === 'marker' || (e.k === 'line' && e.sym)) children.push({ type: 'circle', shape: { cx: (x0 + x1) / 2, cy: y, r: lg.fs * s * .3 }, style: { fill: e.col } });
-      { const r = supRichText(e.s, { fontSize: lg.fs * s, fontFamily: MPL_FONT, fontWeight: 400, fontStyle: 'normal' }, e.c || '#1b2420') || {};
+      { const r = supRichText(e.s, { fontSize: this.isMap ? Math.min(lg.fs * s, 19) : lg.fs * s, fontFamily: this.isMap ? EC.font : MPL_FONT, fontWeight: 400, fontStyle: 'normal' }, e.c || '#1b2420') || {};
         children.push({ type: 'text', x, y, style: { text: r.formatter || e.s, rich: r.rich, fill: e.c || '#1b2420', textVerticalAlign: 'middle', font: `400 ${lg.fs * s}px ${MPL_FONT}`, lineHeight: lg.fs * s * 1.15 } }); }
     }
-    if (lg.title) { const r = supRichText(lg.title.s, { fontSize: lg.title.fs * s, fontFamily: MPL_FONT, fontWeight: 600, fontStyle: 'normal' }, lg.title.c) || {};
+    if (lg.title) { const r = supRichText(lg.title.s, { fontSize: this.isMap ? Math.min(lg.title.fs * s, 19) : lg.title.fs * s, fontFamily: this.isMap ? EC.font : MPL_FONT, fontWeight: 600, fontStyle: 'normal' }, lg.title.c) || {};
       children.push({ type: 'text', x: lg.title.f[0] * W, y: lg.title.f[1] * H, style: { text: r.formatter || lg.title.s, rich: r.rich, fill: lg.title.c, textAlign: lg.title.al, textVerticalAlign: 'middle', font: `600 ${lg.title.fs * s}px ${MPL_FONT}` } }); }
     if (!this.isMap && !this.host.closest('.dark, .brk') && lg.entries.length && !lg.title) {   // a line chart's legend sits on top of the grid lines: a paper-coloured plate hides them
       const fs = lg.fs * s, xs = lg.entries.map(e => e.f[0] * W), ys = lg.entries.map(e => e.f[1] * H);
