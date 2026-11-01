@@ -2428,8 +2428,6 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .hm2 .ue-c { margin-top: 3px; font-size: 16px; }
 .hm2 .ue-op { font-size: 38px; align-self: center; text-align: center; }
 .hm2 .hm-z b { --c: var(--clay); } .hm2 .hm-m b { --c: var(--fjord); }
-.hm2 .r3 { border: 2px dashed var(--moss); background: none; }
-.hm2 .r3 b { --c: var(--moss); }
 .hm-room-l { margin: 0; align-self: center; justify-self: end; max-width: 620px; text-align: right; font: 400 20px/1.4 var(--sans); color: var(--ink-2); }
 .hm-room-l b { color: var(--ink); font-weight: 600; }
 .hm-f { position: relative; display: flex; align-items: center; padding-left: 34px; }
@@ -2448,3 +2446,4 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .hm-f.f4 .hm-br::after { bottom: -9.5px; }
 .hm-f.f10 .hm-br::after { top: -9.5px; }
 .mapcorner .mapnote { font-size: 18px; }   /* as the other notes beside a chart */
+.hm2 { transition: opacity .5s var(--ease); }
