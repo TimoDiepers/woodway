@@ -2311,9 +2311,9 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 .kx-c { fill: color-mix(in srgb, #a8483c 14%, var(--paper)); stroke: color-mix(in srgb, #a8483c 55%, var(--paper)); stroke-width: 1.5; transition: fill .6s ease, stroke .6s ease; }
 .kx-x { stroke: #a8483c; }
 .kx-v { stroke: var(--p-co2); stroke-dasharray: 24; stroke-dashoffset: 24; }
-.ovw:has(.kc-r.shown) .kx-c { fill: color-mix(in srgb, var(--p-co2) 16%, var(--paper)); stroke: color-mix(in srgb, var(--p-co2) 60%, var(--paper)); }
-.ovw:has(.kc-r.shown) .kx-x { opacity: 0; }
-.ovw:has(.kc-r.shown) .kx-v { stroke-dashoffset: 0; transition-delay: .25s; }
+.ovw:has(.ovw-mit.shown) .kx-c { fill: color-mix(in srgb, var(--p-co2) 16%, var(--paper)); stroke: color-mix(in srgb, var(--p-co2) 60%, var(--paper)); }
+.ovw:has(.ovw-mit.shown) .kx-x { opacity: 0; }
+.ovw:has(.ovw-mit.shown) .kx-v { stroke-dashoffset: 0; transition-delay: .25s; }
 .sw { display: inline-block; position: relative; vertical-align: baseline; white-space: nowrap; transition: width .6s var(--ease); }   /* width set in Deck.syncSw: it takes the new word's width, what follows glides */
 .sw > span { transition: opacity .5s ease, transform .5s var(--ease); }
 .sw-m { position: absolute; left: 0; top: 0; }
@@ -2386,7 +2386,6 @@ svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: 
 .slide.carry :is(.pop, .grow, .draw):not([data-step]) { animation: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
 
 /* slide 5 of the overview: the sources of the limits stay until the critique goes */
-.ovw2:not(:has(.kc-r.shown)) .ovw-src { opacity: 1; }
 /* the "Mit": underlined, no fill */
 .ovw .sw-m { text-decoration: underline; text-decoration-thickness: .07em; text-underline-offset: .16em; text-decoration-color: color-mix(in srgb, var(--ch) 85%, transparent); }
 .fz-no { color: var(--clay); }
@@ -2447,3 +2446,49 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .hm-f.f10 .hm-br::after { top: -9.5px; }
 .mapcorner .mapnote { font-size: 18px; }   /* as the other notes beside a chart */
 .hm2 { transition: opacity .5s var(--ease); }
+
+/* slide 5 of the overview stands on slide 4's picture; one click brings Potenziale (the pair slides over, the arrow draws,
+   the disc comes in, the new title) and turns the crosses into ticks, the critique's sources go with it */
+.ovw2:has(.ovw-mit.shown) :is(.kc-b, .kc-k, .ovw-arr-b) { transform: none; }
+.ovw2 .ovw-arr-r path { stroke-dashoffset: 120; transition: stroke-dashoffset .7s var(--ease) .5s; }
+.ovw2:has(.ovw-mit.shown) .ovw-arr-r path { stroke-dashoffset: 0; }
+.ovw2 .ovw-arr-r .ovw-arr-h { transition-delay: .9s; }
+.ovw2:has(.ovw-mit.shown) .sh h2 > .t0 { opacity: 0; pointer-events: none; }
+.ovw2:has(.ovw-mit.shown) .sh h2 > .t1 { opacity: 1; pointer-events: auto; }
+.ovw2 .sh h2 > .t1 { opacity: 0; pointer-events: none; }
+.ovw2 .ovw-src { opacity: 1; }
+.ovw2:has(.ovw-mit.shown) .ovw-src { opacity: 0; }
+/* a slide that continues the picture of the one before (data-carry) stands at once, over it: no cross-fade, no ghost */
+.slide.active.carry { transition: none; background: var(--paper); }
+/* "Modellierung der Kohlenstoff-Aufnahme": from the measured balance to the model, a curved arrow with how */
+.slide:has(.c10-fit) .body { position: relative; }
+.c10-fit { position: absolute !important; left: 1170px; top: 26px !important; display: flex; align-items: center; gap: 8px; z-index: 2; }
+.c10-fit svg { width: 70px; height: 150px; flex: none; overflow: visible; }
+.c10-fit p { margin: 0; width: 220px; font: 600 20px/1.3 var(--sans); color: var(--ink-2); }
+.c10-fit p span { display: block; margin-top: 4px; font: 400 17px/1.3 var(--sans); color: var(--muted); }
+/* the arrow first, then the model it leads to (one click) */
+
+   /* the symbols with their formula */
+/* the balance's braces: thinner; the loss brace only with the loss term (click 3) */
+.c9-line .gloss .katex svg { transform: scaleY(.62); transform-origin: 50% 0; }
+.c9-line .ub-st svg { transition: opacity .5s var(--ease); }
+.c9-line .ub-wa svg { transition: opacity .5s var(--ease); }
+.slide:has(.c10-body dt[data-step="2"]:not(.shown)) .c9-line .ub-wa svg, .slide:has(.c10-body dt[data-step="4"]:not(.shown)) .c9-line .ub-st svg { opacity: 0; }
+.c10-fit p b.fit-h { display: block; font-weight: 600; }
+/* the climate drawings (13-19): sky, ground and ocean inside rounded corners, as the dashed frame around them */
+.slide[data-carry="klima"] svg.schema :is(rect[fill="#e3edf2"], rect[fill="#d9cfb9"], rect[fill="#a39684"], rect[fill="#5f93b3"], path[fill="#7fb0cc"], line[y1="74"][y2="74"]) { clip-path: url(#km-round); }
+/* slide 9, last click: the growth formula again with its sub section ticked off, as a box in the tinted style of the formula chips;
+   a paper-coloured strip behind it takes the map's legend out of the picture */
+.slide:has(.c11-done) .body { position: relative; }
+.c11-done { position: absolute !important; left: 0; bottom: 4px; top: auto !important; z-index: 4; width: 905px; height: 170px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; background: var(--paper); }
+.c11-chip { display: flex; align-items: center; gap: 34px; padding: 16px 30px 16px 34px; border-radius: var(--box-r);
+  background: color-mix(in srgb, var(--c) var(--box-tint), var(--paper)); color: var(--c); }
+.c11-chip .eq { font-size: 26px; margin: 0; min-width: 0; color: var(--ink); }
+.c11-chip .eq .katex-display { margin: 0; text-align: left; }
+.c11-chip .eq .katex-display > .katex { text-align: left; }
+.c11-ic { position: relative; flex: none; width: 76px; height: 76px; }
+.c11-ic > svg:first-child { width: 100%; height: 100%; display: block; }
+.c11-ic .ok { position: absolute; right: -6px; bottom: -5px; width: 30px; height: 30px; padding: 7px 6px 6px 7px; border-radius: 50%; background: var(--c); color: var(--paper); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) var(--box-tint), var(--paper)); }
+.c11-ic .ok path { stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.c11-chip .c11-u { font: 400 20px/1 var(--sans); color: var(--muted); margin-left: -22px; align-self: center; white-space: nowrap; }

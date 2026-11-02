@@ -179,7 +179,7 @@ def growth_model_figure(out_path: str) -> str:
     flat = lambda k: simulate_deterministic(sp, np.full(len(YEARS), k)).stock_kgC
     curves = [
         (ax, biomass_closed(YEARS - YEARS[0], sp), "#2f7a45", "-", 2.6, "nur Wachstum", 12),
-        (overlays[0], flat(0.0), "#e8a291", "-", 2.2, "$\\Delta T_w$ = 0", -2),
+        (overlays[0], flat(0.0), "#e8a291", "-", 2.2, "mit Störung", -2),
         (overlays[1], flat(1.5), "#d6604d", "-", 2.2, "$\\Delta T_w$ = 1,5 K (heute)", -16),
         (overlays[2], flat(3.0), "#a50f15", (0, (6, 4)), 2.2, "$\\Delta T_w$ = 3 K", -30),
     ]

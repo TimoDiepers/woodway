@@ -1950,7 +1950,8 @@ class MplChart {
       for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
       const shown = a.texts.filter(t => !(t.stp > k) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
       const texts = shown.filter(t => !siteText(t));
-      if (texts.length) series.push(textSeries(id('t'), texts, base + 1300));
+      // texts that wait for a click each in a series of their own: a later click adds its text without the earlier ones fading in again
+      for (const g of [...new Set(texts.map(t => t.stp || 0))]) { const part = texts.filter(t => (t.stp || 0) === g); if (part.length) series.push(textSeries(id(g ? 't' + g : 't'), part, base + 1300)); }
       if (siteTexts().length) {
         series.push(textSeries(id('ts'), siteTexts(), base));
         if (this.timeLayer && this.mapAxes.includes(i)) this.siteSeries = () => ({ ...textSeries(id('ts'), siteTexts(), 0), animation: false });
