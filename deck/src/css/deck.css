@@ -2491,3 +2491,26 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .c11-ic .ok { position: absolute; right: -6px; bottom: -5px; width: 30px; height: 30px; padding: 7px 6px 6px 7px; border-radius: 50%; background: var(--c); color: var(--paper); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) var(--box-tint), var(--paper)); }
 .c11-ic .ok path { stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .c11-chip .c11-u { font: 400 20px/1 var(--sans); color: var(--muted); margin-left: -22px; align-self: center; white-space: nowrap; }
+/* "Netto-Energieänderung": the model is again fitted to measurements, averaged over the year (as on the carbon slide) */
+.dq-fit { margin: -2px 0 10px 2px; font: 400 19px/1.3 var(--sans); color: var(--muted); }
+.dq-fit b.fit-h { font-weight: 600; color: var(--ink-2); }
+/* the closing card of the Baum chapter: the two units behind their formulas, in square brackets, in the part's colour and large:
+   the first thing the Klima chapter has to bring together */
+.ovf .frow { display: flex; align-items: baseline; gap: 14px; margin-top: 6px; }
+.ovf .frow .tex { margin-top: 0; }
+.ovf .frow .unit { font: 700 28px/1 var(--sans); white-space: nowrap; align-self: center; padding: 4px 14px 6px; border-radius: var(--box-r); background: var(--c); color: var(--paper); }
+.ovf .lab { font-size: 21px; }
+/* two .next parts in one line: the later one covers the earlier one */
+.fline > .next.shown:has(~ .next.shown) { opacity: 0; }
+.fline > .next { transition: opacity .4s var(--ease); }
+/* the header line while its term moves: the old line steps out, the new line is built from the left (Deck.morphTerm) */
+.slide.morphing .fline.head > .part:not(.next) { transition: opacity .25s var(--ease); }
+.slide.morphing:not(.morph-in) .fline.head > .next { opacity: 0 !important; transition: none; }
+.slide.morphing.morph-in .fline.head > .next { transition: none; }   /* the copy is removed in the same frame */
+.slide.morphing:not(.morph-rest) .fline.head > .next .chip .tex { visibility: hidden; }   /* the flying copy stands for it */
+.slide.morphing .fline.head > .next > :not(.chip) { transition: opacity .45s var(--ease); }
+.slide.morphing:not(.morph-rest) .fline.head > .next > :not(.chip) { opacity: 0; }
+/* a slide that picks the line up where the one before ended: the lit term is lit at once */
+.slide[data-morph] .fline.head .hl::before { transition: none; }
+/* a header line that takes over fades (no rising: it would shift the line by a few pixels while the old one is still there) */
+.slide.active .fline > .next[data-step].shown { animation: none; }

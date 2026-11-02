@@ -3153,7 +3153,10 @@ class Deck {
     // data-auto="k": on arrival the slide plays its clicks up to k by itself (a change that belongs to the transition)
     clearTimeout(this._auto);
     if (s.dataset.auto && !this.still && step === 0) this._auto = setTimeout(() => {
-      if (this.i === n && this.step < +s.dataset.auto) { this.step = +s.dataset.auto; this.applyStep(true, false); this.schedulePlan(); }
+      if (this.i === n && this.step < +s.dataset.auto) {
+        if (s.dataset.morph && !deckCalm.matches) this.morphTerm(s);
+        this.step = +s.dataset.auto; this.applyStep(true, false); this.schedulePlan();
+      }
     }, 150);
     this.schedulePlan();
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
@@ -3164,6 +3167,40 @@ class Deck {
     if (this.editing) { if (prev && prev !== s) { this.texClose(); this.flushSave(); this.editSlide(prev, false); } this.editSlide(s, true); }   // editing goes on here
     else this.drawerBody.innerHTML = notes && notes.innerHTML.trim() ? notes.innerHTML : '<p class="q">Keine Notizen.</p>';
     this.sync();
+  }
+  morphTerm(s) {
+    // one element: the highlighted term of the header line (data-morph) grows into the chip of the line that takes over.
+    // A copy of the chip lies over the line, shown only through a window that starts as the term's own box and opens to
+    // the whole chip; the term inside slides from its old place to its slot, the label and the unit come in from the left
+    // and the right as the window widens. The old line fades; the rest of the new line follows when it is done.
+    const line = s.querySelector('.fline.head'); if (!line) return;
+    const src = line.querySelector('.part:not(.next) .' + s.dataset.morph), chip = line.querySelector('.part.next .chip');
+    const dst = chip && chip.querySelector('.tex'); if (!src || !dst) return;
+    const S = line.getBoundingClientRect(), sc = S.width / line.offsetWidth;
+    const rel = r => ({ x: (r.left - S.left) / sc, y: (r.top - S.top) / sc, w: r.width / sc, h: r.height / sc });
+    const a = rel(src.getBoundingClientRect()), b = rel(dst.getBoundingClientRect()), c = rel(chip.getBoundingClientRect());
+    const box = { x: a.x - 9, y: a.y - 6, w: a.w + 18, h: a.h + 12 };   // the tint of the lit term reaches a little beyond its text
+    const bg = document.createElement('div'), px = r => `left:${r.x}px; top:${r.y}px; width:${r.w}px; height:${r.h}px`;
+    bg.className = 'morph-ghost';
+    bg.style.cssText = `position:absolute; ${px(box)}; z-index:39; pointer-events:none; border-radius:10px; background:${getComputedStyle(chip).backgroundColor}`;
+    const g = chip.cloneNode(true); g.classList.add('morph-ghost');
+    g.style.cssText = `position:absolute; ${px(c)}; margin:0; z-index:40; pointer-events:none; box-sizing:border-box; background:none`;
+    line.append(bg, g);
+    src.style.visibility = 'hidden'; s.classList.add('morphing');
+    const D = 950, ease = 'cubic-bezier(.45, 0, .25, 1)';
+    bg.animate([{ left: box.x + 'px', top: box.y + 'px', width: box.w + 'px', height: box.h + 'px' }, { left: c.x + 'px', top: c.y + 'px', width: c.w + 'px', height: c.h + 'px' }], { duration: D, easing: ease, fill: 'both' });
+    // the content is seen only through the same window as the tint: the label and the unit show as the box reaches them
+    const win = (t, r, bt, l) => `inset(${t}px ${r}px ${bt}px ${l}px)`;
+    g.animate([{ clipPath: win(box.y - c.y, c.x + c.w - box.x - box.w, c.y + c.h - box.y - box.h, box.x - c.x) }, { clipPath: win(0, 0, 0, 0) }], { duration: D, easing: ease, fill: 'both' });
+    const tex = g.querySelector('.tex'); tex.style.transformOrigin = '0 0';
+    tex.animate([{ transform: `translate(${a.x - b.x}px, ${a.y - b.y}px) scale(${a.w / b.w})` }, { transform: 'none' }], { duration: D, easing: ease, fill: 'both' });
+    const lab = g.firstElementChild, un = g.querySelector('.u');
+    if (lab && lab !== tex) lab.animate([{ opacity: 0, transform: 'translateX(-26px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 200, easing: ease, fill: 'both' });
+    if (un) un.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 540, easing: ease, fill: 'both' });
+    setTimeout(() => {
+      s.classList.add('morph-in', 'morph-rest'); g.remove(); bg.remove(); src.style.visibility = '';
+      setTimeout(() => s.classList.remove('morphing', 'morph-in', 'morph-rest'), 480);
+    }, D);
   }
   gather(prev, s) {
     // the map of the slide before is summed up: its cells fly together into one point, the cooling of all of them in
