@@ -2230,7 +2230,6 @@ svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) {
 .slide:has(.fline.head > .next.shown) svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { filter: opacity(0); }
 /* the carbon cycle's words go once its sign is there */
 svg .km-txt { transition: opacity .6s var(--ease); }
-.slide:has(.fline.head > .next.shown) svg.s19 .km-txt { opacity: 0; }
 /* what a slide is not about steps far back: the parts of the base drawing it names in data-km-off, and the signs
    of earlier parts (chips); the signs a slide makes itself stay */
 svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: opacity .6s var(--ease); }
@@ -2370,6 +2369,7 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 /* the forcing of the tree: on the click with the CO₂ box everything else of the drawing steps back */
 svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: opacity .6s var(--ease); }
 .slide:has(.km-fade.shown) svg :is(.km-bound, .kb-sun, .kb-refl, .kb-heat) { opacity: .12 !important; }
+.slide:has(.km-fade.shown) svg text:is(.kb-sun, .kb-refl, .kb-heat) { opacity: 0 !important; }   /* the cycle labels need the room */
 /* slide 13: the formulas stand apart, as the column has room */
 .bilanz .bl-top { display: flex; flex-direction: column; gap: 30px; }
 .bilanz .bl-gap, .bilanz .bl-phi { margin-top: 0; }
@@ -2473,6 +2473,9 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .c9-line .ub-st svg { transition: opacity .5s var(--ease); }
 .c9-line .ub-wa svg { transition: opacity .5s var(--ease); }
 .slide:has(.c10-body dt[data-step="2"]:not(.shown)) .c9-line .ub-wa svg, .slide:has(.c10-body dt[data-step="4"]:not(.shown)) .c9-line .ub-st svg { opacity: 0; }
+/* slide 14: the bracket's brace arrives with its label Δφ (click 2) */
+.bilanz .ub-dphi svg { transition: opacity .6s var(--ease); }
+.slide:has(.bl-leg dt[data-step="2"]:not(.shown)) .bilanz .ub-dphi svg { opacity: 0; }
 .c10-fit p b.fit-h { display: block; font-weight: 600; }
 /* the climate drawings (13-19): sky, ground and ocean inside rounded corners, as the dashed frame around them */
 .slide[data-carry="klima"] svg.schema :is(rect[fill="#e3edf2"], rect[fill="#d9cfb9"], rect[fill="#a39684"], rect[fill="#5f93b3"], path[fill="#7fb0cc"], line[y1="74"][y2="74"]) { clip-path: url(#km-round); }
