@@ -3154,7 +3154,7 @@ class Deck {
     clearTimeout(this._auto);
     if (s.dataset.auto && !this.still && step === 0) this._auto = setTimeout(() => {
       if (this.i === n && this.step < +s.dataset.auto) { this.step = +s.dataset.auto; this.applyStep(true, false); this.schedulePlan(); }
-    }, 650);
+    }, 150);
     this.schedulePlan();
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
     if (this.flying) this.staged = s; else this.stage(s);   // in a flight: after the landing (Deck.flyHome)

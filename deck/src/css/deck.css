@@ -2453,9 +2453,8 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .ovw2 .ovw-arr-r path { stroke-dashoffset: 120; transition: stroke-dashoffset .7s var(--ease) .5s; }
 .ovw2:has(.ovw-mit.shown) .ovw-arr-r path { stroke-dashoffset: 0; }
 .ovw2 .ovw-arr-r .ovw-arr-h { transition-delay: .9s; }
-.ovw2:has(.ovw-mit.shown) .sh h2 > .t0 { opacity: 0; pointer-events: none; }
-.ovw2:has(.ovw-mit.shown) .sh h2 > .t1 { opacity: 1; pointer-events: auto; }
-.ovw2 .sh h2 > .t1 { opacity: 0; pointer-events: none; }
+.ovw2 .sh h2 > .t0 { opacity: 0; pointer-events: none; transition: none; }   /* the new title stands at once on arrival */
+.ovw2 .sh h2 > .t1 { opacity: 1; pointer-events: auto; transition: none; }
 .ovw2 .ovw-src { opacity: 1; }
 .ovw2:has(.ovw-mit.shown) .ovw-src { opacity: 0; }
 /* a slide that continues the picture of the one before (data-carry) stands at once, over it: no cross-fade, no ghost */
