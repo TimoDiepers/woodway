@@ -1,0 +1,36 @@
+{
+ "2020": {
+  "strom_kg_kwh": 0.448033030712669,
+  "strom_kg_kwh_gwp100": 0.41670975028252416,
+  "zug_kg_pkm": 0.06501406649536062,
+  "zug_dataset": "transport, passenger, train, fleet average [DE]",
+  "flug_kg_pkm": 0.12220940752256786,
+  "gas_kg_mj": 0.07054422799959494,
+  "leitungswasser_kg_kg": 0.0003569474296242246,
+  "abwasser_kg_m3": -0.496369755041931
+ },
+ "2050": {
+  "strom_kg_kwh": 0.01434832266267615,
+  "strom_kg_kwh_gwp100": 0.012803260082250587,
+  "zug_kg_pkm": 0.007816487537595613,
+  "zug_dataset": "transport, passenger, train, fleet average [DE]",
+  "flug_kg_pkm": 0.11850108581403072,
+  "gas_kg_mj": 0.006563725450305093,
+  "leitungswasser_kg_kg": 0.00010095946234276162,
+  "abwasser_kg_m3": -0.2960814018739612
+ },
+ "zahlen": {
+  "zug_erdumfang": 1.5352500817907855,
+  "duschen": 7729.203964531494,
+  "duschen_jahre": 21.175901272689025,
+  "netflix_jahre_2050": 413.29868695176367,
+  "netflix_stunden": 115946.9244163096,
+  "netflix_jahre": 13.23595027583443,
+  "waesche": 8585.894536802956,
+  "klima_sommer": 9.299909562558165,
+  "chatgpt_anfragen": 29759710.600186136,
+  "haushaltsstrom_jahre": 2.5508323371588113,
+  "waermepumpe_jahre": 1.5871845653432604,
+  "bitcoin": 0.009615384615384616
+ }
+}

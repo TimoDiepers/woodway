@@ -1259,7 +1259,6 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .ende-text .ende-ww b { font-size: 25px; margin-bottom: 12px; }
 .ende-text .ende-ww b i { font-size: 17px; }
 .ende-text .ende-ww em { font-size: 20px; }
-.slide.ende.active .ende-ww { animation: ende-in 1.1s var(--ease) 5.3s both; }
 /* the balance: each 4.5 s a new thing drops into the right pan; the beam dips to the right and settles level,
    the pans counter-rotate so they keep hanging straight */
 .ende-scene :is(.beam, .pan) { transform-box: view-box; }
@@ -1284,9 +1283,9 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .veganrech { display: flex; flex-direction: column; gap: 18px; margin-top: 10px; }
 .veganrech .basis { margin: 0; max-width: 1300px; }
 .veganrech .basis b { color: var(--ch); }
-.veganrech table { border-collapse: collapse; font: 400 20px/1.35 var(--sans); color: var(--ink-2); }
-.veganrech th { text-align: left; font-weight: 600; color: var(--ink); padding: 8px 18px 8px 0; border-bottom: 1.5px solid var(--ch); }
-.veganrech td { padding: 9px 18px 9px 0; border-bottom: 1px solid var(--paper-line); vertical-align: top; }
+.veganrech table { border-collapse: collapse; font: 400 18px/1.3 var(--sans); color: var(--ink-2); }
+.veganrech th { text-align: left; font-weight: 600; color: var(--ink); padding: 5px 18px 5px 0; border-bottom: 1.5px solid var(--ch); }
+.veganrech td { padding: 5px 18px 5px 0; border-bottom: 1px solid var(--paper-line); vertical-align: top; }
 .veganrech td:first-child { color: var(--ink); white-space: nowrap; }
 .veganrech td:last-child, .veganrech th:last-child { font-weight: 600; color: var(--ch); white-space: nowrap; }
 .veganrech .fazit { margin: 0; }
