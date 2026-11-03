@@ -2224,10 +2224,10 @@ svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 svg .km-past { opacity: .15; }
 svg .km-recede { transition: opacity .6s var(--ease); }
 /* the greenhouse slide needs the whole heat arrow: the carbon box and cycle step back while it is told */
-.slide:has(svg.s18 [data-step="1"].shown):not(:has(.fline.head > .next.shown)) svg .km-recede { opacity: .05; }
+.slide:has(svg.s18 [data-step="1"].shown):not(:has(.f-last.shown)) svg .km-recede { opacity: .05; }
 /* and on its last click the explanation folds into what stays: the molecules on the heat arrow and ε */
 svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { transition: filter .6s var(--ease); }
-.slide:has(.fline.head > .next.shown) svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { filter: opacity(0); }
+.slide:has(.f-last.shown) svg.s18 :is(.km-x, .m1 > path, .m2 > path, .m3 > path, .m4 > path, .m5 > path) { filter: opacity(0); }
 /* the carbon cycle's words go once its sign is there */
 svg .km-txt { transition: opacity .6s var(--ease); }
 /* what a slide is not about steps far back: the parts of the base drawing it names in data-km-off, and the signs
@@ -2295,7 +2295,8 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 .ovw .kc-l { transition: filter .5s var(--ease); }
 /* last click: the chapters numbered, the agenda; each number grows in before its name */
 .ovw .kn { display: inline-block; max-width: 0; margin-right: 0; opacity: 0; overflow: hidden; flex: none;
-  transition: max-width .6s var(--ease), margin-right .6s var(--ease), opacity .4s var(--ease) .15s; }
+  transition: max-width .6s var(--ease) var(--kd, 0s), margin-right .6s var(--ease) var(--kd, 0s), opacity .4s var(--ease) calc(var(--kd, 0s) + .15s); }
+.ovw .kc-b .kn { --kd: 0s; } .ovw .kc-k .kn { --kd: .22s; } .ovw .kc-r .kn { --kd: .44s; }   /* 1, 2, 3 one after the other */
 .ovw .kn.shown { max-width: 60px; margin-right: 14px; opacity: 1; }
 .ovw .kn i { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ch);
   color: var(--paper); font: 600 24px/1 var(--sans); font-style: normal; }
@@ -2495,7 +2496,9 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .c11-ic .ok path { stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .c11-chip .c11-u { font: 400 20px/1 var(--sans); color: var(--muted); margin-left: -22px; align-self: center; white-space: nowrap; }
 /* "Netto-Energieänderung": the model is again fitted to measurements, averaged over the year (as on the carbon slide) */
-.dq-fit { margin: -2px 0 10px 2px; font: 400 19px/1.3 var(--sans); color: var(--muted); }
+.dq-fit { display: flex; align-items: flex-end; gap: 6px; margin: 0 0 10px 120px; font: 400 23px/1.3 var(--sans); color: var(--muted); }
+.dq-fit svg { width: 48px; height: 44px; flex: none; color: var(--s-dq); }
+.dq-fit span { padding-bottom: 2px; }
 .dq-fit b.fit-h { font-weight: 600; color: var(--ink-2); }
 /* the closing card of the Baum chapter: the two units behind their formulas, in square brackets, in the part's colour and large:
    the first thing the Klima chapter has to bring together */
@@ -2517,3 +2520,22 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .slide[data-morph] .fline.head .hl::before { transition: none; }
 /* a header line that takes over fades (no rising: it would shift the line by a few pixels while the old one is still there) */
 .slide.active .fline > .next[data-step].shown { animation: none; }
+
+/* arriving from the CO₂ slide: the new header's line waits while the chip shrinks into its term (Deck.morphBack) */
+.slide.morph-back .fline.head > .part.cont { opacity: 0; transition: none; }
+.slide.morph-back.morph-back-in .fline.head > .part.cont { opacity: 1; transition: opacity .4s var(--ease); }
+
+/* the ticks of the header line sit above the term, just left of its (t), and take no room in the line */
+.fline.head .hl:has(> .fcheck) { position: relative; }
+.fline.head .hl > .fcheck { position: absolute; right: -10px; top: -13px; width: 20px; height: 18px; margin: 0; }
+.slide.morph-back .fline.head { position: relative; }   /* the copy is placed against the line (the slide has no overlaid .next any more) */
+
+/* slide 12: the brace under the right side of the equation comes with its label (click 3) */
+.dq-line .gloss .katex svg { transform: scaleY(.62); transform-origin: 50% 0; }
+.dq-line .ub-fit svg { transition: opacity .5s var(--ease); }
+.slide:has(.f-fit:not(.shown)) .dq-line .ub-fit svg { opacity: 0; }
+.dq-top { align-items: flex-start; }
+.katex .ub-lab, .katex .ub-lab * { font-family: var(--sans); font-weight: 500; }
+.dq-line .ub-lab, .dq-line .ub-lab * { font-size: 20px; font-weight: 600; color: var(--ink-2); }   /* as the note on the carbon slide */
+.dq-line .gloss { margin-top: 8px; }
+.slide.rearm, .slide.rearm *, .slide.rearm *::before, .slide.rearm *::after { transition: none !important; }   /* Deck.go: re-entry of a data-auto slide */

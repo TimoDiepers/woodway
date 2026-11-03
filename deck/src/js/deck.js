@@ -3147,6 +3147,9 @@ class Deck {
     this.slides.forEach((x, k) => x.classList.toggle('active', k === n));
     if (prev && prev !== s && !this.still) this.swapPart(prev, s);
     s.classList.toggle('settled', step === 'end' || !!this.still || !s.classList.contains('arrive') && n !== this.i + 1);   // a chapter opener reached backwards or by a jump: its entrance stays still
+    // a slide that plays its first clicks by itself (data-auto) is entered again from its finished state: its parts must
+    // not first run back to the start (a visible flicker) before the auto clicks play them forward again
+    if (s.dataset.auto && !this.still && step === 0) { s.classList.add('rearm'); requestAnimationFrame(() => requestAnimationFrame(() => s.classList.remove('rearm'))); }
     this.i = n; this.step = (step === 'end' || this.showAll) ? this.steps(s) : step;
     this.applyStep(!this.still && step !== 'end', true);
     if (s.dataset.gather && prev && prev !== s && this.slides.indexOf(prev) === n - 1 && step === 0 && !this.still && !deckCalm.matches) this.gather(prev, s);
@@ -3158,6 +3161,7 @@ class Deck {
         this.step = +s.dataset.auto; this.applyStep(true, false); this.schedulePlan();
       }
     }, 150);
+    if (s.dataset.morphBack && prev && prev !== s && this.slides.indexOf(prev) === n - 1 && step === 0 && !this.still && !deckCalm.matches) this.morphBack(prev, s);
     this.schedulePlan();
     this.progress.style.transform = `scaleX(${Math.min(1, (n + 1) / this.mainEnd)})`;
     if (this.flying) this.staged = s; else this.stage(s);   // in a flight: after the landing (Deck.flyHome)
@@ -3200,6 +3204,42 @@ class Deck {
     setTimeout(() => {
       s.classList.add('morph-in', 'morph-rest'); g.remove(); bg.remove(); src.style.visibility = '';
       setTimeout(() => s.classList.remove('morphing', 'morph-in', 'morph-rest'), 480);
+    }, D);
+  }
+  morphBack(prev, s) {
+    // morphTerm in reverse: the chip of the slide before (its CO₂ line) shrinks into its term in the sum line this slide
+    // starts with (data-morph-back = the term's class). The same window as there, now closing from the whole chip to the
+    // term's box; the term travels to its place, label and unit fade out; then the sum line comes in around it.
+    const line = s.querySelector('.fline.head'), pl = prev.querySelector('.fline.head');
+    const chip = pl && pl.querySelector('.part:not(.next) .chip'), dst = line && line.querySelector('.part.cont .' + s.dataset.morphBack);
+    if (!chip || !dst) return;
+    const S = line.getBoundingClientRect(), sc = S.width / line.offsetWidth, P = pl.getBoundingClientRect();
+    const rel = (r, O) => ({ x: (r.left - O.left) / sc, y: (r.top - O.top) / sc, w: r.width / sc, h: r.height / sc });
+    const c = rel(chip.getBoundingClientRect(), P), a = rel(dst.getBoundingClientRect(), S);
+    const k = dst.querySelector('.katex'), b = rel((k || dst).getBoundingClientRect(), S), t0 = chip.querySelector('.tex').getBoundingClientRect();
+    if (!c.w || !a.w) return;
+    const box = { x: a.x - 9, y: a.y - 6, w: a.w + 18, h: a.h + 12 };
+    const bg = document.createElement('div'), px = r => `left:${r.x}px; top:${r.y}px; width:${r.w}px; height:${r.h}px`;
+    bg.className = 'morph-ghost';
+    bg.style.cssText = `position:absolute; ${px(c)}; z-index:39; pointer-events:none; border-radius:10px; background:${getComputedStyle(chip).backgroundColor}`;
+    const g = chip.cloneNode(true); g.classList.add('morph-ghost');
+    g.style.cssText = `position:absolute; ${px(c)}; margin:0; z-index:40; pointer-events:none; box-sizing:border-box; background:none`;
+    line.append(bg, g);
+    s.classList.add('morph-back');
+    const D = 950, ease = 'cubic-bezier(.45, 0, .25, 1)';
+    bg.animate([{ left: c.x + 'px', top: c.y + 'px', width: c.w + 'px', height: c.h + 'px' }, { left: box.x + 'px', top: box.y + 'px', width: box.w + 'px', height: box.h + 'px' }], { duration: D, easing: ease, fill: 'both' });
+    const win = (t, r, bt, l) => `inset(${t}px ${r}px ${bt}px ${l}px)`;
+    g.animate([{ clipPath: win(0, 0, 0, 0) }, { clipPath: win(box.y - c.y, c.x + c.w - box.x - box.w, c.y + c.h - box.y - box.h, box.x - c.x) }], { duration: D, easing: ease, fill: 'both' });
+    const tex = g.querySelector('.tex'), tw = t0.width / sc, tx = t0.left - P.left, ty = t0.top - P.top;
+    tex.style.transformOrigin = '0 0';
+    tex.animate([{ transform: 'none' }, { transform: `translate(${b.x - tx / sc}px, ${b.y - ty / sc}px) scale(${b.w / tw})` }], { duration: D, easing: ease, fill: 'both' });
+    const lab = g.firstElementChild, un = g.querySelector('.u');
+    if (lab && lab !== tex) lab.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(-26px)' }], { duration: 520, delay: 150, easing: ease, fill: 'both' });
+    if (un) un.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: 0, easing: ease, fill: 'both' });
+    setTimeout(() => {
+      s.classList.add('morph-back-in');
+      const f = [bg, g].map(x => x.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, easing: 'ease', fill: 'both' }));
+      setTimeout(() => { g.remove(); bg.remove(); s.classList.remove('morph-back', 'morph-back-in'); }, 420);
     }, D);
   }
   gather(prev, s) {
