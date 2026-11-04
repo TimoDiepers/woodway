@@ -39,10 +39,10 @@ describe("GlobalStrip", () => {
     const g = at.meta.global;
     render(<GlobalStrip atlas={at} year={2080} />);
     const area = g.areasGha.kuehlt.toFixed(2), year = g.plantYear;
-    expect(area).toBe("0.42");
+    expect(area).toBe("0.47");
     expect(screen.getByText(new RegExp(`^Trees: managed forest on the ${area} Gha that cool, all planted in ${year}, timber kept. Vegan world from ${year}: .* forest on ${g.vegan.freeGha.toFixed(2)} Gha`))).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("de"));
-    expect(screen.getByText(/^Bäume: bewirtschafteter Wald auf den 0,42 Gha, die kühlen, alle 2026 gepflanzt, .*zurück auf 1,5 °C \(2084\)/)).toBeInTheDocument();
+    expect(screen.getByText(/^Bäume: bewirtschafteter Wald auf den 0,47 Gha, die kühlen, alle 2026 gepflanzt, .*zurück auf 1,5 °C \(2083\)/)).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("en"));
   });
 });

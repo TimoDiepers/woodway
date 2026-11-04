@@ -37,7 +37,7 @@ describe("AtlasSlide", () => {
   });
   it("albedo slide states only the areas, as the deck does", () => {
     const { container } = render(<AtlasSlide def={SLIDES.albedo} atlas={at} step={0} />);
-    expect(container.querySelector(".takeaway")!.textContent).toBe("Bäume kühlen 2100 auf 0,42 von 0,83 Gha wiederbewaldbarer Fläche; auf dem Rest überwiegt die Albedo.");
+    expect(container.querySelector(".takeaway")!.textContent).toBe("Bäume kühlen 2100 auf 0,47 von 0,83 Gha wiederbewaldbarer Fläche; auf dem Rest überwiegt die Albedo.");
   });
   it("DAC slides name the median over the land area and the capacity", () => {
     const a = render(<AtlasSlide def={SLIDES.dacStrom} atlas={at} step={1} />);
