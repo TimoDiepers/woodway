@@ -675,7 +675,7 @@ def light_parts_sites_figure(out_path: str) -> str:
 
     _heading_font, body_font = _register_fonts()
     _style(body_font)
-    c_baum, c_wolke = "#5c7200", "#056fab"   # deck.css --s-dal, --s-daw
+    c_baum, c_wolke = "#8a6800", "#056fab"   # deck.css --s-dal, --s-daw
     fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
     fig.subplots_adjust(left=0.141, right=0.977, bottom=0.07, top=0.98)
     _clean_axes(ax)
@@ -791,7 +791,7 @@ def light_ingredients_figure(out_path: str) -> str:
         (q, measured, "sonne", (100, 150, 200, 250), "[W/m²]", lambda v: f"{v:.0f} W/m²", "Einstrahlung", r"$\dot{q}_{\mathrm{ein}}$",
          "#a55500"),
         (darker, measured, "abdunkeln", (0, 5, 10, 15), "[%]", lambda v: f"{v:.0f} %", "Albedo-Kontrast", r"$\Delta\alpha_{\mathrm{B}}$",
-         "#5c7200"),
+         "#8a6800"),
         (cloud, cloud_measured, "wolken", (-1, 0, 1, 2, 3), "[%]", lambda v: f"{_pp(v)} %", "Reflexion durch Wolken",
          r"$\Delta\alpha_{\mathrm{W}}$", "#056fab"),
     ]
@@ -845,7 +845,7 @@ def albedo_ingredients_figure(out_path: str) -> str:
          r"$\dot{q}_{\mathrm{ein}}$", "#a55500"),
         (fig.add_axes((0.51, 0.16, 0.48, 0.73)), fig.add_axes((0.58, 0.085, 0.34, 0.028)), darker, RAMP_SNOW,
          (0.0, 18.0), "[%]",
-         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{B}}$", "#5c7200"),
+         "Albedo-Kontrast Wald gegen Offenland", r"$\Delta\alpha_{\mathrm{B}}$", "#8a6800"),
     ]
     units = {id(q): "W/m²", id(darker): "%"}
     for ax, cax, field, ramp, (lo, hi), label, title, symbol, symbol_color in panels:

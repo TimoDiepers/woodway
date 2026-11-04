@@ -15,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 
+from nbs.constants import SZENARIO
 from nbs.albedo_grid import alpha_q_product
 from nbs.animations import SITES, site_cell, site_key
 from nbs.cloud_grid import cloud_q_product
@@ -27,7 +28,7 @@ ONE_YEAR, EVERY, SCALE = 2041, 5, 1e15
 
 
 def main() -> None:
-    g = np.asarray(green_temperature("ssp245"), dtype=float)
+    g = np.asarray(green_temperature(SZENARIO), dtype=float)
     sites = []
     for s in SITES:
         r = run_site(s)

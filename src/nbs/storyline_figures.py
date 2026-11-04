@@ -36,7 +36,7 @@ from nbs.animations import (  # noqa: E402
     site_key,
     site_uptake_kg_co2,
 )
-from nbs.constants import M_CO2_PER_C, T_START, YEARS  # noqa: E402
+from nbs.constants import M_CO2_PER_C, T_START, YEARS, SZENARIO  # noqa: E402
 from nbs.light import light_product  # noqa: E402
 from nbs.metrics import t_star  # noqa: E402
 from nbs.pipeline import SiteResult, run_single_tree  # noqa: E402
@@ -184,7 +184,7 @@ def co2_profile_figure(out_path: str) -> str:
 def _two_site_panels(out_path: str, *, quantity: str) -> str:
     _setup()
     results = [run_site(s) for s in SITES]
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     series = []
     for r in results:
         if quantity == "phi":
@@ -385,7 +385,7 @@ def co2_saturation_figure(out_path: str) -> str:
     for ax in (ax_l, ax_r):
         _clean_axes(ax)
 
-    cbg = background_co2_ppm("ssp245")
+    cbg = background_co2_ppm(SZENARIO)
     c = np.linspace(280.0, 720.0, 300)
     phi = A_CO2_LOG_W_M2_PER_PPM * np.log(c / 280.0)
     ax_l.plot(c, phi, color=C_CARBON, linewidth=3.0)
@@ -416,7 +416,7 @@ def co2_saturation_figure(out_path: str) -> str:
     ax_r.set_ylim(0.9, 1.9)
     ax_r.set_xticks([T_START, 2050, 2075, 2100])
     ax_r.set_ylabel("Wirkung je kg CO$_2$ [10$^{-15}$ W/m²]")
-    ax_r.set_title("…also wirkt jedes kg später weniger (SSP2-4,5)", loc="left", fontsize=14, color=C_INK)
+    ax_r.set_title("…also wirkt jedes kg später weniger (Very Low)", loc="left", fontsize=14, color=C_INK)
     return _save(fig, out_path)
 
 
@@ -440,10 +440,10 @@ def ladder_t_star(site: Site) -> list[float]:
     from nbs.pipeline import _background_temperature
     from nbs.response import background_co2_ppm, green_carbon
 
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     sp = _site_species(site)
     calm = simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS)))
-    warm = simulate_deterministic(sp, _background_temperature("ssp245"))
+    warm = simulate_deterministic(sp, _background_temperature(SZENARIO))
     product = float(light_product(site_key(site))[site_cell(site)])
 
     def t_of(phi):
@@ -455,9 +455,9 @@ def ladder_t_star(site: Site) -> list[float]:
     flux = co2_flux_kg_per_yr(calm.net_uptake_kgC_yr)
     naive = A_CO2_W_M2_PER_KG * np.cumsum(flux)
     rebound = A_CO2_W_M2_PER_KG * convolve_response(green_carbon_preindustrial(), flux)
-    fuller = phi_co2_background(flux, green_carbon("ssp245"), background_co2_ppm("ssp245"))
-    full = phi_co2_background(co2_flux_kg_per_yr(warm.net_uptake_kgC_yr), green_carbon("ssp245"),
-                              background_co2_ppm("ssp245"))
+    fuller = phi_co2_background(flux, green_carbon(SZENARIO), background_co2_ppm(SZENARIO))
+    full = phi_co2_background(co2_flux_kg_per_yr(warm.net_uptake_kgC_yr), green_carbon(SZENARIO),
+                              background_co2_ppm(SZENARIO))
     return [t_of(naive), t_of(naive + alb(calm)), t_of(rebound + alb(calm)), t_of(fuller + alb(calm)),
             t_of(full + alb(warm))]
 
@@ -471,10 +471,10 @@ def ladder_delta_t(site: Site) -> list[float]:
     from nbs.pipeline import _background_temperature
     from nbs.response import background_co2_ppm, green_carbon
 
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     sp = _site_species(site)
     calm = simulate_deterministic(dataclasses.replace(sp, gamma_warming=0.0), np.zeros(len(YEARS)))
-    warm = simulate_deterministic(sp, _background_temperature("ssp245"))
+    warm = simulate_deterministic(sp, _background_temperature(SZENARIO))
     product = float(light_product(site_key(site))[site_cell(site)])
 
     def end(phi):
@@ -486,9 +486,9 @@ def ladder_delta_t(site: Site) -> list[float]:
     flux = co2_flux_kg_per_yr(calm.net_uptake_kgC_yr)
     naive = A_CO2_W_M2_PER_KG * np.cumsum(flux)
     rebound = A_CO2_W_M2_PER_KG * convolve_response(green_carbon_preindustrial(), flux)
-    fuller = phi_co2_background(flux, green_carbon("ssp245"), background_co2_ppm("ssp245"))
-    full = phi_co2_background(co2_flux_kg_per_yr(warm.net_uptake_kgC_yr), green_carbon("ssp245"),
-                              background_co2_ppm("ssp245"))
+    fuller = phi_co2_background(flux, green_carbon(SZENARIO), background_co2_ppm(SZENARIO))
+    full = phi_co2_background(co2_flux_kg_per_yr(warm.net_uptake_kgC_yr), green_carbon(SZENARIO),
+                              background_co2_ppm(SZENARIO))
     return [end(naive), end(naive + alb(calm)), end(rebound + alb(calm)), end(fuller + alb(calm)),
             end(full + alb(warm))]
 
@@ -519,7 +519,7 @@ def ladder_figure(out_path: str) -> str:
     ax.set_ylim(lo * 1.15, max(30.0, -lo * 0.12))
     ax.set_xticks(x)
     ax.set_xticklabels(LADDER_STEPS, fontsize=11.5)
-    ax.set_ylabel("Temperatur je Baum 2100 [fK]")
+    ax.set_ylabel("Temperatur je Baum 2100 [10⁻¹⁵ K]")
     return _save(fig, out_path)
 
 
@@ -561,13 +561,13 @@ def temperature_path_figure(out_path: str) -> str:
     from nbs.potential import _masked_global_delta_t, cascade, reverse_1p5
 
     _setup()
-    base = run_fair_baseline("ssp245")
+    base = run_fair_baseline(SZENARIO)
     years = YEARS[: len(base)]
-    retain = (assign_species() != None) & ~np.isinf(_breakeven_year_field("ssp245"))  # noqa: E711
-    dt4 = _masked_global_delta_t(retain, "ssp245")[: len(base)]
-    final = cascade("ssp245")[-1]["delta_t_2150"]
-    trees = base + dt4 * (final / float(_masked_global_delta_t(retain, "ssp245")[-1]))
-    factor = reverse_1p5("ssp245")["mit_albedo_und_stoerung"]["vielfaches_der_modellierten_flaeche"]
+    retain = (assign_species() != None) & ~np.isinf(_breakeven_year_field(SZENARIO))  # noqa: E711
+    dt4 = _masked_global_delta_t(retain, SZENARIO)[: len(base)]
+    final = cascade(SZENARIO)[-1]["delta_t_2150"]
+    trees = base + dt4 * (final / float(_masked_global_delta_t(retain, SZENARIO)[-1]))
+    factor = reverse_1p5(SZENARIO)["mit_albedo_und_stoerung"]["vielfaches_der_modellierten_flaeche"]
 
     fig, ax = plt.subplots(figsize=WIDE, dpi=FIG_DPI)
     fig.subplots_adjust(left=0.08, right=0.78, bottom=0.13, top=0.92)
@@ -577,7 +577,7 @@ def temperature_path_figure(out_path: str) -> str:
     ax.fill_between(years, trees, base, color=C_CARBON, alpha=0.25, linewidth=0)
     ax.plot(years, base, color=C_INK_MUTED, linewidth=2.6)
     ax.plot(years, trees, color=C_CARBON, linewidth=2.6)
-    ax.annotate("SSP2-4,5 ohne Aufforstung", (years[-1], base[-1]), xytext=(10, 6), textcoords="offset points",
+    ax.annotate("Very Low ohne Entnahme, ohne Aufforstung", (years[-1], base[-1]), xytext=(10, 6), textcoords="offset points",
                 fontsize=12.5, color=C_INK, annotation_clip=False)
     ax.annotate(f"mit allen nutzbaren Flächen\n(−{abs(final):.2f} K bis 2100)".replace(".", ","),
                 (years[-1], trees[-1]), xytext=(10, -22), textcoords="offset points", fontsize=12.5,
@@ -676,7 +676,7 @@ def forcing_to_temperature_figure(out_path: str) -> str:
 
     _setup()
     lam = float(pd.read_csv(_PARAMS_CSV, index_col=0).loc[CENTRAL_MEMBER, "ocean_heat_transfer[0]"])
-    g = green_temperature("ssp245")
+    g = green_temperature(SZENARIO)
     t = YEARS - YEARS[0]
     step = np.cumsum(g)
 
@@ -719,7 +719,7 @@ def forcing_to_temperature_figure(out_path: str) -> str:
 def temperature_response_figure(out_path: str) -> str:
     """g_T alone, for the convolution slide: the model's own response (FaIR)."""
     _setup()
-    g = green_temperature("ssp245")
+    g = green_temperature(SZENARIO)
     t = YEARS - YEARS[0]
     fig, ax = plt.subplots(figsize=(9.0, 3.86), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.11, right=0.97, bottom=0.2, top=0.93)
@@ -938,7 +938,7 @@ def inertia_result_figure(out_path: str) -> str:
 
     _setup()
     lam = float(pd.read_csv(_PARAMS_CSV, index_col=0).loc[CENTRAL_MEMBER, "ocean_heat_transfer[0]"])
-    g = green_temperature("ssp245")
+    g = green_temperature(SZENARIO)
     t = YEARS - YEARS[0]
     step = np.cumsum(g)
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=HALF, dpi=FIG_DPI, gridspec_kw={"width_ratios": [1.0, 1.25]})
@@ -1187,14 +1187,14 @@ def irf_figure(out_path: str, horizon: int = 150, figsize: tuple[float, float] =
 
 def co2_forcing_figure(out_path: str) -> str:
     """K6: how strongly CO2 warms. Left: forcing of the whole CO2 in the air, 5.35 ln(C/C0), with its tangent
-    in 2025 and 2100 (SSP2-4.5 background) -- the fuller the air, the flatter. Right: the forcing per kg that
+    in 2025 and 2100 (Very Low background, without its own removal) -- the fuller the air, the flatter. Right: the forcing per kg that
     follows, A_CO2(t) = 5.35 / (C_bg(t) k)."""
     from nbs.constants import A_CO2_LOG_W_M2_PER_PPM as A, KG_CO2_PER_PPM as K
     from nbs.response import background_co2_ppm
 
     _setup()
     c0 = 278.0
-    cbg = np.asarray(background_co2_ppm("ssp245"), dtype=float)
+    cbg = np.asarray(background_co2_ppm(SZENARIO), dtype=float)
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=HALF, dpi=FIG_DPI, gridspec_kw={"width_ratios": [1.1, 1.0]})
     fig.subplots_adjust(left=0.1, right=0.97, bottom=0.13, top=0.9, wspace=0.42)
     for ax in (ax_l, ax_r):
@@ -1226,7 +1226,7 @@ def co2_forcing_figure(out_path: str) -> str:
     ax_r.set_xticks([T_START, 2050, 2075, 2100])
     ax_r.set_ylim(0, 2.0)
     ax_r.set_ylabel("Antrieb je kg [10$^{-15}$ W/m$^2$]")
-    ax_r.set_title("Je kg CO$_2$, SSP2-4.5", loc="left", fontsize=12.5, color=C_INK)
+    ax_r.set_title("Je kg CO$_2$, Very Low", loc="left", fontsize=12.5, color=C_INK)
     return _save(fig, out_path)
 
 
@@ -1277,7 +1277,7 @@ def step_response_figure(out_path: str) -> str:
 
     _setup()
     lam = float(pd.read_csv(_PARAMS_CSV, index_col=0).loc[CENTRAL_MEMBER, "ocean_heat_transfer[0]"])
-    step = np.cumsum(green_temperature("ssp245"))
+    step = np.cumsum(green_temperature(SZENARIO))
     t = np.arange(len(step))
     fig, ax = plt.subplots(figsize=(7.3, 4.6), dpi=FIG_DPI)
     fig.subplots_adjust(left=0.13, right=0.96, bottom=0.14, top=0.9)
@@ -1332,12 +1332,12 @@ def tree_temperature_figure(out_path: str) -> str:
 
 def co2_efficiency_figure(out_path: str) -> str:
     """K6e: on top of the greenhouse explanation: the forcing per kg falls as the background concentration
-    rises (SSP2-4.5); one line, the two ends labelled with value and concentration."""
+    rises (Very Low); one line, the two ends labelled with value and concentration."""
     from nbs.constants import A_CO2_LOG_W_M2_PER_PPM as A, KG_CO2_PER_PPM as K
     from nbs.response import background_co2_ppm
 
     _setup()
-    cbg = np.asarray(background_co2_ppm("ssp245"), dtype=float)
+    cbg = np.asarray(background_co2_ppm(SZENARIO), dtype=float)
     a_kg = A / (cbg * K) * 1e15
     fig, ax = plt.subplots(figsize=(7.3, 4.6), dpi=FIG_DPI)  # replaces the 860 px drawing: ticks ~19 px
     fig.subplots_adjust(left=0.13, right=0.95, bottom=0.12, top=0.9)
@@ -1352,7 +1352,7 @@ def co2_efficiency_figure(out_path: str) -> str:
     ax.set_xticks([T_START, 2050, 2075, 2100])
     ax.set_ylim(0, 2.0)
     # y label on the slide as a formula overlay (epsilon_CO2), in the colour of the formula
-    ax.set_title("Mehr CO$_2$ im Hintergrund, weniger Wirkung je kg (SSP2-4.5)", loc="left", fontsize=13, color=C_INK)
+    ax.set_title("Mehr CO$_2$ im Hintergrund, weniger Wirkung je kg (Very Low)", loc="left", fontsize=13, color=C_INK)
     return _save(fig, out_path)
 
 
@@ -1521,7 +1521,7 @@ def own_remaining() -> dict[str, float]:
 
     static: Hasler's own formula (400 ppm, mean 100-year airborne fraction
     0.52) on this model's cells, Delta-alpha*q and Walker carbon.
-    alle / kuehlend: Delta-T in 2100 under SSP2-4.5 with albedo and
+    alle / kuehlend: Delta-T in 2100 under Very Low (without its removal) with albedo and
     disturbance over Delta-T carbon-only without disturbance -- over all
     reforestable area, and over the cells that cool by 2100."""
     from nbs.config import ModelConfig
@@ -1535,11 +1535,11 @@ def own_remaining() -> dict[str, float]:
 
     plant = assign_species() != None  # noqa: E711
     a = plantable_area_m2()
-    cool = plant & np.isfinite(_breakeven_year_field("ssp245"))
+    cool = plant & np.isfinite(_breakeven_year_field(SZENARIO))
     out = {}
     for name, m in (("alle", plant), ("kuehlend", cool)):
-        full = _masked_global_delta_t(m, "ssp245")[-1]
-        co2 = _masked_global_delta_t(m, "ssp245", ModelConfig(albedo=False, disturbance="off"))[-1]
+        full = _masked_global_delta_t(m, SZENARIO)[-1]
+        co2 = _masked_global_delta_t(m, SZENARIO, ModelConfig(albedo=False, disturbance="off"))[-1]
         out[name] = float(full / co2)
         out[f"flaeche_{name}_gha"] = float(a[m].sum() / 1e13)
     prod = _by_type(light_product)
@@ -1559,7 +1559,7 @@ def literature_comparison_figure(out_path: str) -> str:
     rows = [(lab, det, v, lb, False) for lab, det, v, lb in LITERATURE_REMAINING]
     rows += [
         ("Dieses Modell", "Haslers Formel auf unseren Zellen", own["statisch"], False, True),
-        ("Dieses Modell", f"ΔT 2100, SSP2-4.5, alle {de(10 * own['flaeche_alle_gha'], 1)} Mio. km²", own["alle"], False, True),
+        ("Dieses Modell", f"ΔT 2100, Very Low, alle {de(10 * own['flaeche_alle_gha'], 1)} Mio. km²", own["alle"], False, True),
         ("Dieses Modell", f"ΔT 2100, nur kühlende {de(10 * own['flaeche_kuehlend_gha'], 1)} Mio. km²", own["kuehlend"], False,
          True),
     ]

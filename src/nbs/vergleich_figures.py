@@ -24,7 +24,7 @@ from matplotlib.patches import Patch  # noqa: E402
 
 from nbs.animations import FIG_DPI  # noqa: E402
 from nbs.config import ModelConfig  # noqa: E402
-from nbs.constants import T_START  # noqa: E402
+from nbs.constants import T_START, SZENARIO  # noqa: E402
 from nbs.dac import dac_possible, electricity_gwp_grid, energy_grid, rest_gwp  # noqa: E402
 from nbs.dac_climate import climate_grid  # noqa: E402
 from nbs.dac_compare import tree_efficiency_grid  # noqa: E402
@@ -131,7 +131,7 @@ def planting_choice() -> dict[str, dict[str, float]]:
 
     Per variant: area [Gha], CO2 stored by 2100 (gross, from the cascade's carbon) and net of
     albedo [Gt CO2], and the global temperature change in 2100 [K] from one FaIR run with the
-    whole planting (typical forest, planted in the start year, SSP2-4.5). Net = gross x (Delta_T full /
+    whole planting (typical forest, planted in the start year, Very Low without its removal). Net = gross x (Delta_T full /
     Delta_T without albedo). Gross carbon: cascade steps "Nicht-Wald-Biome ausgeschlossen"
     (all reforestable cells with a typical forest) and the last step (cells that cool)."""
     import json
@@ -145,14 +145,14 @@ def planting_choice() -> dict[str, dict[str, float]]:
     if cache.exists():
         return json.loads(cache.read_text())
     plant = assign_species() != None  # noqa: E711
-    cool = plant & ~np.isinf(_breakeven_year_field("ssp245"))
+    cool = plant & ~np.isinf(_breakeven_year_field(SZENARIO))
     steps = cascade()
     land = next(s for s in steps if s["area_gha"] is not None)
     w = plantable_area_m2()
     out = {}
     for key, mask, carbon in (("kuehlt", cool, steps[-1]["carbon_gtc"]), ("alle", plant, land["carbon_gtc"])):
-        full = float(_masked_global_delta_t(mask, "ssp245")[-1])
-        co2 = float(_masked_global_delta_t(mask, "ssp245", ModelConfig(albedo=False))[-1])
+        full = float(_masked_global_delta_t(mask, SZENARIO)[-1])
+        co2 = float(_masked_global_delta_t(mask, SZENARIO, ModelConfig(albedo=False))[-1])
         gross = carbon * 44.0 / 12.0
         out[key] = {"flaeche_gha": float(w[mask].sum() / 1e13), "brutto_gt": gross, "netto_gt": gross * full / co2,
                     "dt_2100_k": full, "dt_nur_co2_k": co2}
@@ -196,11 +196,11 @@ def area_series() -> dict:
         from nbs.potential import _masked_global_delta_t
 
         plant = assign_species() != None  # noqa: E711
-        cool = plant & ~np.isinf(_breakeven_year_field("ssp245"))
+        cool = plant & ~np.isinf(_breakeven_year_field(SZENARIO))
         out = {"jahre": [int(y) for y in YEARS]}
         for key, mask in (("kuehlt", cool), ("alle", plant)):
-            out[key] = [float(v) for v in _masked_global_delta_t(mask, "ssp245")]
-            out[key + "_nur_co2"] = [float(v) for v in _masked_global_delta_t(mask, "ssp245", ModelConfig(albedo=False))]
+            out[key] = [float(v) for v in _masked_global_delta_t(mask, SZENARIO)]
+            out[key + "_nur_co2"] = [float(v) for v in _masked_global_delta_t(mask, SZENARIO, ModelConfig(albedo=False))]
         return out
 
     return _cached_json("flaechen_zeitreihe.json", compute)
@@ -221,10 +221,10 @@ def planting_delay() -> dict:
         from nbs.species import SPECIES, reference_site
         from nbs.aggregate import _product_no_nan, co2_factor_grid
 
-        g_t = green_temperature("ssp245")
+        g_t = green_temperature(SZENARIO)
         keys = key_grid()
         w = plantable_area_m2()
-        cool = (keys != None) & ~np.isinf(_breakeven_year_field("ssp245")) & (w > 0)  # noqa: E711
+        cool = (keys != None) & ~np.isinf(_breakeven_year_field(SZENARIO)) & (w > 0)  # noqa: E711
 
         def total(py):
             t = np.zeros(len(YEARS))
@@ -279,16 +279,16 @@ def area_time_figure(out_path: str) -> str:
         ax.annotate(f"{de(100 * k[i] / kc[i])} % netto", (y[i], k[i]), xytext=(8, -18) if i == i50 else (-6, 10),
                     textcoords="offset points", ha="left" if i == i50 else "right", fontsize=12.5, color=C_TREE,
                     fontweight="bold")
-    ax.annotate(f"kühlende Flächen: {de(k[-1])} mK", (y[-1], k[-1]), xytext=(8, 0),
+    ax.annotate(f"kühlende Flächen: {de(k[-1])} · 10⁻³ K", (y[-1], k[-1]), xytext=(8, 0),
                 textcoords="offset points", va="center", fontsize=12.5, color=C_TREE, fontweight="bold",
                 annotation_clip=False)
-    ax.annotate(f"alle Flächen: {de(al[-1])} mK", (y[-1], al[-1]), xytext=(8, 0), textcoords="offset points",
+    ax.annotate(f"alle Flächen: {de(al[-1])} · 10⁻³ K", (y[-1], al[-1]), xytext=(8, 0), textcoords="offset points",
                 va="center", fontsize=12.5, color=C_WARM, fontweight="bold", annotation_clip=False)
     ax.set_xlim(T_START, 2100)
     ax.set_xticks([T_START, 2050, 2075, 2100])
     ax.set_ylim(0, max(k.max(), al.max()) * 1.15)
-    ax.set_ylabel("Kühlung der Erde [mK]")
-    ax.set_title(f"Alle Bäume, gepflanzt {T_START}: Kühlung Jahr für Jahr (1 mK = 0,001 K)", loc="left", fontsize=13, color=C_INK)
+    ax.set_ylabel("Kühlung der Erde [10⁻³ K]")
+    ax.set_title(f"Alle Bäume, gepflanzt {T_START}: Kühlung Jahr für Jahr", loc="left", fontsize=13, color=C_INK)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
     return _save(fig, out_path)
@@ -297,7 +297,7 @@ def area_time_figure(out_path: str) -> str:
 def need_temperature_series() -> dict:
     """Cooling [K, positive] that the removal CMIP7 Very Low needs (novel + land) would bring, year by
     year from the start year: the removal as a negative CO2 flux through the same chain as the trees
-    (impulse response g_C, logarithmic forcing against the SSP2-4.5 background, temperature response g_T).
+    (impulse response g_C, logarithmic forcing against the Very Low background (without its removal), temperature response g_T).
     Cached in deck/chart_data/bedarf_temperatur.json."""
 
     def compute():
@@ -309,8 +309,8 @@ def need_temperature_series() -> dict:
         e = removal()
         r = e[e.szenario == "VL"].sort_values("jahr")
         gt = np.interp(YEARS, r.jahr.to_numpy(), (r.neuartig_gt + r.land_gt).to_numpy())
-        phi = phi_co2_background(-gt * 1e12, green_carbon("ssp245"), background_co2_ppm("ssp245"))
-        dt = convolve_response(green_temperature("ssp245"), phi)
+        phi = phi_co2_background(-gt * 1e12, green_carbon(SZENARIO), background_co2_ppm(SZENARIO))
+        dt = convolve_response(green_temperature(SZENARIO), phi)
         return {"jahre": [int(y) for y in YEARS], "kuehlung_k": [float(-v) for v in dt],
                 "entnahme_gt": [float(v) for v in np.cumsum(gt)]}
 
@@ -375,16 +375,16 @@ def area_need_figure(out_path: str) -> str:
     ax.plot(y, al, color=C_WARM, linewidth=3.2)
     ip = int(np.argmax(need))
     ax.plot(y[ip], need[ip], "o", ms=8, color="#8e0d16", mec="white", mew=1.5, zorder=5)
-    ax.annotate(f"{y[ip]}: {need[ip]:.0f} mK über 1,5 °C", (y[ip], need[ip]), xytext=(8, 8), textcoords="offset points",
+    ax.annotate(f"{y[ip]}: {need[ip]:.0f} · 10⁻³ K über 1,5 °C", (y[ip], need[ip]), xytext=(8, 8), textcoords="offset points",
                 fontsize=12.5, color="#8e0d16", fontweight="bold")
     end = dict(xytext=(8, 0), textcoords="offset points", va="center", annotation_clip=False)
     ax.annotate("nötig für 1,5 °C\n(Very Low)", (y[-1], need[-1]), fontsize=12.5, color="#8e0d16", fontweight="bold", **end)
-    ax.annotate(f"Bäume, kühlende\nFlächen: {k[-1]:.0f} mK", (y[-1], k[-1] + 26), fontsize=12.5, color=C_TREE, fontweight="bold", **end)
-    ax.annotate(f"alle Flächen: {al[-1]:.0f} mK", (y[-1], al[-1] - 12), fontsize=12.5, color=C_WARM, fontweight="bold", **end)
+    ax.annotate(f"Bäume, kühlende\nFlächen: {k[-1]:.0f} · 10⁻³ K", (y[-1], k[-1] + 26), fontsize=12.5, color=C_TREE, fontweight="bold", **end)
+    ax.annotate(f"alle Flächen: {al[-1]:.0f} · 10⁻³ K", (y[-1], al[-1] - 12), fontsize=12.5, color=C_WARM, fontweight="bold", **end)
     ax.set_xlim(T_START, 2100)
     ax.set_xticks([T_START, 2050, 2075, 2100])
     ax.set_ylim(0, need.max() * 1.15)
-    ax.set_ylabel("Kühlung der Erde [mK]")
+    ax.set_ylabel("Kühlung der Erde [10⁻³ K]")
     ax.set_title("Kühlung Jahr für Jahr, gepflanzt 2026", loc="left", fontsize=13, color=C_INK)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
@@ -438,7 +438,7 @@ def tree_scenarios() -> dict:
 
         c = planting_choice()
         plant = assign_species() != None  # noqa: E711
-        cool = plant & ~np.isinf(_breakeven_year_field("ssp245"))
+        cool = plant & ~np.isinf(_breakeven_year_field(SZENARIO))
         cum = cumulative_removal()
         out = {}
         for code in CMIP7_WORLDS:
@@ -477,10 +477,10 @@ def removal_series() -> dict:
         from nbs.response import convolve_response, green_temperature
         from nbs.species import SPECIES, reference_site
 
-        g_t = green_temperature("ssp245")
+        g_t = green_temperature(SZENARIO)
         keys = key_grid()
         w = plantable_area_m2()
-        cool = (keys != None) & ~np.isinf(_breakeven_year_field("ssp245")) & (w > 0)  # noqa: E711
+        cool = (keys != None) & ~np.isinf(_breakeven_year_field(SZENARIO)) & (w > 0)  # noqa: E711
 
         def series(py):
             gross, t_co2, t_alb = np.zeros(len(YEARS)), np.zeros(len(YEARS)), np.zeros(len(YEARS))
@@ -675,10 +675,10 @@ def planting_rank_figure(out_path: str) -> str:
         ax.plot(q, v, "o", ms=7, color=C_INK, mec="white", mew=1.5, zorder=5)
         ax.text(q + 0.006, 1.2, f"{100 * v / c0[i0]:.0f} %", fontsize=13, color=C_INK, fontweight="bold")
     ax.plot(a[i], peak, "o", ms=9, color=C_TREE, mec="white", mew=1.8, zorder=6)
-    ax.annotate(f"{de(10 * a[i], 1)} Mio. km²: {peak:.0f} mK, größte Kühlung", (a[i], peak), xytext=(0, 12),
+    ax.annotate(f"{de(10 * a[i], 1)} Mio. km²: {peak:.0f} · 10⁻³ K, größte Kühlung", (a[i], peak), xytext=(0, 12),
                 textcoords="offset points", ha="center", fontsize=13, color=C_TREE, fontweight="bold")
     ax.plot(a[-1], c[-1], "o", ms=9, color=C_WARM, mec="white", mew=1.8, zorder=6)
-    ax.annotate(f"alle {de(10 * a[-1], 1)} Mio. km²: {c[-1]:.0f} mK", (a[-1], c[-1]), xytext=(-8, 12),
+    ax.annotate(f"alle {de(10 * a[-1], 1)} Mio. km²: {c[-1]:.0f} · 10⁻³ K", (a[-1], c[-1]), xytext=(-8, 12),
                 textcoords="offset points", ha="right", fontsize=13, color=C_WARM, fontweight="bold")
     ax.text(0.64, 2.5, "ab hier wärmt jeder weitere Quadratkilometer:\nNorden, Trockengebiete", fontsize=12.5,
             color=C_WARM, ha="center")
@@ -692,7 +692,7 @@ def planting_rank_figure(out_path: str) -> str:
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
     ax.set_xticklabels([str(k) for k in range(9)])   # Gha on the axis, written as Mio. km²
     ax.set_xlabel("bepflanzte Fläche [Mio. km²], die am stärksten kühlenden Flächen zuerst")
-    ax.set_ylabel("Kühlung 2100 [mK]")
+    ax.set_ylabel("Kühlung 2100 [10⁻³ K]")
     ax.text(0.006, peak * 1.16, "Prozent: Anteil an der größten Kühlung", fontsize=11.5, color=C_MUTED)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
@@ -1052,13 +1052,13 @@ def tree_effect_figure(out_path: str) -> str:
     The sites carry their own value, the one on the slide before (deck/chart_data/tempsum.json), not their block's."""
     sites = json.loads((Path(__file__).resolve().parents[2] / "deck/chart_data/tempsum.json").read_text())["sites"]
     dt = {s["name"]: s["dt"][-1] for s in sites}   # 2100
-    return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [fK]: grün kühlt, orange wärmt",
+    return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [10⁻¹⁵ K]: grün kühlt, orange wärmt",
                                [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
-                               lambda v: f"{de_signed(v)} fK", site_label=lambda s: f"{de_signed(dt[s.name])} fK")
+                               lambda v: f"{de_signed(v)} · 10⁻¹⁵ K", site_label=lambda s: f"{de_signed(dt[s.name])} · 10⁻¹⁵ K")
 
 
 def total_effect_figure(out_path: str) -> str:
     """K16: where reforestation pays: effect in 2100 of reforesting all free area, per land area."""
-    return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [µK je 10 000 km² Land]",
+    return _world_map_skeleton(out_path, "k16", "Wirkung 2100, wenn alle freie Fläche bewaldet wird [10⁻⁶ K je 10 000 km² Land]",
                                [-12, -8, -4, 0, 4, 8], "kein Platz für Bäume",
-                               lambda v: f"{de_signed(v, 1)} µK")
+                               lambda v: f"{de_signed(v, 1)} · 10⁻⁶ K")

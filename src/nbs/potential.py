@@ -55,7 +55,7 @@ from numpy.typing import NDArray
 from nbs.aggregate import aggregate_by_species, co2_factor_grid, global_delta_t, unit_curves
 from nbs.light import light_product
 from nbs.config import ModelConfig
-from nbs.constants import T_END, YEARS
+from nbs.constants import T_END, YEARS, SZENARIO
 from nbs.fair_module import run_fair_baseline, run_fair_perturbed
 from nbs.grid import grid_lats, grid_lons
 from nbs.landscape import assign_species, plantable_area_m2, tree_count
@@ -231,7 +231,7 @@ _MASKS: dict[str, NDArray] = {}
 
 
 def fair_global_delta_t(
-    retain_mask: NDArray, scenario: str = "ssp245", config: ModelConfig | None = None, scale: float = 1.0
+    retain_mask: NDArray, scenario: str = SZENARIO, config: ModelConfig | None = None, scale: float = 1.0
 ) -> NDArray:
     """Global delta-T(t) [K] of all trees in *retain_mask* (times *scale*)
     from one full FaIR run: removals as negative CO2 emissions, albedo as an
@@ -482,7 +482,7 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
                 f"{min(carbon5_lo, carbon5_hi):.1f}-"
                 f"{max(carbon5_lo, carbon5_hi):.1f} GtC), "
                 f"{abs(delta_t5):.4f} K globale Abkühlung bei {T_END} "
-                f"unter ssp245 -- {100.0 * carbon5_gtc / BASTIN_RAW_CARBON_GTC:.1f} "
+                f"unter Very Low ohne Entnahme -- {100.0 * carbon5_gtc / BASTIN_RAW_CARBON_GTC:.1f} "
                 "% von Bastins unkorrigiertem Rohwert."
             ),
             "quelle": "Kaskadenergebnis dieses Moduls",
@@ -491,7 +491,7 @@ def _cascade_cached(scenario: str) -> tuple[dict, ...]:
     return tuple(steps)
 
 
-def cascade(scenario: str = "ssp245") -> list[dict]:
+def cascade(scenario: str = SZENARIO) -> list[dict]:
     """The Bastin correction cascade, six ordered steps. See the module
     docstring for the derivation of each step and the density-anchoring
     choice that keeps area and carbon monotonically non-increasing from
@@ -508,7 +508,7 @@ def cascade(scenario: str = "ssp245") -> list[dict]:
     return [dict(step) for step in _cascade_cached(scenario)]
 
 
-def reverse_1p5(scenario: str = "ssp245") -> dict:
+def reverse_1p5(scenario: str = SZENARIO) -> dict:
     """How many multiples of this model's own corrected species/area mix
     (``nbs.landscape`` / ``nbs.aggregate``, unfiltered by the albedo or
     disturbance steps above -- the broadest honest base to scale) would be
@@ -615,7 +615,7 @@ def reverse_1p5(scenario: str = "ssp245") -> dict:
                 if full["area_gha"] > ICE_FREE_LAND_GHA
                 else "weniger als diese Fläche, aber ein großer Teil davon"
             )
-            + ": Baumpflanzung allein hält ssp245 nicht unter 1,5 Grad."
+            + ": Baumpflanzung allein hält Very Low ohne Entnahme nicht unter 1,5 Grad."
         ),
     }
 

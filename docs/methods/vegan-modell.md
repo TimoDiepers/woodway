@@ -28,7 +28,7 @@ Alle Anteile stammen aus FAOSTAT Emissions Totals 2022 (Welt, FAO TIER 1) und we
 
 - **Fläche:** Walker et al. 2022, Societal Constraints: Weide ganz, Acker zu 19 %. Wald nur dort, wo Walkers Regel für Wiederbewaldung gilt (Potenzial ≥ 10 Mg C/ha, Bestand/Potenzial ≤ 0,25, ohne Einschränkung). Grund: Die NCS-Schicht ist innerhalb der Societal Constraints null; die Regel trifft Walkers eigene Zuordnung zu 98,4 %. Disjunkt von der wiederbewaldbaren Fläche der Bäume-Kapitel. `scripts/prepare_forest_data.py --only-freed` → `data/vegan/frei_0p5.npz`.
 - **Kohlenstoff:** nicht realisiertes AGB+BGB (Walker, ohne Einschränkung).
-- **Klimawirkung:** dieselbe Baumkette wie in den Kapiteln 2–4 (`forcing_cells`), alle 2026 gepflanzt, nur kühlende Zellen. FaIR auf SSP2-4.5 wie bei den Bäumen.
+- **Klimawirkung:** dieselbe Baumkette wie in den Kapiteln 2–4 (`forcing_cells`), alle 2026 gepflanzt, nur kühlende Zellen. FaIR auf demselben Hintergrund wie die Bäume (Very Low ohne Entnahme, seit 2026-11-04; davor SSP2-4.5).
 - **Ergebnis:** 0,537 Gha frei, davon kühlen 0,210 Gha. CO₂ −8 mK (2050), −16 mK (2100); Albedo +1 bzw. +7 mK; netto −7 bzw. −9 mK.
 
 ## 3  Klimaantwort

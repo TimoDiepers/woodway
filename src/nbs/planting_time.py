@@ -35,7 +35,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.config import ModelConfig
-from nbs.constants import T_START, YEARS
+from nbs.constants import T_START, YEARS, SZENARIO
 from nbs.fair_module import find_breakeven_year
 from nbs.pipeline import SiteResult, _background_temperature, run_single_tree
 from nbs.species import get_species
@@ -55,7 +55,7 @@ def _year_index(year: int) -> int:
     return idx
 
 
-def hazard_curve(species_key: str, scenario: str = "ssp245") -> NDArray:
+def hazard_curve(species_key: str, scenario: str = SZENARIO) -> NDArray:
     """Annual disturbance probability p(t) over ``YEARS`` [1/a].
 
     The species' own p0 and gamma against the scenario's background warming
@@ -67,7 +67,7 @@ def hazard_curve(species_key: str, scenario: str = "ssp245") -> NDArray:
 
 
 def risk_ratio(
-    species_key: str, plant_year: int, scenario: str = "ssp245"
+    species_key: str, plant_year: int, scenario: str = SZENARIO
 ) -> float:
     """Annual hazard in *plant_year* divided by the hazard in ``T_START`` [-].
 
@@ -81,7 +81,7 @@ def survival_probability(
     species_key: str,
     plant_year: int,
     age_yr: int = DEFAULT_AGE_YR,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
 ) -> float:
     """Probability of *no* disturbance in the first ``age_yr`` years [-].
 
@@ -99,7 +99,7 @@ def cohort(
     species_key: str,
     plant_year: int,
     lat_deg: float | None = None,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     config: ModelConfig | None = None,
 ) -> SiteResult:
     """One cohort's full chain, on the common ``YEARS`` axis. Default site:
@@ -117,7 +117,7 @@ def cohort(
 def cohort_table(
     species_key: str,
     lat_deg: float | None = None,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     plant_years: tuple[int, ...] = PLANT_YEARS,
     age_yr: int = DEFAULT_AGE_YR,
     config: ModelConfig | None = None,

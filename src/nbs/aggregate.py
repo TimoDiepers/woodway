@@ -55,7 +55,7 @@ from numpy.typing import NDArray
 
 from nbs.light import light_product
 from nbs.config import ModelConfig
-from nbs.constants import A_EARTH_M2, T_END, TAU_ATM, YEARS
+from nbs.constants import A_EARTH_M2, T_END, TAU_ATM, YEARS, SZENARIO
 from nbs.landscape import assign_species, tree_count
 from nbs.pipeline import run_single_tree
 from nbs.response import convolve_response, green_temperature
@@ -113,7 +113,7 @@ def _unit_curves_cached(
 
 
 def unit_curves(
-    species_key: str, scenario: str = "ssp245", config: ModelConfig | None = None
+    species_key: str, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> tuple[NDArray, NDArray]:
     """Two length-126 curves for one species: ``(delta_t_co2_per_tree,
     delta_t_albedo_per_unit_product)``.
@@ -214,7 +214,7 @@ def aggregate_by_species(config: ModelConfig | None = None) -> dict[str, tuple[f
     return out
 
 
-def global_delta_t(scenario: str = "ssp245", config: ModelConfig | None = None) -> NDArray:
+def global_delta_t(scenario: str = SZENARIO, config: ModelConfig | None = None) -> NDArray:
     """Length-126 global Delta_T(t) [K], summed over every grid cell.
 
     Formed from ``aggregate_by_species``'s two scalars per species and
@@ -233,7 +233,7 @@ def global_delta_t(scenario: str = "ssp245", config: ModelConfig | None = None) 
 
 
 def delta_t_at_year(
-    year: int, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> NDArray:
     """(360, 720) Delta_T [K] at *year*, one cell-wise field.
 
@@ -261,7 +261,7 @@ def delta_t_at_year(
 
 def delta_t_field(
     years_subset: list[int] | NDArray,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     config: ModelConfig | None = None,
 ) -> NDArray:
     """(len(years_subset), 360, 720) Delta_T [K] at a handful of support years.
@@ -292,7 +292,7 @@ def delta_t_field(
 
 
 def albedo_offset_field(
-    year: int = T_END, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int = T_END, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> NDArray:
     """(360, 720) albedo offset [%] per plantable cell, NaN elsewhere.
 
@@ -332,7 +332,7 @@ def albedo_offset_field(
 
 
 def albedo_offset_summary(
-    year: int = T_END, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int = T_END, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> dict[str, float]:
     """Area-weighted summary of ``albedo_offset_field``.
 

@@ -27,8 +27,8 @@ from nbs.constants import YEARS
 from nbs.species import get_species
 
 
-# typical forest per site: mixed forest in Aachen and Joensuu, tropical evergreen broadleaf in Marabá
-TYPICAL_FOREST = {"Aachen": "mf_gemaessigt", "Joensuu": "mf_boreal", "Marabá": "ebf_tropisch"}
+# typical forest per site (Aachen, Fairbanks, Marabá)
+TYPICAL_FOREST = {"Aachen": "mf_gemaessigt", "Fairbanks": "enf_boreal", "Marabá": "ebf_tropisch"}
 
 
 def test_all_sites_lie_on_reforestable_cells_with_their_typical_forest():

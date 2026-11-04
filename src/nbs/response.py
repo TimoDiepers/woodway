@@ -13,7 +13,7 @@ import functools
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.constants import YEARS
+from nbs.constants import YEARS, SZENARIO
 
 _PULSE_GTCO2 = 1.0
 _PULSE_WM2 = 1.0
@@ -42,7 +42,7 @@ def _to_study_length(x: NDArray) -> NDArray:
 
 
 @functools.lru_cache(maxsize=4)
-def green_carbon(scenario: str = "ssp245") -> NDArray:
+def green_carbon(scenario: str = SZENARIO) -> NDArray:
     """Airborne fraction g_C(t) of a CO2 pulse released at T_START.
 
     Returns the fraction of the pulse still in the atmosphere after t years,
@@ -94,7 +94,7 @@ def green_carbon(scenario: str = "ssp245") -> NDArray:
 
 
 @functools.lru_cache(maxsize=4)
-def green_temperature(scenario: str = "ssp245") -> NDArray:
+def green_temperature(scenario: str = SZENARIO) -> NDArray:
     """Temperature response g_T(t) to a one-year unit forcing pulse.
 
     Units: K per (W/m^2 sustained for one year).
@@ -133,7 +133,7 @@ def green_temperature(scenario: str = "ssp245") -> NDArray:
 
 
 @functools.lru_cache(maxsize=4)
-def background_co2_ppm(scenario: str = "ssp245") -> NDArray:
+def background_co2_ppm(scenario: str = SZENARIO) -> NDArray:
     """Baseline CO2 concentration C_bg(t) [ppm] under *scenario*, on YEARS.
 
     Unlike ``green_carbon``, this is not a pulse-minus-baseline difference:

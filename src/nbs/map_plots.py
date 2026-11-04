@@ -55,7 +55,7 @@ from nbs.albedo_grid import (  # noqa: E402
     provenance_fractions,
 )
 from nbs.config import ModelConfig  # noqa: E402
-from nbs.constants import T_END, T_START, YEARS  # noqa: E402
+from nbs.constants import T_END, T_START, YEARS, SZENARIO  # noqa: E402
 from nbs.grid import grid_lats, grid_lons  # noqa: E402
 from nbs.landscape import assign_species  # noqa: E402
 from nbs.landscape import provenance as landscape_provenance  # noqa: E402
@@ -271,7 +271,7 @@ def _t_star_batch(traj: NDArray, years: NDArray) -> NDArray:
     return out
 
 
-def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None = None) -> NDArray:
+def _breakeven_year_field(scenario: str = SZENARIO, config: ModelConfig | None = None) -> NDArray:
     """(360, 720) break-even year t* per cell, NaN where unplantable.
 
     Built from unit_curves (two curves per species, five species total) and
@@ -296,7 +296,7 @@ def _breakeven_year_field(scenario: str = "ssp245", config: ModelConfig | None =
     return field
 
 
-def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
+def plot_breakeven_map(out_path: str, *, scenario: str = SZENARIO) -> str:
     """Folie P1 (primary): per-cell break-even year t*, one still that
     carries the whole warming-fraction-by-year table (task-6 brief): 62.5%
     of plantable cells still warming in 2030, 49.2% in 2040, 45.5% in 2050,
@@ -347,7 +347,7 @@ def plot_breakeven_map(out_path: str, *, scenario: str = "ssp245") -> str:
 
 
 def plot_sign_map(
-    year: int = 2050, out_path: str = "sign_map.png", *, scenario: str = "ssp245"
+    year: int = 2050, out_path: str = "sign_map.png", *, scenario: str = SZENARIO
 ) -> str:
     """Folie P1b: discrete warming/cooling split at one year.
 
@@ -399,7 +399,7 @@ def plot_sign_map(
     return _save(fig, out_path)
 
 
-def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = "ssp245") -> str:
+def plot_horizon_field(out_path: str, *, species_key: str, scenario: str = SZENARIO) -> str:
     """Folie E6: continuous horizon x latitude field of net Delta_T per tree.
 
     **This is a counterfactual sweep**, and the figure says so: it puts the
@@ -534,7 +534,7 @@ def plot_planting_map(
     out_path: str,
     *,
     year: int = 2100,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     block_deg: float = 2.0,
 ) -> str:
     """Folie P: available afforestation area, and what belongs on it.

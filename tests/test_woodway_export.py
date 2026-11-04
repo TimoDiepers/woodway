@@ -61,7 +61,7 @@ def test_cooling_area_is_the_talks_042_gha():
     dt = _dt(meta, fields, 2100)
     cool = fields["area"][(fields["type"] > 0) & (dt < 0)].sum() / 1e13
     assert cool == pytest.approx(meta["global"]["areasGha"]["kuehlt"], abs=0.005)
-    assert cool == pytest.approx(0.423, abs=0.005)
+    assert cool == pytest.approx(0.468, abs=0.005)
 
 
 def test_dac_median_2026_is_46_percent():
@@ -187,7 +187,8 @@ def test_curves_equal_a_fresh_single_tree_run():
     from nbs.species import get_species, reference_site
 
     meta, _ = _load()
-    g_t = green_temperature("ssp245")
+    from nbs.constants import SZENARIO
+    g_t = green_temperature(SZENARIO)
     for key in (meta["types"][0], meta["types"][-1]):
         res = run_single_tree(key, lat_deg=reference_site(key), plant_year=T_START)
         unit = -TAU_ATM * np.asarray(res.trajectory.closure, dtype=float) * get_species(key).stand_area_m2 / A_EARTH_M2

@@ -13,7 +13,7 @@ export interface AtlasSlideDef {
 const pct = (x: number) => `${Math.round(100 * x).toLocaleString("de-DE")} %`;
 const yearAt = (d: { years: number[] }, step: number) => d.years[Math.max(0, Math.min(d.years.length - 1, step))];
 
-const MODEL_SRC = "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, FaIR (Leach et al. 2021), SSP2-4,5; Fläche Walker et al. 2022; Waldtyp: Hasler et al. 2024.";
+const MODEL_SRC = "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, FaIR (Leach et al. 2021), Very Low ohne Entnahme; Fläche Walker et al. 2022; Waldtyp: Hasler et al. 2024.";
 
 const jedeZelle: AtlasSlideDef = {
   id: "jedeZelle", title: "Temperaturwirkung eines Baums je Zelle, 2030–2100", ch: "vergleich", layer: "deltaT", years: [2030, 2050, 2100], sitesFrom: 3,

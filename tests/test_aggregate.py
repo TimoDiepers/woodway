@@ -101,8 +101,9 @@ def test_site_factor_scaling_of_the_co2_channel_is_exact():
     from nbs.response import convolve_response, green_temperature
     from nbs.site_factor import site_factor
 
+    from nbs.constants import SZENARIO
     co2_ref, alb_unit_ref = unit_curves("enf_boreal")
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     for lat in (50.8, 64.5):
         r = run_single_tree("enf_boreal", lat)
         explicit = convolve_response(g_t, r.phi_co2)

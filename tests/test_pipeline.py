@@ -59,12 +59,12 @@ def test_tropical_tree_cools_and_boreal_tree_does_not():
     assert t_star(tropical.delta_t, YEARS) < np.inf
     assert boreal.delta_t[-1] > tropical.delta_t[-1]
 
-    # The albedo channel must be doing real work: the boreal tree actually
-    # warms for a stretch early in its life before turning net cooling.
-    assert np.any(boreal.delta_t[:30] > 0.0)
+    # The albedo channel must be doing real work. On Very Low without its removal (since 2026-11-04) the boreal
+    # tree first cools through its carbon and then, once the canopy closes, warms through its albedo: net warming
+    # at the horizon (as the deck says for Fairbanks), while the tropical tree keeps cooling.
+    assert np.any(boreal.delta_t[:30] < 0.0)
+    assert boreal.delta_t[-1] > 0.0
     assert boreal.phi_albedo[-1] > 0.0
-    boreal_t_star = t_star(boreal.delta_t, YEARS)
-    assert boreal_t_star > t_star(tropical.delta_t, YEARS)
 
 
 @pytest.mark.slow
@@ -152,13 +152,10 @@ def test_disturbance_stochastic_is_reproducible_from_its_seed():
 
 @pytest.mark.slow
 def test_disturbance_stochastic_differs_across_seeds():
-    a = run_single_tree(
-        "enf_boreal", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=1
-    )
-    b = run_single_tree(
-        "enf_boreal", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=2
-    )
-    assert not np.array_equal(a.trajectory.stock_kgC, b.trajectory.stock_kgC)
+    # a few seeds: in the cooler Very Low world two seeds can both draw no event at all
+    runs = [run_single_tree("enf_boreal", lat_deg=60.0, config=ModelConfig(disturbance="stochastic"), seed=s).trajectory.stock_kgC
+            for s in range(1, 7)]
+    assert any(not np.array_equal(runs[0], r) for r in runs[1:])
 
 
 @pytest.mark.slow

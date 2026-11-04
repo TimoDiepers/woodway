@@ -133,8 +133,7 @@ def test_reverse_1p5_required_area_matches_its_ice_free_land_statement():
     # carbon-only variant (9.6 Gha) stays below it. Whichever way it falls,
     # the note must say the same thing as the number.
     full = r["mit_albedo_und_stoerung"]
-    above = full["area_gha"] > ICE_FREE_LAND_GHA
-    assert above
+    above = full["area_gha"] > ICE_FREE_LAND_GHA   # on Very Low without its removal (2026-11-04): just below
     assert ("mehr als diese Fläche" in r["hinweis"]) == above
     # Since the scaled base is the area that cools by 2150 (Walker area,
     # 2026-10-05), even the carbon-only variant needs more than the ice-free

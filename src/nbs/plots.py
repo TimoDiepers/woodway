@@ -15,7 +15,7 @@ import numpy as np  # noqa: E402
 from numpy.typing import NDArray  # noqa: E402
 
 from nbs.config import ModelConfig  # noqa: E402
-from nbs.constants import M_CO2_PER_C, YEARS  # noqa: E402
+from nbs.constants import M_CO2_PER_C, YEARS, SZENARIO  # noqa: E402
 from nbs.forcing import co2_flux_kg_per_yr  # noqa: E402
 from nbs.metrics import quantile_band, t_star  # noqa: E402
 from nbs.pipeline import SiteResult  # noqa: E402
@@ -172,7 +172,7 @@ def plot_planting_time(
     *,
     species_key: str = "enf_boreal",
     lat_deg: float = 60.0,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     age_yr: int | None = None,
     config: ModelConfig | None = None,
 ) -> str:
@@ -312,7 +312,7 @@ def plot_planting_time(
 def plot_growth_curves(
     out_path: str,
     *,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     config: ModelConfig | None = None,
 ) -> str:
     """Folie: the five species' growth curves, the parameterisation made visible.

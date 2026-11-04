@@ -186,7 +186,7 @@ def test_export_file_is_complete():
     assert [c["ziel_jahr"] for c in d["ziel_kurve"]] == [2085, 2090, 2095, 2100]
     assert [p["strompfad"] for p in d["strompfade"]] == ["SSP2-NPi", "SSP2-NDC", "SSP2-PkBudg650"]
     assert all(len(p["eta_median"]) == 75 for p in d["strompfade"])
-    assert 0.0 < d["fair_abweichung_2100_rel"] < 0.15
+    assert -0.15 < d["fair_abweichung_2100_rel"] < 0.15
     assert len(h["fair_kuehlung_k"]) == 75
     assert h["ziel"] == "co2" and h["co2_ziel_gt"] > 0
     assert len(d["wachstumsgrenze_gt"]) == 75 and d["wachstumsgrenze_gt"][4] == pytest.approx(0.0088)
@@ -274,7 +274,7 @@ def test_co2_target_matches_the_temperature_gap():
     from nbs.dac_optim import co2_target_gt
 
     r = co2_target_gt()
-    assert 200 < r < 320
+    assert 150 < r < 320
 
 
 @pytest.fixture(scope="module")

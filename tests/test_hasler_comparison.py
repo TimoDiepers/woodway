@@ -102,16 +102,17 @@ def test_static_offset_matches_hasler_on_the_same_map():
 
 @pytest.mark.slow
 def test_dynamic_offset_is_stricter_than_the_static_one():
-    """Delta-T in 2150 under SSP2-4.5 counts the time course: a growing tree,
-    CO2 flowing back for decades, a fuller atmosphere. That makes the dynamic
-    offset larger than Hasler's static one on the same cells -- disclosed on
-    the literature slide, pinned here so it cannot flip silently."""
+    """Delta-T in 2100 counts the time course: a growing tree, CO2 flowing back
+    for decades. Under SSP2-4.5 (a fuller atmosphere) that made the dynamic
+    offset larger than Hasler's static one; on Very Low without its removal
+    (since 2026-11-04: less CO2 in the air, each kg counts more) it is smaller.
+    Pinned here so it cannot flip silently again."""
     from nbs.aggregate import albedo_offset_summary
 
     off, w = _static_offset(clouds=True)
     o = np.argsort(off)
     static_median = float(off[o][np.searchsorted(np.cumsum(w[o]), 0.5 * w.sum())])
-    assert albedo_offset_summary()["median"] > static_median
+    assert albedo_offset_summary()["median"] < static_median
 
 
 @pytest.mark.slow

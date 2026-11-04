@@ -11,7 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.config import ModelConfig
-from nbs.constants import T_START, YEARS
+from nbs.constants import T_START, YEARS, SZENARIO
 from nbs.forcing import (
     co2_flux_kg_per_yr,
     fallback_delta_alpha,
@@ -154,7 +154,7 @@ def _forcings(
 def run_single_tree(
     species_key: str,
     lat_deg: float,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     delta_alpha: float | None = None,
     q_sw: float | None = None,
     config: ModelConfig | None = None,
@@ -204,7 +204,7 @@ def run_single_tree(
 def run_single_tree_ensemble(
     species_key: str,
     lat_deg: float,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     n_members: int = 1000,
     seed: int = 0,
     delta_alpha: float | None = None,

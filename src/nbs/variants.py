@@ -19,6 +19,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Iterable
 
+from nbs.constants import SZENARIO
 from nbs.config import ModelConfig
 from nbs.metrics import t_star
 from nbs.pipeline import SiteResult, run_single_tree
@@ -29,7 +30,7 @@ def run_variants(
     lat_deg: float,
     *,
     base: ModelConfig = ModelConfig(),
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     **kw: Any,
 ) -> dict[str, SiteResult]:
     """One-at-a-time sensitivity: *base*, plus one result per switch flipped
@@ -126,7 +127,7 @@ def run_ladder(
     lat_deg: float,
     *,
     ladder: list[tuple[str, ModelConfig]] | None = None,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     **kw: Any,
 ) -> list[tuple[str, SiteResult]]:
     """Cumulative ladder of configurations, for a waterfall figure.

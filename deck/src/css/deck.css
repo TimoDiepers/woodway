@@ -60,12 +60,12 @@
   --s-mb: #2e4925;  --s-ps: #007a4f;  --s-re: #911779;  --s-zs: #006cbd;  --s-st: #d1075c;
   --s-mmax: #7e6700; --s-kw: #007589;  --s-pw: #007c00;   --s-md: #3e6a01;
   --s-sz: #be3b10;  --s-gam: #6d54ce;  --s-pd: #b34644;   --s-pdo: #9d3339;
-  --s-qin: #a55500; --s-alb: #635f48;  --s-albb: #017a52; --s-albw: #b94021; --s-dal: #5c7200; --s-daw: #056fab;
+  --s-qin: #a55500; --s-alb: #635f48;  --s-albb: #6e5300; --s-albw: #b94021; --s-dal: #8a6800; --s-daw: #056fab;
   --s-alw: #7638a4; --s-dfw: #057769;  --s-dq: #7b402b;   --s-ab: #007a52;   --s-ae: #045b5d;  --s-tau: #8654a5;
   --s-phi: #ba4300; --s-phio: #615400; --s-phia: #706a19; --s-phic: #067a3c;
   --s-eps: #057772; --s-dm: #007391;   --s-mdc: #007c00;  --s-gc: #005388;   --s-conc: #006e90; --s-conco: #0e6c8c;
   --s-matm: #535c54; --s-katm: #055b49; --s-ch4: #015193;
-  --s-e: #076db0;   --s-dphi: #753c66; --s-pin: #9c5700;  --s-pout: #b21132; --s-pkw: #546f4a;
+  --s-e: #076db0;   --s-dphi: #753c66; --s-dphio: #546477; --s-pin: #9c5700;  --s-pout: #b21132; --s-pkw: #546f4a;
   --s-dt: #902b3c;  --s-rf: #015b9b;   --s-sk: #904997;   --s-ft: #564337;   --s-par: #935433;
   --vapor: #17808a;                    /* water vapour and mixing over the forest (slide 15, step 1) */
   --layer: #5a4fa0;                    /* the rising mixed air layer (slide 15, step 2) */
@@ -91,7 +91,7 @@
 .c-pdo { --c: var(--s-pdo); } .c-qin { --c: var(--s-qin); } .c-alb { --c: var(--s-alb); }
 .c-albb { --c: var(--s-albb); } .c-albw { --c: var(--s-albw); } .c-dal { --c: var(--s-dal); }
 .c-daw { --c: var(--s-daw); } .c-alw { --c: var(--s-alw); } .c-dfw { --c: var(--s-dfw); } .c-dq { --c: var(--s-dq); }
-.c-ab { --c: var(--s-ab); } .c-ae { --c: var(--s-ae); } .c-tau { --c: var(--s-tau); } .c-phi { --c: var(--s-phi); } .c-e { --c: var(--s-e); } .c-dphi { --c: var(--s-dphi); } .c-pin { --c: var(--s-pin); } .c-pout { --c: var(--s-pout); } .c-pkw { --c: var(--s-pkw); }
+.c-dphio { --c: var(--s-dphio); } .c-ab { --c: var(--s-ab); } .c-ae { --c: var(--s-ae); } .c-tau { --c: var(--s-tau); } .c-phi { --c: var(--s-phi); } .c-e { --c: var(--s-e); } .c-dphi { --c: var(--s-dphi); } .c-pin { --c: var(--s-pin); } .c-pout { --c: var(--s-pout); } .c-pkw { --c: var(--s-pkw); }
 .c-phio { --c: var(--s-phio); } .c-phia { --c: var(--s-phia); } .c-phic { --c: var(--s-phic); }
 .c-eps { --c: var(--s-eps); } .c-dm { --c: var(--s-dm); } .c-mdc { --c: var(--s-mdc); } .c-gc { --c: var(--s-gc); }
 .c-conc { --c: var(--s-conc); } .c-conco { --c: var(--s-conco); } .c-matm { --c: var(--s-matm); }
@@ -2163,15 +2163,12 @@ svg.s18 .seg { stroke-width: 3.5px; stroke: #b2182b; transition: stroke-width .6
 svg.s21.cc > g > g:first-of-type > path.t-lw { transition: opacity .6s var(--ease), stroke-width .9s var(--ease), stroke 2.6s linear .3s; }
 .slide:has(svg.s21 [data-step="1"].shown) svg.s21.cc > g > g:first-of-type > path.t-lw { opacity: 1; stroke-width: 6px; }
 svg.s21 .lw-root { transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }
-.slide:has(svg.s21 .ts2.shown) svg.s21 .lw-root { stroke-width: 3px; }   /* the store gives off less and less */
 svg.s21 .lw-deep { animation-duration: 3.2s; transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }   /* the deep sea: slower */
-.slide:has(svg.s21 .ts2.shown) svg.s21 .lw-deep { stroke-width: 2.5px; }
 .slide:has(svg.s21 .ts3.shown) svg.s21 path.flow.t-lw { animation-play-state: running !important; }   /* the heat flows out of the store */
-.slide:has(svg.s21 .ts2.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { stroke-width: 2px; stroke: #90606c;
+.slide:has(svg.s21 .ts2.shown) svg.s21.cc > g > g:first-of-type > path.t-lw { stroke-width: 2.5px; stroke: var(--s-rf);
   transition: stroke-width 2.6s cubic-bezier(.2, .6, .3, 1) .3s, stroke 2.6s linear .3s; }
 svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 .slide:has(svg.s21 .ts3.shown) svg.s21 .tp-store { opacity: .55; }
-.slide:has(svg.s21 .ts2.shown) svg.s21 .tp-store { opacity: .75; transition: opacity 2.6s cubic-bezier(.2, .6, .3, 1) .3s; }
 /* the energy balance per year (backup "Energiebilanz Jahr für Jahr"): its key and names a size smaller, the key fits in one row */
 .chart[data-ec="tbal"] .mtex.ectex { font-size: 15px; padding: 3px 7px 4px; }
 
@@ -2439,7 +2436,6 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .slide:has(.hm2 .f4.shown) .hm2 > :is(.ue-box, .ue-op, .hm-cap):not(.r1, .r2, .r3),
 .slide:has(.hm2 .r3.shown) .hm2 > .r1, .slide:has(.hm2 .r3.shown) .hm2 > .f4 { filter: opacity(.3); }
 .slide:has(.hm2 .r3.shown):not(:has(.hm2 .f10.shown)) .hm2 > .r2 { filter: opacity(.3); }
-.slide:has(.hm2 .f10.shown) .hm2 > .hm-room-l { filter: opacity(.3); }
 /* the brackets as arrows: both lead to our 8,0 (x4 from the first estimate down, x10 from the room up) */
 .hm-f .hm-br::after { content: ""; position: absolute; left: -12px; width: 0; height: 0; border: 8px solid transparent; border-right: 12px solid var(--clay); border-left: 0; }
 .hm-f.f4 .hm-br::after { bottom: -9.5px; }
@@ -2538,3 +2534,190 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .dq-line .ub-lab, .dq-line .ub-lab * { font-size: 20px; font-weight: 600; color: var(--ink-2); }   /* as the note on the carbon slide */
 .dq-line .gloss { margin-top: 8px; }
 .slide.rearm, .slide.rearm *, .slide.rearm *::before, .slide.rearm *::after { transition: none !important; }   /* Deck.go: re-entry of a data-auto slide */
+
+/* slide 17, last click: the sub section "Strahlungshaushalt" ticked off, right of the finished forcing line (as on the growth slide) */
+.fline.head .hd-ic { position: relative; flex: none; width: 54px; height: 54px; margin-left: 18px; --c: var(--p-bal, var(--clay)); opacity: 0; scale: .7;
+  transition: opacity .5s var(--ease) .25s, scale .55s var(--ease) .25s; }
+.slide:has(.f-chk.shown) .fline.head .hd-ic { opacity: 1; scale: 1; }
+.fline.head .hd-ic > svg:first-child { width: 100%; height: 100%; display: block; }
+.fline.head .hd-ic .ok { position: absolute; right: -6px; bottom: -5px; width: 26px; height: 26px; padding: 6px 5px 5px 6px; border-radius: 50%; background: var(--c); color: var(--paper); box-shadow: 0 0 0 3px var(--paper); }
+.fline.head .hd-ic .ok path { stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+/* data-start: what was played before the slide opened does not enter again */
+.slide.active [data-step].pre.shown { animation: none !important; }
+.slide.active .rise.pre.shown { opacity: 1; top: 0; }
+.slide.active .pop.pre.shown { opacity: 1; }
+
+
+/* slide 14: an L-shaped pointer from the world without our tree, "we come back to it" */
+.bilanz .bl-ref { display: flex; align-items: flex-end; gap: 2px; margin: -2px 0 0 150px; font: 400 18px/1.2 var(--sans); color: color-mix(in srgb, var(--s-dphio) 70%, var(--paper)); }
+.bilanz .bl-ref svg { flex: none; width: 40px; height: 34px; }
+.bilanz .bl-ref span { padding-bottom: 0; white-space: nowrap; }
+
+
+
+/* slide 19: FaIR runs the world twice. Left with our tree, right without (dashed, as everywhere: the world without
+   our tree); what goes in on top, what FaIR does in the box, the two temperatures below and their difference */
+.fflow.fz { gap: 6px; }
+.fz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fz-in { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 12px 12px; text-align: center; }
+.fz-in b { font: 600 19px/1.2 var(--sans); }
+.fz-in .tex { font-size: 26px; }
+.fz-in > span:last-child { font: 400 16px/1.25 var(--sans); color: var(--ink-2); }
+.fz-in em { font-style: normal; font-weight: 600; color: var(--s-phi); }
+.fz :is(.fz-in, .fz-out .card).ohne { background: var(--paper); border: 2px dashed color-mix(in srgb, var(--s-dphi) 55%, var(--paper)); }
+.fz-dn { justify-items: center; color: var(--muted); }
+.fz-dn .fa { width: 20px; height: 26px; display: block; }
+.fflow.fz .ffair { padding: 14px 20px 16px; gap: 8px; }
+.fflow.fz .ffair > b { font-size: 24px; }
+.fz-chain { display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: nowrap; }
+.fz-chain > span { padding: 4px 9px; border-radius: 8px; background: rgba(255, 255, 255, .14); font: 600 16px/1.2 var(--sans); color: var(--paper); white-space: nowrap; }
+.fz-chain .fr { width: 15px; height: 12px; flex: none; color: #ead7d2; }
+.fflow.fz .ffair p { margin: 0; font: 400 16px/1.3 var(--sans); color: #ead7d2; text-align: center; }
+.fz-out { grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
+.fz-out .card { padding: 8px 10px; text-align: center; font: 600 18px/1.2 var(--sans); color: var(--s-dt); }
+.fz-op, .fz-eq { font: 400 30px/1 var(--sans); color: var(--ink-2); }
+.fz-res { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 2px; }
+.fz-res .card { display: flex; align-items: center; gap: 14px; padding: 8px 18px; border: 2px solid var(--s-dt); }
+.fz-res .tex { font-size: 30px; }
+.fz-res .card > span:last-child { font: 400 17px/1.25 var(--sans); color: var(--ink-2); }
+.fz-out .card.ohne { color: color-mix(in srgb, var(--s-dt) 80%, var(--muted)); }
+/* one after the other inside the click: what goes in, FaIR, what comes out, the difference */
+.slide.active .fflow.fz.shown > :nth-child(n+2) { animation: fadein .5s var(--ease) both; }
+.slide.active .fflow.fz.shown > :nth-child(2), .slide.active .fflow.fz.shown > :nth-child(3) { animation-delay: .35s; }
+.slide.active .fflow.fz.shown > :nth-child(4), .slide.active .fflow.fz.shown > :nth-child(5) { animation-delay: .8s; }
+.slide.active .fflow.fz.shown > :nth-child(6) { animation-delay: 1.25s; }
+.ovf .ovs { display: block; margin-top: 8px; font: 400 20px/1.3 var(--sans); color: var(--ink-2); }
+.ovf .ovs .tex { font-size: 22px; }
+
+/* slide 18, one effect a click: (1) the CO2 flies into the tree and is gone, (2) the feedback: the heat arrow thins and
+   turns blue, (3) the store: heat from ground and ocean, (4) the world without our tree again, (5) FaIR */
+svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition: transform 1.4s cubic-bezier(.55, 0, .6, 1) .1s, opacity .45s linear 1.1s; }
+.slide:has(svg.s21 [data-step="1"].shown) svg.s21 .co2fly { transform: translate(-210px, 150px) scale(.1); opacity: 0; }
+.ghsteps .gh-lead { margin: 0 0 18px; color: var(--ink); }
+.ghsteps .gh-ref { display: flex; align-items: center; gap: 16px; margin-top: 22px; padding: 12px 16px; border-radius: var(--box-r); border: 2px dashed color-mix(in srgb, var(--s-dphio) 60%, var(--paper)); }
+.ghsteps .gh-ref .tex { flex: none; font-size: 28px; }
+.ghsteps .gh-ref p { margin: 0; font: 400 19px/1.35 var(--sans); color: var(--ink-2); }
+.fz-chain .ch-phi { background: color-mix(in srgb, var(--s-phi) 45%, transparent); }
+.fz-chain .ch-rf { background: color-mix(in srgb, var(--s-rf) 55%, transparent); }
+.fz-chain .ch-sk { background: color-mix(in srgb, var(--s-sk) 55%, transparent); }
+.fz-chain .ch-dt { background: color-mix(in srgb, var(--s-dt) 55%, transparent); }
+.fz-out .card { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.fz-out .card .tex { font-size: 24px; }
+.fz-out .card > span:last-child { font: 400 15px/1.2 var(--sans); color: var(--ink-2); }
+.fz-in .tex { white-space: nowrap; }
+.fflow.fz .fz-row:first-child { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.fflow.fz .fz-in.mit .tex { font-size: 21px; }
+
+/* slide 14, click 5: the world without our tree lit in the formula, and where it comes from */
+.slide:has(.bl-ref.shown) .hl.at-ohne::before { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
+.bilanz .bl-ref b { color: var(--ink); font-weight: 600; }
+
+/* slide 18: the idea first, as a black box: two worlds in, two temperature paths out, their difference; then the box is
+   revealed as FaIR. Dashed = the world without our tree, as everywhere */
+.bbx { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 0; }
+.bbx-lead { margin: -4px 0 4px; color: var(--ink); }
+.bbx-row { display: grid; grid-template-columns: 470px 64px 470px; align-items: stretch; }
+.bbx-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px 12px; text-align: center; }
+.bbx-card b { font: 600 19px/1.2 var(--sans); color: var(--ink); }
+.bbx-card .tex { font-size: 26px; }
+.bbx .ohne { background: var(--paper); border: 2px dashed color-mix(in srgb, var(--s-dphio) 60%, var(--paper)); }
+.bbx-star { position: absolute; right: 14px; top: 8px; font: 600 24px/1 var(--sans); color: var(--s-dphio); }
+.bbx-op { align-self: center; text-align: center; font: 300 46px/1 var(--sans); color: var(--ink-2); }
+.bbx-dn { justify-items: center; color: var(--muted); }
+.bbx-a { width: 18px; height: 24px; display: block; }
+.bbx-dn > :nth-child(1) { grid-column: 1; } .bbx-dn > :nth-child(3) { grid-column: 3; }
+.bbx-box { width: 1004px; box-sizing: border-box; display: grid; min-height: 108px; padding: 12px 26px; }
+.bbx-box > * { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.bbx-box b { font: 600 30px/1.1 var(--sans); }
+.bbx-box > * > span { font: 400 19px/1.3 var(--sans); color: #ead7d2; }
+.bb-gen { transition: opacity .5s var(--ease); }
+.slide:has(.bb-fair.shown) .bb-gen { opacity: 0; }
+.bb-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.bb-chips > span { padding: 4px 10px; border-radius: 8px; background: rgba(255, 255, 255, .14); font: 600 16px/1.2 var(--sans); color: var(--paper); }
+.bbx-c { width: 210px; height: 92px; display: block; }
+.bbx-out .bbx-card { padding-top: 8px; padding-bottom: 8px; }
+.bbx-out .bbx-card .tex { font-size: 22px; }
+.bbx-out .bbx-card { flex-direction: row; flex-wrap: wrap; column-gap: 18px; row-gap: 0; }
+.bbx-out .bbx-card > b { flex-basis: 100%; }
+.bbx-res { display: flex; align-items: center; gap: 16px; margin-top: 2px; }
+.bbx-res .res { border: 2px solid var(--s-dt); padding: 6px 20px 8px; }
+.bbx-rr { display: flex; align-items: center; gap: 16px; }
+.bbx-rr .tex { font-size: 30px; }
+.bbx-fn { margin: 6px 0 0; font: 400 16px/1.3 var(--sans); color: var(--muted); }
+.bbx-fn b { color: var(--ink-2); font-weight: 600; }
+
+/* slide 18, layout: the diagram centred in the body, rows of one width, the result as a full row under "=" */
+.slide:has(.bbx) .body { display: flex; flex-direction: column; }
+.bbx { flex: 1; justify-content: center; gap: 6px; padding: 22px 0 4px; }
+.bbx-in .bbx-card { min-height: 96px; }
+.bbx-out .bbx-card { min-height: 116px; }
+.bbx-a { width: 18px; height: 26px; }
+.bbx-box { min-height: 96px; }
+.bbx-eq { display: flex; justify-content: center; width: 1004px; height: 30px; }
+.bbx-eq span { font: 300 40px/34px var(--sans); color: var(--ink-2); }
+.bbx-res { width: 1004px; box-sizing: border-box; display: grid; grid-template-columns: auto auto auto; justify-content: space-between; align-items: center; gap: 20px;
+  padding: 8px 28px; border: 2px solid var(--s-dt); }
+.bbx-res > b { font: 600 20px/1.25 var(--sans); color: var(--ink); text-align: left; }
+.bbx-res > .tex { font-size: 23px; justify-self: end; white-space: nowrap; }
+.bbx-res .bbx-c { width: 190px; height: 76px; }
+
+/* slide 14: the world without our tree comes from the scenario: a tinted tag at the end of a soft arrow, and the term ticked */
+.bilanz .bl-tag { margin-bottom: -8px; padding: 5px 13px 9px; border-radius: 999px; background: color-mix(in srgb, var(--s-dphio) 13%, var(--paper)); color: var(--ink-2); white-space: nowrap; }
+.bilanz .bl-tag b { color: var(--s-dphio); }
+.hl.at-ohne::after { content: ""; position: absolute; right: -15px; top: -16px; width: 20px; height: 18px; background: var(--s-dphio); opacity: 0; transition: opacity .4s .3s;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
+.slide:has(.bl-ref.shown) .hl.at-ohne::after { opacity: 1; }
+
+.bilanz .bl-phi .bl-f { margin-top: 14px; }   /* room for the tick on Δφ_ges^ohne */
+/* slide 14: the key in the size of the labels above it ("mit zusätzlichem Baum", 20 px) */
+.bilanz .bl-leg { gap: 6px 18px; }
+.bilanz .bl-leg dt { font-size: 24px; }
+.bilanz .bl-leg dd { font-size: 20px; }
+.bilanz .bl-ref { font-size: 19px; }
+.bilanz .bl-ref { margin-left: 128px; }
+.hl.at-ohne::after { background: var(--s-phic); }   /* ticked off in the green of the header ticks */
+.bb-chips { gap: 8px; }
+.bb-chips > span { padding: 4px 9px; font-size: 15.5px; }
+.bbx-note { position: absolute; left: calc(100% + 16px); top: 50%; translate: 0 -50%; width: 170px; text-align: left; font: 400 15px/1.3 var(--sans); color: var(--muted); }
+.bbx-note .tex { font-size: 17px; }
+.bbx-note b { color: var(--s-dphio); font-weight: 600; }
+
+/* slide 18, the result: the difference of the two paths above, joined by a brace onto one centred card
+   (title on top, then the curve beside its formula, as in the two cards above it); the one tinted card */
+.bbx-join { width: 1004px; height: 40px; color: var(--ink-2); }
+.bbx-join svg { display: block; width: 100%; height: 100%; }
+.bbx-res { width: 640px; grid-template-columns: auto auto; justify-content: center; column-gap: 26px; row-gap: 2px; padding: 10px 26px 12px;
+  background: color-mix(in srgb, var(--s-dt) 7%, var(--paper)); }
+.bbx-res > b { grid-column: 1 / -1; justify-self: center; text-align: center; }
+.bbx-res > .tex { justify-self: start; font-size: 25px; }
+.bbx-res .bbx-c { width: 190px; height: 72px; }
+/* slide 18: vertical budget, so the result clears the source line */
+.bbx { padding-top: 10px; gap: 5px; }
+.bbx-in .bbx-card { min-height: 88px; }
+.bbx-out .bbx-card { min-height: 108px; }
+.bbx-box { min-height: 92px; }
+.bbx-join { height: 30px; }
+.bbx-res { padding: 8px 26px 8px; }
+.bbx-res .bbx-c { width: 180px; height: 62px; }
+
+/* the takeaways on the maps (21, 23): one sentence each, neutral, only its key words in the chapter's colour. A calm card;
+   the second takeaway opens it upwards, a hairline draws across, the sentence comes in and its key words colour last */
+.mapmsg { width: 330px; padding: 20px 24px 22px; gap: 0; border-radius: 18px; background: color-mix(in srgb, var(--paper) 72%, #fff);
+  border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); box-shadow: 0 2px 4px rgba(27, 36, 32, .04), 0 14px 34px rgba(27, 36, 32, .10); }
+.mapmsg .tk { margin: 0; font: 400 25px/1.3 var(--serif); letter-spacing: -.005em; color: var(--ink-2); text-wrap: pretty; }
+.mapmsg .tk em { font-style: normal; font-weight: 600; color: var(--ink-2); transition: color .6s var(--ease); }
+.mapmsg.shown > .tk em { color: var(--ch); transition-delay: .45s; }
+.mapmsg .tk2 { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .75s cubic-bezier(.22, .8, .24, 1); }
+.mapmsg .tk2.shown { grid-template-rows: 1fr; animation: none !important; }
+.mapmsg .tk2 > div { min-height: 0; overflow: hidden; position: relative; }
+.mapmsg .tk2 > div::before { content: ""; display: block; height: 1px; margin-top: 16px; background: color-mix(in srgb, var(--ch) 35%, transparent);
+  transform: scaleX(0); transform-origin: left; transition: transform .7s var(--ease) .25s; }
+.mapmsg .tk2.shown > div::before { transform: none; }
+.mapmsg .tk2 .tk { position: relative; top: 8px; padding-top: 14px; opacity: 0; transition: opacity .55s var(--ease) .4s, top .55s var(--ease) .4s; }
+.mapmsg .tk2.shown .tk { top: 0; opacity: 1; }
+.mapmsg .tk2.shown .tk em { color: var(--ch); transition-delay: .95s; }
+@media (prefers-reduced-motion: reduce) { .mapmsg .tk2, .mapmsg .tk2 *, .mapmsg .tk em { transition: none !important; } }
+.mapmsg { padding: 18px 22px 20px; }
+.mapmsg .tk { font-size: 24px; line-height: 1.28; text-wrap: balance; }
+.mapmsg .tk { text-wrap: pretty; }

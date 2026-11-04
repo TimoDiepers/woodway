@@ -19,7 +19,7 @@ import numpy as np
 
 from nbs.aggregate import _product_no_nan, co2_factor_grid
 from nbs.animations import _STAND_AREA_M2, SITES, _by_type, cloud_brightening_grid, typical_light_product, typical_measured_mask
-from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS
+from nbs.constants import A_EARTH_M2, T_START, TAU_ATM, YEARS, SZENARIO
 from nbs.dac import dac_possible, efficiency_grid, energy_grid, lca_vintages
 from nbs.dac_climate import climate_grid
 from nbs.dac_optim import GROWTH
@@ -42,7 +42,7 @@ def _r(a, nd=6):
 
 def type_curves() -> dict:
     """Per forest type, the curves of one tree at its reference site, planted in T_START."""
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     out = {}
     for key in SPECIES:
         res = run_single_tree(key, lat_deg=reference_site(key), plant_year=T_START)

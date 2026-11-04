@@ -21,13 +21,13 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
-from nbs.constants import YEARS
+from nbs.constants import YEARS, SZENARIO
 
 ROOT = Path(__file__).resolve().parents[2]
 FAO = ROOT / "data/vegan/faostat_tierhaltung.json"
 CMIP7_EM = ROOT / "data/cmip7/fair-inputs/emissions_1750-2500.csv"
 VL_AGRAR = ROOT / "data/vegan/vl_agrar.json"   # Very Low's farm emissions by year, if found (QUELLE.md)
-SCENARIO = "cmip7-VL"
+SCENARIO = SZENARIO
 ACKER_NETTO_FREI = 0.19   # Poore & Nemecek 2018: arable land -19 % in a vegan world, net of the replacement crops
 ACKER_FUTTER = 0.38       # Poore & Nemecek 2018 (Table S10, via Our World in Data): 38 % of cropland grows feed;
                           # gross that is freed, the replacement crops take back ACKER_FUTTER - ACKER_NETTO_FREI
@@ -218,8 +218,8 @@ def _flaeche_forcing():
 def _dt_wald(nee: NDArray, rf: NDArray) -> NDArray:
     from nbs.fair_module import run_fair_baseline, run_fair_perturbed
 
-    base = run_fair_baseline("ssp245")
-    d = run_fair_perturbed(nee[: len(base)], rf[: len(base)], "ssp245") - base
+    base = run_fair_baseline(SZENARIO)
+    d = run_fair_perturbed(nee[: len(base)], rf[: len(base)], SZENARIO) - base
     out = np.append(d, d[-1])[: len(YEARS)]
     out.setflags(write=False)
     return out
@@ -227,7 +227,7 @@ def _dt_wald(nee: NDArray, rf: NDArray) -> NDArray:
 
 @lru_cache(maxsize=1)
 def dt_flaeche() -> NDArray:
-    """Temperature change [K] on YEARS of forest on the freed land, one FaIR run (SSP2-4.5 background, as the
+    """Temperature change [K] on YEARS of forest on the freed land, one FaIR run (the same background, as the
     trees of chapter 2-3)."""
     nee, rf, _ = _flaeche_forcing()
     return _dt_wald(nee, rf)

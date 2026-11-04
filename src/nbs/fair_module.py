@@ -18,6 +18,7 @@ from fair import FAIR
 from fair.interface import fill, initialise
 from fair.io import read_properties
 
+from nbs.constants import SZENARIO
 from nbs.legacy.parameters import T_START, T_END
 
 # Index offsets: FaIR time axis starts at 1750
@@ -66,19 +67,30 @@ def _cmip7_inputs(scenario: str) -> tuple[str, str]:
     """(emissions file, forcing file) of one CMIP7 marker, with the scenario column renamed to *scenario*
     ("cmip7-VL", ...), so that FaIR's arrays carry the same name as every other scenario in this module."""
     code = scenario.removeprefix("cmip7-")
+    base = "VL" if code == "VLoE" else code
     d = Path(tempfile.mkdtemp(prefix=f"fair_{code}_"))
     em = pd.read_csv(_CMIP7_INPUTS / "emissions_1750-2500.csv")
-    em = em[em["scenario"] == code].drop(columns=["long_scenario"]).copy()
+    em = em[em["scenario"] == base].drop(columns=["long_scenario"]).copy()
+    if code == "VLoE":
+        # Very Low without its own CO2 removal: the novel removal (BECCS, DAC, weathering, ocean) back onto the
+        # fossil CO2, the land sink back onto AFOLU (data/cmip7/entnahme.csv, Gt -> the file's Mt)
+        r = pd.read_csv(_CMIP7_INPUTS.parent / "entnahme.csv")
+        r = r[r["szenario"] == "VL"].set_index("jahr")
+        for var, col in (("CO2 FFI", "neuartig_gt"), ("CO2 AFOLU", "land_gt")):
+            row = em.index[em["variable"] == var][0]
+            for y, v in r[col].items():
+                if f"{y}.5" in em.columns:
+                    em.at[row, f"{y}.5"] += 1000.0 * float(v)
     em["scenario"] = scenario
     fo = pd.read_csv(_CMIP7_INPUTS / "volcanic_solar.csv")
-    fo = fo[fo["Scenario"] == code].copy()
+    fo = fo[fo["Scenario"] == base].copy()
     fo["Scenario"] = scenario
     em.to_csv(d / "emissions.csv", index=False)
     fo.to_csv(d / "forcing.csv", index=False)
     return str(d / "emissions.csv"), str(d / "forcing.csv")
 
 
-def _create_fair(scenario: str = "ssp245") -> FAIR:
+def _create_fair(scenario: str = SZENARIO) -> FAIR:
     """FaIR with the constrained fair-calibrate 1.4.1 parameters (one member)."""
     f = FAIR(ch4_method="Thornhill2021")
     f.define_time(1750, T_END, 1)
@@ -136,7 +148,7 @@ def _surface_temperature(f: FAIR, scenario: str) -> NDArray:
 
 
 @functools.lru_cache(maxsize=4)
-def run_fair_baseline(scenario: str = "ssp245") -> NDArray:
+def run_fair_baseline(scenario: str = SZENARIO) -> NDArray:
     """Run an unperturbed FaIR scenario and return surface temperature.
 
     Returns
@@ -152,7 +164,7 @@ def run_fair_baseline(scenario: str = "ssp245") -> NDArray:
 def run_fair_perturbed(
     nee_gtco2_yr: NDArray,
     albedo_rf_wm2: NDArray,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
 ) -> NDArray:
     """Run a perturbed FaIR scenario and return surface temperature.
 
@@ -163,7 +175,7 @@ def run_fair_perturbed(
     albedo_rf_wm2 : NDArray, shape (125,)
         Albedo radiative forcing [W/m^2]. Positive = warming.
     scenario : str
-        SSP scenario name (default ``"ssp245"``).
+        SSP scenario name (default ``SZENARIO``).
 
     Returns
     -------
@@ -189,7 +201,7 @@ def run_fair_perturbed(
     return _surface_temperature(f, scenario)
 
 
-def run_fair_emission_delta(delta: dict[str, NDArray], scenario: str = "cmip7-VL") -> NDArray:
+def run_fair_emission_delta(delta: dict[str, NDArray], scenario: str = SZENARIO) -> NDArray:
     """FaIR with changed emissions of some species over the study period (e.g. {"CH4": -x [Mt CH4/a],
     "N2O": -y [Mt N2O/a]}), in FaIR's own units (it converts the file's kt N2O to Mt on reading). Surface
     temperature as run_fair_baseline."""
@@ -204,7 +216,7 @@ def run_fair_emission_delta(delta: dict[str, NDArray], scenario: str = "cmip7-VL
 
 def compute_pulse_warming(
     pulse_gtco2: float = 1.0,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
 ) -> NDArray:
     """Temperature impact of an instantaneous CO2 emission pulse at T_START.
 
@@ -216,7 +228,7 @@ def compute_pulse_warming(
     pulse_gtco2 : float
         Size of the emission pulse [GtCO2] (default 1.0).
     scenario : str
-        Background SSP scenario (default "ssp245").
+        Background SSP scenario (default SZENARIO).
 
     Returns
     -------

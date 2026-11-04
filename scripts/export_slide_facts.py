@@ -17,7 +17,7 @@ import numpy as np
 
 from nbs.aggregate import albedo_offset_summary, albedo_offset_field
 from nbs.animations import SITES, site_cell
-from nbs.constants import A_CO2_LOG_W_M2_PER_PPM, KG_CO2_PER_PPM, T_START, YEARS
+from nbs.constants import A_CO2_LOG_W_M2_PER_PPM, KG_CO2_PER_PPM, T_START, YEARS, SZENARIO
 from nbs.fair_module import CENTRAL_MEMBER, run_fair_baseline
 from nbs.grid import grid_lats
 from nbs.landscape import assign_species, plantable_area_m2
@@ -110,12 +110,12 @@ def tree_energy() -> dict:
 def a_co2() -> dict:
     from nbs.response import green_carbon, green_carbon_preindustrial
 
-    a = A_CO2_LOG_W_M2_PER_PPM / (background_co2_ppm("ssp245") * KG_CO2_PER_PPM) * 1e15
+    a = A_CO2_LOG_W_M2_PER_PPM / (background_co2_ppm(SZENARIO) * KG_CO2_PER_PPM) * 1e15
     return {
         "start": float(a[0]),
         "ende": float(a[-1]),
         # airborne fraction of a 2025 pulse in 2100: FaIR (scenario) vs Joos (shell 2)
-        "g_c_fair_2100": float(green_carbon("ssp245")[2100 - T_START]),
+        "g_c_fair_2100": float(green_carbon(SZENARIO)[2100 - T_START]),
         "g_c_joos_2100": float(green_carbon_preindustrial()[2100 - T_START]),
     }
 
@@ -125,7 +125,7 @@ def climate() -> dict:
 
     from nbs.fair_module import _PARAMS_CSV
 
-    base = run_fair_baseline("ssp245")
+    base = run_fair_baseline(SZENARIO)
     return {
         "fair_mitglied": CENTRAL_MEMBER,
         "lambda_w_m2_k": float(pd.read_csv(_PARAMS_CSV, index_col=0).loc[CENTRAL_MEMBER, "ocean_heat_transfer[0]"]),
@@ -136,7 +136,7 @@ def climate() -> dict:
 
 
 def cascade_facts() -> dict:
-    steps = cascade("ssp245")
+    steps = cascade(SZENARIO)
     land, albedo, disturbance = steps[2], steps[3], steps[4]
     band = [float(v) for v in disturbance["band_gtc"]] if "band_gtc" in disturbance else None
     return {
@@ -153,7 +153,7 @@ def cascade_facts() -> dict:
 
 
 def reverse() -> dict:
-    r = reverse_1p5("ssp245")["mit_albedo_und_stoerung"]
+    r = reverse_1p5(SZENARIO)["mit_albedo_und_stoerung"]
     return {
         "vielfaches": r["vielfaches_der_modellierten_flaeche"],
         "flaeche_gha": r["area_gha"],
@@ -163,13 +163,13 @@ def reverse() -> dict:
 
 
 def maps() -> dict:
-    field = _breakeven_year_field("ssp245")
+    field = _breakeven_year_field(SZENARIO)
     plantable = assign_species() != None  # noqa: E711
     lats = np.abs(grid_lats())[:, None] * np.ones((1, field.shape[1]))
     boreal = plantable & (lats >= 50) & (lats < 70)
     rest = plantable & (lats < 50) & np.isfinite(field)
-    gain = improvement(2100, "ssp245")
-    rec = summary(2100, "ssp245")
+    gain = improvement(2100, SZENARIO)
+    rec = summary(2100, SZENARIO)
     return {
         "boreal_nie_anteil": float(np.isinf(field[boreal]).mean()),
         "median_t_star_ausserhalb_boreal": float(np.median(field[rest])),
@@ -225,7 +225,7 @@ def boreal_reference() -> dict:
 
     jo = SITES[1]
     res = run_site(jo)
-    p = disturbance_probability(get_species(site_key(jo)), _background_temperature("ssp245"))[:50]
+    p = disturbance_probability(get_species(site_key(jo)), _background_temperature(SZENARIO))[:50]
     return {
         "art": site_key(jo),
         "breite": jo.lat,

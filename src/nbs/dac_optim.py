@@ -29,7 +29,7 @@ from types import SimpleNamespace
 import numpy as np
 from numpy.typing import NDArray
 
-from nbs.constants import YEARS
+from nbs.constants import YEARS, SZENARIO
 
 ROOT = Path(__file__).resolve().parents[2]
 GAP_FILE = ROOT / "deck" / "chart_data" / "luecke.json"
@@ -81,7 +81,7 @@ def eta_by_country(quantil: float = 0.9, stufe: str = "prudent", pathway: str = 
 
 
 @lru_cache(maxsize=1)
-def removal_kernel_matrix(scenario: str = "ssp245") -> NDArray:
+def removal_kernel_matrix(scenario: str = SZENARIO) -> NDArray:
     """K[y, t]: temperature change [K] in year t per Gt CO2 taken out of the air in year y."""
     from nbs.forcing import phi_co2_background
     from nbs.response import background_co2_ppm, convolve_response, green_carbon, green_temperature

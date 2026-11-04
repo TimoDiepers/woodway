@@ -55,6 +55,7 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
+from nbs.constants import SZENARIO
 from nbs.aggregate import _product_no_nan, _year_index, co2_factor_grid, unit_curves
 from nbs.config import ModelConfig
 from nbs.grid import grid_lats
@@ -88,7 +89,7 @@ def admissible_mask(species_key: str) -> NDArray:
 def score_field(
     species_key: str,
     year: int = 2100,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     config: ModelConfig | None = None,
 ) -> NDArray:
     """(360, 720) Delta_T per hectare [K/ha] at *year*, NaN where inadmissible.
@@ -161,7 +162,7 @@ def _recommend_cached(year: int, scenario: str, config: ModelConfig) -> Recommen
 
 
 def recommend(
-    year: int = 2100, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int = 2100, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> Recommendation:
     """Best admissible species per plantable cell at *year*.
 
@@ -174,7 +175,7 @@ def recommend(
 def total_delta_t(
     species_grid: NDArray,
     year: int = 2100,
-    scenario: str = "ssp245",
+    scenario: str = SZENARIO,
     config: ModelConfig | None = None,
 ) -> float:
     """Global Delta_T [K] at *year* if every plantable cell carries
@@ -201,7 +202,7 @@ def total_delta_t(
 
 
 def summary(
-    year: int = 2100, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int = 2100, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> dict[str, dict[str, float]]:
     """Per species: recommended and band-assigned area [Gha], mean score and
     mean margin (both in mK per Mha, see MK_PER_MHA_PER_K_PER_HA) over the
@@ -235,7 +236,7 @@ def summary(
 
 
 def improvement(
-    year: int = 2100, scenario: str = "ssp245", config: ModelConfig | None = None
+    year: int = 2100, scenario: str = SZENARIO, config: ModelConfig | None = None
 ) -> dict[str, float]:
     """How much the species choice is worth against the latitude-band default.
 

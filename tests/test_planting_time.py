@@ -92,7 +92,9 @@ def test_later_cohorts_lose_a_larger_share_at_the_same_age():
     fire risk penalises late planting would have no support in the model."""
     table = cohort_table("enf_boreal")
     losses = [table[py]["verlust_anteil"] for py in PLANT_YEARS]
-    assert all(b > a for a, b in zip(losses, losses[1:]))
+    # Very Low (without its removal) warms to about 2050 and then cools again: a later cohort lives through a similar
+    # hazard at the same age, so its loss share stays close (since 2026-11-04; under SSP2-4.5 it grew)
+    assert max(losses) < 1.1 * min(losses)
     # And the undisturbed reference must be identical for every cohort: at
     # the same age, with the hazard off, they are the same tree.
     refs = [table[py]["vorrat_ungestoert"] for py in PLANT_YEARS]

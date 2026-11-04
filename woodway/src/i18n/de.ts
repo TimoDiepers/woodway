@@ -46,7 +46,7 @@ export const de: Record<keyof typeof en, string> = {
   "src.albedo": "Albedo und Sonneneinstrahlung: Duveiller et al. 2018, Jahresmittel.",
   "src.cloud": "Niedrige Wolken über Wald: Duveiller et al. 2021 (Änderung der Wolkenbedeckung, Wald gegen Offenland), mal zusätzliche Reflexion einer Wolke (Cerasoli et al. 2021) und Nachmittagsanteil des Tageslichts; Jahresmittel.",
   "src.light": "Albedo und Sonneneinstrahlung: Duveiller et al. 2018; Wolken über Wald: Duveiller et al. 2021; Jahresmittel; mal Kronenschluss des typischen Walds, gepflanzt 2026 (Williams et al. 2026).",
-  "src.deltaT": "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, CO₂-Aufnahme gegen Albedo und Wolken, FaIR (Leach et al. 2021), SSP2-4,5.",
+  "src.deltaT": "Eigenes Modell: typischer Wald der Zelle, gepflanzt 2026, CO₂-Aufnahme gegen Albedo und Wolken, FaIR (Leach et al. 2021), CMIP7 Very Low ohne eigene CO₂-Entnahme.",
   "src.dac": "Eigenes Modell: Sorbens-DAC mit Wärmepumpe (Sendi et al. 2022), Strommix REMIND-EU SSP2-NDC über premise.",
   "src.build": "Eigene Kostenoptimierung (optimistische Kosten, Okosun et al. 2026): das günstigste DACCS, das die Erwärmung nach den Bäumen so früh wie möglich auf 1,5 °C zurückbringt, Ausbau höchstens +20 %/a, Speicher Gidden et al. 2025. Die Kapazität eines Landes ist gleichmäßig auf seine Zellen nahe einem Sedimentbecken mit den besten 10 % Netto-Anteil (2050) verteilt.",
   "type.dbf": "Sommergrüner Laubwald",

@@ -11,6 +11,10 @@ import numpy as np
 T_START = 2026  # the current year: planting, DAC start and every time axis begin here (was 2025 until 2026-10-07)
 T_END = 2100  # evaluation horizon: keep warming low until 2100 (was 2150 until 2026-10-06)
 YEARS = np.arange(T_START, T_END + 1, dtype=int)
+# The world every run of the talk lives in: CMIP7 Very Low without its own CO2 removal (its novel removal and its
+# land sink added back as emissions; nbs.fair_module). That removal is what trees, a vegan world and DAC would have to
+# deliver, so it is not in the reference (was SSP2-4.5 for the trees until 2026-11-04).
+SZENARIO = "cmip7-VLoE"
 
 A_EARTH_M2 = 5.1006e14
 """Earth surface area [m^2]. Slide 22."""

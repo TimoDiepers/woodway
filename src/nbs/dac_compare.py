@@ -24,7 +24,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from nbs.aggregate import _product_no_nan, co2_factor_grid
-from nbs.constants import T_START, TAU_ATM, A_EARTH_M2
+from nbs.constants import T_START, TAU_ATM, A_EARTH_M2, SZENARIO
 from nbs.dac import efficiency_grid
 from nbs.pipeline import run_single_tree
 from nbs.landscape import assign_species
@@ -40,7 +40,7 @@ def _unit_curves_planted(species_key: str, plant_year: int) -> tuple[float, floa
     """(Delta_T_CO2 per tree, Delta_T_albedo per unit product) at T_END (2100) for a
     tree planted in *plant_year* -- nbs.aggregate.unit_curves with a planting year."""
     res = run_single_tree(species_key, lat_deg=reference_site(species_key), plant_year=plant_year)
-    g_t = green_temperature("ssp245")
+    g_t = green_temperature(SZENARIO)
     co2 = convolve_response(g_t, res.phi_co2)
     sp = get_species(species_key)
     unit_alb = -TAU_ATM * np.asarray(res.trajectory.closure, dtype=float) * sp.stand_area_m2 / A_EARTH_M2
@@ -85,7 +85,7 @@ def best_option_grid(year: int, variant: str = "waermepumpe") -> NDArray:
 
 
 @lru_cache(maxsize=1)
-def _removal_kernel(scenario: str = "ssp245") -> NDArray:
+def _removal_kernel(scenario: str = SZENARIO) -> NDArray:
     """K[y]: temperature change at the horizon (T_END) [K] per t CO2 taken out of the air in study
     year y -- the same climate chain as the tree (FaIR g_C, logarithmic CO2 forcing against the
     scenario background, FaIR g_T)."""

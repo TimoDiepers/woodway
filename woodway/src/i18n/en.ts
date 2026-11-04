@@ -44,7 +44,7 @@ export const en = {
   "src.albedo": "Albedo and sunlight: Duveiller et al. 2018, annual means.",
   "src.cloud": "Low clouds over forest: Duveiller et al. 2021 (change in cloud cover, forest against open land), times the extra reflection of a cloud (Cerasoli et al. 2021) and the afternoon share of daylight; annual mean.",
   "src.light": "Albedo and sunlight: Duveiller et al. 2018; clouds over forest: Duveiller et al. 2021; annual means; times canopy closure of the typical forest, planted 2026 (Williams et al. 2026).",
-  "src.deltaT": "Own model: typical forest of the cell, planted 2026, CO₂ uptake against albedo and clouds, FaIR (Leach et al. 2021), SSP2-4.5.",
+  "src.deltaT": "Own model: typical forest of the cell, planted 2026, CO₂ uptake against albedo and clouds, FaIR (Leach et al. 2021), CMIP7 Very Low without its own CO₂ removal.",
   "src.dac": "Own model: sorbent DAC with heat pump (Sendi et al. 2022), electricity mix REMIND-EU SSP2-NDC via premise.",
   "src.build": "Own cost optimisation (optimistic costs, Okosun et al. 2026): the cheapest DACCS that brings the warming the trees leave back to 1.5 °C as early as possible, build-out at most +20 %/a, storage Gidden et al. 2025. Each country's capacity is spread evenly over its cells near a sediment basin with the top 10 % net share (2050).",
   "type.dbf": "Deciduous broadleaf",

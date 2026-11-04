@@ -106,5 +106,5 @@ def test_contributions_sum_to_the_vegan_world():
     assert np.allclose(c["netto"], dt_gase() + dt_flaeche())
     assert c["ch4_tier"][-1] < 0 and c["n2o_vermieden"][-1] < 0 and c["co2_hof"][-1] < 0 and c["co2_entwaldung"][-1] < 0 and c["ersatz"][-1] > 0
     assert c["wald_co2"][-1] < 0 and c["wald_albedo"][-1] > 0
-    parts = sum(c[k] for k in c if k != "netto")
+    parts = sum(c[k] for k in c if k not in ("netto", "n2o_tier", "n2o_acker"))   # those two split n2o_vermieden
     assert np.max(np.abs(parts - c["netto"])) < 0.05 * np.max(np.abs(c["netto"]))   # FaIR nearly linear here

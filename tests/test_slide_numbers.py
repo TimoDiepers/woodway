@@ -123,8 +123,10 @@ def test_slide_32_planting_year_numbers():
 
     table = cohort_table("mf_gemaessigt")
     late, first = T_START + 20, T_START
+    # the later cohort starts in a warmer world (higher hazard at planting) ...
     assert table[late]["risikofaktor"] > table[first]["risikofaktor"] == pytest.approx(1.0)
-    assert table[late]["verlust_anteil"] > table[first]["verlust_anteil"]
+    # ... but in Very Low the warming falls again after 2050, so at the same age it loses hardly more (backup slide)
+    assert table[late]["verlust_anteil"] == pytest.approx(table[first]["verlust_anteil"], rel=0.05)
 
 
 # --------------------------------------------------------------------------
@@ -189,7 +191,7 @@ def test_slide_38_reverse_calculation():
 def test_slide_31_ladder_rungs():
     """The ladder as printed (fakten.json, per site): adding the ocean and
     land response never adds cooling."""
-    for site in ("Aachen", "Joensuu"):
+    for site in ("Aachen", "Fairbanks", "Marabá"):
         rungs = FACTS["orte"][site]["leiter_dt_2150_K"]
         assert rungs[2] > rungs[1], f"{site}: Rückgabe durch Ozean und Land muss Kühlung kosten"
         assert rungs[0] < rungs[-1], f"{site}: die volle Kette kühlt weniger als die naive"

@@ -99,3 +99,9 @@ Faltung −0,0476 K. Anteil, der nach der Albedo bleibt: 18 % gegen 17 %
 hochgerechnet wäre es das 77-Fache. Bei so großen Flächen füllen sich die
 Senken weniger, jede weitere Tonne wirkt dann etwas länger. Deshalb sucht
 die Umkehrrechnung das Vielfache jetzt mit FaIR-Läufen (Bisektion).
+
+## Hintergrund seit 2026-11-04: Very Low ohne Entnahme
+
+Alle Läufe des Vortrags (Bäume, vegane Welt, DACCS, Flächenpfade) rechnen jetzt vor demselben Hintergrund: CMIP7 Very Low, aber ohne seine eigene CO₂-Entnahme (neuartige Entnahme auf die fossilen Emissionen, Landsenke auf AFOLU zurückgelegt, `data/cmip7/entnahme.csv`). FaIR-Szenario `cmip7-VLoE`, eine Konstante `nbs.constants.SZENARIO`. Grund: Die Lücke des Vortrags ist die Erwärmung von Very Low ohne Entnahme über 1,5 °C; die Entnahme sollen Bäume, Ernährung oder DACCS erst liefern. Vorher liefen die Bäume auf SSP2-4.5, die vegane Welt und DACCS auf Very Low mit Entnahme. Gegenprobe: VLoE − VL = +0,013 K (2050), +0,096 K (2100), genau wie der frühere Weg über `_vl_ohne_entnahme_k`.
+
+Wirkung auf die Kernzahlen (2100, je Baum gepflanzt 2026): Aachen −37 → −47, Marabá −63 → −77, Fairbanks +26 → +24 · 10⁻¹⁵ K. Kühlende Fläche 4,2 → 4,7 Mio. km², alle kühlenden Bäume −21 → −24 mK, je Baum 25 → 26 fK, Bedarf 8,0 → 7,7 Billionen Bäume, Platz ×10 → ×8 zu wenig. Strahlungseffizienz von CO₂ 1,61 (2026) → 1,56 (2038, höchste Konzentration 440 ppm) → 1,66 · 10⁻¹⁵ W/m² je kg (2100). Grund für die stärkere Kühlung: weniger CO₂ in der Luft (jedes Kilogramm wirkt stärker) und weniger Erwärmung (weniger Störung).

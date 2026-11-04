@@ -19,7 +19,7 @@ FaIR (calibrated with fair-calibrate 1.4.1) supplies the impulse responses g_C a
 from nbs.pipeline import run_single_tree
 from nbs.metrics import t_star
 
-r = run_single_tree("mf_gemaessigt", lat_deg=50.8, scenario="ssp245")   # temperate mixed forest, Aachen
+r = run_single_tree("mf_gemaessigt", lat_deg=50.8)   # temperate mixed forest, Aachen; background nbs.constants.SZENARIO
 print(t_star(r.delta_t, r.years))
 ```
 

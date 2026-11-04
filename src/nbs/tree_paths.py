@@ -27,7 +27,7 @@ from numpy.typing import NDArray
 from nbs.aggregate import co2_factor_grid
 from nbs.light import light_product
 from nbs.config import ModelConfig
-from nbs.constants import A_EARTH_M2, M_CO2_PER_C, T_START, TAU_ATM, YEARS
+from nbs.constants import A_EARTH_M2, M_CO2_PER_C, T_START, TAU_ATM, YEARS, SZENARIO
 from nbs.fair_module import run_fair_baseline, run_fair_perturbed
 from nbs.landscape import assign_species, plantable_area_m2, tree_count
 from nbs.species import SPECIES, get_species, reference_site
@@ -44,7 +44,7 @@ def masks() -> dict[str, NDArray]:
     from nbs.map_plots import _breakeven_year_field
 
     plant = assign_species() != None  # noqa: E711
-    cool = plant & ~np.isinf(_breakeven_year_field("ssp245"))
+    cool = plant & ~np.isinf(_breakeven_year_field(SZENARIO))
     return {"alle": plant, "kuehlt": cool}
 
 
@@ -72,7 +72,7 @@ def _trajectory(key: str, plant_year: int) -> tuple[NDArray, NDArray, NDArray]:
     from nbs.tree import simulate_deterministic
 
     sp = _species_for(key, ModelConfig(), reference_site(key))
-    tr = simulate_deterministic(sp, _background_temperature("ssp245"), plant_year=plant_year)
+    tr = simulate_deterministic(sp, _background_temperature(SZENARIO), plant_year=plant_year)
     out = tuple(np.asarray(a, dtype=float) for a in (tr.net_uptake_kgC_yr, tr.closure, tr.stock_kgC))
     for a in out:
         a.setflags(write=False)
@@ -136,7 +136,7 @@ def _site_factor(keys: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
 
 
 def cooling_cells(area_m2: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
-    """Cells with area whose typical forest still cools by T_END (finite break-even year), SSP2-4.5."""
+    """Cells with area whose typical forest still cools by T_END (finite break-even year), Very Low without its removal."""
     from nbs.aggregate import unit_curves
     from nbs.forest_data import key_grid
     from nbs.map_plots import _t_star_batch
@@ -148,7 +148,7 @@ def cooling_cells(area_m2: NDArray, carbon_mgc_ha: NDArray) -> NDArray:
         m = (keys == key) & (area_m2 > 0) & (f > 0)
         if not m.any():
             continue
-        co2, alb = unit_curves(key, "ssp245")
+        co2, alb = unit_curves(key, SZENARIO)
         traj = f[m][:, None] * co2[None, :] + np.nan_to_num(light_product(key)[m])[:, None] * alb[None, :]
         out[m] = ~np.isinf(_t_star_batch(traj, YEARS))
     return out
@@ -181,10 +181,10 @@ def forcing_cells(area_m2: NDArray, carbon_mgc_ha: NDArray, start: int = T_START
 
 @lru_cache(maxsize=None)
 def delta_t(path: str, start: int = T_START, rate_gha: float | None = None, release: bool = False) -> NDArray:
-    """Global temperature change [K] of a path, one full FaIR run (SSP2-4.5 background)."""
+    """Global temperature change [K] of a path, one full FaIR run (Very Low background, without its own removal)."""
     nee, rf, _ = forcing(path, start, rate_gha, release)
-    base = run_fair_baseline("ssp245")
-    pert = run_fair_perturbed(nee[: len(base)], rf[: len(base)], "ssp245")
+    base = run_fair_baseline(SZENARIO)
+    pert = run_fair_perturbed(nee[: len(base)], rf[: len(base)], SZENARIO)
     out = np.append(pert - base, (pert - base)[-1])[:N_Y]
     out.setflags(write=False)
     return out
@@ -195,11 +195,11 @@ def delta_t_parts(path: str, start: int = T_START, release: bool = False) -> dic
     """delta_t of a path by cause, each its own FaIR run: CO2 uptake of the standing trees, CO2 released at
     felling (residues, the timber too if *release*), albedo. They add up to delta_t only nearly (FaIR)."""
     up, loss, rf, _ = forcing_split(path, start, None, release)
-    base = run_fair_baseline("ssp245")
+    base = run_fair_baseline(SZENARIO)
     z = np.zeros(len(base))
 
     def run(nee, f):
-        d = run_fair_perturbed(nee[: len(base)], f[: len(base)], "ssp245") - base
+        d = run_fair_perturbed(nee[: len(base)], f[: len(base)], SZENARIO) - base
         out = np.append(d, d[-1])[:N_Y]
         out.setflags(write=False)
         return out
