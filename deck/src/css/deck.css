@@ -382,7 +382,7 @@ strong { font-weight: 600; }
 
 /* a curve's name on an ECharts figure (EChart.placeLabels): the same box, a fixed size; it fades in once its curve has
    been drawn up to it (--ld, set per name) */
-.chart .mtex.ectex { font: 600 18px/1 var(--sans); background: color-mix(in srgb, var(--c) var(--box-tint), var(--paper)); }   /* opaque: lines pass behind it */
+.chart .mtex.ectex { font: 600 18px/1 var(--sans); color: color-mix(in srgb, var(--c) 50%, var(--ink)); background: color-mix(in srgb, var(--c) 18%, var(--paper)); }   /* the same look as the names inside the figures (deck.js: fg, tint) */   /* opaque: lines pass behind it */
 .chart .mtex.ectex .katex { font-size: 1.35em; }
 .chart .mtex.ectex.late { animation: fadein .7s ease-out var(--ld, 1.1s) both; }
 
@@ -1042,7 +1042,7 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 @media (prefers-reduced-motion: reduce) { .slide.fazit :is(.fg, .fz-sun) { animation: none !important; } }
 @media print { .slide.fazit :is(.fg, .fz-sun) { animation: none !important; } }
 .slide.fazit .cols3 .col p { font-size: 25px; line-height: 1.42; }
-.slide.fazit .cols3 .col h4, .slide.holzweg .hw-fz3 h4 { font-size: 30px; }   /* the same in both: the hand-over lines up */
+.slide.fazit .cols3 .col h4, .slide:is(.holzweg, .hwq) .hw-fz3 h4 { font-size: 30px; }   /* the same in both: the hand-over lines up */
 
 /* the closing slide: from the dark vegan world into the day. It opens at night, the sun comes up behind the hills,
    the night lifts, then the words. Only on arrival (.active); the overview and previews show the day */
@@ -1193,6 +1193,7 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 /* click 1: the claim steps back into the paper, the thanks comes up in its place */
 .ende-a { transition: opacity .7s var(--ease), filter .7s var(--ease), transform .7s var(--ease); }
 .slide.ende:has(.ende-dank.shown) .ende-a { animation: ende-out .7s var(--ease) both; }   /* its own rise would hold it */
+.slide.ende.active:has(.ende-ww.shown) .ende-a { animation-delay: 0s; }   /* back from the thanks: the text returns at once, not after the sunrise wait */
 @keyframes ende-out { from { opacity: 1; filter: none; transform: none; } to { opacity: 0; filter: blur(10px); transform: translateY(-14px); } }
 .ende-dank { position: absolute; left: 0; top: 0; width: 900px; }
 .slide.active .ende-dank.shown { animation: ende-in 1.1s var(--ease) .35s both; }
@@ -1591,7 +1592,7 @@ svg.mo .m-sway.back { animation: none; }
 .slide.holzweg .spk { position: absolute; left: var(--x); top: var(--y); width: 18px; height: 18px; margin: -9px 0 0 -9px; background: #fff3c4;
   clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); transform: scale(0); opacity: 0;
   filter: drop-shadow(0 0 4px rgba(255, 224, 138, .7)); }
-.slide.holzweg.active .hwans.shown .spk { animation: hw-twinkle 1.8s ease-in-out calc(.3s + var(--k)) 2 both; }
+.slide.holzweg.active .hwans.shown .spk { animation: hw-twinkle 1.8s ease-in-out calc(.3s + var(--k)) infinite both; }   /* keeps twinkling while the line stands */
 @keyframes hw-twinkle { 0%, 100% { transform: scale(0) rotate(0); opacity: 0; } 45% { transform: scale(var(--s)) rotate(20deg); opacity: .85; } 70% { transform: scale(calc(var(--s) * .6)) rotate(30deg); opacity: .6; } }
 @media (prefers-reduced-motion: reduce) { .slide.holzweg .hwans b::after, .slide.holzweg .hwans b::before, .slide.holzweg .spk { animation: none !important; } }
 /* beside it, smaller: what it brings besides */
@@ -1842,9 +1843,6 @@ html.notips .ectip { display: none !important; }
 .ovtrail .ic > .ring { width: 128%; height: 128%; margin: -14%; }   /* the disc keeps its size, the ring around it */
 .ovtrail .later .ic { filter: grayscale(1); opacity: .4; }
 /* under the next chapter: the question it answers, thin, in its colour; hangs below, the row keeps its spacing */
-.ovtrail .st .q { position: absolute; top: calc(100% + 14px); left: 50%; width: max-content; max-width: 520px;
-  translate: -50% 0; font: italic 300 26px/1.25 var(--serif); color: var(--c); text-align: center; }
-.slide.active .ovtrail:has(.go.shown) .st .q { animation: fadein .8s var(--ease) .55s both; }   /* not rise: that moves `top` */   /* not on .st: its entrance animates opacity */
 .ovtrail .later { color: color-mix(in srgb, var(--c) 40%, var(--paper)); }
 .ovtrail .ok { position: absolute; right: -6px; bottom: -4px; width: 30px; height: 30px; padding: 7px 6px 6px 7px; border-radius: 50%;
   background: var(--c); color: var(--paper); box-shadow: 0 0 0 3px var(--paper); }
@@ -1859,13 +1857,11 @@ html.notips .ectip { display: none !important; }
 .slide.active .ovl.shown .ovtrail .st:nth-of-type(1) { animation-delay: .9s; }
 .slide.active .ovl.shown .ovtrail .st:nth-of-type(2) { animation-delay: 1.02s; }
 .slide.active .ovl.shown .ovtrail .st:nth-of-type(3) { animation-delay: 1.14s; }
-/* the next chapter waits grey; on its click (.go) it takes its colour, its ring and its question */
-.ovtrail .go { display: none; }
+/* the next chapter waits grey; it takes its colour as its disc zooms into the chapter slide */
 .ovtrail .next { transition: color .6s var(--ease); }
 .ovtrail .next .ic { transition: filter .7s var(--ease), opacity .7s var(--ease); }
-.ovtrail:not(:has(.go.shown)) .next { color: color-mix(in srgb, var(--muted) 70%, var(--paper)); }
-.ovtrail:not(:has(.go.shown)) .next .ic { filter: grayscale(1); opacity: .4; }
-.ovtrail:not(:has(.go.shown)) .q { opacity: 0; }
+.ovtrail .next { color: color-mix(in srgb, var(--muted) 70%, var(--paper)); }
+.ovtrail .next .ic { filter: grayscale(1); opacity: .4; }
 @keyframes tick { to { stroke-dashoffset: 0; } }
 /* on from the overview or a closing card: the discs fly into the chapter marks top right (Deck.flyHome); the marks
    wait under them, then the current chapter's label unfolds */
@@ -2045,31 +2041,21 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 .slide.fazit :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line, .ww-side) { transition: filter .9s var(--ease); }
 .slide.fazit .cols3 .col:last-child :is(h4, p, .big-n) { transition: color 1.4s var(--ease); }
 .slide.fazit .fz-k { transition: color 1.4s var(--ease), text-decoration-color 1.4s var(--ease); text-decoration: underline 3px transparent; text-underline-offset: 7px; }
-.slide.fazit:has(.fz-dusk.shown) { background-color: var(--night); }
-.slide.fazit:has(.fz-dusk.shown) svg.deco { filter: brightness(.3) saturate(.6); }
-.slide.fazit:has(.fz-dusk.shown) .fz-sun { opacity: 0; }
-.slide.fazit:has(.fz-dusk.shown) :is(.sh h2, .cols3 .col:not(:last-child), .grenz-line, .ww-side) { filter: opacity(0); }
-.slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child :is(h4, .big-n) { color: #f2ede2; }
-.slide.fazit:has(.fz-dusk.shown) .cols3 .col:last-child p { color: #b9c0bb; }
-.slide.fazit:has(.fz-dusk.shown) .fz-k { color: #e8b866; text-decoration-color: #e8b866; }   /* colour only: a bolder weight would rewrap the text */
 .slide.fazit svg.deco use[href="#cloud"] { transition: opacity 1.2s var(--ease); }
-.slide.fazit:has(.fz-dusk.shown) svg.deco use[href="#cloud"] { opacity: 0; }   /* the night of the Holzweg slide has none */
 
 /* the hand-over from the summary to the Holzweg slide: both show the same picture at the cut, the question on the left
    (as on the night slide) and takeaway 3 on the right; the Holzweg slide then lifts the question into its header */
-.slide.fazit .fz-hw, .slide.holzweg .ctext h1 { font: 600 96px/1.02 var(--serif); letter-spacing: -0.02em; color: #f2ede2; }
-.slide.fazit .fz-hw em, .slide.holzweg .ctext h1 em { font-style: normal; color: var(--amber); }
-.slide.fazit .fz-hw { position: absolute; left: 0; top: 16px; width: 900px; margin: 0; z-index: 2; opacity: 0; transition: opacity 1.2s var(--ease) .6s; }
-.slide.fazit:has(.fz-dusk.shown) .fz-hw { opacity: 1; }
+.slide.holzweg .ctext h1 { font: 600 96px/1.02 var(--serif); letter-spacing: -0.02em; color: #f2ede2; }
+.slide.holzweg .ctext h1 em { font-style: normal; color: var(--amber); }
 .slide.chapter.brk.holzweg .ctext { left: 88px; right: auto; top: 170px; width: 900px; text-align: left; transition: top .9s var(--ease), width .9s var(--ease); }
 .slide.chapter.brk.holzweg:has(.hwk3.shown) .ctext { top: 52px; width: 1424px; }
 .slide.chapter.brk.holzweg:has(.hwk3.shown) h1 { font-size: 60px; }
-.slide.holzweg .hw-fz3 { position: absolute; left: 88px; right: 88px; top: 158px; z-index: 2; transition: opacity .7s var(--ease); }
-.slide.holzweg .hw-fz3 > .col:not(:last-child) { visibility: hidden; }
-.slide.holzweg .hw-fz3 .col { border-top: 1px solid rgb(61, 85, 45); padding-top: 18px; }
-.slide.holzweg .hw-fz3 :is(h4, .big-n) { color: #f2ede2; }
-.slide.holzweg .hw-fz3 p { font: 400 25px/1.42 var(--serif); color: #b9c0bb; }
-.slide.holzweg .hw-fz3 .fz-k { color: #e8b866; text-decoration: underline 3px #e8b866; text-underline-offset: 7px; }
+.slide:is(.holzweg, .hwq) .hw-fz3 { position: absolute; left: 88px; right: 88px; top: 158px; z-index: 2; transition: opacity .7s var(--ease); }
+.slide:is(.holzweg, .hwq) .hw-fz3 > .col:not(:last-child) { visibility: hidden; }
+.slide:is(.holzweg, .hwq) .hw-fz3 .col { border-top: 1px solid rgb(61, 85, 45); padding-top: 18px; }
+.slide:is(.holzweg, .hwq) .hw-fz3 :is(h4, .big-n) { color: #f2ede2; }
+.slide:is(.holzweg, .hwq) .hw-fz3 p { font: 400 25px/1.42 var(--serif); color: #b9c0bb; }
+.slide:is(.holzweg, .hwq) .hw-fz3 .fz-k { color: #e8b866; text-decoration: underline 3px #e8b866; text-underline-offset: 7px; }
 .slide.holzweg .hw-fz3 :is(h4, .big-n, p) { transition: color .7s var(--ease); }
 .slide.holzweg .hw-fz3 .col { transition: border-color .7s var(--ease); }
 .slide.holzweg:has(.hwk3.shown) .hw-fz3 :is(h4, .big-n, p) { color: transparent; }   /* the rest of takeaway 3 goes, the gold phrases wait for their card */
@@ -2333,7 +2319,7 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 
 .ovw .ovw-src { transition: opacity .5s var(--ease); }
 .ovw .ovw-src { opacity: 0; }
-.ovw:has(.kp.shown):not(:has(.kc-r.shown)) .ovw-src { opacity: 1; }   /* the sources come with the first limit and go with the critique */
+.ovw:not(:has(.kc-r.shown)) .ovw-src { opacity: 1; }   /* the sources stand with the limits and go with the critique */
 
 .kp[data-step] { opacity: 0; transition: opacity .7s var(--ease); }
 .kp[data-step].shown { opacity: 1; }   /* the limits one by one */
@@ -2471,7 +2457,7 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .slide:has(.c10-body dt[data-step="2"]:not(.shown)) .c9-line .ub-wa svg, .slide:has(.c10-body dt[data-step="4"]:not(.shown)) .c9-line .ub-st svg { opacity: 0; }
 /* slide 14: the bracket's brace arrives with its label Δφ (click 2) */
 .bilanz .ub-dphi svg { transition: opacity .6s var(--ease); }
-.slide:has(.bl-leg dt[data-step="2"]:not(.shown)) .bilanz .ub-dphi svg { opacity: 0; }
+.slide:has(.bl-leg dt[data-step="3"]:not(.shown)) .bilanz .ub-dphi svg { opacity: 0; }
 .c10-fit p b.fit-h { display: block; font-weight: 600; }
 /* the climate drawings (13-19): sky, ground and ocean inside rounded corners, as the dashed frame around them */
 .slide[data-carry="klima"] svg.schema :is(rect[fill="#e3edf2"], rect[fill="#d9cfb9"], rect[fill="#a39684"], rect[fill="#5f93b3"], path[fill="#7fb0cc"], line[y1="74"][y2="74"]) { clip-path: url(#km-round); }
@@ -2549,9 +2535,6 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 
 
 /* slide 14: an L-shaped pointer from the world without our tree, "we come back to it" */
-.bilanz .bl-ref { display: flex; align-items: flex-end; gap: 2px; margin: -2px 0 0 150px; font: 400 18px/1.2 var(--sans); color: color-mix(in srgb, var(--s-dphio) 70%, var(--paper)); }
-.bilanz .bl-ref svg { flex: none; width: 40px; height: 34px; }
-.bilanz .bl-ref span { padding-bottom: 0; white-space: nowrap; }
 
 
 
@@ -2608,9 +2591,8 @@ svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition:
 .fflow.fz .fz-row:first-child { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .fflow.fz .fz-in.mit .tex { font-size: 21px; }
 
-/* slide 14, click 5: the world without our tree lit in the formula, and where it comes from */
-.slide:has(.bl-ref.shown) .hl.at-ohne::before { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
-.bilanz .bl-ref b { color: var(--ink); font-weight: 600; }
+/* slide 14: the world without our tree, lit in the formula in the colour of its box in the drawing */
+.slide:has(.bl-phi.shown) .hl.at-base::before { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
 
 /* slide 18: the idea first, as a black box: two worlds in, two temperature paths out, their difference; then the box is
    revealed as FaIR. Dashed = the world without our tree, as everywhere */
@@ -2661,22 +2643,18 @@ svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition:
 .bbx-res > .tex { font-size: 23px; justify-self: end; white-space: nowrap; }
 .bbx-res .bbx-c { width: 190px; height: 76px; }
 
-/* slide 14: the world without our tree comes from the scenario: a tinted tag at the end of a soft arrow, and the term ticked */
-.bilanz .bl-tag { margin-bottom: -8px; padding: 5px 13px 9px; border-radius: 999px; background: color-mix(in srgb, var(--s-dphio) 13%, var(--paper)); color: var(--ink-2); white-space: nowrap; }
-.bilanz .bl-tag b { color: var(--s-dphio); }
-.hl.at-ohne::after { content: ""; position: absolute; right: -15px; top: -16px; width: 20px; height: 18px; background: var(--s-dphio); opacity: 0; transition: opacity .4s .3s;
+/* slide 14: the world without our tree comes from the scenario: the term ticked */
+.hl.at-base::after { content: ""; position: absolute; right: -15px; top: -16px; width: 20px; height: 18px; background: var(--s-dphio); opacity: 0; transition: opacity .4s .3s;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
-.slide:has(.bl-ref.shown) .hl.at-ohne::after { opacity: 1; }
+.slide:has(.bl-phi.shown) .hl.at-base::after { opacity: 1; }
 
-.bilanz .bl-phi .bl-f { margin-top: 14px; }   /* room for the tick on Δφ_ges^ohne */
+.bilanz .bl-phi .bl-f { margin-top: 14px; }   /* room for the tick on Δφ_ges^Base */
 /* slide 14: the key in the size of the labels above it ("mit zusätzlichem Baum", 20 px) */
 .bilanz .bl-leg { gap: 6px 18px; }
 .bilanz .bl-leg dt { font-size: 24px; }
 .bilanz .bl-leg dd { font-size: 20px; }
-.bilanz .bl-ref { font-size: 19px; }
-.bilanz .bl-ref { margin-left: 128px; }
-.hl.at-ohne::after { background: var(--s-phic); }   /* ticked off in the green of the header ticks */
+.hl.at-base::after { background: var(--s-phic); }   /* ticked off in the green of the header ticks */
 .bb-chips { gap: 8px; }
 .bb-chips > span { padding: 4px 9px; font-size: 15.5px; }
 .bbx-note { position: absolute; left: calc(100% + 16px); top: 50%; translate: 0 -50%; width: 170px; text-align: left; font: 400 15px/1.3 var(--sans); color: var(--muted); }
@@ -2721,3 +2699,58 @@ svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition:
 .mapmsg { padding: 18px 22px 20px; }
 .mapmsg .tk { font-size: 24px; line-height: 1.28; text-wrap: balance; }
 .mapmsg .tk { text-wrap: pretty; }
+
+/* slide 14: until our tree stands in the picture the light goes to the ground and back; with the tree, to its crown */
+svg.s17 :is(.rays-ground, .rays-tree) { transition: opacity .6s var(--ease); }
+svg.s17 .rays-tree { opacity: 0; }
+.slide:has(svg.s17 .tree14.shown) svg.s17 .rays-tree { opacity: 1; }
+.slide:has(svg.s17 .tree14.shown) svg.s17 .rays-ground { opacity: 0; }
+
+/* slide 24: from the end label of all land to that of the cooling land, the factor between them: as .hm-f, in the green of the curve */
+.auf-x { --c: #2f7a45; position: absolute; left: 1250px; top: 440px; width: 250px; height: 178px; display: flex; align-items: center; justify-content: flex-end; padding-right: 32px; }
+.auf-x .hm-br { position: absolute; right: 0; top: 0; bottom: 0; width: 20px; border: 3px solid var(--c); border-left: none; border-radius: 0 12px 12px 0; }
+.auf-x .hm-br::after { content: ""; position: absolute; left: -12px; bottom: -9.5px; width: 0; height: 0; border: 8px solid transparent; border-right: 12px solid var(--c); border-left: 0; }
+.auf-x p { margin: 0; display: flex; flex-direction: column; align-items: flex-end; }
+.auf-x b { font: 600 44px/1 var(--serif); color: var(--c); }
+.auf-x span:not(.hm-br) { font: 400 19px/1.3 var(--sans); color: var(--ink-2); }
+
+/* the Fazit's last two pictures: one question, then the other in its place. Display Literata, one size for every
+   line: emphasis is carried by weight and tone, not by size. The frame words in a light weight and a sage tint of the
+   forest below; what the question turns on ("Holzweg", then "Wald vor lauter Bäumen", and "nicht" stressed in italic,
+   as it would be spoken) in full weight and cream. No amber underlines and no small heads: the card beside it speaks in
+   text size, this side only in display. The swap: the old words leave one after the other, rising and blurring away,
+   the new ones settle in from below, the same way, so the question seems to rewrite itself. */
+.slide.hwq .fz-hw { position: absolute; left: 88px; top: 168px; margin: 0; z-index: 2; width: 990px; color: #f2ede2; display: grid; font: 108px/1.04 var(--serif); letter-spacing: -0.006em; word-spacing: .02em; font-variation-settings: "opsz" 72; }
+.slide.hwq .fz-hw .hq { grid-area: 1 / 1; }
+.slide.hwq .fz-hw .ln { display: block; white-space: nowrap; }
+.slide.hwq .fz-hw .w { display: inline-block; transition: opacity .55s var(--ease), transform .7s var(--ease), filter .55s var(--ease);
+  transition-delay: calc(var(--i) * 55ms); }
+.slide.hwq .fz-hw .w.f { font-weight: 360; color: #a3ae9a; }
+.slide.hwq .fz-hw .w.k { font-weight: 640; color: #f6f1e6; }
+.slide.hwq .fz-hw .w em { font-style: normal; font-weight: 600; color: var(--amber); }
+.slide.hwq .fz-hw .hq2 .w { opacity: 0; transform: translateY(.32em); filter: blur(7px); }
+.slide.hwq:has(.fz-wald.shown) .fz-hw .hq1 .w { opacity: 0; transform: translateY(-.28em); filter: blur(7px); }
+.slide.hwq:has(.fz-wald.shown) .fz-hw .hq2 .w { opacity: 1; transform: none; filter: none; transition-delay: calc(380ms + var(--i) * 70ms); }
+@media (prefers-reduced-motion: reduce) { .slide.hwq .fz-hw .w { transition: opacity .3s linear !important; transform: none !important; filter: none !important; } }
+/* "Kohlenstoff-Aufnahme": the same braces as on the next slide, unseen, so the line stands exactly as it does there */
+.c9-line .ub-ghost svg { opacity: 0 !important; }
+/* "Kohlenstoff-Aufnahme" and "Modellierung": the right-hand side on the fraction bar of the left (dm/dt), its "=" at the bar */
+.c9-line:has(.chip .mfrac) > .gloss { margin-top: 24px; }
+.c9-line:has(.chip .mfrac) > .gloss.tex, .c9-line:has(.chip .mfrac) > .gloss .tex { font-size: 34px; }   /* the rates as large as m_max in the model line below */
+
+.sh h2.hw-wald-h em { font-style: normal; color: var(--amber); }
+/* "Holzweg oder Wald?": the night of the Holzweg slide, its forest as there */
+.slide.hwq { background: var(--night); }
+.slide.hwq svg.deco { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the Holzweg slide's title, once it moves up, in the size and place of the next slide's (the same question) */
+.slide.chapter.brk.holzweg:has(.hwk3.shown) .ctext { top: 68px; }
+.slide.chapter.brk.holzweg:has(.hwk3.shown) h1 { font-size: 50px; letter-spacing: -0.015em; }
+/* "Was schafft eine vegane Welt?": a size larger and higher, clear of the forest */
+.slide.holzweg .hwnext { bottom: 94px; }
+.slide.holzweg .hwnext .hwans, .slide.holzweg .hwnext .hwans b { font-size: 52px; }
+
+/* closing slide: the weight on "noch viel mehr". "Bäume können" leads in, smaller and lighter, in a soft moss; the
+   claim follows large and full, upright, in the deck's moss (the same split as on "Holzweg oder Wald?": frame light,
+   what matters bold) */
+.ende-text .ende-a .e-big { font-size: 72px; font-weight: 500; letter-spacing: -0.012em; padding-bottom: 0; color: color-mix(in srgb, var(--moss) 85%, var(--paper)); }
+.ende-text .ende-a .e-sub { margin-top: 6px; font-size: 124px; line-height: .98; font-style: normal; font-weight: 640; letter-spacing: -0.022em; color: var(--moss); }

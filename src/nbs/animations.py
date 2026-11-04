@@ -221,6 +221,20 @@ def typical_light_product() -> NDArray:
 
 
 @lru_cache(maxsize=1)
+def closure_end_grid() -> NDArray:
+    """(360, 720) canopy closure in the last year (2100) of a tree planted today, per cell by its typical forest.
+
+    Closure depends on the forest key only (the site factor scales m_max, the ratio stays), so one run per key."""
+    from nbs.pipeline import run_single_tree
+
+    keys = key_grid()
+    out = np.full(keys.shape, np.nan)
+    for k in {x for x in keys.ravel() if x is not None}:
+        out[keys == k] = float(run_single_tree(k, 0.0).trajectory.closure[-1])
+    return out
+
+
+@lru_cache(maxsize=1)
 def typical_cloud_product() -> NDArray:
     """(360, 720) cloud brightening product (nbs.cloud_grid) of the typical forest per cell."""
     from nbs.cloud_grid import cloud_q_product
@@ -607,17 +621,17 @@ def carbon_curve_figure(out_path: str) -> str:
 
 
 def albedo_annual_map_figure(out_path: str) -> str:
-    """B8: yearly extra shortwave per full-grown tree as a map.
+    """B8: yearly extra shortwave per tree planted today, in 2100, as a map (the chart beside it ends at the same values).
 
     The same layout as the deck's other world maps (nbs.vergleich_figures._world_map_skeleton): the world at full
     width, colour bar with its title and the grey layers' legend in a strip underneath. The deck draws the cells
     (nbs.map_fields.absorbed_light, 1 deg blocks); the sites keep the value of their own cell, as in the talk."""
     from nbs.vergleich_figures import _world_map_skeleton
 
-    annual = -typical_light_product() * _STAND_AREA_M2
-    return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum, Jahresmittel [W]",
+    annual = -typical_light_product() * _STAND_AREA_M2 * closure_end_grid()
+    return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum im Jahr 2100, Jahresmittel [W]",
                                [0, 20, 40, 60, 80, 100], "kein Platz für Bäume", None,
-                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=6.9, lats=(-56, 80), fit=True)
+                               site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=6.9, lats=(-56, 87), fit=True)   # room above Alaska for Fairbanks's label
 
 
 C_CLOUD = "#4f8fb0"  # cloud brightening, as in the deck's "Wodurch ein Baum aufs Klima wirkt" drawing
@@ -659,53 +673,6 @@ def cloud_season_figure(out_path: str) -> str:
         ax.set_title(s.label, loc="left", fontsize=14, fontweight="bold", color=s.color)
     axes[0].set_ylabel("W je Baum")
     axes[-1].legend(loc="lower right", frameon=False, fontsize=12, ncol=3, bbox_to_anchor=(1.0, 1.08))
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
-    fig.savefig(out_path, dpi=FIG_DPI)
-    plt.close(fig)
-    return out_path
-
-
-def light_parts_sites_figure(out_path: str) -> str:
-    """B8s: the extra absorbed light per tree at the three sites over time, 2026-2100 [W, annual mean]: it grows with
-    the canopy, A_Baum(t) = closure(t) x stand area, as in the model. Laid out like the growth chart beside the
-    forest-type map: sites in their colours, names centred just above their curve. Per place the net (leaves plus
-    clouds); with the last click the other two places step back and Aachen's two parts come in, each as a line with
-    its area to the axis (as on the slide "Ein Baum an drei Orten"): the leaves' Delta alpha_Baum up, the clouds' down."""
-    from nbs.storyline_figures import run_site
-
-    _heading_font, body_font = _register_fonts()
-    _style(body_font)
-    c_baum, c_wolke = "#8a6800", "#056fab"   # deck.css --s-dal, --s-daw
-    fig, ax = plt.subplots(figsize=(4.4, 5.4), dpi=FIG_DPI)   # beside the 905 px map
-    fig.subplots_adjust(left=0.141, right=0.977, bottom=0.07, top=0.98)
-    _clean_axes(ax)
-    y = YEARS
-    xl = 2080   # the names stand here, just above (the steep curves: higher) their own curve
-    for s in SITES:
-        alb, cld, net = (float(v.mean()) for v in cloud_season_series(s))
-        f = np.asarray(run_site(s).trajectory.closure, dtype=float)
-        shown = s.name == "Aachen"
-        fade = "" if shown else " fade:2"   # at the last click the other places step back
-        ax.plot(y, net * f, color=s.color, linewidth=2.8, label=None, gid="step:0" + fade)
-        # the canopy is not closed yet everywhere in 2100: the value is that of the curve
-        below = s.name == "Marabá"   # lowest curve: its name below it
-        off = -22 if below else {"Fairbanks": 28}.get(s.name, 18)
-        ax.annotate(f"{s.label}: {net * f[-1]:.0f} W", (xl, float(np.interp(xl, y, net * f))), xytext=(0, off), textcoords="offset points",
-                    ha="center", va="top" if below else "bottom", fontsize=13.5, fontweight="bold", color=s.color, gid="step:0 fade:2")   # at the last click the parts have the room
-        if shown:
-            for part, col, name, xn, yn, up in ((alb * f, c_baum, "Albedo (Baum)", 2042, 10.5, True), (cld * f, c_wolke, "Albedo (Wolken)", 2054, -5.0, False)):
-                ax.fill_between(y, 0, part, color=col, alpha=0.22, linewidth=0, gid="step:2")
-                ax.plot(y, part, color=col, linewidth=2.2, label=None, gid="step:2")
-                ax.text(xn, yn, name, ha="center", va="center", fontsize=12, fontweight="bold",
-                        color=col, bbox=dict(boxstyle="round,pad=0.25", facecolor=col, alpha=0.16, edgecolor="none"), gid="step:2")
-                ax.annotate(f"{part[-1]:+.0f} W".replace("-", "\u2212"), (y[-1], float(part[-1])), xytext=(-2, 7 if up else -7), textcoords="offset points",
-                            ha="right", va="center", fontsize=11.5, fontweight="bold", color=col, gid="step:2")
-    ax.axhline(0, color=C_INK_MUTED, linewidth=0.9)
-    ax.set_xlim(y[0], y[-1])
-    ax.set_ylim(-8, 68)
-    ax.set_yticks([0, 20, 40, 60])
-    ax.set_xticks([T_START, 2060, 2100])
-    ax.set_ylabel("W je Baum, Jahresmittel")
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     fig.savefig(out_path, dpi=FIG_DPI)
     plt.close(fig)

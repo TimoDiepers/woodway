@@ -39,6 +39,7 @@ def data() -> dict[str, str]:
     film = _load("dacfilm.json")
     return {
         "TEMPSUM": _json(_load("tempsum.json"), ascii=False),  # scripts/build_tempsum_data.py
+        "LICHT": _json(_load("licht.json"), ascii=False),  # scripts/build_licht_data.py
         "ZEIT": _json(_load("zeitpfade.json")),                # scripts/build_zeitpfade_data.py
         "DACFILM_LAND": "img/dac_land.png",       # written by dacfilm_js(): one file, not a copy in every DAC slide
         "DACFILM_BASINS": "img/dac_basins.png",

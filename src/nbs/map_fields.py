@@ -300,10 +300,10 @@ def light_ingredients() -> dict:
 
 
 def absorbed_light() -> dict:
-    """b8: extra absorbed light per full-grown tree [W], annual mean."""
-    from nbs.animations import _STAND_AREA_M2, typical_light_product
+    """b8: extra absorbed light per tree planted today, in 2100 [W], annual mean (canopy not closed everywhere yet)."""
+    from nbs.animations import _STAND_AREA_M2, closure_end_grid, typical_light_product
 
-    return {"panels": [_world_panel(-typical_light_product() * _STAND_AREA_M2, "licht")]}
+    return {"panels": [_world_panel(-typical_light_product() * _STAND_AREA_M2 * closure_end_grid(), "licht")]}
 
 
 def availability() -> dict:

@@ -1466,12 +1466,13 @@ def forest_type_map_figure(out_path: str) -> str:
     # without reforestable land cut off (56 S to 80 N), so the map is as large as the column allows
     from nbs.vergleich_figures import SIDE_MAP_SIZE, side_map_axes
     fig = plt.figure(figsize=SIDE_MAP_SIZE, dpi=FIG_DPI)   # the same size and layout as the albedo map (nbs.vergleich_figures)
-    ax, _ = side_map_axes(fig, MAP_LATS)
+    lats = (MAP_LATS[0], MAP_LATS[1] + 7)   # a little more sky above Alaska: Fairbanks's label stands above its marker
+    ax, _ = side_map_axes(fig, lats)
     ax.imshow(rgba, extent=(-180, 180, -90, 90), origin="upper", interpolation="nearest")
     _map_axes(ax)
     from nbs.borders import MAP_ASPECT
     ax.set_aspect(MAP_ASPECT, adjustable="box")   # beside the curves: the narrower projection (nbs.borders)
-    ax.set_ylim(*MAP_LATS)
+    ax.set_ylim(*lats)
     from nbs import map_fields as M
     from nbs.vergleich_figures import map_site_value, world_site_labels
 

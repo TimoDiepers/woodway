@@ -19,12 +19,12 @@ const TEX_MACROS = {
   // bare (dm/dt); a function carries its argument (m(t)). Indices: B tree, W cloud, Bo ground, atm atmosphere, PS RE ZS ST the four carbon fluxes
   "\\rate":  "\\dfrac{\\mathbf{d}\\,#1}{\\mathbf{d}\\tm}",   // \rate{\mB} = dm_B/dt
   // carbon in the tree
-  "\\mB":   "\\q{mb}{m_{\\mathrm{B}}}",
+  "\\mB":   "\\q{mb}{m^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{B}}}",   // carbon in the tree (C: the element, not the whole mass); C one size smaller, so it does not crowd the B
   "\\mBd":  "\\rate{\\mB}",                         // the balance, as a rate
-  "\\mPS":  "\\rate{\\q{ps}{m_{\\mathrm{PS}}}}",     // a flux: kg C per year
-  "\\mRE":  "\\rate{\\q{re}{m_{\\mathrm{RE}}}}",
-  "\\mZS":  "\\rate{\\q{zs}{m_{\\mathrm{ZS}}}}",
-  "\\mST":  "\\rate{\\q{st}{m_{\\mathrm{ST}}}}",
+  "\\mPS":  "\\q{ps}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{PS}}}",     // a flux: kg C per year
+  "\\mRE":  "\\q{re}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{RE}}}",
+  "\\mZS":  "\\q{zs}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZS}}}",
+  "\\mST":  "\\q{st}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ST}}}",
   "\\mmax": "\\q{mmax}{m_{\\mathrm{max}}}",
   "\\kw":   "\\q{kw}{k}",                             // growth rate
   "\\pw":   "\\q{pw}{p}",                             // shape parameter
@@ -52,10 +52,10 @@ const TEX_MACROS = {
   // the energy balance of the atmosphere (the system boundary at its top): E, the flux densities in and out, their difference
   "\\Een":  "\\q{e}{E}",
   "\\pin":  "\\q{pin}{\\varphi^{\\mathrm{kw}}_{\\mathrm{ein}}}",     // sunlight in, shortwave
-  "\\pkw":  "\\q{pkw}{\\varphi^{\\mathrm{kw}}_{\\mathrm{aus}}}",     // reflected, shortwave out
-  "\\plw":  "\\q{pout}{\\varphi^{\\mathrm{lw}}_{\\mathrm{aus}}}",    // heat radiation, longwave out
+  "\\pkw":  "\\q{pkw}{\\varphi^{\\mathrm{kw}}_{\\mathrm{ref}}}",     // reflected, shortwave out
+  "\\plw":  "\\q{pout}{\\varphi^{\\mathrm{lw}}_{\\mathrm{ab}}}",    // heat radiation, longwave out
   "\\dphi": "\\q{dphi}{\\Delta\\varphi_{\\mathrm{ges}}}",
-  "\\dphiO": "\\q{dphio}{\\Delta\\varphi^{\\mathrm{ohne}}_{\\mathrm{ges}}}",   // the world without our tree: the reference
+  "\\dphiO": "\\q{dphio}{\\Delta\\varphi^{\\mathrm{Base}}_{\\mathrm{ges}}}",   // the world without our tree: the reference
   "\\dphiM": "\\q{dphi}{\\Delta\\varphi^{\\mathrm{B}}_{\\mathrm{ges}}}",   // the same world with our additional tree
   // CO2 in the atmosphere
   "\\eps":  "\\q{eps}{\\varepsilon_{\\mathrm{CO_2}}}",
@@ -73,7 +73,7 @@ const TEX_MACROS = {
   "\\T":    "\\q{dt}{T}",
   "\\dTw":  "\\q{dt}{\\Delta T_{\\mathrm{w}}}",
   "\\dTB":  "\\q{dt}{\\Delta T_{\\mathrm{B}}}",                         // the temperature effect of our tree alone
-  "\\dTO":  "\\q{dt}{T^{\\mathrm{ohne}}_{\\mathrm{ges}}}",      // the temperature of the world without our tree
+  "\\dTO":  "\\q{dt}{T^{\\mathrm{Base}}_{\\mathrm{ges}}}",      // the temperature of the world without our tree
   "\\dTM":  "\\q{dt}{T^{\\mathrm{B}}_{\\mathrm{ges}}}",         // the same world with it
   "\\Rf":   "\\q{rf}{R}",
   "\\Sk":   "\\q{sk}{S}",
@@ -811,6 +811,62 @@ const EC_ORTE3 = {
   }
 };
 
+/* slide "Netto-Energieänderung durch Albedo": the extra absorbed light of a tree planted 2026 (chart_data/licht.json,
+   scripts/build_licht_data.py). Aachen alone, the axis made for it: the leaves' albedo with its name (0), the clouds
+   with theirs (1); both step back and Aachen's sum stays, named (2); the axis grows to Fairbanks, the Aachen curve is
+   the same, only scaled, and the other two places fade in (3). The end values are the map's (2100). */
+window.LICHT = @@LICHT@@;
+const EC_LICHT = {
+  steps: 3, tip: { unit: 'W', dec: 0, sub: 'je Baum' }, labelMs: 1100,
+  // a name on each curve (HTML, placeLabels): where the curve is, outside its area
+  labels(k) {
+    const D = window.LICHT, A = D.sites.find(x => x.name === 'Aachen'), at = (ys, x) => ys[D.years.indexOf(x)], out = [];
+    if (k <= 1) out.push({ key: 'laub', grid: 0, x: 2048, y: at(A.laub, 2048), text: 'Albedo (Baum)', role: 'dal', side: 'above' });
+    if (k === 1) out.push({ key: 'wolke', grid: 0, x: 2062, y: at(A.wolke, 2062), text: 'Albedo (Wolken)', role: 'daw', side: 'below' });
+    if (k >= 2) D.sites.forEach(st => {
+      if (st.name !== 'Aachen' && k < 3) return;
+      const x = st.name === 'Marabá' ? 2072 : st.name === 'Fairbanks' ? 2060 : 2080;
+      out.push({ key: 'n' + st.name, grid: 0, x, y: at(st.dt, x), text: st.name, role: 'ink', color: st.color, side: st.name === 'Marabá' ? 'below' : 'above' });
+    });
+    return out;
+  },
+  option(k) {
+    const D = window.LICHT, n = D.years.length - 1, hex = (c, a) => { const v = [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); return `rgba(${v.join(',')},${a})`; };
+    const cLeaf = cssColor('--s-dal', EC.ink), cCloud = cssColor('--s-daw', EC.ink);
+    const wide = k >= 3, ymin = wide ? 0 : -10, ymax = wide ? 70 : 30, val = v => ecNum(Math.abs(v), 0) + ' W';
+    const sg = v => (v < -0.5 ? '−' : '+') + ecNum(Math.abs(v), 0) + ' W';
+    const series = [], pts = ys => D.years.map((y, j) => [y, ys[j]]);
+    const A = D.sites.find(x => x.name === 'Aachen');
+    // the two parts: drawn with their click, step back (fade out) when the sum is alone
+    const part = (id, name, col, ys) => {
+      const a = k >= 2 ? 0 : 1;
+      series.push({ id, name, tipName: name, tip: a ? undefined : false, silent: !a, type: 'line', z: 3, showSymbol: false, smooth: false, data: pts(ys),
+        lineStyle: { color: col, width: 2.4, opacity: a }, itemStyle: { color: col }, areaStyle: { color: col, opacity: .2 * a, origin: 'auto' },
+        endLabel: { show: true, formatter: sg(ys[n]), color: hex(col, a), fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 },
+        labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1300, animationEasing: 'cubicInOut' });
+    };
+    part('laub', 'Albedo (Baum)', cLeaf, A.laub);
+    if (k >= 1) part('wolke', 'Albedo (Wolken)', cCloud, A.wolke);
+    D.sites.forEach(st => {
+      const first = st.name === 'Aachen', a = first || wide ? 1 : 0;
+      if (k < 2) return;   // Aachen's sum comes with its click; the others wait, invisible, until the axis has grown
+      series.push({ id: 'n_' + st.name, name: st.name, tipName: st.name, tip: a ? undefined : false, silent: !a, type: 'line', z: 6, showSymbol: false, smooth: false, data: pts(st.dt),
+        lineStyle: { color: st.color, width: 4.4, opacity: a }, itemStyle: { color: st.color },
+        endLabel: { show: true, formatter: val(st.dt[n]), color: hex(st.color, a), fontFamily: EC.font, fontSize: 19, fontWeight: 700, distance: 8 },
+        labelLayout: { moveOverlap: 'shiftY' }, animationDuration: first ? 1500 : 900, animationEasing: 'cubicInOut' });
+    });
+    return {
+      animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
+      grid: { left: 86, right: 62, top: 20, bottom: 44, containLabel: false },
+      xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2060, 2100], formatter: v => String(v) } }),
+      yAxis: ecAxis({ type: 'value', min: ymin, max: ymax, interval: wide ? 20 : 10, name: 'W je Baum', nameTex: '$\\dQ$ je Baum [W]', nameLocation: 'middle', nameGap: 52,
+        axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => (v % (wide ? 20 : 10) === 0 ? String(v).replace('-', '−') : '') },
+        splitLine: { show: true, lineStyle: { color: EC.grid } } }),
+      series
+    };
+  }
+};
+
 /* the gap chart on a dark slide: light text and lines, the colours of the curves stay */
 function ecDark(o) {
   const map = { [EC.ink]: '#f2ede2', [EC.ink2]: '#d6dbd6', [EC.muted]: '#9aa39d', [EC.grid]: '#2c3437', [EC.line]: '#3a4447', '#8a918c': '#6d756f', '#8e0d16': '#ff7a6e', '#c4121f': '#ff5a4f', '#2f7a45': '#6cc28a', [EC.alb]: '#ef8a52', [EC.alle]: '#7fb6cf' };
@@ -934,9 +990,9 @@ function aufMorph(phase, t) {
         markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: '#1b2420', width: 1.6, type: 'solid', opacity: .7 * vlIn },
           label: { show: true, position: 'insideStartBottom', color: `rgba(27, 36, 32, ${vlIn})`, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
       { id: 'al', type: 'line', data: P(on(p.alle)), showSymbol: false, z: 5, labelLayout: { moveOverlap: 'shiftY' },
-        lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: end(named ? 'alle Flächen' : `alle Flächen: −${ecNum(p.alle.at(-1), 0)} · 10⁻³ K`, EC.alle) },
+        lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: end(named ? 'alle Flächen' : `alle Flächen: −${ecNum(p.alle.at(-1) / 1000, 3)} K`, EC.alle) },
       { id: 'k', type: 'line', data: P(on(p.kuehlt)), showSymbol: false, z: 6, labelLayout: { moveOverlap: 'shiftY' },
-        lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: end(named ? 'kühlende Flächen' : `kühlende Flächen: −${ecNum(p.kuehlt.at(-1), 0)} · 10⁻³ K`, '#2f7a45') },
+        lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: end(named ? 'kühlende Flächen' : `kühlende Flächen: −${ecNum(p.kuehlt.at(-1) / 1000, 3)} K`, '#2f7a45') },
       ...(phase !== 3 ? [
         { id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(on(p.kuehlt)), showSymbol: false, silent: true, lineStyle: { width: 0 } },
         { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => (phase === 'direct' ? lift * v : v) - on(p.kuehlt)[i])), showSymbol: false, silent: true, z: 2,
@@ -955,6 +1011,11 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
     const o = EC_ZEIT.option(k); o.title.text = AUF_TITLE; o.title.left = AUF_LEFT; o.grid.bottom = 34; o.grid.left = AUF_LEFT;
     Object.assign(o.yAxis, AUF_Y);
     o.yAxis.axisLabel.formatter = v => (v === 0 ? '0' : ecSigned(v / 1000, 3));   // the data in mK, read in deg C
+    // the end labels as the axis reads: in K, not in 10^-3 K (name line and the parts below it)
+    const inK = n => ecNum(+n / 1000, 3);
+    for (const sr of o.series) if (sr.endLabel && typeof sr.endLabel.formatter === 'string')
+      sr.endLabel.formatter = sr.endLabel.formatter.replace(/(\d+) · 10⁻³ K/g, (_, n) => `${inK(n)} K`)
+        .replace(/\{b\|[^}]*\}/, b => b.replace(/([−+])(\d+)/g, (_, g, n) => g + inK(n)));
     return o;
   }
   const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), p = D.pfade, vl = D.vl_c;
@@ -1330,7 +1391,7 @@ const EC_LANDDONUT = {
     const series = [Object.assign({}, base, { id: 'heute', radius: ['40%', '71%'], data: [
       item('Wald', L.wald, '#2f6b45', 'in'),
       item('frei, aufforstbar', L.wiederbewaldbar, '#6b8f5e', 'out', '#c9d8c0'),
-      item('Tierhaltung', L.tiere, '#c98a2b', 'in', '#14181a', 'Futtermittel'),
+      ((x) => (x.label && (x.label.offset = [0, -10]), x))(item('Tierhaltung', L.tiere, '#c98a2b', 'in', '#14181a', 'Futtermittel')),   // a little up, clear of the ring's outer edge
       item('Lebensmittel', L.acker, '#e3c46e', 'out'),
       item('übriges Land', rest, '#30383b', 'in', '#b9c0bb')] })];
     // the second ring: what of the animals' land could carry forest
@@ -1345,7 +1406,7 @@ const EC_LANDDONUT = {
              spacer('Lebensmittel ', L.acker), spacer('übriges Land ', rest)] }));
     return {
       animationDurationUpdate: 700,
-      title: { text: `${ecNum(L.gesamt * 10, 0)} Mio. km²`, subtext: 'Land', left: '53%', textAlign: 'center', top: '37%',
+      title: { text: `${ecNum(L.gesamt * 10, 0)} Mio.`, subtext: 'km² Land', left: '53%', textAlign: 'center', top: '37%',
                textStyle: { color: '#f2ede2', fontFamily: EC.font, fontSize: 28, fontWeight: 600 },
                subtextStyle: { color: '#9aa39d', fontFamily: EC.font, fontSize: 18 } },
       series
@@ -1355,7 +1416,7 @@ const EC_LANDDONUT = {
 
 /* Holzweg: the donut on the left card, held while the right card has its clicks; what a world without animals frees
    comes after them */
-const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 6, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1, 1][k]) });
+const EC_LANDDONUT_HOLD = Object.assign({}, EC_LANDDONUT, { steps: 5, option: k => EC_LANDDONUT.option([0, 0, 1, 1, 1, 1][k]) });   // to the slide's last click (6), no further: one more would be a click that changes nothing
 /* backup "Energiebilanz Jahr für Jahr": the energy balance year by year, as FaIR counts it, for one year of
    forcing (a pulse: φ = −1 W/m² in year 1, i.e. −31,6 MJ/m², then nothing): the response f of the formula above it, the
    tree's ΔT being the sum of such responses over its years. One layer, the FaIR member: heat capacity 1/S = 3,7 W·a/(m²·K)
@@ -1449,7 +1510,7 @@ const EC_TBAL = {
   }
 };
 
-const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, auff1: EC_AUFF1, auff2: EC_AUFF2, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU, tbal: EC_TBAL };
+const EC_CHARTS = { kurs: EC_KURS, landdonut: EC_LANDDONUT, landdonut5: EC_LANDDONUT_HOLD, temperatur: EC_TEMPERATURE, entnahme: EC_REMOVAL, luecke: EC_GAP, tempsum: EC_TEMPSUM, orte3: EC_ORTE3, licht: EC_LICHT, lueckeend: EC_GAP_END, zeit: EC_ZEIT27, auff: EC_AUFF, auff1: EC_AUFF1, auff2: EC_AUFF2, zeitforst: EC_ZEIT28, dactemp: EC_DACTEMP, kosten: EC_KOSTEN, vegan: EC_VEGAN, veganluecke: EC_VEGAN_LUECKE, anker4: EC_ANKER4, anker4f: EC_ANKER4F, anker0: EC_ANKER0, anker1: EC_ANKER1, anker2: EC_ANKER2, veganall: EC_VEGAN_ALL, daccsausbau: EC_DACCS_AUSBAU, tbal: EC_TBAL };
 
 class EChart {
   constructor(host) {
@@ -1512,6 +1573,8 @@ class EChart {
       let el = old.get(L.key); old.delete(L.key);
       if (!el) {
         el = document.createElement('span'); el.className = 'mtex ectex c-' + L.role; el.dataset.key = L.key;
+        if (L.color) el.style.setProperty('--c', L.color);
+        if (this.spec.labelMs) el.style.transition = `left ${this.spec.labelMs}ms cubic-bezier(.65,0,.35,1), top ${this.spec.labelMs}ms cubic-bezier(.65,0,.35,1)`;
         if (L.tex) katex.render(L.tex, el, { macros: TEX_MACROS, throwOnError: false, strict: false, trust: c => c.command === '\\htmlClass' });
         else el.textContent = L.text;
         // a new name comes once its curve has been drawn to it (the curves are drawn at a constant pace: spec.drawMs
@@ -1941,14 +2004,18 @@ class MplChart {
       const sites = window.MAPDATA ? window.MAPDATA.sites : [];
       const textSeries = (sid, list, delay) => ({
         id: sid, type: 'scatter', xAxisIndex: i, yAxisIndex: i, z: 30, silent: true, clip: false, symbolSize: 0,
+        itemStyle: { opacity: 1 },   // a scatter series is 80 % opaque by default: the names' boxes would be seen through
         data: list.map(t => ({ value: [t.x, t.y], label: { show: true, position: 'inside', formatter: t.s, color: t.c, align: t.al, ...subRich(t, font(t, 16)),
           verticalAlign: 'middle', rotate: t.rot || 0, lineHeight: (t.fs || 16) * s * 1.18, ...font(t, 16),
           backgroundColor: t.bg ? (t.bga < 1 ? `rgba(${parseInt(t.bg.slice(1, 3), 16)},${parseInt(t.bg.slice(3, 5), 16)},${parseInt(t.bg.slice(5, 7), 16)},${t.bga})` : t.bg) : 'transparent',
           // dark labels get a paper halo so they stay readable over lines and bars; light ones sit on colour and need none
           textBorderColor: 'rgba(242,237,226,.92)', textBorderWidth: t.bg || mapHex(t.c).reduce((q, v) => q + v, 0) > 560 ? 0 : 3.2 * s,
-          padding: t.bg ? [2 * s, 4 * s] : 0, borderColor: t.ring || 'transparent', borderWidth: t.ring ? 1.6 * s : 0, borderRadius: t.ring ? 4 * s : 0 } })),
+          padding: t.pill ? [3 * s, 8 * s] : t.bg ? [2 * s, 4 * s] : 0, borderColor: t.ring || 'transparent', borderWidth: t.ring ? 1.6 * s : 0, borderRadius: t.pill ? 8 * s : t.ring ? 4 * s : 0 } })),
         animationDuration: 500, animationDelay: delay
       });
+      // a curve's or place's name (bold, in a colour) sits in a box of its colour, as the names on the ECharts figures (.mtex.ectex)
+      const paper = mapHex(cssColor('--paper', '#f2ede2')), mix = (c, d, w) => '#' + mapHex(c).map((v, q) => Math.round(v * w + mapHex(d)[q] * (1 - w)).toString(16).padStart(2, '0')).join(''),
+        tint = c => mix(c, '#' + paper.map(v => v.toString(16).padStart(2, '0')).join(''), .18), fg = c => mix(c, '#1b2420', .5);   // one look for every name: its colour darkened (readable), on a tint of it
       const siteText = t => {
         const site = a.map && sites.find(q => t.s.trim().startsWith(q.name));
         if (!site) return null;
@@ -1959,12 +2026,17 @@ class MplChart {
           const j = L.cells.findIndex(q => q[0] === r && q[1] === c);
           if (j >= 0) s2 = site.name + (t.s.includes('\n') ? '\n' : ': ') + mapFmt(this.frameValue(L, j), window.MAPDATA.scales[L.scale]);
         }
-        return { ...t, s: s2, c: '#1b2420', b: 1, bg: '#fbf8f1', bga: .94, ring: site.color };
+        return { ...t, s: s2, c: fg(site.color), b: 1, pill: 1, bg: tint(site.color), bga: 1 };
       };
       // a formula symbol on its own goes over the chart in KaTeX, in the slides' formula face (placeTex)
       for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
       const shown = a.texts.filter(t => !(t.stp > k) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
-      const texts = shown.filter(t => !siteText(t));
+      const pill = t => {
+        const c = !a.map && !t.bg && !t.rot && !t.ring && t.b && /^#[0-9a-f]{6}$/i.test(t.c || '') && mapHex(t.c);
+        if (!c || Math.max(...c) - Math.min(...c) < 50) return t;
+        return { ...t, pill: 1, c: fg(t.c), bg: tint(t.c), bga: 1 };
+      };
+      const texts = shown.filter(t => !siteText(t)).map(pill);
       // texts that wait for a click each in a series of their own: a later click adds its text without the earlier ones fading in again
       for (const g of [...new Set(texts.map(t => t.stp || 0))]) { const part = texts.filter(t => (t.stp || 0) === g); if (part.length) series.push(textSeries(id(g ? 't' + g : 't'), part, base + 1300)); }
       if (siteTexts().length) {

@@ -925,7 +925,7 @@ def map_site_value(data: dict, site):
 def world_site_labels(ax, text_of, marker=None, fairbanks_up: bool = True) -> None:
     """The three sites on a world map, each labelled with its name and, below it, *text_of(site)* (its value);
     *marker* overrides the marker style.
-    Fairbanks's label above its marker, the others below."""
+    Fairbanks's label above and right of its marker, Aachen's above and left, the others below."""
     from nbs.animations import SITES
 
     for s in SITES:
@@ -933,9 +933,10 @@ def world_site_labels(ax, text_of, marker=None, fairbanks_up: bool = True) -> No
                 **(dict(marker=s.marker, ms=9, mfc=s.color, mec="white", mew=2.0) | (marker or {})))
         value = text_of(s)
         text = s.label if value is None else f"{s.label}\n{value}"
-        up = s.name == "Fairbanks" and fairbanks_up   # below it where the map is cut off just above Alaska
-        ax.annotate(text, (s.lon, s.lat), xytext=(7, 6) if up else (7, -8), textcoords="offset points",
-                    va="bottom" if up else "top", fontsize=11, fontweight="bold", color=C_INK, zorder=7)
+        # Fairbanks's label up and right of its marker, Aachen's up and left of it, the others below and right
+        off, ha, va = {"Fairbanks": ((7, 6), "left", "bottom"), "Aachen": ((-7, 6), "right", "bottom")}.get(s.name, ((7, -8), "left", "top"))
+        ax.annotate(text, (s.lon, s.lat), xytext=off, textcoords="offset points", ha=ha,
+                    va=va, fontsize=11, fontweight="bold", color=C_INK, zorder=7)
 
 
 def de_num(v: float, nd: int = 0) -> str:
