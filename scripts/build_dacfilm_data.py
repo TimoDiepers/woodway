@@ -39,7 +39,7 @@ def _png(mask_rgba: np.ndarray) -> str:
 
 def main() -> None:
     need = np.array(overshoot_series()["noetig_k"]) * 1000
-    tree = -delta_t("forst") * 1000
+    tree = -delta_t("kuehlt") * 1000   # the trees of chapter 5: the cooling land, left to grow (as zeitpfade.json)
     paths, cool = {}, {}
     r = solve_cost_offset(np.array(vl_series()["median_c"]) - 1.5 - tree / 1000, growth=1.2)   # cheapest, at most 20 %/a
     r["x"] = r["u"]                                                   # the map shows what is removed

@@ -5,6 +5,8 @@ albedo as a forcing; the same chain as ``nbs.potential.fair_global_delta_t``):
 
 - ``"alle"``: every reforestable cell with a typical forest (0.83 Gha), left to grow.
 - ``"kuehlt"``: only the cells whose tree still cools at the horizon (the area slide's main case), left to grow.
+- ``"kuehlt_rodung"``: ``"kuehlt"`` plus today's forest where forest warms, cut in the start year with its
+  biomass buried (felling_forcing_split), both in one FaIR run; the forgone sink counts as release.
 - ``"forst"``: the cooling cells as managed forest: clear-cut at a rotation age by climate zone (boreal 80,
   temperate 60, subtropical 30, tropical 20 years) and replanted. The stem (70 % of the stand's carbon)
   leaves the forest as timber and stays bound -- the optimistic case; the residues go back to the air at
@@ -35,7 +37,7 @@ from nbs.species import SPECIES, get_species, reference_site
 # managed forest: clear-cut at a rotation age by climate zone (the zone is the suffix of the forest-type key)
 ROTATION_BY_ZONE = {"boreal": 80, "gemaessigt": 60, "subtropisch": 30, "tropisch": 20}  # [a]
 STEM_SHARE = 0.7                # share of the stand's carbon that leaves as timber; the residues decay
-PATHS = ("alle", "kuehlt", "forst")
+PATHS = ("alle", "kuehlt", "forst", "kuehlt_rodung")
 N_Y = len(YEARS)
 
 
@@ -100,6 +102,10 @@ def forcing_split(path: str, start: int = T_START, rate_gha: float | None = None
     [Gt CO2/a, >= 0], albedo forcing [W/m^2], planted area [Gha])."""
     if path not in PATHS:
         raise ValueError(f"unknown path {path!r}")
+    if path == "kuehlt_rodung":   # the cooling cells planted, plus today's warming forest cut and buried (stacked)
+        up, loss, rf, area = forcing_split("kuehlt", start, rate_gha, release)
+        lost, _, rf_cut, a_cut, _ = felling_forcing_split(start)
+        return up, loss + lost, rf + rf_cut, area + a_cut
     mask = masks()["alle" if path == "alle" else "kuehlt"]
     sums = {key: _cells(key, mask) for key in SPECIES}
     sums = {k: v for k, v in sums.items() if v[2] > 0}
@@ -204,3 +210,87 @@ def delta_t_parts(path: str, start: int = T_START, release: bool = False) -> dic
         out.setflags(write=False)
         return out
     return {"co2_aufnahme": run(up, z), "co2_verlust": run(loss, z) if loss.any() else np.zeros(N_Y), "albedo": run(z, rf)}
+
+
+# ---- felling: the existing forest that warms, cut in the start year, its biomass buried ----------------------
+
+BESTAND = __import__("pathlib").Path(__file__).resolve().parents[2] / "data" / "forest" / "bestand_0p5.npz"
+
+
+@lru_cache(maxsize=None)
+def _bestand() -> tuple[NDArray, NDArray, NDArray]:
+    """(area [m^2], current AGB+BGB carbon [Mg C/ha], potential [Mg C/ha]) of the woody land today per cell
+    (Walker et al. 2022, NCS categories MM and M; scripts/prepare_bestand.py)."""
+    d = np.load(BESTAND)
+    return (d["area_m2"].astype(float), d["current_mgc_ha"].astype(float), d["potential_mgc_ha"].astype(float))
+
+
+def felling_cells() -> NDArray:
+    """Cells of today's forest where forest warms: the deck's own rule (the cell's typical forest does not cool by
+    T_END, cooling_cells with Walker's potential carbon), applied to the woody land of Walker's MM and M categories."""
+    from nbs.forest_data import key_grid
+
+    area, _, pot = _bestand()
+    has_key = key_grid(all_cells=True) != None  # noqa: E711
+    m = (area > 0) & (pot > 0) & has_key
+    return m & ~cooling_cells(np.where(m, area, 0.0), pot)
+
+
+def felling_forcing_split(start: int = T_START, forgone: bool = True) -> tuple[NDArray, NDArray, NDArray, float, float]:
+    """The warming existing forest (felling_cells) cut at once in *start*, the land kept open, all biomass buried
+    (no CO2 back to the air). Returns (forgone uptake [Gt CO2/a, >= 0: the sink the stand would still have had],
+    zeros for the release, albedo forcing [W/m^2, < 0: the open land is brighter], area [Gha], buried carbon [Gt C]).
+
+    Forgone uptake: each stand is placed on its forest key's growth curve (stock scaled to the cell's potential, as
+    the site factor does) at the age where it holds today's carbon; the uptake it would have had from that age on is
+    lost. The albedo: the full-canopy forcing of that forest type there, with the opposite sign."""
+    from nbs.forest_data import key_grid
+
+    area, cur, pot = _bestand()
+    keys = key_grid(all_cells=True)
+    cut = felling_cells()
+    f = _site_factor(keys, pot)
+    i0 = start - int(YEARS[0])
+    n_left = N_Y - i0
+    up_lost, rf, a_sum, c_sum = np.zeros(N_Y), np.zeros(N_Y), 0.0, 0.0
+    for key in SPECIES:
+        m = (keys == key) & cut & (f > 0)
+        if not m.any():
+            continue
+        sp = get_species(key)
+        n_trees = area[m] / sp.stand_area_m2
+        rf[i0:] += TAU_ATM * sp.stand_area_m2 / A_EARTH_M2 * float((n_trees * np.nan_to_num(light_product(key)[m])).sum())
+        a_sum += float(area[m].sum()) / 1e13
+        c_sum += float((area[m] * cur[m]).sum()) / 1e4 / 1e9
+        if forgone:
+            up, _, st = _trajectory(key, int(YEARS[0]))
+            s_ref = np.maximum.accumulate(st)
+            c_tree = cur[m] * 1000.0 * sp.stand_area_m2 / 1e4       # kg C per tree today
+            a0 = np.searchsorted(s_ref, c_tree / f[m])               # age that holds today's stock
+            idx = np.minimum(a0[:, None] + np.arange(n_left)[None, :], N_Y - 1)
+            up_cells = np.maximum(up[idx], 0.0) * (f[m] * n_trees)[:, None]
+            up_lost[i0:] += M_CO2_PER_C * up_cells.sum(axis=0) / 1e12
+    return up_lost, np.zeros(N_Y), rf, a_sum, c_sum
+
+
+def _fair(nee: NDArray, rf: NDArray) -> NDArray:
+    base = run_fair_baseline(SZENARIO)
+    d = run_fair_perturbed(nee[: len(base)], rf[: len(base)], SZENARIO) - base
+    out = np.append(d, d[-1])[:N_Y]
+    out.setflags(write=False)
+    return out
+
+
+@lru_cache(maxsize=None)
+def delta_t_felling(start: int = T_START, forgone: bool = True) -> NDArray:
+    """Global temperature change [K] of felling the warming existing forest (felling_forcing_split), one FaIR run."""
+    up, _, rf, _, _ = felling_forcing_split(start, forgone)
+    return _fair(up, rf)
+
+
+@lru_cache(maxsize=None)
+def delta_t_felling_parts(start: int = T_START) -> dict[str, NDArray]:
+    """delta_t_felling by cause, each its own FaIR run: the forgone sink and the albedo."""
+    up, _, rf, _, _ = felling_forcing_split(start)
+    z = np.zeros(N_Y)
+    return {"co2_entgangen": _fair(up, z), "albedo": _fair(z, rf)}

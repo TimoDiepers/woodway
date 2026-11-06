@@ -21,7 +21,7 @@ from nbs.constants import YEARS
 from nbs import vegan
 from nbs.dac_optim import (COST_CASES, EU27_BIP_BIO_EUR, FOSSIL_SUBV_BIO_EUR, GROWTH, START_2030_GT, VERGLEICH_QUELLEN,
                            max_buildout, price_plan, solve_cost_offset)
-from nbs.tree_paths import delta_t, delta_t_parts, forcing
+from nbs.tree_paths import delta_t, delta_t_felling, delta_t_felling_parts, delta_t_parts, felling_forcing_split, forcing
 from nbs.vergleich_figures import overshoot_series, vl_series
 
 REPO = Path(__file__).resolve().parents[1]
@@ -29,6 +29,9 @@ OUT = REPO / "deck/chart_data/zeitpfade.json"
 # land of the Earth without Antarctica [Gha]: FAOSTAT 13.0, forest FAO FRA 2020 4.06; farmland 4.1 after Poore &
 # Nemecek 2018, 83 % of it for animals (pasture and feed), vegan about 1.0 in all; reforestable after Walker et al. 2022
 # (as slide 25); freed and forest-capable in a vegan world from nbs.vegan.flaeche_info (Walker's rule)
+# the trees' contribution from slide 25 on: the cooling cells planted. "kuehlt_rodung" (plus today's warming forest
+# cut and buried) is only the what-if line on slide 25
+BASIS = "kuehlt"
 LAND_GHA = {"gesamt": 13.0, "wald": 4.06, "tiere": 3.4, "acker": 0.7, "acker_vegan": 1.0, "wiederbewaldbar": 0.83}
 
 
@@ -42,14 +45,24 @@ def _rest(gap, r) -> list[float]:
 
 def main() -> None:
     need = np.array(overshoot_series()["noetig_k"])
-    paths = {p: _mk(-delta_t(p)) for p in ("alle", "kuehlt", "forst")}
+    paths = {p: _mk(-delta_t(p)) for p in ("alle", "kuehlt", "forst", "kuehlt_rodung")}
     paths["forst_frei"] = _mk(-delta_t("forst", release=True))
     # the same paths by cause (cooling > 0): CO2 uptake of the standing trees, CO2 released at felling, albedo
-    teile = {p: {k: _mk(-v) for k, v in delta_t_parts(p).items()} for p in ("alle", "kuehlt", "forst")}
+    teile = {p: {k: _mk(-v) for k, v in delta_t_parts(p).items()} for p in ("alle", "kuehlt", "forst", "kuehlt_rodung")}
     teile["forst_frei"] = {k: _mk(-v) for k, v in delta_t_parts("forst", release=True).items()}
     areas = {p: round(forcing(p)[2], 3) for p in ("alle", "kuehlt", "forst")}
-    gap = need + delta_t("kuehlt")
-    gap_c = np.array(vl_series()["median_c"]) - 1.5 + delta_t("kuehlt")   # unclipped: below 1.5 deg C counts too
+    # slide 24: today's forest where forest warms (Walker's woody land, the deck's cooling rule), cut in 2026, all
+    # biomass buried, the land kept open: brighter land, minus the sink the stands would still have had
+    paths["rodung"] = _mk(-delta_t_felling())
+    rt = delta_t_felling_parts()
+    teile["rodung"] = {"co2_aufnahme": _mk(-rt["co2_entgangen"]), "co2_verlust": [0.0] * len(YEARS), "albedo": _mk(-rt["albedo"])}
+    up_lost, _, _, areas["rodung"], c_bur = felling_forcing_split()
+    rodung = {"flaeche_gha": round(areas["rodung"], 3), "vergraben_gtc": round(c_bur, 1),
+              "entgangen_gtco2_bis_2100": round(float(up_lost[: YEARS.tolist().index(2100) + 1].sum()), 1)}
+    areas["rodung"] = round(areas["rodung"], 3)
+    print("rodung", rodung, "2100 mK", paths["rodung"][-1] if YEARS[-1] == 2100 else None)
+    gap = need + delta_t(BASIS)
+    gap_c = np.array(vl_series()["median_c"]) - 1.5 + delta_t(BASIS)   # unclipped: below 1.5 deg C counts too
 
     def _case(r, g):
         x = np.array(r["u"]); over = 1000 * (g - np.array(r["kuehlung_k"]))
@@ -106,13 +119,13 @@ def main() -> None:
                          "brutto_gt": round(float(u.sum() - uv.sum()), 1),
                          "kosten_bio": {k: round(kosten_pfad[k]["summe_bio"] - vk[k]["summe_bio"], 2) for k in COST_CASES}}}
     # chapter 5 anchor: Very Low in deg C and what each measure does to it, unclipped (mK, < 0 = cooler)
-    wirkung = {"baeume": _mk(delta_t("kuehlt")), "vegan": _mk(dg + df),
+    wirkung = {"baeume": _mk(delta_t(BASIS)), "vegan": _mk(dg + df),
                **{f"dac_{g}": _mk(-np.array(r["kuehlung_k"])) for g, r in runs.items()}, "dac_max": _mk(-np.array(r_max["kuehlung_k"])),
                "dac_vegan": _mk(-np.array(r_v["kuehlung_k"]))}
     vl_c = [round(v, 3) for v in vl_series()["median_c"]]
     print("vegan", veg["ersparnis"], ohne_dac, vegan.flaeche_info())
     out = {"jahre": [int(y) for y in YEARS], "noetig": _mk(need), "baeume_rest": _mk(gap), "pfade": paths, "pfade_teile": teile, "vl_c": vl_c, "wirkung": wirkung,
-           "flaechen_gha": areas, "dac": dac, "kosten_pfad": kosten_pfad, "vegan": veg}
+           "flaechen_gha": areas, "rodung": rodung, "dac": dac, "kosten_pfad": kosten_pfad, "vegan": veg}
     OUT.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     print("wrote", OUT)
 

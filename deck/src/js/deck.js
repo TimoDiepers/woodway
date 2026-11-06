@@ -310,7 +310,7 @@ let chartUid = 0;
    goes. SVG renderer, so text stays sharp when the deck scales.
    =========================================================== */
 const EC = {
-  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#706a19', alle: '#04455f',   // = --s-phia
+  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#706a19', alle: '#04455f', rodung: '#8a4b1f',   // = --s-phia
   font: "'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif"
 };
 /* one pace for every curve in the deck: a line or area is drawn in from the left in DRAW_MS at a constant speed
@@ -948,16 +948,17 @@ const EC_ZEIT = {
    picture ([-35, 0] mK) until Very Low is in view, the tree curves stay at 0, tiny now; click 4 zooms in on the warming
    ([1.4, 1.9] deg C) while the tree curves move up onto Very Low minus their cooling. The ticks are recomputed every
    frame, so the numbers move with the scale; they read in mK while the span is small */
-const AUF_TITLE = 'Alle Bäume 2026 gepflanzt', AUF_WIDE = [-.1, 2];
+const AUF_TITLE = 'Alle Bäume 2026 gepflanzt', AUF_WIDE = [-.1, 2], AUF_DT = [-.035, 0];   // AUF_DT: the Delta T axis of slide 24
 // one y title through all of slide 24, in deg C from the start: only the scale moves, never the label
+const AUF_KR = 'kühlende Flächen + Rodung\nwärmender Wälder';   // the stacked case's name in deg C pictures
 const AUF_Y = { name: 'ΔT [°C]', nameTex: '$\\dT$ [°C]', nameLocation: 'middle', nameGap: 86 }, AUF_LEFT = 108;
 function aufMorph(phase, t) {
   const D = window.ZEIT, p = D.pfade, vl = D.vl_c, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
-  const bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), ext = vl.concat(bk);
+  const bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), ext = vl.concat(bk, vl.map((v, i) => v - p.kuehlt_rodung[i] / 1000));   // the axis of pictures 3-5
   const lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
   const mix = (a, b) => a + (b - a) * t;
   // 'direct': from the Delta T picture straight to the warming, the tree curves moving onto Very Low as the axis goes
-  const [l0, l1] = phase === 3 ? [[-.035, 0], AUF_WIDE] : phase === 'direct' ? [[-.035, 0], [lo, hi]] : [AUF_WIDE, [lo, hi]];
+  const [l0, l1] = phase === 3 ? [AUF_DT, AUF_WIDE] : phase === 'direct' ? [AUF_DT, [lo, hi]] : [AUF_WIDE, [lo, hi]];
   const min = mix(l0[0], l1[0]), max = mix(l0[1], l1[1]), span = max - min;
   const lift = phase === 3 ? 0 : t, on = d => vl.map((v, i) => lift * v - d[i] / 1000);   // 4: the tree curves move up onto Very Low
   // a round step for the ticks every frame (1, 2, 5 x 10^n, about six of them), on its multiples
@@ -997,11 +998,12 @@ function aufMorph(phase, t) {
   };
 }
 
-/* slide 24 in one chart: 0-2 the Delta T of the trees as before (all land, its turning point, the cooling land);
+/* slides 24-25 in one chart: 0-2 the Delta T of the trees as before (all land, its turning point, the cooling land);
    3 in one move the axis goes from the trees' Delta T to the warming in deg C, Very Low without its removal comes into
    view and the tree curves move onto it, as Very Low minus their cooling (same series, so they glide there), ending on
-   the cooling as a band and its size at the peak; 4 what stays above 1.5 deg C */
-const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
+   the cooling as a band and its size at the peak; 4 a what-if, dashed: the cooling land plus today's warming forest
+   cut and buried (one FaIR run); 5 what stays above 1.5 deg C, still with the cooling land alone */
+const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   option(k, t = 1) {
   // one title through all pictures: the scenario stays, only the axis changes
   if (k <= 2) {
@@ -1018,7 +1020,9 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   const D = window.ZEIT, P = ys => D.jahre.map((y, i) => [y, ys[i]]), p = D.pfade, vl = D.vl_c;
   if (k === 3 && t < 1) return aufMorph('direct', t);   // the move; its last frame is the picture below
   const iPk = vl.indexOf(Math.max(...vl)), pv = D.jahre[iPk], tv = vl[iPk];
-  const ba = vl.map((v, i) => v - p.alle[i] / 1000), bk = vl.map((v, i) => v - p.kuehlt[i] / 1000), tip = { unit: '°C', dec: 2 };
+  const ba = vl.map((v, i) => v - p.alle[i] / 1000), bc = vl.map((v, i) => v - p.kuehlt[i] / 1000), tip = { unit: '°C', dec: 2 };
+  const br = vl.map((v, i) => v - p.kuehlt_rodung[i] / 1000);   // the what-if: only a dashed line
+  const bk = bc;   // the case on the table: band, peak, what stays above 1.5 deg C
   const lab = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
   const series = [
     { id: 'vl', name: 'Best Case', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
@@ -1031,8 +1035,11 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
         label: { show: true, position: 'insideStartBottom', color: EC.ink, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
     { id: 'al', type: 'line', data: P(ba), showSymbol: false, z: 5, tip, tipName: 'alle Flächen', animationDurationUpdate: 1600,
       lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: lab('alle Flächen', EC.alle), labelLayout: { moveOverlap: 'shiftY' } },
-    { id: 'k', type: 'line', data: P(bk), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
+    { id: 'k', type: 'line', data: P(bc), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
       lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: lab('kühlende Flächen', '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' } }];
+  if (k >= 4) series.push(   // what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
+    { id: 'kr', type: 'line', data: P(br), animationDuration: 1600, showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen + Rodung wärmender Wälder', animationDurationUpdate: 1600,
+      lineStyle: { color: EC.rodung, width: 3, type: [3, 5] }, itemStyle: { color: EC.rodung }, endLabel: Object.assign(lab(AUF_KR, EC.rodung), { lineHeight: 25 }), labelLayout: { moveOverlap: 'shiftY' } });
   if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
     const iK = bk.indexOf(Math.max(...bk));   // the new peak, with the trees
     series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(bk), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
@@ -1042,14 +1049,14 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
                 { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - bk[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: '#2f7a45' }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 1200 });
   }
-  if (k >= 4) {   // what stays above 1.5 deg C
+  if (k >= 5) {   // what stays above 1.5 deg C
     series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
                 { id: 'rr', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(v => Math.max(v - 1.5, 0))), showSymbol: false, silent: true, z: 1,
                   lineStyle: { width: 0 }, areaStyle: { color: '#c4121f', opacity: .16 }, animationDuration: 1200,
                   markPoint: { silent: true, symbol: 'circle', symbolSize: 0, animationDelay: 500, data: [{ coord: [2075, 1.5 + (bk[D.jahre.indexOf(2075)] - 1.5) * .4] }],
                     label: { show: true, color: '#8e0d16', fontFamily: "'Literata', Georgia, serif", fontStyle: 'italic', fontWeight: 500, fontSize: 25, formatter: 'fehlende Kühlung' } } });
   }
-  const ext = vl.concat(bk), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
+  const ext = vl.concat(bc, br), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
   return {
     animationDurationUpdate: 1600, animationEasingUpdate: 'cubicInOut',
     title: { text: AUF_TITLE, left: AUF_LEFT, top: 0, textStyle: { color: EC.ink, fontFamily: EC.font, fontSize: 21, fontWeight: 600 } },
@@ -1067,8 +1074,8 @@ const EC_AUFF = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
 /* slide 25 builds the cooling of all trees up (pictures 0-2); the next slide stands on that picture and goes on to the warming
    in deg C and what stays above 1.5 deg C (pictures 3-4 of the full chart) */
 // the cooling of the cooling land as an area from 0 down to its curve: the band the next slide moves under the warming
-function aufFill(o) {
-  const k = o.series.find(x => x.id === 'k');
+function aufFill(o, id = 'k') {
+  const k = o.series.find(x => x.id === id);
   if (!k) return o;
   const mid = k.data[Math.round(k.data.length * .72)];
   o.series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: k.data, showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 } },
@@ -1079,7 +1086,8 @@ function aufFill(o) {
   return o;
 }
 const EC_AUFF1 = { steps: 3, tip: EC_ZEIT.tip, option: k => k < 3 ? EC_AUFF.option(k) : aufFill(EC_AUFF.option(2)) };
-const EC_AUFF2 = { steps: 2, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
+// slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dashed), 3 what stays above 1.5 deg C
+const EC_AUFF2 = { steps: 3, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
 
 const EC_ZEIT27 = { steps: 4, tip: EC_ZEIT.tip, option: k => EC_ZEIT.option(Math.min(k, 2)) };
 const EC_ZEIT28 = { steps: 4, tip: EC_ZEIT.tip, calmStart: true, option: k => EC_ZEIT.option([2, 2, 2, 6, 8][k]) };
