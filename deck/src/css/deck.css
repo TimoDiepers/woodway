@@ -1062,6 +1062,8 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .slide.ende.active .ende-a { animation-delay: 4.4s; }
 @media (prefers-reduced-motion: reduce) { .ende-scene :is(.e-sunrise, .e-night, .e-dawn) { animation: none !important; } }
 @media print { .ende-scene :is(.e-sunrise, .e-night, .e-dawn) { animation: none !important; } .slide.ende :is(.ende-a, .ende-ww) { animation-delay: 0s; } }
+/* on paper the thanks replace the headline outright (the fade-out would restart in print and leave both on the page) */
+@media print { .slide.ende:has(.ende-dank.shown) .ende-a { animation: none !important; opacity: 0 !important; } }
 /* the last slide: first what trees are besides climate technology, then on the click thanks */
 .slide.ende > .body { opacity: 1; transition: none; position: relative; }
 .slide.ende .num { display: none; }
@@ -2377,6 +2379,8 @@ svg .km-bound, svg .km-pill, svg :is(.kb-sun, .kb-refl, .kb-heat) { transition: 
 
 /* a drawing that goes on across slides (data-carry): its fixed parts do not enter again, only the clicks do */
 .slide.carry :is(.pop, .grow, .draw):not([data-step]) { animation: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
+/* a split slide's second half (data-start) continues the first: what stands from the start does not enter again */
+.slide.carry[data-start] .rise:not([data-step]) { animation: none; opacity: 1; top: 0; }
 
 /* slide 5 of the overview: the sources of the limits stay until the critique goes */
 /* the "Mit": underlined, no fill */
@@ -2436,6 +2440,9 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .hm-f .hm-br::after { content: ""; position: absolute; left: -12px; width: 0; height: 0; border: 8px solid transparent; border-right: 12px solid var(--clay); border-left: 0; }
 .hm-f.f4 .hm-br::after { bottom: -9.5px; }
 .hm-f.f10 .hm-br::after { top: -9.5px; }
+/* both arrows end at the 7,7-Billionen box: apart, one above and one below its middle */
+.hm-f.f4 .hm-br { bottom: 82px; }
+.hm-f.f10 .hm-br { top: 82px; }
 .mapcorner .mapnote { font-size: 18px; }   /* as the other notes beside a chart */
 .hm2 { transition: opacity .5s var(--ease); }
 
@@ -2657,6 +2664,9 @@ svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition:
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M4 16 l9 9 l17 -20' stroke='black' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
 .slide:has(.bl-phi.shown) .hl.at-base::after { opacity: 1; }
+/* the tree's forcing in the balance lights up in the tint of its chip, on the click the chip's definition comes up top */
+.slide:has(.fline.head > .part.next.shown) .hl.at-phit::before { background: color-mix(in srgb, var(--c) var(--box-tint), var(--paper)); }
+.bl-f .hl.at-phit { margin-inline: 9px; }   /* room for the box, so it does not cover the bracket next to it */
 
 .bilanz .bl-phi .bl-f { margin-top: 14px; }   /* room for the tick on Δφ_ges^Base */
 /* slide 14: the key in the size of the labels above it ("mit zusätzlichem Baum", 20 px) */

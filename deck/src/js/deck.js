@@ -587,11 +587,11 @@ const EC_KURS = { steps: 2,
   }
   if (k >= 1) {
     const x = upto(2026, 2100, 1);
-    series.push({ id: 'vl', name: 'Best Case', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
+    series.push({ id: 'vl', name: 'Best Case Szenario', type: 'line', showSymbol: false, data: cut(P(vl), x), z: 5,
       lineStyle: { color: KURS_COL.vl, width: 3, type: [8, 6] }, itemStyle: { color: KURS_COL.vl },
       // two lines, right-aligned above the tip: clear of the curve and of the peak's label at 2050
       endLabel: { show: true, align: 'right', offset: [-6, -40], color: KURS_COL.vl, fontFamily: EC.font, fontSize: 19, fontWeight: 600, lineHeight: 23,
-                  formatter: 'Best Case*:\n1,7 °C in 2100' },   // UNEP's 2100 value, as for the policy line
+                  formatter: 'Best Case Szenario*:\n1,7 °C in 2100' },   // UNEP's 2100 value, as for the policy line
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: KURS_COL.vl, borderColor: '#f2ede2', borderWidth: 2 },
                    // left of the point and lifted off the rising curve, on a paper halo where it crosses the faint
                    // policy line: the curve's own label takes the space to the right
@@ -950,7 +950,7 @@ const EC_ZEIT = {
    frame, so the numbers move with the scale; they read in mK while the span is small */
 const AUF_TITLE = 'Alle Bäume 2026 gepflanzt', AUF_WIDE = [-.1, 2], AUF_DT = [-.035, 0];   // AUF_DT: the Delta T axis of slide 24
 // one y title through all of slide 24, in deg C from the start: only the scale moves, never the label
-const AUF_KR = 'kühlende Flächen + Rodung\nwärmender Wälder';   // the stacked case's name in deg C pictures
+const AUF_KR = '+ Rodung wärmender Wälder\n& permanente Speicherung';   // the stacked case's name in deg C pictures
 const AUF_Y = { name: 'ΔT [°C]', nameTex: '$\\dT$ [°C]', nameLocation: 'middle', nameGap: 86 }, AUF_LEFT = 108;
 function aufMorph(phase, t) {
   const D = window.ZEIT, p = D.pfade, vl = D.vl_c, P = ys => D.jahre.map((y, i) => [y, ys[i]]);
@@ -981,9 +981,10 @@ function aufMorph(phase, t) {
                      splitLine: { show: true, lineStyle: { color: EC.grid } } }, AUF_Y))],
     series: [
       { id: 'vl', type: 'line', data: P(vl), showSymbol: false, z: 4, labelLayout: { moveOverlap: 'shiftY' }, lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6], opacity: vlIn },
-        itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case', color: muted(vlIn), fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 },
+        itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case Szenario', color: muted(vlIn), fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 },
         markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2, opacity: peak },
-          label: { show: true, position: 'top', distance: 9, color: muted(peak), fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
+          label: { show: true, position: [16, -4], align: 'left', verticalAlign: 'bottom', color: muted(peak), fontFamily: EC.font, fontSize: 21, fontWeight: 600,   // as in the picture after the move
+                   backgroundColor: `rgba(242, 237, 226, ${peak})`, borderColor: `rgba(109, 117, 111, ${.35 * peak})`, borderWidth: 1, padding: [3, 7], borderRadius: 4, formatter: `${ecNum(tv, 2)} °C` },
           data: [{ coord: [pv, tv] }] },
         markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: '#1b2420', width: 1.6, type: 'solid', opacity: .7 * vlIn },
           label: { show: true, position: 'insideStartBottom', color: `rgba(27, 36, 32, ${vlIn})`, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
@@ -1002,8 +1003,9 @@ function aufMorph(phase, t) {
    3 in one move the axis goes from the trees' Delta T to the warming in deg C, Very Low without its removal comes into
    view and the tree curves move onto it, as Very Low minus their cooling (same series, so they glide there), ending on
    the cooling as a band and its size at the peak; 4 a what-if, dashed: the cooling land plus today's warming forest
-   cut and buried (one FaIR run), its extra cooling as a hatched band; 5 what still stays above 1.5 deg C */
-const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
+   cut and buried (one FaIR run), its extra cooling as a hatched band; 5 what still stays above 1.5 deg C; 6 the what-if
+   gone again, the red up to the cooling land */
+const EC_AUFF = { steps: 6, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   option(k, t = 1) {
   // one title through all pictures: the scenario stays, only the axis changes
   if (k <= 2) {
@@ -1025,11 +1027,12 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   const bk = bc;   // the case on the table: band, peak, what stays above 1.5 deg C
   const lab = (text, color) => ({ show: true, formatter: text, color, fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 });
   const series = [
-    { id: 'vl', name: 'Best Case', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
-      lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6] }, itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case',
+    { id: 'vl', name: 'Best Case Szenario', type: 'line', data: P(vl), showSymbol: false, z: 4, tip, animationDuration: 1600,
+      lineStyle: { color: '#6d756f', width: 2.6, type: [8, 6] }, itemStyle: { color: '#6d756f' }, endLabel: { show: true, formatter: 'Best Case Szenario',
         color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, distance: 10 }, labelLayout: { moveOverlap: 'shiftY' },
       markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#6d756f', borderColor: '#f2ede2', borderWidth: 2 },
-        label: { show: true, position: 'top', distance: 9, color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600, formatter: `Spitze: ${ecNum(tv, 2)} °C` },
+        label: { show: true, position: [16, -4], align: 'left', verticalAlign: 'bottom', color: '#6d756f', fontFamily: EC.font, fontSize: 21, fontWeight: 600,   // top right of its dot
+                 backgroundColor: '#f2ede2', borderColor: 'rgba(109, 117, 111, .35)', borderWidth: 1, padding: [3, 7], borderRadius: 4, formatter: `${ecNum(tv, 2)} °C` },
         data: [{ coord: [pv, tv] }] },
       markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: EC.ink, width: 1.6, type: 'solid', opacity: .7 },
         label: { show: true, position: 'insideStartBottom', color: EC.ink, fontFamily: EC.font, fontSize: 19, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } },
@@ -1037,8 +1040,9 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
       lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: lab('alle Flächen', EC.alle), labelLayout: { moveOverlap: 'shiftY' } },
     { id: 'k', type: 'line', data: P(bc), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
       lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: lab('kühlende Flächen', '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' } }];
-  if (k >= 4) series.push(   // what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
-    { id: 'kr', type: 'line', data: P(br), animationDuration: 1600, showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen + Rodung wärmender Wälder', animationDurationUpdate: 1600,
+  const fell = k === 4 || k === 5;   // the what-if stands in pictures 4-5; in 6 it is gone again
+  if (fell) series.push(   // what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
+    { id: 'kr', type: 'line', data: P(br), animationDuration: 1600, showSymbol: false, z: 6, tip, tipName: '+ Rodung wärmender Wälder & permanente Speicherung', animationDurationUpdate: 1600,
       lineStyle: { color: EC.rodung, width: 5, type: [4, 6], cap: 'round' }, itemStyle: { color: EC.rodung }, endLabel: Object.assign(lab(AUF_KR, EC.rodung), { lineHeight: 25 }), labelLayout: { moveOverlap: 'shiftY' } });
   if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
     const iK = bk.indexOf(Math.max(...bk));   // the new peak, with the trees
@@ -1048,22 +1052,22 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
                     // at its dot, to the bottom right, on a solid paper box (it sits on the hatch)
                     label: { show: true, position: [16, 14], align: 'left', verticalAlign: 'top', color: '#2f7a45', fontFamily: EC.font, fontSize: 21, fontWeight: 600,
                              backgroundColor: '#f2ede2', borderColor: 'rgba(47, 122, 69, .35)', borderWidth: 1, padding: [3, 7], borderRadius: 4,
-                             formatter: `Spitze: ${ecNum(bk[iK], 2)} °C` }, data: [{ coord: [D.jahre[iK], bk[iK]] }] } },
+                             formatter: `${ecNum(bk[iK], 2)} °C` }, data: [{ coord: [D.jahre[iK], bk[iK]] }] } },
                 { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - bk[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: '#2f7a45' }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 1200 });
   }
-  if (k >= 4) {  // the felling's extra cooling, between the cooling land and the what-if line: hatched ochre, drawn in with the line
+  if (fell) {  // the felling's extra cooling, between the cooling land and the what-if line: hatched ochre, drawn in with the line
     const iR = br.indexOf(Math.max(...br));   // its peak, labelled at the dot
     series.push({ id: 'hB', type: 'line', stack: 'h', stackStrategy: 'all', data: P(br), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
                   markPoint: { silent: true, z: 20,   // above the curves
                     symbol: 'circle', symbolSize: 11, animationDelay: 900, itemStyle: { color: EC.rodung, borderColor: '#f2ede2', borderWidth: 2 },
                     label: { show: true, position: [16, 14], align: 'left', verticalAlign: 'top', color: EC.rodung, fontFamily: EC.font, fontSize: 21, fontWeight: 600,
                              backgroundColor: '#f2ede2', borderColor: 'rgba(154, 107, 10, .35)', borderWidth: 1, padding: [3, 7], borderRadius: 4,   // bottom right of its dot, solid box
-                             formatter: `Spitze: ${ecNum(br[iR], 2)} °C` }, data: [{ coord: [D.jahre[iR], br[iR]] }] } },
+                             formatter: `${ecNum(br[iR], 2)} °C` }, data: [{ coord: [D.jahre[iR], br[iR]] }] } },
                 { id: 'hG', type: 'line', stack: 'h', stackStrategy: 'all', data: P(bc.map((v, i) => v - br[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: EC.rodung }, areaStyle: { color: aufHatch(), opacity: 1 }, animationDuration: 1600 });
   }
-  const low = k >= 4 ? br : bk;   // red: what is still missing below the lowest curve shown
+  const low = fell ? br : bk;   // red: what is still missing below the lowest curve shown (6: grows back up to the cooling land)
   if (k >= 5) {   // what stays above 1.5 deg C
     series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(low.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
                 { id: 'rr', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(low.map(v => Math.max(v - 1.5, 0))), showSymbol: false, silent: true, z: 1,
@@ -1102,8 +1106,8 @@ function aufFill(o, id = 'k') {
 }
 const EC_AUFF1 = { steps: 3, tip: EC_ZEIT.tip, option: k => k < 3 ? EC_AUFF.option(k) : aufFill(EC_AUFF.option(2)) };
 // slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dotted ochre line, hatched band), 3 what
-// still stays above 1.5 deg C
-const EC_AUFF2 = { steps: 3, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
+// still stays above 1.5 deg C, 4 the what-if gone again, the red grows up to the cooling land
+const EC_AUFF2 = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
 // the hatch of the felling's band: diagonal ochre lines on a faint ochre tint, one tile repeated
 let aufHatchTile;
 function aufHatch() {
@@ -1274,7 +1278,7 @@ function ecAnker(phase) {
     const peak = ys => { const i = ys.indexOf(Math.max(...ys)); return [D.jahre[i], ys[i]]; };
     const series = [];
     const [pv, tv] = peak(vl);
-    series.push(L('vl', vl, 'CMIP7 Very Low, Verlauf ohne Entnahme', { line: { width: 2.4, type: [8, 6] },
+    series.push(L('vl', vl, 'Best Case Szenario', { line: { width: 2.4, type: [8, 6] },
       mark: [{ coord: [pv, tv], label: { position: 'top', formatter: `Spitze ${pv}: ${ecNum(tv, 2)} °C` } }],
       extra: { markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: ink, width: 1.6, type: 'solid', opacity: .7 },
         label: { show: true, position: 'insideStartBottom', color: ink, fontFamily: EC.font, fontSize: 18, formatter: '1,5 °C' }, data: [{ yAxis: 1.5 }] } } }));
@@ -1770,6 +1774,7 @@ class MplChart {
     for (const a of d.axes) for (const it of [...(a.items || []), ...(a.texts || [])]) if (it.stp) this.nSteps = Math.max(this.nSteps, it.stp);
     // the three sites' names on a map can wait for a click of their own (data-site-step="N")
     this.siteStep = +host.dataset.siteStep || 0;
+    this.siteFirst = (host.dataset.siteFirst || '').split(',').map(x => x.trim()).filter(Boolean);   // sites shown from the start (data-site-first)
     this.nSteps = Math.max(this.nSteps, this.siteStep);
     if (host.dataset.stops === 'auto') {
       // category positions of the first panel, from its markers and bars
@@ -1973,7 +1978,7 @@ class MplChart {
           if (it.stp > k) return;   // waits for its click
           // a site's marker comes with its name (data-site-step)
           if (this.siteStep > k && a.map && it.mk && !it.lw && it.xy.length === 1 && window.MAPDATA
-            && window.MAPDATA.sites.some(q => Math.abs(q.lon - it.xy[0][0]) < .5 && Math.abs(q.lat - it.xy[0][1]) < .5)) return;
+            && window.MAPDATA.sites.some(q => Math.abs(q.lon - it.xy[0][0]) < .5 && Math.abs(q.lat - it.xy[0][1]) < .5 && !this.siteFirst.some(n => q.name.startsWith(n)))) return;
           const faded = it.fade !== undefined && it.fade <= k;   // the other places step back (gid "fade:N")
           const pts = it.xy.filter(p => p[0] === null || inX(p[0])).map(p => (p[0] === null || p[1] === null) ? [NaN, NaN] : p);
           if (!pts.length) return;
@@ -2068,7 +2073,7 @@ class MplChart {
       };
       // a formula symbol on its own goes over the chart in KaTeX, in the slides' formula face (placeTex)
       for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
-      const shown = a.texts.filter(t => !(t.stp > k) && !(this.siteStep > k && siteText(t)) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
+      const shown = a.texts.filter(t => !(t.stp > k) && !(this.siteStep > k && siteText(t) && !this.siteFirst.some(n => t.s.trim().startsWith(n))) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
       const pill = t => {
         const c = !a.map && !t.bg && !t.rot && !t.ring && t.b && /^#[0-9a-f]{6}$/i.test(t.c || '') && mapHex(t.c);
         if (!c || Math.max(...c) - Math.min(...c) < 50) return t;
@@ -2078,7 +2083,11 @@ class MplChart {
       // texts that wait for a click each in a series of their own: a later click adds its text without the earlier ones fading in again
       for (const g of [...new Set(texts.map(t => t.stp || 0))]) { const part = texts.filter(t => (t.stp || 0) === g); if (part.length) series.push(textSeries(id(g ? 't' + g : 't'), part, base + 1300)); }
       if (siteTexts().length) {
-        series.push(textSeries(id('ts'), siteTexts(), base));
+        // the sites shown from the start (data-site-first) in a series of their own: when the others come, they stay put
+        const first = t => this.siteFirst.some(n => t.s.trim().startsWith(n));
+        const st0 = siteTexts().filter(first), st1 = siteTexts().filter(t => !first(t));
+        if (st0.length) series.push(textSeries(id('ts0'), st0, base));
+        if (st1.length) series.push(textSeries(id('ts'), st1, base));
         if (this.timeLayer && this.mapAxes.includes(i)) this.siteSeries = () => ({ ...textSeries(id('ts'), siteTexts(), 0), animation: false });
       }
     });
@@ -3245,6 +3254,7 @@ class Deck {
       let n = 0;
       for (const e of s.querySelectorAll('[data-step]')) n = Math.max(n, +e.dataset.step || 0);
       for (const h of s.querySelectorAll('.chart')) if (h._chart) n = Math.max(n, (+h.dataset.step || 0) + h._chart.nSteps);
+      if (s.dataset.end !== undefined) n = Math.min(n, +s.dataset.end);   // data-end: a split slide stops here, the next slide goes on
       s._steps = n;
     }
     return s._steps;
@@ -3255,6 +3265,10 @@ class Deck {
     if (this.booted && window.__deckDataNow) window.__deckDataNow();   // the speaker moves on: load the charts now
     if (window.__ensureCharts) { window.__ensureCharts(this.slides[n]); delete this.slides[n]._steps; }
     if (window.__ensureTex) window.__ensureTex(this.slides[n]);
+    // the second half of a split slide (data-start) is made ready before we get there: formulas set and charts
+    // built, so the cut shows the same picture from its first frame
+    const nx = this.slides[n + 1];
+    if (nx && nx.dataset.start !== undefined) { if (window.__ensureTex) window.__ensureTex(nx); if (window.__ensureCharts) window.__ensureCharts(nx); }
     deckMedia.around(this.slides, n);
     const s = this.slides[n], again = n === this.i && s.classList.contains('active');
     if (again && !this.still) { s.classList.remove('active'); void s.offsetWidth; }   // restart CSS entrances
@@ -3632,7 +3646,9 @@ class Deck {
     for (const h of s.querySelectorAll('.chart')) {
       const ch = h._chart; if (!ch) continue;
       const k = this.step - (+h.dataset.step || 0);
-      if ((animate || late) && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
+      // a split slide's second half (data-start) opens on the picture the first half ended on: its charts stand
+      const cont = entering && s.dataset.start !== undefined && this.step === +s.dataset.start;
+      if ((animate || late) && !cont && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
         ch.play(k);
       } else ch.final(k);
     }
@@ -3802,7 +3818,10 @@ for (const sl of deckEl.querySelectorAll('.slide[data-start]')) for (const e of 
   const texed = new WeakSet(), texOne = s => {
     if (!window.katex || texed.has(s)) return false; texed.add(s);
     if (!s.textContent.includes('$')) return false;
-    renderTex(s); delete s._steps; return true;
+    renderTex(s); delete s._steps;
+    // a split slide's second half: the formula parts its first clicks already show stand without an entrance (as .pre above)
+    if (s.dataset.start !== undefined) for (const e of s.querySelectorAll('.katex [data-step]')) if ((+e.dataset.step || 0) <= +s.dataset.start) e.classList.add('pre');
+    return true;
   };
   window.__ensureTex = texOne;
   const tex = () => {

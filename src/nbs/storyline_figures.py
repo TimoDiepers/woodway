@@ -1062,7 +1062,8 @@ def uptake_panel_figure(out_path: str) -> str:
 
 def stock_panel_figure(out_path: str) -> str:
     """B6 as carbon stock, for the side panel next to the forest-type map: the stock of one tree at the
-    three sites (disturbance at today's rate), as the Aachen curve on the slide before; names upper left."""
+    three sites (disturbance at today's rate), as the Aachen curve on the slide before; names upper left. Aachen stands
+    from the start, the other two come with the slide's first click (gid "step:1")."""
     _setup()
     # sized to its box on the slide (520 x 581 px) at the scale of the other model charts (~0.675 px per figure px),
     # so lines and type match them
@@ -1074,14 +1075,15 @@ def stock_panel_figure(out_path: str) -> str:
     ends = []
     for s in SITES:
         m = _shell_one_trajectory(s).stock_kgC
-        ax.plot(YEARS, m, color=s.color, linewidth=2.6)
+        ax.plot(YEARS, m, color=s.color, linewidth=2.6, gid=None if s.name == "Aachen" else "step:1")
         ends.append((float(m[-1]), s))
     # each name just above its own curve, towards the end (a little higher on the steeper curves)
     xl = 2080
     for _, s in ends:
         m = _shell_one_trajectory(s).stock_kgC
         ax.annotate(s.label, (xl, float(np.interp(xl, YEARS, m))), xytext=(0, {"Fairbanks": 12, "Aachen": 20}.get(s.name, 30)), textcoords="offset points",
-                    ha="center", va="bottom", fontsize=13.5, color=s.color, fontweight="bold")
+                    ha="center", va="bottom", fontsize=13.5, color=s.color, fontweight="bold",
+                    gid=None if s.name == "Aachen" else "step:1")
     ax.set_ylim(0, None)
     ax.set_ylabel("Kohlenstoffvorrat mᶜ$_{Baum}$ [kg C]")
     return _save(fig, out_path)
