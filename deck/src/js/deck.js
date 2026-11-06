@@ -1002,7 +1002,7 @@ function aufMorph(phase, t) {
    3 in one move the axis goes from the trees' Delta T to the warming in deg C, Very Low without its removal comes into
    view and the tree curves move onto it, as Very Low minus their cooling (same series, so they glide there), ending on
    the cooling as a band and its size at the peak; 4 a what-if, dashed: the cooling land plus today's warming forest
-   cut and buried (one FaIR run); 5 what stays above 1.5 deg C, still with the cooling land alone */
+   cut and buried (one FaIR run), in this picture only; 5 what stays above 1.5 deg C, with the cooling land alone */
 const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   option(k, t = 1) {
   // one title through all pictures: the scenario stays, only the axis changes
@@ -1037,9 +1037,9 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
       lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: lab('alle Flächen', EC.alle), labelLayout: { moveOverlap: 'shiftY' } },
     { id: 'k', type: 'line', data: P(bc), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
       lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: lab('kühlende Flächen', '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' } }];
-  if (k >= 4) series.push(   // what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
+  if (k === 4) series.push(   // only in its own picture; what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
     { id: 'kr', type: 'line', data: P(br), animationDuration: 1600, showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen + Rodung wärmender Wälder', animationDurationUpdate: 1600,
-      lineStyle: { color: EC.rodung, width: 3, type: [3, 5] }, itemStyle: { color: EC.rodung }, endLabel: Object.assign(lab(AUF_KR, EC.rodung), { lineHeight: 25 }), labelLayout: { moveOverlap: 'shiftY' } });
+      lineStyle: { color: EC.rodung, width: 5, type: [4, 6], cap: 'round' }, itemStyle: { color: EC.rodung }, endLabel: Object.assign(lab(AUF_KR, EC.rodung), { lineHeight: 25 }), labelLayout: { moveOverlap: 'shiftY' } });
   if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
     const iK = bk.indexOf(Math.max(...bk));   // the new peak, with the trees
     series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(bk), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
@@ -1086,8 +1086,10 @@ function aufFill(o, id = 'k') {
   return o;
 }
 const EC_AUFF1 = { steps: 3, tip: EC_ZEIT.tip, option: k => k < 3 ? EC_AUFF.option(k) : aufFill(EC_AUFF.option(2)) };
-// slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dashed), 3 what stays above 1.5 deg C
-const EC_AUFF2 = { steps: 3, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
+// slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dotted), 3 that line gone again, 4 what
+// stays above 1.5 deg C
+const EC_AUFF2 = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true,
+  option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option([3, 3, 4, 3, 5][k], t) };
 
 const EC_ZEIT27 = { steps: 4, tip: EC_ZEIT.tip, option: k => EC_ZEIT.option(Math.min(k, 2)) };
 const EC_ZEIT28 = { steps: 4, tip: EC_ZEIT.tip, calmStart: true, option: k => EC_ZEIT.option([2, 2, 2, 6, 8][k]) };
