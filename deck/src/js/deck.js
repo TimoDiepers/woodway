@@ -310,7 +310,7 @@ let chartUid = 0;
    goes. SVG renderer, so text stays sharp when the deck scales.
    =========================================================== */
 const EC = {
-  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#706a19', alle: '#04455f', rodung: '#8a4b1f',   // = --s-phia
+  ink: '#1b2420', ink2: '#3f4a44', muted: '#5d665f', line: '#d6ccb6', grid: '#e4dccb', alb: '#706a19', alle: '#04455f', rodung: '#9a6b0a',   // = --s-phia
   font: "'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif"
 };
 /* one pace for every curve in the deck: a line or area is drawn in from the left in DRAW_MS at a constant speed
@@ -1002,7 +1002,7 @@ function aufMorph(phase, t) {
    3 in one move the axis goes from the trees' Delta T to the warming in deg C, Very Low without its removal comes into
    view and the tree curves move onto it, as Very Low minus their cooling (same series, so they glide there), ending on
    the cooling as a band and its size at the peak; 4 a what-if, dashed: the cooling land plus today's warming forest
-   cut and buried (one FaIR run), in this picture only; 5 what stays above 1.5 deg C, with the cooling land alone */
+   cut and buried (one FaIR run), its extra cooling as a hatched band; 5 what still stays above 1.5 deg C */
 const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   option(k, t = 1) {
   // one title through all pictures: the scenario stays, only the axis changes
@@ -1037,7 +1037,7 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
       lineStyle: { color: EC.alle, width: 3, type: [8, 6] }, itemStyle: { color: EC.alle }, endLabel: lab('alle Flächen', EC.alle), labelLayout: { moveOverlap: 'shiftY' } },
     { id: 'k', type: 'line', data: P(bc), showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen', animationDurationUpdate: 1600,
       lineStyle: { color: '#2f7a45', width: 3.4 }, itemStyle: { color: '#2f7a45' }, endLabel: lab('kühlende Flächen', '#2f7a45'), labelLayout: { moveOverlap: 'shiftY' } }];
-  if (k === 4) series.push(   // only in its own picture; what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
+  if (k >= 4) series.push(   // what if: the cooling land plus today's warming forest cut, its wood buried (one FaIR run)
     { id: 'kr', type: 'line', data: P(br), animationDuration: 1600, showSymbol: false, z: 6, tip, tipName: 'kühlende Flächen + Rodung wärmender Wälder', animationDurationUpdate: 1600,
       lineStyle: { color: EC.rodung, width: 5, type: [4, 6], cap: 'round' }, itemStyle: { color: EC.rodung }, endLabel: Object.assign(lab(AUF_KR, EC.rodung), { lineHeight: 25 }), labelLayout: { moveOverlap: 'shiftY' } });
   if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
@@ -1045,15 +1045,21 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
     series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(bk), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
                   markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#2f7a45', borderColor: '#f2ede2', borderWidth: 2 },
                     label: { show: true, position: 'bottom', distance: 30, offset: [60, 0], color: '#2f7a45', fontFamily: EC.font, fontSize: 21, fontWeight: 600,
+                             backgroundColor: 'rgba(242, 237, 226, .92)', padding: [2, 6], borderRadius: 4,   // readable on the hatch
                              formatter: `Spitze: ${ecNum(bk[iK], 2)} °C` }, data: [{ coord: [D.jahre[iK], bk[iK]] }] } },
                 { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - bk[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: '#2f7a45' }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 1200 });
   }
+  if (k >= 4)   // the felling's extra cooling, between the cooling land and the what-if line: hatched ochre, drawn in with the line
+    series.push({ id: 'hB', type: 'line', stack: 'h', stackStrategy: 'all', data: P(br), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
+                { id: 'hG', type: 'line', stack: 'h', stackStrategy: 'all', data: P(bc.map((v, i) => v - br[i])), showSymbol: false, silent: true, z: 2,
+                  lineStyle: { width: 0 }, itemStyle: { color: EC.rodung }, areaStyle: { color: aufHatch(), opacity: 1 }, animationDuration: 1600 });
+  const low = k >= 4 ? br : bk;   // red: what is still missing below the lowest curve shown
   if (k >= 5) {   // what stays above 1.5 deg C
-    series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
-                { id: 'rr', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(bk.map(v => Math.max(v - 1.5, 0))), showSymbol: false, silent: true, z: 1,
+    series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(low.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
+                { id: 'rr', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(low.map(v => Math.max(v - 1.5, 0))), showSymbol: false, silent: true, z: 1,
                   lineStyle: { width: 0 }, areaStyle: { color: '#c4121f', opacity: .16 }, animationDuration: 1200,
-                  markPoint: { silent: true, symbol: 'circle', symbolSize: 0, animationDelay: 500, data: [{ coord: [2075, 1.5 + (bk[D.jahre.indexOf(2075)] - 1.5) * .4] }],
+                  markPoint: { silent: true, symbol: 'circle', symbolSize: 0, animationDelay: 500, data: [{ coord: [2075, 1.5 + (low[D.jahre.indexOf(2075)] - 1.5) * .4] }],
                     label: { show: true, color: '#8e0d16', fontFamily: "'Literata', Georgia, serif", fontStyle: 'italic', fontWeight: 500, fontSize: 25, formatter: 'fehlende Kühlung' } } });
   }
   const ext = vl.concat(bc, br), lo = Math.floor(Math.min(...ext) * 10) / 10, hi = Math.ceil(Math.max(...ext) * 10 + .5) / 10;
@@ -1086,10 +1092,20 @@ function aufFill(o, id = 'k') {
   return o;
 }
 const EC_AUFF1 = { steps: 3, tip: EC_ZEIT.tip, option: k => k < 3 ? EC_AUFF.option(k) : aufFill(EC_AUFF.option(2)) };
-// slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dotted), 3 that line gone again, 4 what
-// stays above 1.5 deg C
-const EC_AUFF2 = { steps: 4, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true,
-  option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option([3, 3, 4, 3, 5][k], t) };
+// slide 25: 1 the move to deg C, 2 what if the warming forest were cut too (dotted ochre line, hatched band), 3 what
+// still stays above 1.5 deg C
+const EC_AUFF2 = { steps: 3, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [1], calmStart: true, option: (k, t) => k === 0 ? aufFill(EC_AUFF.option(2)) : EC_AUFF.option(k + 2, t) };
+// the hatch of the felling's band: diagonal ochre lines on a faint ochre tint, one tile repeated
+let aufHatchTile;
+function aufHatch() {
+  if (aufHatchTile) return aufHatchTile;
+  const n = 16, c = document.createElement('canvas'); c.width = c.height = 2 * n;
+  const g = c.getContext('2d'); g.scale(2, 2);
+  g.fillStyle = 'rgba(176, 130, 28, .13)'; g.fillRect(0, 0, n, n);
+  g.strokeStyle = 'rgba(154, 107, 10, .75)'; g.lineWidth = 2.2; g.lineCap = 'square';
+  for (const d of [-n, 0, n]) { g.beginPath(); g.moveTo(d, n); g.lineTo(d + n, 0); g.stroke(); }
+  return (aufHatchTile = { image: c, repeat: 'repeat' });
+}
 
 const EC_ZEIT27 = { steps: 4, tip: EC_ZEIT.tip, option: k => EC_ZEIT.option(Math.min(k, 2)) };
 const EC_ZEIT28 = { steps: 4, tip: EC_ZEIT.tip, calmStart: true, option: k => EC_ZEIT.option([2, 2, 2, 6, 8][k]) };
