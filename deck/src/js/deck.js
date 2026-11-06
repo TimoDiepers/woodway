@@ -1043,17 +1043,26 @@ const EC_AUFF = { steps: 5, tip: EC_ZEIT.tip, tween: 2400, tweenAt: [3],
   if (k >= 3) {   // the cooling as a band under Very Low, its size at the peak
     const iK = bk.indexOf(Math.max(...bk));   // the new peak, with the trees
     series.push({ id: 'tB', type: 'line', stack: 't', stackStrategy: 'all', data: P(bk), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
-                  markPoint: { silent: true, symbol: 'circle', symbolSize: 11, itemStyle: { color: '#2f7a45', borderColor: '#f2ede2', borderWidth: 2 },
-                    label: { show: true, position: 'bottom', distance: 30, offset: [60, 0], color: '#2f7a45', fontFamily: EC.font, fontSize: 21, fontWeight: 600,
-                             backgroundColor: 'rgba(242, 237, 226, .92)', padding: [2, 6], borderRadius: 4,   // readable on the hatch
+                  markPoint: { silent: true, z: 20,   // above the curves
+                    symbol: 'circle', symbolSize: 11, itemStyle: { color: '#2f7a45', borderColor: '#f2ede2', borderWidth: 2 },
+                    // at its dot, to the bottom right, on a solid paper box (it sits on the hatch)
+                    label: { show: true, position: [16, 14], align: 'left', verticalAlign: 'top', color: '#2f7a45', fontFamily: EC.font, fontSize: 21, fontWeight: 600,
+                             backgroundColor: '#f2ede2', borderColor: 'rgba(47, 122, 69, .35)', borderWidth: 1, padding: [3, 7], borderRadius: 4,
                              formatter: `Spitze: ${ecNum(bk[iK], 2)} °C` }, data: [{ coord: [D.jahre[iK], bk[iK]] }] } },
                 { id: 'tG', type: 'line', stack: 't', stackStrategy: 'all', data: P(vl.map((v, i) => v - bk[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: '#2f7a45' }, areaStyle: { color: '#2f7a45', opacity: .3 }, animationDuration: 1200 });
   }
-  if (k >= 4)   // the felling's extra cooling, between the cooling land and the what-if line: hatched ochre, drawn in with the line
-    series.push({ id: 'hB', type: 'line', stack: 'h', stackStrategy: 'all', data: P(br), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
+  if (k >= 4) {  // the felling's extra cooling, between the cooling land and the what-if line: hatched ochre, drawn in with the line
+    const iR = br.indexOf(Math.max(...br));   // its peak, labelled at the dot
+    series.push({ id: 'hB', type: 'line', stack: 'h', stackStrategy: 'all', data: P(br), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false,
+                  markPoint: { silent: true, z: 20,   // above the curves
+                    symbol: 'circle', symbolSize: 11, animationDelay: 900, itemStyle: { color: EC.rodung, borderColor: '#f2ede2', borderWidth: 2 },
+                    label: { show: true, position: [16, 14], align: 'left', verticalAlign: 'top', color: EC.rodung, fontFamily: EC.font, fontSize: 21, fontWeight: 600,
+                             backgroundColor: '#f2ede2', borderColor: 'rgba(154, 107, 10, .35)', borderWidth: 1, padding: [3, 7], borderRadius: 4,   // bottom right of its dot, solid box
+                             formatter: `Spitze: ${ecNum(br[iR], 2)} °C` }, data: [{ coord: [D.jahre[iR], br[iR]] }] } },
                 { id: 'hG', type: 'line', stack: 'h', stackStrategy: 'all', data: P(bc.map((v, i) => v - br[i])), showSymbol: false, silent: true, z: 2,
                   lineStyle: { width: 0 }, itemStyle: { color: EC.rodung }, areaStyle: { color: aufHatch(), opacity: 1 }, animationDuration: 1600 });
+  }
   const low = k >= 4 ? br : bk;   // red: what is still missing below the lowest curve shown
   if (k >= 5) {   // what stays above 1.5 deg C
     series.push({ id: 'rb', type: 'line', stack: 'rot', stackStrategy: 'all', data: P(low.map(() => 1.5)), showSymbol: false, silent: true, lineStyle: { width: 0 }, animation: false },
