@@ -25,7 +25,7 @@ const TEX_MACROS = {
   "\\mRE":  "\\q{re}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{RE}}}",
   "\\mZS":  "\\q{zs}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZS}}}",
   "\\mST":  "\\q{st}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ST}}}",
-  "\\mmax": "\\q{mmax}{m_{\\mathrm{max}}}",
+  "\\mmax": "\\q{mmax}{m^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{max}}}",   // carbon, as \mB
   "\\kw":   "\\q{kw}{k}",                             // growth rate
   "\\pw":   "\\q{pw}{p}",                             // shape parameter
   "\\sz":   "\\q{sz}{s_{0}}",                         // disturbance rate, pre-industrial
@@ -36,9 +36,9 @@ const TEX_MACROS = {
   // sunlight, energy, albedo
   "\\qin":  "\\q{qin}{\\dot{q}_{\\mathrm{ein}}}",
   "\\alb":  "\\q{alb}{\\alpha}",
-  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{B}}}",
+  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{L}}}",   // L: Laub
   "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{W}}}",
-  "\\alw":  "\\q{alw}{\\alpha_{\\mathrm{W}}}",
+  "\\alw":  "\\q{alw}{\\Delta\\alpha_{\\mathrm{Wolke}}}",   // a contrast: how much more a cloud reflects than the ground
   "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{W}}}",
   "\\dQ":   "\\q{dq}{\\dot{Q}_{\\alpha}}",
   "\\Ab":   "\\q{ab}{A_{\\mathrm{B}}}",
@@ -93,7 +93,7 @@ const TEX_MACROS = {
 
 // the figures' own formula labels (mpl texts that are one $…$) and the colour role of the symbol they show
 const CHART_TEX_ROLE = {
-  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{B}}': 'dal',
+  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{L}}': 'dal',
   '\\Delta\\alpha_{\\mathrm{W}}': 'daw', '\\dot{Q}_{\\alpha}': 'dq'
 };
 
@@ -118,7 +118,7 @@ function axTex(host, key, tex, x, y, fontPx) {
       if (!part) continue;
       const sp = document.createElement('span');
       if (part.startsWith('$') && window.katex) katex.render(part.slice(1, -1), sp, { macros: TEX_MACROS, throwOnError: false, strict: false, trust: c => c.command === '\\htmlClass' });
-      else sp.innerHTML = supHTML(tipEsc(part.replace(/^\$|\$$/g, '')));
+      else sp.innerHTML = supHTML(tipEsc(part.replace(/^\$|\$$/g, ''))).replace(/kg C(?![O₂])/g, 'kg<sub>C</sub>');   // carbon as the unit's index, as on the slides
       el.append(sp);
     }
     host.append(el);
@@ -739,7 +739,7 @@ const EC_ORTE3 = {
   // the curves and the name each carries on the plot
   parts: [
     { key: 'co2', name: 'CO₂', role: 'phic' },
-    { key: 'laub', name: 'Albedo direkt (Baum)', role: 'dal' },
+    { key: 'laub', name: 'Albedo direkt (Laub)', role: 'dal' },
     { key: 'wolke', name: 'Albedo indirekt (Wolken)', role: 'daw' },
     { key: 'dt', name: 'netto', role: 'ink', net: true }],
   // a name on each curve, outside its area: CO2 under its curve, the leaves above theirs, the clouds, which stay near
@@ -817,50 +817,47 @@ const EC_ORTE3 = {
    the same, only scaled, and the other two places fade in (3). The end values are the map's (2100). */
 window.LICHT = @@LICHT@@;
 const EC_LICHT = {
-  steps: 3, tip: { unit: 'W', dec: 0, sub: 'je Baum' }, labelMs: 1100,
+  steps: 1, tip: { unit: 'W', dec: 0, sub: 'je Baum' }, labelMs: 1100,
+  // pictures: 0 the net curve of all three sites (with the map); 1 Fairbanks alone, split into the tree's and the clouds' albedo
   // a name on each curve (HTML, placeLabels): where the curve is, outside its area
   labels(k) {
-    const D = window.LICHT, A = D.sites.find(x => x.name === 'Aachen'), at = (ys, x) => ys[D.years.indexOf(x)], out = [];
-    if (k <= 1) out.push({ key: 'laub', grid: 0, x: 2048, y: at(A.laub, 2048), text: 'Albedo (Baum)', role: 'dal', side: 'above' });
-    if (k === 1) out.push({ key: 'wolke', grid: 0, x: 2062, y: at(A.wolke, 2062), text: 'Albedo (Wolken)', role: 'daw', side: 'below' });
-    if (k >= 2) D.sites.forEach(st => {
-      if (st.name !== 'Aachen' && k < 3) return;
-      const x = st.name === 'Marabá' ? 2072 : st.name === 'Fairbanks' ? 2060 : 2080;
+    const D = window.LICHT, F = D.sites.find(x => x.name === 'Fairbanks'), at = (ys, x) => ys[D.years.indexOf(x)], out = [];
+    D.sites.forEach(st => {
+      if (k >= 1 && st.name !== 'Fairbanks') return;
+      const x = st.name === 'Marabá' ? 2072 : st.name === 'Fairbanks' ? 2046 : 2080;
       out.push({ key: 'n' + st.name, grid: 0, x, y: at(st.dt, x), text: st.name, role: 'ink', color: st.color, side: st.name === 'Marabá' ? 'below' : 'above' });
     });
+    if (k >= 1) out.push({ key: 'laub', grid: 0, x: 2082, y: at(F.laub, 2082) * .62, text: 'Albedo (Laub)', role: 'dal', side: 'above' });
+    if (k >= 1) out.push({ key: 'wolke', grid: 0, x: 2062, y: at(F.wolke, 2062), text: 'Albedo (Wolken)', role: 'daw', side: 'below' });
     return out;
   },
   option(k) {
     const D = window.LICHT, n = D.years.length - 1, hex = (c, a) => { const v = [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); return `rgba(${v.join(',')},${a})`; };
     const cLeaf = cssColor('--s-dal', EC.ink), cCloud = cssColor('--s-daw', EC.ink);
-    const wide = k >= 3, ymin = wide ? 0 : -10, ymax = wide ? 70 : 30, val = v => ecNum(Math.abs(v), 0) + ' W';
-    const sg = v => (v < -0.5 ? '−' : '+') + ecNum(Math.abs(v), 0) + ' W';
+    const val = v => ecNum(Math.abs(v), 0) + ' W', sg = v => (v < -0.5 ? '−' : '+') + ecNum(Math.abs(v), 0) + ' W';
     const series = [], pts = ys => D.years.map((y, j) => [y, ys[j]]);
-    const A = D.sites.find(x => x.name === 'Aachen');
-    // the two parts: drawn with their click, step back (fade out) when the sum is alone
-    const part = (id, name, col, ys) => {
-      const a = k >= 2 ? 0 : 1;
-      series.push({ id, name, tipName: name, tip: a ? undefined : false, silent: !a, type: 'line', z: 3, showSymbol: false, smooth: false, data: pts(ys),
-        lineStyle: { color: col, width: 2.4, opacity: a }, itemStyle: { color: col }, areaStyle: { color: col, opacity: .2 * a, origin: 'auto' },
-        endLabel: { show: true, formatter: sg(ys[n]), color: hex(col, a), fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8 },
-        labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1300, animationEasing: 'cubicInOut' });
-    };
-    part('laub', 'Albedo (Baum)', cLeaf, A.laub);
-    if (k >= 1) part('wolke', 'Albedo (Wolken)', cCloud, A.wolke);
+    const F = D.sites.find(x => x.name === 'Fairbanks');
+    // Fairbanks' two parts, each with its click, under its net curve
+    const part = (id, name, col, ys) => series.push({ id, name, tipName: name, type: 'line', z: 3, showSymbol: false, smooth: false, data: pts(ys),
+      lineStyle: { color: col, width: 2.4 }, itemStyle: { color: col }, areaStyle: { color: col, opacity: .2, origin: 'auto' },
+      endLabel: { show: true, formatter: sg(ys[n]), color: col, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8, offset: id === 'laub' ? [0, 18] : [0, 0] },
+      labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1300, animationEasing: 'cubicInOut' });
+    if (k >= 1) part('laub', 'Albedo (Laub)', cLeaf, F.laub);
+    if (k >= 1) part('wolke', 'Albedo (Wolken)', cCloud, F.wolke);
     D.sites.forEach(st => {
-      const first = st.name === 'Aachen', a = first || wide ? 1 : 0;
-      if (k < 2) return;   // Aachen's sum comes with its click; the others wait, invisible, until the axis has grown
-      series.push({ id: 'n_' + st.name, name: st.name, tipName: st.name, tip: a ? undefined : false, silent: !a, type: 'line', z: 6, showSymbol: false, smooth: false, data: pts(st.dt),
-        lineStyle: { color: st.color, width: 4.4, opacity: a }, itemStyle: { color: st.color },
-        endLabel: { show: true, formatter: val(st.dt[n]), color: hex(st.color, a), fontFamily: EC.font, fontSize: 19, fontWeight: 700, distance: 8 },
-        labelLayout: { moveOverlap: 'shiftY' }, animationDuration: first ? 1500 : 900, animationEasing: 'cubicInOut' });
+      // with the split, the other two sites go
+      const a = k >= 1 && st.name !== 'Fairbanks' ? 0 : 1;
+      series.push({ id: 'n_' + st.name, name: st.name, tipName: st.name, type: 'line', z: 6, showSymbol: false, smooth: false, data: pts(st.dt),
+        lineStyle: { color: st.color, width: 4.4, opacity: a }, itemStyle: { color: st.color }, silent: !a, tip: a ? undefined : false,
+        endLabel: { show: true, formatter: val(st.dt[n]), color: hex(st.color, a), fontFamily: EC.font, fontSize: 19, fontWeight: 700, distance: 8, offset: st.name === 'Fairbanks' && k >= 1 ? [0, -10] : [0, 0] },
+        labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1500, animationEasing: 'cubicInOut' });
     });
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
       grid: { left: 86, right: 62, top: 20, bottom: 44, containLabel: false },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2060, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: ymin, max: ymax, interval: wide ? 20 : 10, name: 'W je Baum', nameTex: '$\\dQ$ je Baum [W]', nameLocation: 'middle', nameGap: 52,
-        axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => (v % (wide ? 20 : 10) === 0 ? String(v).replace('-', '−') : '') },
+      yAxis: ecAxis({ type: 'value', min: -10, max: 70, interval: 10, name: 'W je Baum', nameTex: '$\\dQ$ je Baum [W]', nameLocation: 'middle', nameGap: 52,
+        axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => (v % 20 === 0 ? String(v).replace('-', '−') : '') },
         splitLine: { show: true, lineStyle: { color: EC.grid } } }),
       series
     };
@@ -1736,6 +1733,9 @@ class MplChart {
     this.nSteps = Math.max(0, ...this.slotStep);
     // single lines and labels can wait for a click of their own (gid "step:N" in the figure)
     for (const a of d.axes) for (const it of [...(a.items || []), ...(a.texts || [])]) if (it.stp) this.nSteps = Math.max(this.nSteps, it.stp);
+    // the three sites' names on a map can wait for a click of their own (data-site-step="N")
+    this.siteStep = +host.dataset.siteStep || 0;
+    this.nSteps = Math.max(this.nSteps, this.siteStep);
     if (host.dataset.stops === 'auto') {
       // category positions of the first panel, from its markers and bars
       const xs = [];
@@ -1936,6 +1936,9 @@ class MplChart {
       a.items.forEach((it, j) => {
         if (it.t === 'line') {
           if (it.stp > k) return;   // waits for its click
+          // a site's marker comes with its name (data-site-step)
+          if (this.siteStep > k && a.map && it.mk && !it.lw && it.xy.length === 1 && window.MAPDATA
+            && window.MAPDATA.sites.some(q => Math.abs(q.lon - it.xy[0][0]) < .5 && Math.abs(q.lat - it.xy[0][1]) < .5)) return;
           const faded = it.fade !== undefined && it.fade <= k;   // the other places step back (gid "fade:N")
           const pts = it.xy.filter(p => p[0] === null || inX(p[0])).map(p => (p[0] === null || p[1] === null) ? [NaN, NaN] : p);
           if (!pts.length) return;
@@ -2030,7 +2033,7 @@ class MplChart {
       };
       // a formula symbol on its own goes over the chart in KaTeX, in the slides' formula face (placeTex)
       for (const t of a.texts) if (t.tex && inX(t.x) && window.katex) this.texs.push({ t, a, key: i + ':' + t.tex });
-      const shown = a.texts.filter(t => !(t.stp > k) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
+      const shown = a.texts.filter(t => !(t.stp > k) && !(this.siteStep > k && siteText(t)) && !(t.fade <= k) && inX(t.x) && !(t.tex && window.katex)), siteTexts = () => shown.map(siteText).filter(Boolean);
       const pill = t => {
         const c = !a.map && !t.bg && !t.rot && !t.ring && t.b && /^#[0-9a-f]{6}$/i.test(t.c || '') && mapHex(t.c);
         if (!c || Math.max(...c) - Math.min(...c) < 50) return t;

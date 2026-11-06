@@ -361,6 +361,9 @@ strong { font-weight: 600; }
 .slide:has(.fswap.shown) .fw.swaps .w { display: none; }
 .slide:has(.fswap.shown) .fw.swaps .s { display: inline; animation: fadein .6s var(--ease) both; }
 .later:not(.late), .slide:has(.ghsteps > [data-step="1"].shown) .later.late { color: var(--faint); }
+/* slide 15: on arrival both factors of the CO₂ forcing are lit; with the next click the greenhouse effect steps back */
+.slide:not(:has(.f-gh2.shown)) .later.gh-both { color: var(--ink); }
+.slide:not(:has(.f-gh2.shown)) .hl.gh-both::before { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
 
 /* highlight: a tint in the term's colour, laid behind it (accents do not bend it, the layout never moves) */
 .hl { display: inline-block; position: relative; isolation: isolate; }
@@ -1777,8 +1780,8 @@ html.notips .ectip { display: none !important; }
 .ue { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 46px; }
 .ue-eq { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 0 26px; align-items: center; }
 .ue-box { display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%;
-          padding: 26px 28px 28px; }
-.ue-ico { width: 96px; height: 80px; margin-bottom: 14px; }
+          padding: 20px 28px 22px; }
+.ue-ico { width: 84px; height: 66px; margin-bottom: 8px; }
 .ue-box b { --c: var(--ink); }
 .ue-bedarf b { --c: var(--clay); }
 .ue-baum b { --c: var(--moss); }
@@ -1791,7 +1794,8 @@ html.notips .ectip { display: none !important; }
 .ue .clip.ue-sci { position: relative; width: 700px; }
 .ue-hype { width: 720px; }   /* the paper, and the headlines it set off */
 .ue-hype .clips { height: 340px; }
-.ue-hype .ue-sci .cl-h { font-size: 24px; }
+.ue-lit { margin-top: -6px; }
+.ue-hype .ue-sci .cl-h { font-size: 34px; line-height: 1.1; white-space: nowrap; text-wrap: nowrap; }
 .ue-hype .ue-sci .cl-sub { font-size: 18px; }
 .ue-hype .clip.ue-sci { position: absolute; z-index: 1; }
 .ue-hype .clip:not(.sci) { z-index: 2; }
@@ -1804,8 +1808,14 @@ html.notips .ectip { display: none !important; }
 .ue-crit .clip:not(.sci) { z-index: 2; }
 .ue-hype .clip:not(.sci) .cl-in, .ue-crit .clip:not(.sci) .cl-in { padding: 14px 20px 16px; }
 .ue-sci .cl-in { padding: 20px 28px 22px; }
-.ue-sci .cl-h { font-size: 28px; }
+.ue-sci .cl-h { font-size: 36px; line-height: 1.12; }
 .ue-sci .cl-sub { font-size: 20px; margin-top: 10px; text-wrap: balance; }
+/* the paper's conclusion is the claim the talk takes apart: set apart under a rule, large, the claim itself marked as with a highlighter */
+.ue-sci .ue-fazit { position: relative; margin-top: 14px; padding-top: 11px; border-top: 1px solid #ddd5c4; font-style: normal; }
+.ue-fz-k { position: absolute; top: -8px; left: 0; padding-right: 10px; background: #fbf3dc; font: 600 15px/1 var(--sans); letter-spacing: .02em; color: var(--muted); }   /* the label sits on the rule */
+.ue-fz-t { display: block; margin-top: 6px; font: italic 400 23px/1.3 var(--serif); color: var(--ink-2); white-space: nowrap; }
+.ue-fz-t mark { color: inherit; padding: 0 .14em; margin: 0 -.14em; border-radius: 3px; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: linear-gradient(transparent 12%, color-mix(in srgb, var(--moss) 24%, transparent) 12%, color-mix(in srgb, var(--moss) 24%, transparent) 92%, transparent 92%); }
 /* the clouds slide: the total albedo term, in the chip style of the signpost lines */
 
 /* the general reflection slide: the summary line and the definition of albedo under the five surfaces */
@@ -2189,7 +2199,7 @@ svg.s21 .tp-store { opacity: 0; transition: opacity 4.5s linear .3s; }
 .rt-s { font-weight: 600; white-space: nowrap; }
 .rt-s.warm { color: #b2182b; } .rt-s.cool { color: var(--fjord); }
 /* f13: the forcing with the evaluation bars (mit / ohne) on one line in the column */
-.bilanz .bl-phi .bl-f { font-size: 25px; white-space: nowrap; }
+.bilanz .bl-phi .bl-f { white-space: nowrap; }
 .bilanz .bl-d .tex { display: inline-block; vertical-align: middle; font-size: 22px; margin-right: 4px; }
 
 
@@ -2326,7 +2336,7 @@ svg .km-phi { transition: opacity .6s var(--ease); }
 .c10-body .legend.lg { gap: 5px 22px; }   /* the taller rate fractions above (t in the numerator) leave less room */
 /* f13: the rates carry their (t) in the numerator now: set one size down, the balance on one line */
 .bilanz .bl-f { font-size: 24px; white-space: nowrap; }
-.bilanz .bl-phi .bl-f { font-size: 22px; }
+/* the balance with the tree in the same size as the one without (.bilanz .bl-f) */
 
 .bilanz .bl-gap { margin-top: 14px; }
 .bilanz .bl-phi { margin-top: 26px; }
@@ -2591,8 +2601,7 @@ svg.s21 .co2fly { transform-box: fill-box; transform-origin: center; transition:
 .fflow.fz .fz-row:first-child { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .fflow.fz .fz-in.mit .tex { font-size: 21px; }
 
-/* slide 14: the world without our tree, lit in the formula in the colour of its box in the drawing */
-.slide:has(.bl-phi.shown) .hl.at-base::before { background: color-mix(in srgb, var(--c) var(--box-tint), transparent); }
+/* slide 14: the world without our tree stays plain in the formula, only ticked off (.hl.at-base::after) */
 
 /* slide 18: the idea first, as a black box: two worlds in, two temperature paths out, their difference; then the box is
    revealed as FaIR. Dashed = the world without our tree, as everywhere */
