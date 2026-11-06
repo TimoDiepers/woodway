@@ -70,7 +70,7 @@
   </aside>
 </section>
 
-<section class="slide" data-ch="baeume" data-title="Wachstumskurven im globalen Vergleich" data-part="1">
+<section class="slide" data-ch="baeume" data-title="Wachstumskurven im globalen Vergleich" data-carry="wachstum" data-end="1" data-part="1">
   <header class="sh"><h2>Wachstumskurven im globalen Vergleich</h2></header>
   <div class="body">
     <div class="split sketch mapwide" style="flex:1; min-height:0">
@@ -85,8 +85,25 @@
     <p><b>Drei Orte für den ganzen Vortrag:</b> Aachen Mischwald, Marabá Regenwald, Fairbanks Nadelwald. 2100: 42, 62, 20 kg<sub>C</sub>.</p>
     <p>„Marabá wächst schneller und höher, Fairbanks ist kalt und langsam.“</p>
     <p>Klick: <b>drei Orte + Kurven.</b></p>
-    <p>Klick: <b>Haken.</b> „Damit steht der Zeitverlauf.“</p>
     <p class="q">Falls Fragen kommen — Kohlenstoff ist je Ort für alle Waldtypen gleich (IPCC 2019: kein belastbarer Unterschied); die Typen unterscheiden sich in Albedo und Störung. Aufgenommen bis 2100: Aachen 163, Marabá 232, Fairbanks 81 kg CO₂. Kräftige Farbe: mindestens 30 % der Fläche wiederbewaldbar.</p>
+  </aside>
+</section>
+
+<section class="slide" data-ch="baeume" data-title="Wachstumskurven im globalen Vergleich" data-carry="wachstum" data-start="1" data-part="1">
+  <!-- the second half of a split slide: opens on click 1 of the slide before (data-start, data-carry) -->
+  <header class="sh"><h2>Wachstumskurven im globalen Vergleich</h2></header>
+  <div class="body">
+    <div class="split sketch mapwide" style="flex:1; min-height:0">
+    <div class="sidecol"><div class="chart" data-chart="b5" data-site-step="1" data-site-first="Aachen" data-label="Karte: typischer Waldtyp auf der wiederbewaldbaren Fläche"></div></div>
+    <!-- the stock chart stands from the start with Aachen alone; Fairbanks and Marabá come with the sites on the map (gid "step:1") -->
+    <div class="sidecol"><div class="chart" data-chart="b6s" style="flex:1; min-height:0" data-label="Kohlenstoffvorrat eines Baums von 2026 bis 2100: zuerst Aachen (DE), dann dazu Fairbanks (US) und Marabá (BR)"></div></div>
+    <div class="c11-done rise" data-step="2" style="--c:var(--s-mb)"><div class="c11-chip"><div class="eq tex">$$\mB(\tm) = \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw}\left(1 - \sz \mathbf{e}^{\gam \dTw(\tm)}\right)$$</div><span class="c11-u">[kg<sub>C</sub>]</span><span class="c11-ic"><svg viewBox="-118 72 236 236" aria-hidden="true"><use href="#p-co2" x="-118" y="72" width="236" height="236"/></svg><svg class="ok" viewBox="0 0 34 30" aria-hidden="true"><path d="M4 16 l9 9 l17 -20"/></svg></span></span></div></div>
+    </div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (Waldtyp: wahrscheinlichste Waldklasse, aus Satelliten-Landbedeckung MODIS)</span><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (wiederbewaldbare Fläche, Kohlenstoff der Zelle, Klimazone; aus Inventur- und Satellitendaten hochgerechnet)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a> (Wachstumstempo, begrenzt nach <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a>)</span><span><i>Eigene Rechnung</i> (Kurven; alles auf 0,5° zusammengefasst)</span><span><i>Annahme</i> (Störung mit heutiger Rate; 2000 Bäume je ha)</span></p>
+  <aside class="notes" data-n="13a">
+    <p>Gleiches Bild wie eben.</p>
+    <p>Klick: <b>Haken.</b> „Damit steht der Zeitverlauf.“</p>
   </aside>
 </section>
 
@@ -170,7 +187,7 @@
   </aside>
 </section>
 
-<section class="slide" data-ch="baeume" data-title="Netto-Energieänderung durch Albedo" data-carry="albedo" data-end="5" data-part="2">
+<section class="slide" data-ch="baeume" data-title="Netto-Energieänderung durch Albedo" data-carry="albedo" data-end="4" data-part="2">
   <header class="sh"><h2>Netto-Energieänderung $\boldsymbol{\dot Q_\alpha}$ durch Albedo</h2></header>
   <div class="body" style="position:relative">
     <div class="dq-top">
@@ -193,8 +210,31 @@
     <p>Klick: <b>q̇_ein und A_B.</b> „Einstrahlung mal Kronenfläche, und beide ändern sich mit der Zeit.“</p>
     <p>Klick: „Wieder aus jährlich gemittelten Messdaten.“</p>
     <p>Klick: <b>Karte und drei Orte.</b> Aachen 20 W, Fairbanks 63 W: „Schnee.“ Marabá 17 W: „schon alles grün.“ „Viel bei Schnee und Wüste, wenig in den Tropen.“</p>
-    <p>Klick: <b>Fairbanks allein, Laub und Wolken:</b> +64 W und −1 W. „Die Wolken spielen dort kaum eine Rolle, das Laub macht fast alles.“</p>
     <p class="q">Falls Fragen kommen — 2100, Baum gepflanzt 2026: Aachen 20, Fairbanks 63, Marabá 17 W; nur Albedo 24, 64, 16 W; Wolken −4, −1, +1 W; ausgewachsen mit geschlossener Krone 29, 103, 21 W. Monatlich gerechnet, A_B wächst bis 5 m². Marabá: Wolkenterm leicht positiv, in der Trockenzeit weniger Wolken über Wald.</p>
+  </aside>
+</section>
+
+<section class="slide" data-ch="baeume" data-title="Netto-Energieänderung durch Albedo" data-carry="albedo" data-start="4" data-end="5" data-part="2">
+  <!-- the middle of a split slide: opens on the three sites (data-start), the click redraws the chart for Fairbanks alone -->
+  <header class="sh"><h2>Netto-Energieänderung $\boldsymbol{\dot Q_\alpha}$ durch Albedo</h2></header>
+  <div class="body" style="position:relative">
+    <div class="dq-top">
+      <div class="fline head c9-line dq-line"><span class="chip c-dq"><span>Netto-Energieänderung</span><span class="tex">$\dQ(\tm)$</span><span class="u">[W]</span></span><span class="gloss"><span class="tex">$\st{1}{=}\ \htmlClass{ub-fit}{\underbrace{\st{2}{\qin(\tm)\,\Ab(\tm)}\ \st{1}{\big(\dal(\tm) + \daw(\tm)\big)}}_{\st{3}{\htmlClass{ub-lab}{\text{aus jährlich gemittelten globalen Messdaten}}}}}$</span></span></div>
+      <i class="f-fit" data-step="3" hidden></i><dl class="legend sm dq-leg"><dt data-step="2">$\qin$</dt><dd data-step="2">Sonneneinstrahlung [W/m²]</dd><dt data-step="2">$\Ab$</dt><dd data-step="2">Kronenfläche [m²]</dd></dl>
+    </div>
+
+
+    <!-- as the growth slide: the map on the left, the three sites on the right, the light split into leaves and clouds -->
+    <div class="split sketch mapwide" style="flex:1; min-height:0">
+      <div class="sidecol" data-step="4"><div class="chart" data-chart="b8" data-step="4" data-label="Weltkarte: zusätzlich absorbierte Sonnenstrahlung je Baum, gepflanzt 2026, im Jahr 2100, Jahresmittel"></div></div>
+      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 20 W, Fairbanks 63 W, Marabá 17 W; dann Fairbanks allein, in Teilen: Albedo des Baums +64 W, Wolken −1 W"></div></div>
+    </div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Einstrahlung und Albedo-Kontrast)</span><span><a href="https://doi.org/10.1038/s41467-021-24551-5" target="_blank" rel="noopener">Duveiller et al. 2021</a> (Wolken)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (typischer Wald je Zelle)</span><span><a href="https://doi.org/10.1029/2025JG009284" target="_blank" rel="noopener">Williams et al. 2026</a> (Kronenschluss, A<sub>B</sub>(t))</span><span><i>Annahme</i> (2000 Bäume je ha; Grau: keine lokale Messung, im Modell mit dem Median des Breitenbandes gefüllt)</span></p>
+  <!-- the end: both effects per tree as a card in front, the slide blurred behind it -->
+  <aside class="notes" data-n="16a">
+    <p>Gleiches Bild wie eben.</p>
+    <p>Klick: <b>Fairbanks allein, Laub und Wolken:</b> +64 W und −1 W. „Die Wolken spielen dort kaum eine Rolle, das Laub macht fast alles.“</p>
   </aside>
 </section>
 
@@ -226,7 +266,7 @@
       </div>
       <div class="ovtrail" aria-hidden="true"><span class="st done" style="--c:var(--moss)"><span class="ic"><svg data-fly="baeume" viewBox="0 0 100 100"><use href="#e-baeume" width="100" height="100"/></svg><svg class="ok" viewBox="0 0 34 30" aria-hidden="true"><path d="M4 16 l9 9 l17 -20"/></svg></span>Baum-Modell</span><span class="st next" style="--c:var(--clay)"><span class="ic"><svg data-fly="klima" viewBox="0 0 100 100"><use href="#e-klima" width="100" height="100"/></svg></span>Klima-Modell</span><span class="st later" style="--c:var(--fjord)"><span class="ic"><svg data-fly="vergleich" viewBox="0 0 100 100"><use href="#e-potenzial" width="100" height="100"/></svg></span>Potenziale</span></div>
     </div></div>
-  <aside class="notes" data-n="16a">
+  <aside class="notes" data-n="16b">
     <p>Gleiches Bild wie eben.</p>
     <p>Klick: <b>Karte Baum-Modell.</b> „Kilogramm und Watt, aber noch keine Temperatur.“</p>
   </aside>
