@@ -1172,7 +1172,7 @@ svg.mo .m-sway { transform-box: fill-box; transform-origin: 50% 100%; }
 .forstbk .fazit { margin: 22px 0 0; }
 
 /* a formula symbol in a slide title: the math font, without making the title line taller */
-.sh h2 .katex { font-size: 1.08em; line-height: 0; }
+.sh h2 .katex { font-size: .94em; line-height: 0; }   /* as tall as the title's letters (Q̇ with its dot read too big at 1.08em) */
 /* climate: which way the radiative forcing points */
 /* forcing slide: the sign key stands in the row of the definition line, over the formula column (out of the stack, so the formula centres) */
 .sh h2 .katex .strut { display: none !important; }   /* KaTeX's strut would still add a few px to the line */
