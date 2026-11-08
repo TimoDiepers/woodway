@@ -122,7 +122,8 @@ def build_table() -> dict:
     film = json.loads((CHART_DATA / "dacfilm.json").read_text(encoding="utf-8"))
     cells = [[int(round((90.0 - lat) / 0.5 - 0.5)), int(round((lon + 180.0) / 0.5 - 0.5))] for lon, lat in film["cells"]]
     return {"years": film["years"], "countries": film["countries"], "cells": cells, "owner": film["owner"],
-            "capacityGt": film["paths"]["opt"]["cc"]}
+            # installed capacity per country and year [Gt CO2/a] (not the removal running that year)
+            "capacityGt": film["paths"]["opt"]["kap"]}
 
 
 def _dac_case(c: dict) -> dict:

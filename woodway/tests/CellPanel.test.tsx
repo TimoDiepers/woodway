@@ -28,7 +28,7 @@ describe("CellPanel", () => {
     expect(screen.getByText(/Mixed forest|Deciduous|Evergreen|Larch/)).toBeInTheDocument();
     const y = coolsFrom(at, cell);
     expect(screen.getByText(y ? `Cools the climate from ${y} on` : "Does not cool the climate by 2100")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Electricity per tonne of CO₂.*MWh\/t/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Electricity.*MWh\/t/ })).toBeInTheDocument();
   });
   it("cell without forest says so instead of drawing curves", async () => {
     const at = await loadAtlas("data/", diskFetch);
@@ -92,9 +92,9 @@ describe("CellPanel", () => {
     const onLayer = vi.fn();
     render(<CellPanel atlas={at} cell={r.i * 720 + r.j} year={2050} onClose={() => {}} layer="sun" onLayer={onLayer} />);
     const list = screen.getByRole("list", { name: "Conditions here" });
-    const sun = within(list).getByRole("button", { name: /Solar radiation at the ground.*W\/m²/ });
+    const sun = within(list).getByRole("button", { name: /^Sunlight.*W\/m²/ });
     expect(sun).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(within(list).getByRole("button", { name: /Albedo change: how much darker forest is than open land/ }));
+    fireEvent.click(within(list).getByRole("button", { name: /^Albedo change/ }));
     expect(onLayer).toHaveBeenCalledWith("darker");
   });
 });

@@ -65,7 +65,7 @@ export const useAtlas = create<AtlasState>((set) => ({
   year: 2100,
   setYear: (year) => { if (Number.isFinite(year)) set({ year: Math.max(2026, Math.min(2100, Math.round(year))) }); },
   plantYear: 2026,
-  setPlantYear: (plantYear) => { setModelPlantYear(plantYear); set({ plantYear }); },
+  setPlantYear: (plantYear) => { setModelPlantYear(plantYear); set((s) => ({ plantYear, year: Math.max(s.year, plantYear) })); },
   plantYears: [2026],
   setPlantYears: (plantYears) => set({ plantYears }),
   cell: null,

@@ -206,7 +206,7 @@ def test_build_table_and_global_paths_equal_the_deck_data():
     z = json.loads((ROOT / "deck" / "chart_data" / "zeitpfade.json").read_text(encoding="utf-8"))
     b, g = meta["build"], meta["global"]
     assert b["years"] == film["years"] and b["countries"] == film["countries"] and b["owner"] == film["owner"]
-    assert b["capacityGt"] == film["paths"]["opt"]["cc"]
+    assert b["capacityGt"] == film["paths"]["opt"]["kap"]   # installed capacity, not the removal
     for (i, j), (lon, lat) in zip(b["cells"], film["cells"]):
         assert 90.0 - (i + 0.5) * 0.5 == pytest.approx(lat, abs=0.25 + 1e-9)
         assert -180.0 + (j + 0.5) * 0.5 == pytest.approx(lon, abs=0.25 + 1e-9)

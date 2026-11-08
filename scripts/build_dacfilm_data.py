@@ -70,7 +70,14 @@ def main() -> None:
             if c in used:
                 cap[used.index(c)] = x[i]
         net = (x * eta).sum(axis=0)
+        # the installed capacity per country (kap_land; cc above is what runs, the removal): plants stand idle
+        # once storage is full, but they are still there
+        kap = np.zeros((len(used), x.shape[1]))
+        for i, c in enumerate(L):
+            if c in used:
+                kap[used.index(c)] = np.asarray(r["kap_land"])[i]
         out_paths[key] = {"cc": [[round(float(v), 4) for v in row] for row in cap],
+                          "kap": [[round(float(v), 4) for v in row] for row in kap],
                           "tot": [round(float(v), 4) for v in np.array(r["kap_land"]).sum(axis=0)],
                           "cum": [round(float(v), 2) for v in np.cumsum(net)],
                           "peak": round(float(np.array(r["kap_land"]).sum(axis=0).max()), 1),

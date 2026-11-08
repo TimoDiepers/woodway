@@ -26,7 +26,7 @@ describe("App", () => {
   it("shows the map, the layer list and the legend", async () => {
     render(<App />);
     expect(await screen.findByTestId("map")).toBeInTheDocument();
-    expect(screen.getAllByText("Temperature effect of one tree").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Effect per tree").length).toBeGreaterThan(0);
     expect(screen.getByText(/FaIR/)).toBeInTheDocument();
   });
   it("language switch relabels the legend", async () => {
@@ -34,7 +34,7 @@ describe("App", () => {
     await screen.findByTestId("map");
     await userEvent.click(screen.getByRole("button", { name: "More" }));
     await userEvent.click(screen.getByRole("button", { name: "Deutsch" }));
-    expect(screen.getAllByText("Temperaturwirkung eines Baums").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Wirkung je Baum").length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "English" }));
   });
   it("layers that do not change over time have no year slider; timed ones do", async () => {
@@ -42,23 +42,23 @@ describe("App", () => {
     await screen.findByTestId("map");
     expect(screen.getByRole("slider")).toBeInTheDocument();             // ΔT per tree: timed
     act(() => useAtlas.getState().setPlaying(true));
-    await pickLayer("Solar radiation at the ground");
+    await pickLayer("Sunlight");
     expect(screen.queryByRole("slider")).toBeNull();
     expect(useAtlas.getState().playing).toBe(false);                     // nothing left to play
-    await pickLayer("CO₂ removal efficiency (net share)");
+    await pickLayer("Removal efficiency");
     expect(screen.getByRole("slider")).toBeInTheDocument();
-    await pickLayer("Temperature effect of one tree");
+    await pickLayer("Effect per tree");
   });
   it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await pickLayer("Solar radiation at the ground");
+    await pickLayer("Sunlight");
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
-    await pickLayer("DACCS build-out, cost-optimal");
+    await pickLayer("DACCS capacity");
     expect(screen.getByText("no DACCS built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
-    await pickLayer("Temperature effect of one tree");
+    await pickLayer("Effect per tree");
   });
 });
 
@@ -79,7 +79,7 @@ describe("desktop layout", () => {
     render(<App />);
     await screen.findByTestId("map");
     act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
-    await userEvent.click(screen.getByRole("button", { name: /^Solar radiation at the ground:/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^Sunlight:/ }));
     expect(useAtlas.getState().layer).toBe("sun");
     expect(screen.queryByRole("slider")).toBeNull();          // a static layer: the dock is the dropdown alone
     act(() => { useAtlas.getState().setLayer("deltaT"); useAtlas.getState().setCell(null); });
@@ -118,21 +118,37 @@ describe("place search", () => {
   });
 });
 
+describe("planting year", () => {
+  it("a planted layer's timeline starts in its planting year; an earlier year moves along", async () => {
+    render(<App />);
+    await screen.findByTestId("map");
+    act(() => { useAtlas.getState().setYear(2030); });
+    await userEvent.click(screen.getByRole("combobox", { name: "Planting year" }));
+    await userEvent.click(await screen.findByRole("option", { name: /2041/ }));
+    const slider = screen.getByRole("slider", { name: /year/i });
+    expect(slider).toHaveAttribute("min", "2041");
+    expect(slider).toHaveValue("2041");
+    expect(useAtlas.getState().year).toBe(2041);
+    act(() => { useAtlas.getState().setPlantYear(2026); useAtlas.getState().setYear(2100); });
+    expect(screen.getByRole("slider", { name: /year/i })).toHaveAttribute("min", "2026");
+  });
+});
+
 describe("layer dropdown", () => {
   it("shows the current layer and offers every layer in sections in the order of the talk", async () => {
     render(<App />);
     await screen.findByTestId("map");
     const box = screen.getByRole("combobox", { name: "Layer" });
-    expect(box).toHaveTextContent("Temperature effect of one tree");
+    expect(box).toHaveTextContent("Effect per tree");
     expect(screen.queryByRole("radio")).toBeNull();          // no long list any more
     await userEvent.click(box);
     expect(await screen.findByText("One tree")).toBeInTheDocument();
-    for (const g of ["All reforestable land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
+    for (const g of ["All land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
     expect(screen.getAllByRole("option")).toHaveLength(15);
-    await userEvent.click(screen.getByRole("option", { name: "CO₂ removal efficiency (net share)" }));
+    await userEvent.click(screen.getByRole("option", { name: "Removal efficiency" }));
     expect(useAtlas.getState().layer).toBe("dacNet");
-    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("CO₂ removal efficiency (net share)");
-    await pickLayer("Temperature effect of one tree");
+    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("Removal efficiency");
+    await pickLayer("Effect per tree");
   });
   it("works with the keyboard", async () => {
     render(<App />);

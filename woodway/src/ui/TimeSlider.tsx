@@ -1,12 +1,14 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { Pause, Play } from "lucide-react";
 import { useT } from "@/i18n/useT";
 
 const YEARS_PER_SECOND = 6;
 
-/** Play, a slim track that fills up to the year, and the year itself: one line, ~36 px tall. */
-export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max = 2100 }:
-  { year: number; onYear(y: number): void; playing: boolean; onPlaying(p: boolean): void; min?: number; max?: number }) {
+/** Play, a slim track that fills up to the year, and the year itself: one line, ~36 px tall. `min` is the first year
+ *  shown (the planting year for planted trees: nothing happens before it); `after` sits at the end of the row. */
+export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max = 2100, after }:
+  { year: number; onYear(y: number): void; playing: boolean; onPlaying(p: boolean): void; min?: number; max?: number;
+    after?: ReactNode }) {
   const t = useT();
   const yearRef = useRef(year);
   yearRef.current = year;
@@ -35,6 +37,7 @@ export function TimeSlider({ year, onYear, playing, onPlaying, min = 2026, max =
         onChange={(e) => { onPlaying(false); onYear(+e.target.value); }}
         className="year-range min-w-0 flex-1" style={{ "--pct": `${pct}%` } as CSSProperties} />
       <output className="ch-text w-11 text-right font-serif text-[15px] font-semibold tabular-nums leading-none">{Math.round(year)}</output>
+      {after}
     </div>
   );
 }

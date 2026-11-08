@@ -77,6 +77,8 @@ export default function App() {
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
   if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
   const layer = layerById(s.layer);
+  // planted trees start in their planting year: an earlier year shows that year (as the slider does)
+  const year = layer.planted ? Math.max(s.year, s.plantYear) : s.year;
   const open = s.cell !== null;
 
   // the detail sheet's resting heights on a phone: half (map above it), almost full
@@ -115,7 +117,7 @@ export default function App() {
   const closeCell = () => s.setCell(null);
 
   const map = (
-    <AtlasMap atlas={atlas} layer={layer} year={s.year} plantYear={s.plantYear} cell={s.cell} onCell={select}
+    <AtlasMap atlas={atlas} layer={layer} year={year} plantYear={s.plantYear} cell={s.cell} onCell={select}
       onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection}
       initialView={{ longitude: WORLD.lon, latitude: WORLD.lat, zoom: worldZoom }}
       sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />
@@ -140,7 +142,7 @@ export default function App() {
           // the details carry the dock on top, so the year stays in reach while reading a cell
           <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
             peek={<Dock layer={layer} onLayer={pickLayer} bare row={dockRow} />}>
-            <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} />
+            <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} />
           </CompactSheet>
         ) : (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3"
@@ -155,14 +157,14 @@ export default function App() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {map}
-      <HoverReadout atlas={atlas} layer={layer} year={s.year} {...hover} />
+      <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-4 p-4" style={safeTop}>
         <TitlePlate atlas={atlas} layer={layer} compact={false} />
         {tools}
       </div>
       {open && (
         <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-[25rem] overflow-auto overscroll-contain p-4">
-          <CellPanel atlas={atlas} cell={s.cell!} year={s.year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} />
+          <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} />
         </section>
       )}
       {/* centred, as in woodway: layer and year in one line, as wide as it needs; clear of the details when open */}
