@@ -12,7 +12,7 @@ describe("GlobalStrip", () => {
   it("names the curves of the deck's anchor and DACCS capacity and cost of the year", async () => {
     const at = await loadAtlas("data/", diskFetch);
     render(<GlobalStrip atlas={at} year={2080} />);
-    for (const name of ["Very Low, without its own removal", "+ trees", "+ vegan world", "+ DACCS", "+ vegan world + DACCS"])
+    for (const name of ["Best case scenario (Very Low, without its own removal)", "+ trees", "+ vegan world", "+ DACCS", "+ vegan world + DACCS"])
       expect(screen.getByText(name)).toBeInTheDocument();
     const d = at.meta.global.dac["20"], k = at.meta.global.years.indexOf(2080);
     expect(screen.getByText(`DACCS ${d.capGt[k].toFixed(1)} Gt/a · ${d.costMed[k].toFixed(1)} tn €/a`)).toBeInTheDocument();
@@ -40,9 +40,9 @@ describe("GlobalStrip", () => {
     render(<GlobalStrip atlas={at} year={2080} />);
     const area = g.areasGha.kuehlt.toFixed(2), year = g.plantYear;
     expect(area).toBe("0.47");
-    expect(screen.getByText(new RegExp(`^Trees: managed forest on the ${area} Gha that cool, all planted in ${year}, timber kept. Vegan world from ${year}: .* forest on ${g.vegan.freeGha.toFixed(2)} Gha`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^Trees: forest on the ${area} Gha that cool, all planted in ${year}, not harvested. Vegan world from ${year}: .* forest on ${g.vegan.freeGha.toFixed(2)} Gha`))).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("de"));
-    expect(screen.getByText(/^Bäume: bewirtschafteter Wald auf den 0,47 Gha, die kühlen, alle 2026 gepflanzt, .*zurück auf 1,5 °C \(2083\)/)).toBeInTheDocument();
+    expect(screen.getByText(/^Bäume: Wald auf den 0,47 Gha, die kühlen, alle 2026 gepflanzt, ohne Nutzung\. .*zurück auf 1,5 °C \(2083\)/)).toBeInTheDocument();
     act(() => useAtlas.getState().setLang("en"));
   });
 });

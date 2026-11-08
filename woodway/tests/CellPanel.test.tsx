@@ -94,7 +94,7 @@ describe("CellPanel", () => {
     const list = screen.getByRole("list", { name: "Conditions here" });
     const sun = within(list).getByRole("button", { name: /Solar radiation at the ground.*W\/m²/ });
     expect(sun).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(within(list).getByRole("button", { name: /How much darker forest is than open land/ }));
+    fireEvent.click(within(list).getByRole("button", { name: /Albedo change: how much darker forest is than open land/ }));
     expect(onLayer).toHaveBeenCalledWith("darker");
   });
 });

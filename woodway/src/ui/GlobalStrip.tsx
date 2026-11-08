@@ -21,7 +21,7 @@ const CURVES = [
 export function GlobalStrip({ atlas, year }: { atlas: Atlas; year: number }) {
   const t = useT(), num = useNum();
   const [pace, setPace] = useState<Pace>("20");
-  const g = atlas.meta.global, e = g.effect;
+  const g = { ...atlas.meta.global, bestand: atlas.meta.bestand }, e = g.effect;
   const dacE = e[`dac${pace}`];
   const data = g.years.map((y, k) => {
     const trees = g.vlC[k] + e.trees[k] / 1000, vegan = trees + e.vegan[k] / 1000;
@@ -75,6 +75,14 @@ export function GlobalStrip({ atlas, year }: { atlas: Atlas; year: number }) {
           </li>
         ))}
       </ul>
+      {/* today's forests: what they still take up and what felling the warming ones would do, in the year shown;
+          not a curve -- their sink is part of the scenario already */}
+      {g.bestand && (
+        <p className="mt-1 text-inkMuted">{t("strip.today", {
+          area: num(g.bestand.areaGha, 1), year: Math.round(year), gt: num(g.bestand.uptakeGt[k], 1),
+          fell: num(g.bestand.fellGha, 2), dt: num(g.bestand.fellMK[k] / 1000, 3).replace("-", "−"),
+        })}</p>
+      )}
       <div className="mt-1"><SourceLine>{t("strip.source", {
         area: num(g.areasGha.kuehlt, 2), year: g.plantYear, free: num(g.vegan.freeGha, 2), growth: pace,
         back: plan.back, sum: num(plan.sumMed, 0), eurt: num(plan.eurT, 0),

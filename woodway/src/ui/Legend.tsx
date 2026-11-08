@@ -1,5 +1,5 @@
 import type { Atlas } from "@/data/types";
-import { reasonColor, scaleOf, type Layer } from "@/model/layers";
+import { groupCh, reasonColor, scaleOf, type Layer } from "@/model/layers";
 import { useNum, useT, type Key } from "@/i18n/useT";
 import { useAtlas } from "@/store";
 import { useDark } from "@/lib/useDark";
@@ -37,7 +37,7 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
   if (compact) {
     // the phone's plate: the layer's name in full, the ramp with its ticks and unit, then what the greys mean
     return (
-      <figure className="flex flex-col gap-1 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
+      <figure className="flex flex-col gap-1 text-xs" aria-label={t(layer.label)} data-ch={groupCh(layer.group)}>
         {caption && <figcaption className="ch-text line-clamp-2 font-serif text-[13px] font-semibold leading-tight">{t(layer.label)}</figcaption>}
         {cats}
         {layer.kind !== "cat" && sc && (
@@ -58,7 +58,7 @@ export function Legend({ atlas, layer, compact = false, caption = true }: { atla
     );
   }
   return (
-    <figure className="flex flex-col gap-1.5 text-xs" aria-label={t(layer.label)} data-ch={layer.group === "dac" ? "dac" : "baeume"}>
+    <figure className="flex flex-col gap-1.5 text-xs" aria-label={t(layer.label)} data-ch={groupCh(layer.group)}>
       <figcaption className="ch-text font-serif text-base font-semibold leading-tight">{t(layer.label)}</figcaption>
       {cats}
       {layer.kind !== "cat" && sc && (

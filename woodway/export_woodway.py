@@ -40,12 +40,16 @@ def _r(a, nd=6):
     return [float(f"{v:.{nd}g}") for v in np.asarray(a, dtype=float)]
 
 
-def type_curves() -> dict:
-    """Per forest type, the curves of one tree at its reference site, planted in T_START."""
+PLANT_YEARS = list(range(T_START, 2062, 5))   # the planting years woodway offers (2026-2061, as the deck's backup)
+AGE_BIN = 3                                    # years per age bin of today's forest (keeps the curve table small)
+
+
+def type_curves(plant_year: int = T_START) -> dict:
+    """Per forest type, the curves of one tree at its reference site, planted in *plant_year*."""
     g_t = green_temperature(SZENARIO)
     out = {}
     for key in SPECIES:
-        res = run_single_tree(key, lat_deg=reference_site(key), plant_year=T_START)
+        res = run_single_tree(key, lat_deg=reference_site(key), plant_year=plant_year)
         sp = get_species(key)
         unit_alb = -TAU_ATM * np.asarray(res.trajectory.closure, dtype=float) * sp.stand_area_m2 / A_EARTH_M2
         out[key] = {
@@ -56,6 +60,41 @@ def type_curves() -> dict:
             "dtCo2": _r(convolve_response(g_t, res.phi_co2)),
             "dtAlbUnit": _r(convolve_response(g_t, unit_alb)),
         }
+    return out
+
+
+def _dt_uptake(uptake_kgC: np.ndarray) -> np.ndarray:
+    """Temperature change [K] of one tree's net carbon uptake series on YEARS (the CO2 chain of nbs.pipeline)."""
+    from nbs.config import ModelConfig
+    from nbs.forcing import co2_flux_kg_per_yr, phi_co2, phi_co2_background
+    from nbs.pipeline import _green_carbon_for
+    from nbs.response import background_co2_ppm
+    cfg = ModelConfig()
+    flux = co2_flux_kg_per_yr(uptake_kgC)
+    g_c = _green_carbon_for(cfg, SZENARIO)
+    f = phi_co2(flux, g_c) if cfg.co2_forcing == "linear" else phi_co2_background(flux, g_c, background_co2_ppm(SZENARIO))
+    return convolve_response(green_temperature(SZENARIO), f)
+
+
+def bestand_curves() -> dict:
+    """Per forest type, what one tree of today's forest does from T_START on if it stays (nbs.tree_paths.felling_*):
+    its further uptake from the age that holds its stock (per age bin, at site factor 1), and its canopy's albedo at
+    full closure, held from T_START (per unit of the light product, as dtAlbUnit). Felling is the opposite of both."""
+    from nbs.tree_paths import _trajectory
+    g_t = green_temperature(SZENARIO)
+    n = len(YEARS)
+    out = {}
+    for key in SPECIES:
+        up, _, st = _trajectory(key, int(YEARS[0]))
+        sp = get_species(key)
+        canopy = -TAU_ATM * np.ones(n) * sp.stand_area_m2 / A_EARTH_M2
+        bins = []
+        for b in range(0, n // AGE_BIN + 2):
+            a0 = min(b * AGE_BIN + AGE_BIN // 2, n - 1)
+            u = np.maximum(up[np.minimum(a0 + np.arange(n), n - 1)], 0.0)
+            bins.append(_r(_dt_uptake(u)))
+        out[key] = {"dtUp": bins, "dtCanopy": _r(convolve_response(g_t, canopy)),
+                    "stockRef": _r(np.maximum.accumulate(st))}
     return out
 
 
@@ -148,6 +187,53 @@ def main() -> None:
     f.add("cloud", np.where(cloud_ok & (code > 0), cloud, np.nan), "f4")
     f.add("a", a, "f4")
     f.add("b", b, "f4")
+    # the land a vegan world frees and that could carry forest (deck chapter 5, nbs.vegan): its area, the typical
+    # forest there (key_grid over all cells) and that forest's site factor on the freed land's carbon, as
+    # nbs.tree_paths.forcing_cells; the browser evaluates it like the reforestable cells (a, b with the type curves)
+    from nbs.forest_data import key_grid
+    from nbs.tree_paths import _site_factor
+    from nbs.vegan import freed_area_m2, freed_carbon_mgc_ha
+    fkeys = key_grid(all_cells=True)
+    fsite = _site_factor(fkeys, freed_carbon_mgc_ha())
+    farea = freed_area_m2()
+    fcode = np.zeros((360, 720), dtype=np.uint8)
+    fa = np.full((360, 720), np.nan)
+    fb = np.full((360, 720), np.nan)
+    for n, key in enumerate(keys, start=1):
+        m = (fkeys == key) & (farea > 0) & (fsite > 0)
+        fcode[m] = n
+        fa[m] = fsite[m]
+        fb[m] = _product_no_nan(key)[m]
+    f.add("freeArea", np.where(fcode > 0, farea, 0.0), "f4")
+    f.add("freeType", fcode, "u1")
+    f.add("freeA", fa, "f4")
+    f.add("freeB", fb, "f4")
+    # today's forest (Walker et al. 2022, woody land: nbs.tree_paths._bestand): its type, area, site factor on the
+    # potential carbon, the age bin that holds today's stock, the light product, and where forest warms (felling)
+    from nbs.tree_paths import _bestand, felling_cells, _trajectory
+    barea, bcur, bpot = _bestand()
+    bsite = _site_factor(fkeys, bpot)
+    bcode = np.zeros((360, 720), dtype=np.uint8)
+    bage = np.zeros((360, 720), dtype=np.uint8)
+    bb = np.full((360, 720), np.nan)
+    for n_, key in enumerate(keys, start=1):
+        m = (fkeys == key) & (barea > 0) & (bsite > 0)
+        if not m.any():
+            continue
+        bcode[m] = n_
+        bb[m] = _product_no_nan(key)[m]
+        _, _, st = _trajectory(key, int(YEARS[0]))
+        s_ref = np.maximum.accumulate(st)
+        c_tree = bcur[m] * 1000.0 * get_species(key).stand_area_m2 / 1e4
+        a0 = np.searchsorted(s_ref, c_tree / bsite[m])
+        bage[m] = np.minimum(a0 // AGE_BIN, len(YEARS) // AGE_BIN + 1)
+    fell = felling_cells() & (bcode > 0)
+    f.add("bArea", np.where(bcode > 0, barea, 0.0), "f4")
+    f.add("bType", bcode, "u1")
+    f.add("bA", np.where(bcode > 0, bsite, np.nan), "f4")
+    f.add("bAge", bage, "u1")
+    f.add("bB", bb, "f4")
+    f.add("bFell", fell.astype(np.uint8), "u1")
     f.add("elec", np.where(ok, energy_grid("waermepumpe")["strom"], np.nan), "f4")
     f.add("dacOk", ok.astype(np.uint8), "u1")
     for y in base_years:
@@ -155,6 +241,36 @@ def main() -> None:
 
     curves = type_curves()
     years = [int(y) for y in YEARS]
+    # the same tree planted later: the curves that change with the planting year (the 2026 ones stay in curves)
+    later = {str(y): {k: {c: v[c] for c in ("m", "closure", "dtCo2", "dtAlbUnit")} for k, v in type_curves(y).items()}
+             for y in PLANT_YEARS[1:]}
+    bcurves = bestand_curves()
+
+    # today's forest worldwide, the sum of its cells (each one linear, as the map): ΔT [mK] if it stays, of its
+    # uptake alone, and of felling where it warms; and its uptake [Gt CO2/a]
+    from nbs.constants import M_CO2_PER_C
+    from nbs.tree_paths import _trajectory as _traj
+    tot = {"keep": np.zeros(len(years)), "uptake": np.zeros(len(years)), "fell": np.zeros(len(years)), "gt": np.zeros(len(years))}
+    for n_, key in enumerate(keys, start=1):
+        m = bcode == n_
+        if not m.any():
+            continue
+        trees = barea[m] / get_species(key).stand_area_m2
+        bc = bcurves[key]
+        up, _, _ = _traj(key, int(YEARS[0]))
+        for ab in np.unique(bage[m]):
+            mm = bage[m] == ab
+            w_up = float((bsite[m][mm] * trees[mm]).sum())
+            w_alb = float((bb[m][mm] * trees[mm]).sum())
+            d_up = w_up * np.asarray(bc["dtUp"][ab]); d_alb = w_alb * np.asarray(bc["dtCanopy"])
+            tot["keep"] += d_up + d_alb; tot["uptake"] += d_up
+            fm = fell[m][mm]
+            if fm.any():
+                tot["fell"] -= float((bsite[m][mm][fm] * trees[mm][fm]).sum()) * np.asarray(bc["dtUp"][ab]) \
+                    + float((bb[m][mm][fm] * trees[mm][fm]).sum()) * np.asarray(bc["dtCanopy"])
+            a0 = min(int(ab) * AGE_BIN + AGE_BIN // 2, len(years) - 1)
+            u = np.maximum(up[np.minimum(a0 + np.arange(len(years)), len(years) - 1)], 0.0)
+            tot["gt"] += w_up * M_CO2_PER_C * u / 1e12
 
     def dt_at(i, j, year):
         k = years.index(year)
@@ -183,6 +299,14 @@ def main() -> None:
         "types": keys,
         "typeGroup": {k: k.split("_")[0] for k in keys},
         "curves": curves,
+        "plantYears": PLANT_YEARS,
+        "curvesLater": later,
+        "bestand": {"curves": bcurves, "ageBin": AGE_BIN,
+                    "areaGha": round(float(barea[bcode > 0].sum() / 1e13), 3), "fellGha": round(float(barea[fell].sum() / 1e13), 3),
+                    # the canopy's albedo of today's forest is in today's climate already: only what changes counts,
+                    # its further uptake (cools) and, where it is cut, the brighter land minus the lost uptake
+                    "uptakeMK": _r(1000 * tot["uptake"], 4), "fellMK": _r(1000 * tot["fell"], 4),
+                    "uptakeGt": _r(tot["gt"], 4)},
         "dacYears": base_years,
         "build": build_table(),
         "global": global_paths(),

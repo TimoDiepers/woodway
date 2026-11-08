@@ -1,17 +1,13 @@
-import { LAYERS, type LayerId } from "@/model/layers";
+import { GROUPS, LAYERS, groupCh, type LayerId } from "@/model/layers";
 import { useT } from "@/i18n/useT";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/ui/primitives/select";
 
-const GROUPS = [
-  { g: "trees", ch: "baeume", label: "group.trees" },
-  { g: "dac", ch: "dac", label: "group.dac" },
-] as const;
-
-/** One dropdown instead of a long list: the current layer, and every layer in two sections, trees and DAC. */
+/** One dropdown instead of a long list: the current layer, and every layer in sections in the order of the talk
+ *  (one tree, all land, today's forest, a vegan world, DAC). */
 export function LayerPicker({ value, onChange }: { value: LayerId; onChange(id: LayerId): void }) {
   const t = useT();
   const cur = LAYERS.find((l) => l.id === value)!;
-  const ch = cur.group === "dac" ? "dac" : "baeume";
+  const ch = groupCh(cur.group);
   return (
     <Select value={value} onValueChange={(v) => onChange(v as LayerId)}>
       <SelectTrigger aria-label={t("layer.label")} data-ch={ch}

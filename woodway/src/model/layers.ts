@@ -1,11 +1,26 @@
 import type { Atlas, Scale } from "@/data/types";
 import type { Key } from "@/i18n/useT";
-import { closure, dacBuildMt, dacNet, deltaT, netShare, typeKey } from "./model";
+import { bestandUptake, cellTotal, closure, dacBuildMt, dacNet, deltaT, felling, netShare, typeKey, veganLand } from "./model";
 
-export type LayerId = "forestType" | "area" | "sun" | "darker" | "cloud" | "light" | "deltaT" | "netShare" | "elec" | "dacNet" | "dacBuild";
+export type LayerId = "forestType" | "area" | "sun" | "darker" | "cloud" | "light" | "deltaT" | "netShare" | "cellTotal"
+  | "bestandUp" | "felling" | "veganLand" | "elec" | "dacNet" | "dacBuild";
+
+/** The sections of the layer list, in the order of the talk: one tree, all reforestable land, today's forest, a
+ *  vegan world, DAC. `ch` is the chapter colour of the section. */
+export const GROUPS = [
+  { g: "tree", ch: "baeume", label: "group.tree" },
+  { g: "land", ch: "vergleich", label: "group.land" },
+  { g: "today", ch: "baeume", label: "group.today" },
+  { g: "vegan", ch: "dac", label: "group.vegan" },
+  { g: "dac", ch: "dac", label: "group.dac" },
+] as const;
+export type GroupId = (typeof GROUPS)[number]["g"];
+export const groupCh = (g: GroupId) => GROUPS.find((x) => x.g === g)!.ch;
 
 export interface Layer {
-  id: LayerId; group: "trees" | "dac"; label: Key; source: Key; timed: boolean;
+  id: LayerId; group: GroupId; label: Key; source: Key; timed: boolean;
+  /** follows the chosen planting year */
+  planted?: boolean;
   kind: "num" | "cat"; scale?: string; unit?: Key | string;
   /** A scale computed from the data, instead of the named one (the talk fits the build-out scale to the built cells). */
   scaleFn?: (at: Atlas) => Scale;
@@ -22,11 +37,16 @@ export const DARK_GREYS = { land: "#2e373a", unmeasured: "#3a4447", tooCold: "#4
 export function reasonColor(at: Atlas, reason: Key | null, dark = false): string {
   const c = dark ? DARK_GREYS : at.meta.colors;
   if (reason === "reason.tooCold") return c.tooCold;
-  if (reason === "reason.unmeasured" || reason === "reason.noCloud") return c.unmeasured;
+  // a second grey where the layer has two reasons on land: not measured, no clouds, or today's forest that cools
+  if (reason === "reason.unmeasured" || reason === "reason.noCloud" || reason === "reason.forestCools") return c.unmeasured;
   return c.land;
 }
 
 export const BUILD_SCALE: Scale = { stops: ["#d6ecea", "#7cc2bc", "#2f9c98", "#0d4f57"], domain: [0, 60], unit: "Mt/a" };
+/** Whole cells [10⁻⁶ K per 10 000 km²]: planted land cools (green) or warms (orange), as the deck's "lohnt" scale,
+ *  over the range single cells reach; today's forest and felling only cool, on one green ramp. */
+export const AREA_SCALE: Scale = { stops: ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"], domain: [-20, 20], mid: 0, unit: "10⁻⁶ K je 10 000 km²" };
+export const COOL_SCALE: Scale = { stops: ["#0f3d22", "#2f7a45", "#7fb98a", "#cfe4c6", "#ece7d8"], domain: [-120, 0], unit: "10⁻⁶ K je 10 000 km²" };
 
 // nbs.constants.A_EARTH_M2, as in nbs.grid.cell_area_m2
 const R2 = 5.1006e14 / (4 * Math.PI);
@@ -43,24 +63,35 @@ const measured = (name: string) => (at: Atlas, c: number) => (at.f.type[c] && at
 const unmeasured = (at: Atlas, c: number): Key | null => noTrees(at, c) ?? (at.f.type[c] && !at.f.measured[c] ? "reason.unmeasured" : null);
 // Cloud brightening only where Duveiller et al. 2021 retrieve the cloud change locally (deck b8i)
 const cloudless = (at: Atlas, c: number): Key | null => noTrees(at, c) ?? (at.f.type[c] && !Number.isFinite(at.f.cloud[c]) ? "reason.noCloud" : null);
+const notFreed = (at: Atlas, c: number): Key | null => (at.f.land[c] && !at.f.freeType[c] ? "reason.notFreed" : null);
+const noForest = (at: Atlas, c: number): Key | null => (at.f.land[c] && !at.f.bType[c] ? "reason.noForestToday" : null);
+const forestCools = (at: Atlas, c: number): Key | null => noForest(at, c) ?? (at.f.land[c] && !at.f.bFell[c] ? "reason.forestCools" : null);
 const TREES: Key[] = ["reason.noTrees"], ALBEDO: Key[] = ["reason.noTrees", "reason.unmeasured"], COLD: Key[] = ["reason.tooCold"];
 
 export const LAYERS: Layer[] = [
-  { id: "forestType", group: "trees", label: "layer.forestType", source: "src.forestType", timed: false, kind: "cat",
+  { id: "forestType", group: "tree", label: "layer.forestType", source: "src.forestType", timed: false, kind: "cat",
     value: (at, c) => { const k = typeKey(at, c); return k ? at.meta.categories.waldtyp.findIndex((x) => x.key === at.meta.typeGroup[k]) : -1; },
     reason: noTrees, greys: TREES },
-  { id: "area", group: "trees", label: "layer.area", source: "src.forestType", timed: false, kind: "num", scale: "flaeche", unit: "unit.area",
+  { id: "area", group: "land", label: "layer.area", source: "src.forestType", timed: false, kind: "num", scale: "flaeche", unit: "unit.area",
     value: (at, c) => (at.f.type[c] ? (100 * at.f.area[c]) / ROW_AREA[Math.floor(c / 720)] : NaN), reason: noTrees, greys: TREES },
-  { id: "sun", group: "trees", label: "layer.sun", source: "src.albedo", timed: false, kind: "num", scale: "sonne", value: measured("sun"), reason: unmeasured, greys: ALBEDO },
-  { id: "darker", group: "trees", label: "layer.darker", source: "src.albedo", timed: false, kind: "num", scale: "abdunkeln", value: measured("darker"), reason: unmeasured, greys: ALBEDO },
-  { id: "cloud", group: "trees", label: "layer.cloud", source: "src.cloud", timed: false, kind: "num", scale: "wolken",
+  { id: "sun", group: "tree", label: "layer.sun", source: "src.albedo", timed: false, kind: "num", scale: "sonne", value: measured("sun"), reason: unmeasured, greys: ALBEDO },
+  { id: "darker", group: "tree", label: "layer.darker", source: "src.albedo", timed: false, kind: "num", scale: "abdunkeln", value: measured("darker"), reason: unmeasured, greys: ALBEDO },
+  { id: "cloud", group: "tree", label: "layer.cloud", source: "src.cloud", timed: false, kind: "num", scale: "wolken",
     value: (at, c) => (at.f.type[c] ? at.f.cloud[c] : NaN), reason: cloudless, greys: ["reason.noTrees", "reason.noCloud"] },
-  { id: "light", group: "trees", label: "layer.light", source: "src.light", timed: true, kind: "num", scale: "licht",
+  { id: "light", group: "tree", planted: true, label: "layer.light", source: "src.light", timed: true, kind: "num", scale: "licht",
     value: (at, c, y) => measured("light")(at, c) * closure(at, c, y), reason: unmeasured, greys: ALBEDO },
-  { id: "deltaT", group: "trees", label: "layer.deltaT", source: "src.deltaT", timed: true, kind: "num", scale: "baumwirkung", unit: "unit.deltaT",
+  { id: "deltaT", group: "tree", planted: true, label: "layer.deltaT", source: "src.deltaT", timed: true, kind: "num", scale: "baumwirkung", unit: "unit.deltaT",
     value: (at, c, y) => deltaT(at, c, y) * 1e15, reason: noTrees, greys: TREES },
-  { id: "netShare", group: "trees", label: "layer.netShare", source: "src.deltaT", timed: true, kind: "num", scale: "dac_netto", unit: "unit.netShare",
+  { id: "netShare", group: "tree", planted: true, label: "layer.netShare", source: "src.deltaT", timed: true, kind: "num", scale: "dac_netto", unit: "unit.netShare",
     value: (at, c, y) => netShare(at, c, y) * 100, reason: noTrees, greys: TREES },
+  { id: "cellTotal", group: "land", planted: true, label: "layer.cellTotal", source: "src.cellTotal", timed: true, kind: "num", scaleFn: () => AREA_SCALE, unit: "unit.perArea",
+    value: cellTotal, reason: noTrees, greys: TREES },
+  { id: "bestandUp", group: "today", label: "layer.bestandUp", source: "src.bestand", timed: true, kind: "num", scaleFn: () => COOL_SCALE, unit: "unit.perArea",
+    value: bestandUptake, reason: noForest, greys: ["reason.noForestToday"] },
+  { id: "felling", group: "today", label: "layer.felling", source: "src.felling", timed: true, kind: "num", scaleFn: () => COOL_SCALE, unit: "unit.perArea",
+    value: felling, reason: forestCools, greys: ["reason.forestCools", "reason.noForestToday"] },
+  { id: "veganLand", group: "vegan", planted: true, label: "layer.veganLand", source: "src.veganLand", timed: true, kind: "num", scaleFn: () => AREA_SCALE, unit: "unit.perArea",
+    value: veganLand, reason: notFreed, greys: ["reason.notFreed"] },
   { id: "elec", group: "dac", label: "layer.elec", source: "src.dac", timed: false, kind: "num", scale: "strom",
     value: (at, c) => (at.f.dacOk[c] ? at.f.elec[c] : NaN), reason: tooCold, greys: COLD },
   { id: "dacNet", group: "dac", label: "layer.dacNet", source: "src.dac", timed: true, kind: "num", scale: "dac_netto",

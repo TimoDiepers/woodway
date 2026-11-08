@@ -45,7 +45,7 @@ describe("App", () => {
     await pickLayer("Solar radiation at the ground");
     expect(screen.queryByRole("slider")).toBeNull();
     expect(useAtlas.getState().playing).toBe(false);                     // nothing left to play
-    await pickLayer("DAC net share");
+    await pickLayer("CO₂ removal efficiency (net share)");
     expect(screen.getByRole("slider")).toBeInTheDocument();
     await pickLayer("Temperature effect of one tree");
   });
@@ -55,7 +55,7 @@ describe("App", () => {
     await pickLayer("Solar radiation at the ground");
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
-    await pickLayer("DACCS build-out");
+    await pickLayer("DACCS build-out, cost-optimal");
     expect(screen.getByText("no DACCS built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
     await pickLayer("Temperature effect of one tree");
@@ -119,19 +119,19 @@ describe("place search", () => {
 });
 
 describe("layer dropdown", () => {
-  it("shows the current layer and offers every layer in two sections, trees and DAC", async () => {
+  it("shows the current layer and offers every layer in sections in the order of the talk", async () => {
     render(<App />);
     await screen.findByTestId("map");
     const box = screen.getByRole("combobox", { name: "Layer" });
     expect(box).toHaveTextContent("Temperature effect of one tree");
     expect(screen.queryByRole("radio")).toBeNull();          // no long list any more
     await userEvent.click(box);
-    expect(await screen.findByText("Trees")).toBeInTheDocument();
-    expect(screen.getByText("Direct air capture")).toBeInTheDocument();
-    expect(screen.getAllByRole("option")).toHaveLength(11);
-    await userEvent.click(screen.getByRole("option", { name: "DAC net share" }));
+    expect(await screen.findByText("One tree")).toBeInTheDocument();
+    for (const g of ["All reforestable land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
+    expect(screen.getAllByRole("option")).toHaveLength(15);
+    await userEvent.click(screen.getByRole("option", { name: "CO₂ removal efficiency (net share)" }));
     expect(useAtlas.getState().layer).toBe("dacNet");
-    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("DAC net share");
+    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("CO₂ removal efficiency (net share)");
     await pickLayer("Temperature effect of one tree");
   });
   it("works with the keyboard", async () => {

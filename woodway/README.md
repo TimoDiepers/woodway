@@ -1,6 +1,6 @@
 # Woodway
 
-The model of the PhD defence talk "Aufforstung als Klima-Technologie" (see the [main README](../README.md)), cell by cell: forest type, albedo, the temperature effect of one tree, DAC electricity, net share and build-out, 2026–2100, in English and German. Live at https://woodway.tidi.dev/, with the talk's slides under https://woodway.tidi.dev/slides/ (linked from the app's tool column).
+The model of the PhD defence talk "Aufforstung als Klima-Technologie" (see the [main README](../README.md)), cell by cell, 2026–2100, in English and German. The layers follow the talk: one tree (forest type, sunlight, albedo change, clouds, absorbed radiation, temperature effect, net share; planted in 2026 or any fifth year up to 2061), all reforestable land (area, the effect of the whole cell), today's forest (cooling by further growth, an upper bound; felling where forest warms, the talk's thought experiment), a vegan world (forest on the freed land) and DAC (electricity, removal efficiency, build-out). The world strip adds it up and states what today's forests still take up. Live at https://woodway.tidi.dev/, with the talk's slides under https://woodway.tidi.dev/slides/ (linked from the app's tool column).
 
 Place search asks OpenStreetMap's Nominatim, and only when Enter is pressed; nothing else leaves the page.
 

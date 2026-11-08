@@ -59,7 +59,8 @@ export default function App() {
   useEffect(() => { document.documentElement.lang = s.lang; }, [s.lang]);
   useEffect(() => forwardDeckKeys(), []);
   useEffect(() => {
-    loadAtlas().then(setAtlas).catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
+    loadAtlas().then((at) => { useAtlas.getState().setPlantYears(at.meta.plantYears ?? [at.meta.years[0]]); setAtlas(at); })
+      .catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
   }, []);
   // Escape closes a cell's details (unless a tool panel or the dropdown has it first)
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function App() {
   const closeCell = () => s.setCell(null);
 
   const map = (
-    <AtlasMap atlas={atlas} layer={layer} year={s.year} cell={s.cell} onCell={select}
+    <AtlasMap atlas={atlas} layer={layer} year={s.year} plantYear={s.plantYear} cell={s.cell} onCell={select}
       onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection}
       initialView={{ longitude: WORLD.lon, latitude: WORLD.lat, zoom: worldZoom }}
       sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />

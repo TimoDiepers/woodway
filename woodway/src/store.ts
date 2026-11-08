@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { LayerId } from "@/model/layers";
+import { setPlantYear as setModelPlantYear } from "@/model/model";
 
 export type { LayerId } from "@/model/layers";
 export type Theme = "light" | "dark" | "system";
@@ -37,6 +38,11 @@ interface AtlasState {
   setLayer: (l: LayerId) => void;
   year: number;
   setYear: (y: number) => void;
+  /** the year every planted tree is planted in (2026–2061 in 5-year steps) */
+  plantYear: number;
+  setPlantYear: (y: number) => void;
+  plantYears: number[];
+  setPlantYears: (ys: number[]) => void;
   cell: number | null;
   setCell: (c: number | null) => void;
   playing: boolean;
@@ -58,6 +64,10 @@ export const useAtlas = create<AtlasState>((set) => ({
   setLayer: (layer) => set({ layer }),
   year: 2100,
   setYear: (year) => { if (Number.isFinite(year)) set({ year: Math.max(2026, Math.min(2100, Math.round(year))) }); },
+  plantYear: 2026,
+  setPlantYear: (plantYear) => { setModelPlantYear(plantYear); set({ plantYear }); },
+  plantYears: [2026],
+  setPlantYears: (plantYears) => set({ plantYears }),
   cell: null,
   setCell: (cell) => set({ cell }),
   playing: false,

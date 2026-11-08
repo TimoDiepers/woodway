@@ -12,6 +12,8 @@ import Borders from "./Borders";
 
 export interface AtlasMapProps {
   atlas: Atlas; layer: Layer; year: number; cell: number | null;
+  /** the planting year: a new one recolours the planted layers */
+  plantYear?: number;
   onCell(cell: number | null): void;
   onHover?(cell: number | null, x: number, y: number): void;
   projection?: "globe" | "mercator"; dark?: boolean;
@@ -46,7 +48,7 @@ function viewImage(map: MaplibreMap) {
   return { b, w, h, coords };
 }
 
-export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, projection = "globe", dark = false,
+export default function AtlasMap({ atlas, layer, year, plantYear = 2026, cell, onCell, onHover, projection = "globe", dark = false,
   sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 }, insets }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
   // The painting goes straight from this canvas to the GPU (a maplibre canvas source, not an encoded image).
@@ -55,9 +57,9 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
   // where the canvas sits; a theme switch re-adds the source from these props and the canvas as it is
   const [coords, setCoords] = useState<Coords>(IMAGE_COORDS);
   const pending = useRef(0);
-  const latest = useRef({ atlas, layer, year, dark });
-  latest.current = { atlas, layer, year, dark };
-  const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; dark: boolean; colors: Uint32Array } | null>(null);
+  const latest = useRef({ atlas, layer, year, dark, plantYear });
+  latest.current = { atlas, layer, year, dark, plantYear };
+  const colours = useRef<{ atlas: Atlas; layer: Layer; year: number; dark: boolean; plantYear: number; colors: Uint32Array } | null>(null);
   // the colours with the other cells faded around a selected one, kept while view and selection stay
 
   useEffect(() => () => { pending.current++; }, []);
@@ -90,10 +92,10 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
       const map = mapRef.current?.getMap();
       if (ticket !== pending.current || !map) return;
       const t0 = performance.now();
-      const { atlas, layer, year, dark } = latest.current;
+      const { atlas, layer, year, dark, plantYear } = latest.current;
       let cc = colours.current;
-      if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year || cc.dark !== dark)
-        cc = colours.current = { atlas, layer, year, dark, colors: cellColors(atlas, layer, year, cc?.colors, dark) };
+      if (!cc || cc.atlas !== atlas || cc.layer !== layer || cc.year !== year || cc.dark !== dark || cc.plantYear !== plantYear)
+        cc = colours.current = { atlas, layer, year, dark, plantYear, colors: cellColors(atlas, layer, year, cc?.colors, dark) };
       const v = viewImage(map);
       canvas.width = v.w; canvas.height = v.h;
       paintHexView(canvas.getContext("2d", { willReadFrequently: true })!, v.w, v.h, v.b, atlas, layer, year, cc.colors);
@@ -108,7 +110,7 @@ export default function AtlasMap({ atlas, layer, year, cell, onCell, onHover, pr
     });
   }, [canvas]);
 
-  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, dark, projection, loaded, repaint]);
+  useEffect(() => { if (loaded) repaint(); }, [atlas, layer, year, plantYear, dark, projection, loaded, repaint]);
 
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180
