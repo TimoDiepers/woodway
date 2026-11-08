@@ -11,11 +11,11 @@ export function LayerPicker({ value, onChange }: { value: LayerId; onChange(id: 
   return (
     <Select value={value} onValueChange={(v) => onChange(v as LayerId)}>
       <SelectTrigger aria-label={t("layer.label")} data-ch={ch}
-        className="h-auto min-h-9 gap-2 border-[var(--paper-line)] bg-paper/70 px-2.5 py-1.5 [@media(pointer:coarse)]:min-h-10 text-left text-sm font-medium text-ink focus-visible:ring-[color-mix(in_srgb,var(--ch)_40%,transparent)]">
+        className="h-9 gap-2 border-[var(--paper-line)] bg-paper/70 px-2.5 [@media(pointer:coarse)]:h-10 text-left text-sm font-medium text-ink focus-visible:ring-[color-mix(in_srgb,var(--ch)_40%,transparent)]">
         {/* a div: the primitive clamps direct <span> children to one line, which collapses the dot */}
         <div className="flex min-w-0 items-center gap-2">
           <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--ch)]" aria-hidden />
-          <div className="line-clamp-2 leading-snug"><SelectValue /></div>
+          <div className="truncate"><SelectValue /></div>
         </div>
       </SelectTrigger>
       <SelectContent position="popper" sideOffset={4}
