@@ -2849,8 +2849,9 @@ const deckMedia = {
   },
   around(slides, n) {
     for (const k of [n, n + 1, n - 1, n + 2]) this.load(slides[k]);
-    // live iframes (woodway): only on this slide and the next, and only in the projector window
-    if (!document.documentElement.classList.contains('embed') && !deckLean)
+    // live iframes (woodway): only on this slide and the next, and only in the projector window. Opened from a local
+    // file (offline in the hall) the app is not one level up, the folder is: the poster stands instead
+    if (!document.documentElement.classList.contains('embed') && !deckLean && location.protocol !== 'file:')
       for (const k of [n, n + 1]) for (const f of slides[k]?.querySelectorAll('iframe[data-live-src]') ?? []) {
         f.addEventListener('load', () => f.classList.add('on'), { once: true });
         f.src = f.dataset.liveSrc; f.removeAttribute('data-live-src');
