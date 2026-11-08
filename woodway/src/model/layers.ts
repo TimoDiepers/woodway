@@ -45,8 +45,8 @@ export function reasonColor(at: Atlas, reason: Key | null, dark = false): string
 export const BUILD_SCALE: Scale = { stops: ["#d6ecea", "#7cc2bc", "#2f9c98", "#0d4f57"], domain: [0, 60], unit: "Mt/a" };
 /** Whole cells [10⁻⁶ K per 10 000 km²]: planted land cools (green) or warms (orange), as the deck's "lohnt" scale,
  *  over the range single cells reach; today's forest and felling only cool, on one green ramp. */
-export const AREA_SCALE: Scale = { stops: ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"], domain: [-20, 20], mid: 0, unit: "10⁻⁶ K je 10 000 km²" };
-export const COOL_SCALE: Scale = { stops: ["#0f3d22", "#2f7a45", "#7fb98a", "#cfe4c6", "#ece7d8"], domain: [-120, 0], unit: "10⁻⁶ K je 10 000 km²" };
+export const AREA_SCALE: Scale = { stops: ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"], domain: [-20, 20], mid: 0, unit: "10⁻⁶ K" };
+export const COOL_SCALE: Scale = { stops: ["#0f3d22", "#2f7a45", "#7fb98a", "#cfe4c6", "#ece7d8"], domain: [-120, 0], unit: "10⁻⁶ K" };
 
 // nbs.constants.A_EARTH_M2, as in nbs.grid.cell_area_m2
 const R2 = 5.1006e14 / (4 * Math.PI);

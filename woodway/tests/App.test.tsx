@@ -26,7 +26,7 @@ describe("App", () => {
   it("shows the map, the layer list and the legend", async () => {
     render(<App />);
     expect(await screen.findByTestId("map")).toBeInTheDocument();
-    expect(screen.getAllByText("Effect per tree").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Temperature change per tree").length).toBeGreaterThan(0);
     expect(screen.getByText(/FaIR/)).toBeInTheDocument();
   });
   it("language switch relabels the legend", async () => {
@@ -34,7 +34,7 @@ describe("App", () => {
     await screen.findByTestId("map");
     await userEvent.click(screen.getByRole("button", { name: "More" }));
     await userEvent.click(screen.getByRole("button", { name: "Deutsch" }));
-    expect(screen.getAllByText("Wirkung je Baum").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Temperaturänderung je Baum").length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "English" }));
   });
   it("layers that do not change over time have no year slider; timed ones do", async () => {
@@ -42,23 +42,23 @@ describe("App", () => {
     await screen.findByTestId("map");
     expect(screen.getByRole("slider")).toBeInTheDocument();             // ΔT per tree: timed
     act(() => useAtlas.getState().setPlaying(true));
-    await pickLayer("Sunlight");
+    await pickLayer("Sunlight at the ground");
     expect(screen.queryByRole("slider")).toBeNull();
     expect(useAtlas.getState().playing).toBe(false);                     // nothing left to play
-    await pickLayer("Removal efficiency");
+    await pickLayer("CO₂ removal efficiency");
     expect(screen.getByRole("slider")).toBeInTheDocument();
-    await pickLayer("Effect per tree");
+    await pickLayer("Temperature change per tree");
   });
   it("legend names every grey: unmeasured albedo, and both reasons of the build-out", async () => {
     render(<App />);
     await screen.findByTestId("map");
-    await pickLayer("Sunlight");
+    await pickLayer("Sunlight at the ground");
     expect(screen.getByText("reforestable, not measured locally")).toBeInTheDocument();
     expect(screen.getByText("no room for trees")).toBeInTheDocument();
     await pickLayer("DACCS capacity");
     expect(screen.getByText("no DACCS built here")).toBeInTheDocument();
     expect(screen.getByText("too cold for sorbent DAC")).toBeInTheDocument();
-    await pickLayer("Effect per tree");
+    await pickLayer("Temperature change per tree");
   });
 });
 
@@ -79,7 +79,7 @@ describe("desktop layout", () => {
     render(<App />);
     await screen.findByTestId("map");
     act(() => (map.props.onCell as (c: number) => void)(cellAt(6.08, 50.78)!));
-    await userEvent.click(screen.getByRole("button", { name: /^Sunlight:/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^Sunlight at the ground:/ }));
     expect(useAtlas.getState().layer).toBe("sun");
     expect(screen.queryByRole("slider")).toBeNull();          // a static layer: the dock is the dropdown alone
     act(() => { useAtlas.getState().setLayer("deltaT"); useAtlas.getState().setCell(null); });
@@ -139,16 +139,16 @@ describe("layer dropdown", () => {
     render(<App />);
     await screen.findByTestId("map");
     const box = screen.getByRole("combobox", { name: "Layer" });
-    expect(box).toHaveTextContent("Effect per tree");
+    expect(box).toHaveTextContent("Temperature change per tree");
     expect(screen.queryByRole("radio")).toBeNull();          // no long list any more
     await userEvent.click(box);
     expect(await screen.findByText("One tree")).toBeInTheDocument();
     for (const g of ["All land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
     expect(screen.getAllByRole("option")).toHaveLength(15);
-    await userEvent.click(screen.getByRole("option", { name: "Removal efficiency" }));
+    await userEvent.click(screen.getByRole("option", { name: "CO₂ removal efficiency" }));
     expect(useAtlas.getState().layer).toBe("dacNet");
-    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("Removal efficiency");
-    await pickLayer("Effect per tree");
+    expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("CO₂ removal efficiency");
+    await pickLayer("Temperature change per tree");
   });
   it("works with the keyboard", async () => {
     render(<App />);

@@ -33,7 +33,7 @@ describe("App on a phone", () => {
     expect(within(dock).getByRole("combobox", { name: "Layer" })).toBeInTheDocument();
     expect(within(dock).getByRole("slider")).toBeInTheDocument();
     const plate = screen.getByRole("banner");
-    expect(within(plate).getByRole("figure", { name: "Effect per tree" })).toBeInTheDocument();
+    expect(within(plate).getByRole("figure", { name: "Temperature change per tree" })).toBeInTheDocument();
     const tools = screen.getByRole("toolbar", { name: "Map tools" });
     // only the five tools reached for while exploring; the rest waits behind More, named in full
     expect(within(tools).getAllByRole("button").map((b) => b.getAttribute("aria-label")))
