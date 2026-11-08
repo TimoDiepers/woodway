@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { loadAtlas, LoadError } from "@/data/load";
 import type { Atlas } from "@/data/types";
 import { allReady, fieldsOf, layerById, layerReady, type LayerId } from "@/model/layers";
@@ -9,7 +9,8 @@ import { useLayoutMode, useViewportHeight } from "@/lib/useViewport";
 import AtlasMap from "@/map/AtlasMap";
 import { CompactSheet } from "@/ui/CompactSheet";
 import { HoverReadout } from "@/ui/HoverReadout";
-import { CellPanel } from "@/ui/CellPanel";
+// the cell details and their charts (recharts) load when a cell is first opened, not with the app
+const CellPanel = lazy(() => import("@/ui/CellPanel").then((m) => ({ default: m.CellPanel })));
 import { TitlePlate } from "@/ui/TitlePlate";
 import { ToolColumn } from "@/ui/ToolColumn";
 import { Dock } from "@/ui/Dock";
@@ -78,6 +79,12 @@ export default function App() {
   // the first opened cell retires the first-visit hint
   useEffect(() => { if (s.cell !== null && !s.hintSeen) s.markHintSeen(); }, [s.cell, s.hintSeen]);
 
+  useEffect(() => {
+    if (!atlas) return;
+    const go = () => { import("@/ui/CellPanel"); import("@/ui/GlobalStrip"); };
+    const w = window as Window & { requestIdleCallback?: (f: () => void) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(go); else setTimeout(go, 1500);
+  }, [!!atlas]);   // eslint-disable-line react-hooks/exhaustive-deps
   // a layer that does not change over time has no year to play
   useEffect(() => { if (atlas && !layerById(s.layer).timed && s.playing) s.setPlaying(false); }, [atlas, s.layer, s.playing]);
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
@@ -85,8 +92,9 @@ export default function App() {
   // and the world chart stand as skeletons and the hexagons fade in once the cells have loaded
   const layer = layerById(s.layer);
   // a layer picked before its fields have arrived: its hexagons and legend wait (skeleton), the rest stands
-  const layerOk = !!atlas && layerReady(atlas, s.layer);
+  const layerOk = !!atlas && layerReady(atlas, s.layer, s.plantYear);
   const panelOk = !!atlas && allReady(atlas);
+  // once the hexagons stand, fetch the panels' code in idle time: a first click on a cell then opens at once
   // planted trees start in their planting year: an earlier year shows that year (as the slider does)
   const year = layer.planted ? Math.max(s.year, s.plantYear) : s.year;
   const open = s.cell !== null;
@@ -152,7 +160,7 @@ export default function App() {
           // the details carry the dock on top, so the year stays in reach while reading a cell
           <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
             peek={<Dock layer={layer} onLayer={pickLayer} bare row={dockRow} />}>
-            {panelOk ? <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} /> : <PanelSkeleton />}
+            {panelOk ? <Suspense fallback={<PanelSkeleton />}><CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} /></Suspense> : <PanelSkeleton />}
           </CompactSheet>
         ) : (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3"
@@ -174,7 +182,7 @@ export default function App() {
       </div>
       {open && atlas && (
         <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-[25rem] overflow-auto overscroll-contain p-4">
-          {panelOk ? <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} /> : <PanelSkeleton />}
+          {panelOk ? <Suspense fallback={<PanelSkeleton />}><CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} /></Suspense> : <PanelSkeleton />}
         </section>
       )}
       {/* centred, as in woodway: layer and year in one line, as wide as it needs; clear of the details when open */}

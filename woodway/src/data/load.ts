@@ -68,9 +68,14 @@ export async function loadAtlas(base = "data/", fetcher: typeof fetch = fetch,
       try { f[name] = view(name, meta.fields[name], buf); } catch (e) { throw new LoadError(file, String(e)); }
     });
   };
+  // the curves of later planting years and of today's forest: not needed for the first picture
+  const extras = () => Promise.all([
+    get(fetcher, base, "curves_later.json", (r) => r.json()).then((v) => { meta.curvesLater = v; }),
+    get(fetcher, base, "bestand_curves.json", (r) => r.json()).then((v) => { meta.bestand.curves = v; }),
+  ]);
   const all = Object.keys(meta.fields);
   if (!opts.first) {
-    await Promise.all(all.map(one));
+    await Promise.all([...all.map(one), extras()]);
     return atlas;
   }
   const first = opts.first.filter((n) => n in meta.fields);
@@ -80,6 +85,8 @@ export async function loadAtlas(base = "data/", fetcher: typeof fetch = fetch,
   const rest = all.filter((n) => !first.includes(n));
   (async () => {
     await opts.after;   // what the screen shows first (land, lines, names) gets the line before the rest
+    await extras().catch(() => {});
+    opts.onMore?.({ ...atlas });
     for (let k = 0; k < rest.length; k += 4) {
       await Promise.all(rest.slice(k, k + 4).map(one)).catch(() => {});
       opts.onMore?.({ ...atlas });

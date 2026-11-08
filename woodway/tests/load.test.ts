@@ -13,7 +13,7 @@ function fakeData() {
     fields: { land: { offset: 0, dtype: "u1", length: n }, a: { offset: n, dtype: "f4", length: n } },
     types: [], typeGroup: {}, curves: {}, dacYears: [],
     build: { years: [2026], countries: ["X"], cells: [[10, 20]], owner: [0], capacityGt: [[1]] },
-    global: {}, sites: [], scales: {}, categories: { waldtyp: [] }, colors: { land: "#000", tooCold: "#000", unmeasured: "#000" }, reference: [],
+    global: {}, bestand: {}, sites: [], scales: {}, categories: { waldtyp: [] }, colors: { land: "#000", tooCold: "#000", unmeasured: "#000" }, reference: [],
   };
   return { meta, buf };
 }
@@ -30,6 +30,8 @@ function fetcher(over: Serve = {}, log: string[] = []): typeof fetch {
     "fields.bin": () => new Response(buf),
     "fields/land.bin.gz": () => new Response(gzipSync(buf.slice(0, n))),
     "fields/a.bin.gz": () => new Response(gzipSync(buf.slice(n, 5 * n))),
+    "curves_later.json": () => new Response("{}"),
+    "bestand_curves.json": () => new Response("{}"),
     ...over,
   };
   return (async (url: string) => {
@@ -44,7 +46,7 @@ describe("loadAtlas", () => {
   it("decodes each gzipped field into a typed array", async () => {
     const log: string[] = [];
     const at = await loadAtlas("data/", fetcher({ "fields.bin": status404 }, log));
-    expect(log.sort()).toEqual(["fields/a.bin.gz", "fields/land.bin.gz", "meta.json"]);
+    expect(log.sort()).toEqual(["bestand_curves.json", "curves_later.json", "fields/a.bin.gz", "fields/land.bin.gz", "meta.json"]);
     expect(at.f.land).toBeInstanceOf(Uint8Array);
     expect(at.f.a).toBeInstanceOf(Float32Array);
     expect(at.f.a[123]).toBe(2);
@@ -53,7 +55,7 @@ describe("loadAtlas", () => {
   it("with `first`, resolves once those fields are there and brings the others after", async () => {
     let more!: (a: unknown) => void;
     const arrived = new Promise((r) => { more = r; });
-    const at = await loadAtlas("data/", fetcher(), { first: ["land"], onMore: (a) => more(a) });
+    const at = await loadAtlas("data/", fetcher(), { first: ["land"], onMore: (a) => { if ((a as typeof at).f.a) more(a); } });
     expect(at.f.land).toBeInstanceOf(Uint8Array);
     await arrived;
     expect(at.f.a).toBeInstanceOf(Float32Array);

@@ -117,7 +117,10 @@ const FIELDS: Record<LayerId, string[]> = {
 };
 export const fieldsOf = (id: LayerId): string[] => FIELDS[id];
 /** Every field of the layer has arrived. */
-export const layerReady = (at: Atlas, id: LayerId): boolean => FIELDS[id].every((n) => !!at.f[n]);
+export const layerReady = (at: Atlas, id: LayerId, plantYear = at.meta.years[0]): boolean =>
+  FIELDS[id].every((n) => !!at.f[n])
+  && (id !== "bestandUp" && id !== "felling" || !!at.meta.bestand.curves)
+  && (!layerById(id).planted || plantYear === at.meta.years[0] || !!at.meta.curvesLater);
 /** Every field has arrived (the cell panel reads them all). */
-export const allReady = (at: Atlas): boolean => Object.keys(at.meta.fields).every((n) => !!at.f[n]);
+export const allReady = (at: Atlas): boolean => Object.keys(at.meta.fields).every((n) => !!at.f[n]) && !!at.meta.curvesLater && !!at.meta.bestand.curves;
 export const scaleOf = (at: Atlas, l: Layer): Scale | undefined => (l.scaleFn ? l.scaleFn(at) : l.scale === "__build" ? BUILD_SCALE : l.scale ? at.meta.scales[l.scale] : undefined);

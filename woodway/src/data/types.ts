@@ -8,10 +8,12 @@ export interface Meta {
   curves: Record<string, {m: number[]; closure: number[]; phiCo2: number[]; phiAlbUnit: number[]; dtCo2: number[]; dtAlbUnit: number[]}>;
   /** the planting years on offer, and the curves of a tree planted in each later one (meta.curves is the first) */
   plantYears: number[];
-  curvesLater: Record<string, Record<string, {m: number[]; closure: number[]; dtCo2: number[]; dtAlbUnit: number[]}>>;
+  /** from curves_later.json, loaded after the layer on screen */
+  curvesLater?: Record<string, Record<string, {m: number[]; closure: number[]; dtCo2: number[]; dtAlbUnit: number[]}>>;
   /** today's forest (Walker et al. 2022, woody land): per type the ΔT of one tree's further uptake per age bin (site
    *  factor 1) and of its canopy's albedo held from 2026 (per unit light product); world totals [mK, Gt CO2/a] */
-  bestand: {curves: Record<string, {dtUp: number[][]; dtCanopy: number[]; stockRef: number[]}>; ageBin: number;
+  bestand: {/** from bestand_curves.json, loaded after the layer on screen */
+            curves?: Record<string, {dtUp: number[][]; dtCanopy: number[]; stockRef: number[]}>; ageBin: number;
             areaGha: number; fellGha: number; uptakeMK: number[]; fellMK: number[]; uptakeGt: number[]};
   dacYears: number[];
   build: {years: number[]; countries: string[]; cells: [number, number][]; owner: number[]; capacityGt: number[][]};

@@ -59,7 +59,7 @@ describe("App on a phone", () => {
     const before = insets().bottom;
     tap(AACHEN());
     const sheet = screen.getByRole("region", { name: "Cell details" });
-    expect(within(sheet).getByText(/Cools the climate|Does not cool|Cools the climate until/)).toBeInTheDocument();
+    expect(await within(sheet).findByText(/Cools the climate|Does not cool|Cools the climate until/)).toBeInTheDocument();   // the panel's code loads on first use
     expect(screen.getByRole("slider")).toBeInTheDocument();
     expect(insets().bottom).toBeGreaterThan(before);
     const jump = map.props.flyTo as { lon: number; lat: number; zoom?: number };

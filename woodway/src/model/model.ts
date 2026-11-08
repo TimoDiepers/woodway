@@ -125,7 +125,8 @@ export function veganLand(at: Atlas, cell: number, year: number): number {
 function bestand(at: Atlas, cell: number, year: number): { up: number; canopy: number } | null {
   const n = at.f.bType?.[cell];
   if (!n) return null;
-  const b = at.meta.bestand.curves[at.meta.types[n - 1]], k = yearIndex(at, year);
+  const b = at.meta.bestand.curves?.[at.meta.types[n - 1]], k = yearIndex(at, year);
+  if (!b) return null;
   return { up: at.f.bA[cell] * b.dtUp[at.f.bAge[cell]][k], canopy: at.f.bB[cell] * b.dtCanopy[k] };
 }
 export function bestandUptake(at: Atlas, cell: number, year: number): number {
@@ -137,6 +138,7 @@ export function bestandUptake(at: Atlas, cell: number, year: number): number {
  *  open: the brighter land, minus the uptake it would still have had. */
 export function felling(at: Atlas, cell: number, year: number): number {
   if (!at.f.bFell?.[cell]) return NaN;
-  const v = bestand(at, cell, year)!;
+  const v = bestand(at, cell, year);
+  if (!v) return NaN;
   return perArea(cell, -(v.up + v.canopy), at.f.bArea[cell]);
 }

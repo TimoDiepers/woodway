@@ -302,8 +302,9 @@ def main() -> None:
         "typeGroup": {k: k.split("_")[0] for k in keys},
         "curves": curves,
         "plantYears": PLANT_YEARS,
-        "curvesLater": later,
-        "bestand": {"curves": bcurves, "ageBin": AGE_BIN,
+        # the curves of later planting years and of today's forest are in files of their own (curves_later.json,
+        # bestand_curves.json): the browser loads them after the layer on screen
+        "bestand": {"ageBin": AGE_BIN,
                     "areaGha": round(float(barea[bcode > 0].sum() / 1e13), 3), "fellGha": round(float(barea[fell].sum() / 1e13), 3),
                     # the canopy's albedo of today's forest is in today's climate already: only what changes counts,
                     # its further uptake (cools) and, where it is cut, the brighter land minus the lost uptake
@@ -330,6 +331,8 @@ def main() -> None:
         n = d["length"] * (4 if d["dtype"] == "f4" else 1)
         (fdir / f"{name}.bin.gz").write_bytes(gzip.compress(raw[d["offset"]: d["offset"] + n], compresslevel=9, mtime=0))
     (OUT / "fields.bin.gz").unlink(missing_ok=True)
+    (OUT / "curves_later.json").write_text(json.dumps(later, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+    (OUT / "bestand_curves.json").write_text(json.dumps(bcurves, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     (OUT / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
                                    encoding="utf-8")
     print(f"wrote {OUT}: {f.offset / 1e6:.1f} MB fields, {len(reference)} reference cells")
