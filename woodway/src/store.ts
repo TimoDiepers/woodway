@@ -34,6 +34,9 @@ interface AtlasState {
   setTheme: (t: Theme) => void;
   projection: Projection;
   setProjection: (p: Projection) => void;
+  /** place names over the map */
+  labels: "off" | "on";
+  setLabels: (l: "off" | "on") => void;
   layer: LayerId;
   setLayer: (l: LayerId) => void;
   year: number;
@@ -60,6 +63,8 @@ export const useAtlas = create<AtlasState>((set) => ({
   setTheme: (theme) => { save("atlas-theme", theme); set({ theme }); },
   projection: stored("atlas-projection", ["globe", "mercator"] as const, "globe"),
   setProjection: (projection) => { save("atlas-projection", projection); set({ projection }); },
+  labels: stored("atlas-labels", ["off", "on"] as const, "on"),
+  setLabels: (labels) => { save("atlas-labels", labels); set({ labels }); },
   layer: "deltaT",
   setLayer: (layer) => set({ layer }),
   year: 2100,

@@ -4,6 +4,8 @@ The model of the PhD defence talk "Aufforstung als Klima-Technologie" (see the [
 
 Place search asks OpenStreetMap's Nominatim, and only when Enter is pressed; nothing else leaves the page.
 
+Country borders (Natural Earth 1:50m) sit over the hexagons with a light casing; place names (Natural Earth countries and populated places, German and English, each from its own zoom level) can be switched on under More. They come from `woodway/scripts/borders.py` and `woodway/scripts/labels.py` (the 19 MB places file is fetched to `data/raw/` on first run); their glyphs (Noto Sans, OFL) are served from `public/glyphs`.
+
     uv run python woodway/export_woodway.py   # model → public/data (run after a model change)
     cd woodway && npm install
     npm run dev                               # http://localhost:5173

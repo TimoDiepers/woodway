@@ -25,7 +25,8 @@ vi.mock("react-map-gl/maplibre", async () => {
     return <div data-testid="map">{p.children}</div>;
   }),
   Marker: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  Source: ({ children, ...p }: { children: ReactNode }) => { fake.sourceProps = p; return <>{children}</>; },
+  // the hexagons' canvas source; the outline sources (hover, selection) are GeoJSON and not what this checks
+  Source: ({ children, ...p }: { children: ReactNode; id?: string }) => { if (p.id === "atlas") fake.sourceProps = p; return <>{children}</>; },
   Layer: () => null,
   };
 });

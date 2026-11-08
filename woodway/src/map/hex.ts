@@ -52,3 +52,27 @@ export function hexCentres(bounds: Bounds, pad = 0): { lon: Float32Array; lat: F
   }
   return { lon: lon.subarray(0, n), lat: lat.subarray(0, n), cell: cell.subarray(0, n) };
 }
+
+/** The hexagon of the lattice under a point (as drawn by hexCentres): its centre, the nearest of the candidates in
+ *  the two closest rows, measured in Web Mercator where the lattice is regular. Null off the lattice. */
+export function hexAt(lon: number, lat: number): { lon: number; lat: number } | null {
+  if (!Number.isFinite(lon) || !Number.isFinite(lat) || Math.abs(lat) > LAT_MAX) return null;
+  const y = mercY(lat), x = (lon * Math.PI) / 180;
+  const j0 = Math.floor(y / HEX_ROW_M - 0.5);
+  let best: { lon: number; lat: number } | null = null, d = Infinity;
+  for (const j of [j0, j0 + 1]) {
+    const yc = (j + 0.5) * HEX_ROW_M, x0 = -180 + 0.125 + (j & 1 ? 0.25 : 0);
+    const xc = x0 + 0.5 * Math.round((lon - x0) / 0.5), dx = (xc * Math.PI) / 180 - x, dy = yc - y;
+    if (dx * dx + dy * dy < d) { d = dx * dx + dy * dy; best = { lon: xc, lat: latOfMercY(yc) }; }
+  }
+  return best && Math.abs(best.lat) <= LAT_MAX ? best : null;
+}
+
+/** The six corners of the hexagon around a lattice centre, closed, as [lon, lat]: pointy on top and bottom,
+ *  0.25° to either side, as paint.ts draws them. */
+export function hexRing(c: { lon: number; lat: number }): [number, number][] {
+  const y = mercY(c.lat), r = HEX_R_M, lat = (dy: number) => latOfMercY(y + dy);
+  const ring: [number, number][] = [[c.lon, lat(r)], [c.lon + 0.25, lat(r / 2)], [c.lon + 0.25, lat(-r / 2)],
+    [c.lon, lat(-r)], [c.lon - 0.25, lat(-r / 2)], [c.lon - 0.25, lat(r / 2)]];
+  return [...ring, ring[0]];
+}

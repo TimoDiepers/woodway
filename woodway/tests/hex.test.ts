@@ -4,7 +4,7 @@ import { loadAtlas } from "@/data/load";
 import { layerById, scaleOf } from "@/model/layers";
 import { scaleColor } from "@/color/scale";
 import { cellAt, LAT_MAX } from "@/map/lookup";
-import { hexCentres, HEX_R_DEG, HEX_R_M, mercY } from "@/map/hex";
+import { hexAt, hexCentres, hexRing, HEX_R_DEG, HEX_R_M, mercY } from "@/map/hex";
 import { paintHexView } from "@/map/paint";
 
 const DIR = path.resolve(__dirname, "../public/data/");
@@ -99,5 +99,22 @@ describe("paintHexView", () => {
     const sea = [...hx.cell.keys()].filter((i) => !at.f.land[hx.cell[i]]);
     expect(sea.length).toBeGreaterThan(0);
     for (const i of sea) expect(pixel(hx.lon[i], hx.lat[i])).toBe(0);
+  });
+});
+
+describe("hexAt / hexRing", () => {
+  it("finds the lattice hexagon under a point: a centre finds itself, a point just beside it too", () => {
+    const { lon, lat } = hexCentres({ west: 5, south: 48, east: 7, north: 50 });
+    for (let i = 0; i < lon.length; i += 7) {
+      const h = hexAt(lon[i] + 0.05, lat[i] - 0.02)!;
+      expect(h.lon).toBeCloseTo(lon[i], 5);
+      expect(h.lat).toBeCloseTo(lat[i], 5);
+    }
+  });
+  it("outlines a hexagon with six corners, closed, 0.5° across", () => {
+    const r = hexRing({ lon: 6.125, lat: 49 });
+    expect(r).toHaveLength(7);
+    expect(r[6]).toEqual(r[0]);
+    expect(Math.max(...r.map((p) => p[0])) - Math.min(...r.map((p) => p[0]))).toBeCloseTo(0.5, 6);
   });
 });

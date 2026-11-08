@@ -1,3 +1,4 @@
+import type { FeatureCollection } from "geojson";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { Layer as MLayer, Marker, Source, type MapRef, type MapLayerMouseEvent, type SourceProps } from "react-map-gl/maplibre";
 import type { CanvasSource, CanvasSourceSpecification, Map as MaplibreMap } from "maplibre-gl";
@@ -8,12 +9,16 @@ import { paperBasemap, paperBasemapDark } from "@/lib/mapStyle";
 import { cellColors, paintHexView, IMAGE_COORDS } from "./paint";
 import { clampBounds } from "./hex";
 import { cellAt, cellCenter } from "./lookup";
+import { hexAt, hexRing } from "./hex";
 import Borders from "./Borders";
+import Labels from "./Labels";
 
 export interface AtlasMapProps {
   atlas: Atlas; layer: Layer; year: number; cell: number | null;
   /** the planting year: a new one recolours the planted layers */
   plantYear?: number;
+  /** place names over the map, in this language (off: none) */
+  labels?: "de" | "en" | null;
   onCell(cell: number | null): void;
   onHover?(cell: number | null, x: number, y: number): void;
   projection?: "globe" | "mercator"; dark?: boolean;
@@ -48,12 +53,18 @@ function viewImage(map: MaplibreMap) {
   return { b, w, h, coords };
 }
 
-export default function AtlasMap({ atlas, layer, year, plantYear = 2026, cell, onCell, onHover, projection = "globe", dark = false,
+// the glyphs of the place names, served with the app (public/glyphs); MapLibre needs an absolute URL template
+const GLYPHS = (typeof document !== "undefined" ? document.baseURI.replace(/[^/]*$/, "") : "/") + "glyphs/{fontstack}/{range}.pbf";
+const styleLight = { ...paperBasemap, glyphs: GLYPHS };
+const styleDark = { ...paperBasemapDark, glyphs: GLYPHS };
+
+export default function AtlasMap({ atlas, layer, year, plantYear = 2026, labels = null, cell, onCell, onHover, projection = "globe", dark = false,
   sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 }, insets }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
   // The painting goes straight from this canvas to the GPU (a maplibre canvas source, not an encoded image).
   const canvas = useMemo(() => document.createElement("canvas"), []);
   const [loaded, setLoaded] = useState(false);
+  const [hoverHex, setHoverHex] = useState<{ lon: number; lat: number } | null>(null);
   // where the canvas sits; a theme switch re-adds the source from these props and the canvas as it is
   const [coords, setCoords] = useState<Coords>(IMAGE_COORDS);
   const pending = useRef(0);
@@ -115,24 +126,37 @@ export default function AtlasMap({ atlas, layer, year, plantYear = 2026, cell, o
   const pick = (e: MapLayerMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap();   // a spun globe reports longitudes beyond ±180
     const c = cellAt(lng, lat);
-    return c !== null && atlas.f.land[c] ? c : null;
+    if (c === null || !atlas.f.land[c]) return null;
+    // a coastal cell reaches into the sea, where the sea now covers it: a point in the sea picks nothing
+    const map = mapRef.current?.getMap();
+    if (map?.getLayer?.("ocean-fill") && map.queryRenderedFeatures(e.point, { layers: ["ocean-fill"] }).length) return null;
+    return c;
   };
 
   const sel = cell !== null ? cellCenter(cell) : null;
+  // the hexagon under the pointer and the selected one, as outlines on the map (the selected one stronger)
+  const selHex = sel ? hexAt(sel.lon, sel.lat) : null;
+  const ring = (h: { lon: number; lat: number } | null) =>
+    ({ type: "FeatureCollection", features: h ? [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: hexRing(h) } }] : [] }) as FeatureCollection;
   return (
     <Map
       ref={mapRef}
       initialViewState={initialView}
-      mapStyle={dark ? paperBasemapDark : paperBasemap}
+      mapStyle={dark ? styleDark : styleLight}
       projection={projection}
       onLoad={() => setLoaded(true)}
       onMoveEnd={() => repaint()}
       onResize={() => repaint()}
       onClick={(e) => onCell(pick(e))}
-      onMouseMove={onHover ? (e) => onHover(pick(e), e.point.x, e.point.y) : undefined}
-      onMouseLeave={onHover ? () => onHover(null, 0, 0) : undefined}
+      onMouseMove={(e) => {
+        const c = pick(e);
+        onHover?.(c, e.point.x, e.point.y);
+        const { lng, lat } = e.lngLat.wrap(), h = c !== null ? hexAt(lng, lat) : null;
+        setHoverHex((o) => (o?.lon === h?.lon && o?.lat === h?.lat ? o : h));
+      }}
+      onMouseLeave={() => { onHover?.(null, 0, 0); setHoverHex(null); }}
       // the cell under a still pointer changes once the map moves (a site jump, a search): drop the readout
-      onMoveStart={onHover ? () => onHover(null, 0, 0) : undefined}
+      onMoveStart={() => { onHover?.(null, 0, 0); setHoverHex(null); }}
       style={{ position: "absolute", inset: 0, background: "rgb(var(--color-paper))" }}
       attributionControl={{ compact: true }}
     >
@@ -141,16 +165,20 @@ export default function AtlasMap({ atlas, layer, year, plantYear = 2026, cell, o
         <MLayer id="atlas-layer" type="raster" paint={{ "raster-resampling": "nearest", "raster-opacity": 0.95, "raster-fade-duration": 0 }} />
       </Source>
       <Borders dark={dark} />
+      <Source id="hex-hover" type="geojson" data={ring(hoverHex && (hoverHex.lon !== selHex?.lon || hoverHex.lat !== selHex?.lat) ? hoverHex : null)}>
+        <MLayer id="hex-hover-casing" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#14181a" : "#f6f1e6", "line-width": 3.5, "line-opacity": 0.85 }} />
+        <MLayer id="hex-hover-line" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#f2ede2" : "#1b2420", "line-width": 1.5 }} />
+      </Source>
+      <Source id="hex-sel" type="geojson" data={ring(selHex)}>
+        <MLayer id="hex-sel-casing" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#14181a" : "#f6f1e6", "line-width": 5 }} />
+        <MLayer id="hex-sel-line" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#f2ede2" : "#1b2420", "line-width": 2.5 }} />
+      </Source>
+      {labels && <Labels lang={labels} dark={dark} />}
       {sites.map((s) => (
         <Marker key={s.name} longitude={s.lon} latitude={s.lat} anchor="center">
           <span className="block h-3 w-3 rounded-full border-2 border-paper shadow-[0_0_0_1px_rgb(var(--color-ink)/0.55)]" style={{ background: s.color }} title={s.name} />
         </Marker>
       ))}
-      {sel && (
-        <Marker longitude={sel.lon} latitude={sel.lat} anchor="center">
-          <span className="block h-4 w-4 rounded-sm border-2 border-ink" aria-hidden />
-        </Marker>
-      )}
     </Map>
   );
 }

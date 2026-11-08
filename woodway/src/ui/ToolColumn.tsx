@@ -68,7 +68,7 @@ export function ToolColumn({ atlas, layer, compact, onPlace, onRecenter }: { atl
 /** The slides as a named row, then the three display settings as segmented choices. */
 function MoreMenu() {
   const t = useT();
-  const { lang, setLang, theme, setTheme, projection, setProjection } = useAtlas();
+  const { lang, setLang, theme, setTheme, projection, setProjection, labels, setLabels } = useAtlas();
   const row = "flex min-h-11 w-full items-center gap-3 rounded-md px-2 text-left text-sm font-medium text-ink hover:bg-ink/5 active:bg-ink/10";
   return (
     <div className="flex flex-col">
@@ -84,6 +84,8 @@ function MoreMenu() {
       <div className="mt-2 flex flex-col gap-2.5 border-t border-[var(--paper-line)] pt-3">
         <Choice label={t("projection.label")} value={projection} onChange={setProjection}
           options={[{ value: "globe", label: t("projection.globe") }, { value: "mercator", label: t("projection.flat") }]} />
+        <Choice label={t("labels.label")} value={labels} onChange={setLabels}
+          options={[{ value: "off", label: t("labels.off") }, { value: "on", label: t("labels.on") }]} />
         <Choice label={t("theme.label")} value={theme} onChange={setTheme}
           options={[{ value: "light", label: t("theme.light") }, { value: "dark", label: t("theme.dark") }, { value: "system", label: t("theme.system") }]} />
         {/* each language under its own name, so a visitor who reads only one still finds it */}

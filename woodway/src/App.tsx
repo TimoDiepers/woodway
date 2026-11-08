@@ -117,7 +117,7 @@ export default function App() {
   const closeCell = () => s.setCell(null);
 
   const map = (
-    <AtlasMap atlas={atlas} layer={layer} year={year} plantYear={s.plantYear} cell={s.cell} onCell={select}
+    <AtlasMap atlas={atlas} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
       onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection}
       initialView={{ longitude: WORLD.lon, latitude: WORLD.lat, zoom: worldZoom }}
       sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />
