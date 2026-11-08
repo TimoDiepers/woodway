@@ -135,7 +135,7 @@ export default function App() {
   const closeCell = () => s.setCell(null);
 
   const map = (
-    <AtlasMap atlas={atlas} ready={layerOk} onBase={base.current.resolve} onNames={names.current.resolve} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
+    <AtlasMap atlas={atlas} ready={layerOk} imagery={layer.kind === "image"} onBase={base.current.resolve} onNames={names.current.resolve} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
       onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection}
       initialView={{ longitude: WORLD.lon, latitude: WORLD.lat, zoom: worldZoom }}
       sites={atlas?.meta.sites ?? []} flyTo={flyTo} insets={insets} />
@@ -175,7 +175,7 @@ export default function App() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {map}
-      {atlas && layerOk && <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />}
+      {atlas && layerOk && layer.kind !== "image" && <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-4 p-4" style={safeTop}>
         <TitlePlate atlas={layerOk ? atlas : null} layer={layer} compact={false} />
         {tools}

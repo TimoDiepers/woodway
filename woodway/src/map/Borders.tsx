@@ -11,18 +11,16 @@ import { FADE, useReady } from "./useReady";
  * `onLand` reports when the land stands, so the hexagons fade in after it, never before. MapLibre fetches and
  * parses the files in its worker. They load after the map's own layers: beforeId keeps them in their place.
  */
-export default function Borders({ dark, onLand, onBase }: { dark: boolean; onLand?: () => void; onBase?: () => void }) {
+export default function Borders({ dark, onLand, onBase, imagery = false }: { dark: boolean; onLand?: () => void; onBase?: () => void; imagery?: boolean }) {
   const land = useReady("ocean"), lines = useReady("borders");
   useEffect(() => { if (land) onLand?.(); }, [land, onLand]);
   useEffect(() => { if (land && lines) onBase?.(); }, [land, lines, onBase]);
   const w = (a: number, b: number) => ["interpolate", ["linear"], ["zoom"], 1, a, 6, b] as unknown as number;
-  const seaColour = dark ? "#20282b" : "#efe9dc", landColour = dark ? "#2e373a" : "#ddd6c7";   // lib/mapStyle.ts, meta.colors.land
+  const seaColour = dark ? "#20282b" : "#efe9dc";   // lib/mapStyle.ts
   return (
     <>
-      <Layer beforeId="atlas-layer" id="land-ground" type="background"
-        paint={{ "background-color": landColour, "background-opacity": land ? 1 : 0, "background-opacity-transition": FADE }} />
       <Source id="ocean" type="geojson" data="ocean.geojson">
-        <Layer beforeId="hex-hover-casing" id="ocean-fill" type="fill" paint={{ "fill-color": seaColour, "fill-antialias": true }} />
+        <Layer beforeId="hex-hover-casing" id="ocean-fill" type="fill" paint={{ "fill-color": seaColour, "fill-antialias": true, "fill-opacity": imagery ? 0 : 1, "fill-opacity-transition": FADE }} />
       </Source>
       <Source id="borders" type="geojson" data="borders.geojson">
         <Layer beforeId="hex-hover-casing" id="borders-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
@@ -32,4 +30,12 @@ export default function Borders({ dark, onLand, onBase }: { dark: boolean; onLan
       </Source>
     </>
   );
+}
+
+/** The land-coloured ground under the hexagons, rendered before them (so no beforeId is needed): it fades in once
+ *  the sea shape over it has loaded, and the continents appear. Not under the satellite image. */
+export function LandGround({ dark, imagery = false }: { dark: boolean; imagery?: boolean }) {
+  const land = useReady("ocean");
+  return <Layer id="land-ground" type="background"
+    paint={{ "background-color": dark ? "#2e373a" : "#ddd6c7", "background-opacity": land && !imagery ? 1 : 0, "background-opacity-transition": FADE }} />;
 }

@@ -2,12 +2,13 @@ import type { Atlas, Scale } from "@/data/types";
 import type { Key } from "@/i18n/useT";
 import { bestandUptake, cellTotal, closure, dacBuildMt, dacNet, deltaT, felling, netShare, typeKey, veganLand } from "./model";
 
-export type LayerId = "forestType" | "area" | "sun" | "darker" | "cloud" | "light" | "deltaT" | "netShare" | "cellTotal"
+export type LayerId = "satellite" | "forestType" | "area" | "sun" | "darker" | "cloud" | "light" | "deltaT" | "netShare" | "cellTotal"
   | "bestandUp" | "felling" | "veganLand" | "elec" | "dacNet" | "dacBuild";
 
 /** The sections of the layer list, in the order of the talk: one tree, all reforestable land, today's forest, a
  *  vegan world, DAC. `ch` is the chapter colour of the section. */
 export const GROUPS = [
+  { g: "earth", ch: "vergleich", label: "group.earth" },
   { g: "tree", ch: "baeume", label: "group.tree" },
   { g: "land", ch: "vergleich", label: "group.land" },
   { g: "today", ch: "baeume", label: "group.today" },
@@ -21,7 +22,8 @@ export interface Layer {
   id: LayerId; group: GroupId; label: Key; source: Key; timed: boolean;
   /** follows the chosen planting year */
   planted?: boolean;
-  kind: "num" | "cat"; scale?: string; unit?: Key | string;
+  /** image: no values, the map shows satellite imagery instead of hexagons */
+  kind: "num" | "cat" | "image"; scale?: string; unit?: Key | string;
   /** A scale computed from the data, instead of the named one (the talk fits the build-out scale to the built cells). */
   scaleFn?: (at: Atlas) => Scale;
   value(at: Atlas, cell: number, year: number): number;
@@ -69,6 +71,9 @@ const forestCools = (at: Atlas, c: number): Key | null => noForest(at, c) ?? (at
 const TREES: Key[] = ["reason.noTrees"], ALBEDO: Key[] = ["reason.noTrees", "reason.unmeasured"], COLD: Key[] = ["reason.tooCold"];
 
 export const LAYERS: Layer[] = [
+  // what is actually there, to compare with: Sentinel-2 cloudless (EOX), drawn by the map itself (AtlasMap)
+  { id: "satellite", group: "earth", label: "layer.satellite", source: "src.satellite", timed: false, kind: "image",
+    value: () => NaN, reason: () => null, greys: [] },
   { id: "forestType", group: "tree", label: "layer.forestType", source: "src.forestType", timed: false, kind: "cat",
     value: (at, c) => { const k = typeKey(at, c); return k ? at.meta.categories.waldtyp.findIndex((x) => x.key === at.meta.typeGroup[k]) : -1; },
     reason: noTrees, greys: TREES },
@@ -106,6 +111,7 @@ export const layerById = (id: LayerId): Layer => LAYERS.find((l) => l.id === id)
 /** The fields a layer reads (value and grey reasons), so the browser can fetch them first and know when it can draw. */
 const BASE = ["land", "type"];
 const FIELDS: Record<LayerId, string[]> = {
+  satellite: ["land"],
   forestType: BASE, area: [...BASE, "area"],
   sun: [...BASE, "measured", "sun"], darker: [...BASE, "measured", "darker"], cloud: [...BASE, "cloud"], light: [...BASE, "measured", "light"],
   deltaT: [...BASE, "a", "b"], netShare: [...BASE, "a", "b"], cellTotal: [...BASE, "a", "b", "area"],

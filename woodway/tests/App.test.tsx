@@ -157,8 +157,8 @@ describe("layer dropdown", () => {
     expect(screen.queryByRole("radio")).toBeNull();          // no long list any more
     await userEvent.click(box);
     expect(await screen.findByText("One tree")).toBeInTheDocument();
-    for (const g of ["All land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
-    expect(screen.getAllByRole("option")).toHaveLength(15);
+    for (const g of ["Earth", "All land", "Today's forest", "A vegan world", "Direct air capture"]) expect(screen.getByText(g)).toBeInTheDocument();
+    expect(screen.getAllByRole("option")).toHaveLength(16);
     await userEvent.click(screen.getByRole("option", { name: "CO₂ removal efficiency" }));
     expect(useAtlas.getState().layer).toBe("dacNet");
     expect(screen.getByRole("combobox", { name: "Layer" })).toHaveTextContent("CO₂ removal efficiency");

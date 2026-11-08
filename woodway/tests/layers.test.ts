@@ -18,7 +18,7 @@ const pack = (hex: string) => { const [r, g, b, a] = hexToRgba(hex); return ((a 
 
 describe("layers", () => {
   it("every land cell without a value has a named reason, in every layer and year", () => {
-    for (const l of LAYERS) {
+    for (const l of LAYERS.filter((x) => x.kind !== "image")) {   // the satellite image has no values, by design
       for (const y of l.timed ? [2026, 2063, 2100] : [2100]) {
         let missing = 0;
         for (let c = 0; c < 360 * 720; c++) {

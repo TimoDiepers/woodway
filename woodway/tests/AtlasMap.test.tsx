@@ -30,7 +30,7 @@ vi.mock("react-map-gl/maplibre", async () => {
   Layer: () => null,
   };
 });
-vi.mock("@/map/Borders", () => ({ default: () => null }));
+vi.mock("@/map/Borders", () => ({ default: () => null, LandGround: () => null }));
 
 import AtlasMap from "@/map/AtlasMap";
 import { act, waitFor } from "@testing-library/react";

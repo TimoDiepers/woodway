@@ -10,7 +10,7 @@ import { cellColors, paintHexView, IMAGE_COORDS } from "./paint";
 import { clampBounds } from "./hex";
 import { cellAt, cellCenter } from "./lookup";
 import { hexAt, hexRing } from "./hex";
-import Borders from "./Borders";
+import Borders, { LandGround } from "./Borders";
 import Labels from "./Labels";
 import { mapLib } from "./mapLib";
 
@@ -21,6 +21,8 @@ export interface AtlasMapProps {
   onBase?: () => void;
   onNames?: () => void;
   /** the layer's fields have arrived (the map draws its hexagons only then) */
+  /** satellite imagery instead of the hexagons, land and sea */
+  imagery?: boolean;
   ready?: boolean;
   /** the planting year: a new one recolours the planted layers */
   plantYear?: number;
@@ -65,7 +67,7 @@ const GLYPHS = (typeof document !== "undefined" ? document.baseURI.replace(/[^/]
 const styleLight = { ...paperBasemap, glyphs: GLYPHS };
 const styleDark = { ...paperBasemapDark, glyphs: GLYPHS };
 
-export default function AtlasMap({ atlas, ready = true, onBase, onNames, layer, year, plantYear = 2026, labels = null, cell, onCell, onHover, projection = "globe", dark = false,
+export default function AtlasMap({ atlas, ready = true, imagery = false, onBase, onNames, layer, year, plantYear = 2026, labels = null, cell, onCell, onHover, projection = "globe", dark = false,
   sites = [], flyTo = null, initialView = { longitude: 10, latitude: 25, zoom: 1.6 }, insets }: AtlasMapProps) {
   const mapRef = useRef<MapRef | null>(null);
   // The painting goes straight from this canvas to the GPU (a maplibre canvas source, not an encoded image).
@@ -178,9 +180,11 @@ export default function AtlasMap({ atlas, ready = true, onBase, onNames, layer, 
       style={{ position: "absolute", inset: 0, background: "rgb(var(--color-paper))" }}
       attributionControl={{ compact: true }}
     >
+      {/* the land first, under everything that follows (meta.colors.land) */}
+      <LandGround dark={dark} imagery={imagery} />
       {/* react-map-gl types <Source> without canvas sources; it passes them on to maplibre like any other */}
       <Source {...({ id: "atlas", type: "canvas", canvas, coordinates: coords, animate: false } as CanvasSourceSpecification as unknown as SourceProps)}>
-        <MLayer id="atlas-layer" type="raster" paint={{ "raster-resampling": "nearest", "raster-opacity": painted && ready && land ? 0.95 : 0, "raster-opacity-transition": { duration: 600, delay: 0 }, "raster-fade-duration": 0 }} />
+        <MLayer id="atlas-layer" type="raster" paint={{ "raster-resampling": "nearest", "raster-opacity": painted && ready && land && !imagery ? 0.95 : 0, "raster-opacity-transition": { duration: 600, delay: 0 }, "raster-fade-duration": 0 }} />
       </Source>
       {/* the outlines first: sea and lines are inserted below them (beforeId), the names go on top */}
       <Source id="hex-hover" type="geojson" data={ring(hoverHex && (hoverHex.lon !== selHex?.lon || hoverHex.lat !== selHex?.lat) ? hoverHex : null)}>
@@ -191,7 +195,15 @@ export default function AtlasMap({ atlas, ready = true, onBase, onNames, layer, 
         <MLayer id="hex-sel-casing" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#14181a" : "#f6f1e6", "line-width": 5 }} />
         <MLayer id="hex-sel-line" type="line" layout={{ "line-join": "round" }} paint={{ "line-color": dark ? "#f2ede2" : "#1b2420", "line-width": 2.5 }} />
       </Source>
-      <Borders dark={dark} onLand={showLand} onBase={onBase} />
+      {/* satellite imagery (Sentinel-2 cloudless 2021, EOX, CC BY-NC-SA 4.0), only while its layer is on: tiles from EOX */}
+      {imagery && (
+        <Source id="satellite" type="raster" tileSize={256} maxzoom={13}
+          tiles={["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg"]}
+          attribution={'<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2021)'}>
+          <MLayer beforeId="atlas-layer" id="satellite-layer" type="raster" paint={{ "raster-fade-duration": 300 }} />
+        </Source>
+      )}
+      <Borders dark={dark} onLand={showLand} onBase={onBase} imagery={imagery} />
       {/* the names after the cells: they never hold up the data on a slow connection */}
       {labels && atlas && <Labels lang={labels} dark={dark} onReady={onNames} />}
       {sites.map((s) => (
