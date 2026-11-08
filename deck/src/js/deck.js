@@ -16,13 +16,13 @@ const TEX_MACROS = {
   "\\st":   "\\htmlData{step=#1}{#2}",               // \st{2}{…}: this term appears on click 2
   // the symbols of the talk: one macro and one colour each (deck.css, "Symbol colours"); only the variable is coloured,
   // with its indices; d, dt, the brackets and (t) stay in ink. The heat flows are dotted (q̇, Q̇), the other rates written
-  // bare (dm/dt); a function carries its argument (m(t)). Indices: B tree, W cloud, Bo ground, atm atmosphere, PS RE ZS ST the four carbon fluxes
+  // bare (dm/dt); a function carries its argument (m(t)). Indices: B tree, W cloud, Bo ground, atm atmosphere, PS ZA ZS ST the four carbon fluxes
   "\\rate":  "\\dfrac{\\mathbf{d}\\,#1}{\\mathbf{d}\\tm}",   // \rate{\mB} = dm_B/dt
   // carbon in the tree
   "\\mB":   "\\q{mb}{m^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{B}}}",   // carbon in the tree (C: the element, not the whole mass); C one size smaller, so it does not crowd the B
   "\\mBd":  "\\rate{\\mB}",                         // the balance, as a rate
   "\\mPS":  "\\q{ps}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{PS}}}",     // a flux: kg C per year
-  "\\mRE":  "\\q{re}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{RE}}}",
+  "\\mZA":  "\\q{re}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZA}}}",
   "\\mZS":  "\\q{zs}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZS}}}",
   "\\mST":  "\\q{st}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ST}}}",
   "\\mmax": "\\q{mmax}{m^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{max}}}",   // carbon, as \mB
