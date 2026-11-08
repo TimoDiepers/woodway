@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { loadAtlas, LoadError } from "@/data/load";
 import type { Atlas } from "@/data/types";
-import { layerById, type LayerId } from "@/model/layers";
+import { allReady, fieldsOf, layerById, layerReady, type LayerId } from "@/model/layers";
 import { useAtlas } from "@/store";
 import { useT } from "@/i18n/useT";
 import { useMediaQuery } from "@/lib/useMediaQuery";
@@ -43,6 +43,7 @@ export default function App() {
   const s = useAtlas();
   const [atlas, setAtlas] = useState<Atlas | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const base = useRef(deferred()), names = useRef(deferred());
   const [hover, setHover] = useState<{ cell: number | null; x: number; y: number }>({ cell: null, x: 0, y: 0 });
   const [flyTo, setFlyTo] = useState<Jump | null>(null);
   const [snap, setSnap] = useState(0);
@@ -59,7 +60,12 @@ export default function App() {
   useEffect(() => { document.documentElement.lang = s.lang; }, [s.lang]);
   useEffect(() => forwardDeckKeys(), []);
   useEffect(() => {
-    loadAtlas().then((at) => { useAtlas.getState().setPlantYears(at.meta.plantYears ?? [at.meta.years[0]]); setAtlas(at); })
+    // the fields of the layer on screen first, the others after them (each set re-renders with what has arrived)
+    // the background fields wait for what the screen shows first: land and lines, then the names (10 s at most)
+    const after = Promise.race([Promise.all([base.current.done, names.current.done]), new Promise((r) => setTimeout(r, 10000))]);
+    const firstAfter = Promise.race([base.current.done, new Promise((r) => setTimeout(r, 6000))]);   // land and lines first
+    loadAtlas("data/", fetch, { first: fieldsOf(useAtlas.getState().layer), onMore: setAtlas, after, firstAfter })
+      .then((at) => { useAtlas.getState().setPlantYears(at.meta.plantYears ?? [at.meta.years[0]]); setAtlas(at); })
       .catch((e) => setError(e instanceof LoadError ? e.file : String(e)));
   }, []);
   // Escape closes a cell's details (unless a tool panel or the dropdown has it first)
@@ -75,8 +81,12 @@ export default function App() {
   // a layer that does not change over time has no year to play
   useEffect(() => { if (atlas && !layerById(s.layer).timed && s.playing) s.setPlaying(false); }, [atlas, s.layer, s.playing]);
   if (error) return <p role="alert" className="p-8">{t("app.loadError", { file: error })}</p>;
-  if (!atlas) return <p className="p-8 text-inkMuted">{t("app.loading")}</p>;
+  // no wait for the data: the globe, its lines and names, the plate, the tools and the bar come at once; the legend
+  // and the world chart stand as skeletons and the hexagons fade in once the cells have loaded
   const layer = layerById(s.layer);
+  // a layer picked before its fields have arrived: its hexagons and legend wait (skeleton), the rest stands
+  const layerOk = !!atlas && layerReady(atlas, s.layer);
+  const panelOk = !!atlas && allReady(atlas);
   // planted trees start in their planting year: an earlier year shows that year (as the slider does)
   const year = layer.planted ? Math.max(s.year, s.plantYear) : s.year;
   const open = s.cell !== null;
@@ -107,7 +117,7 @@ export default function App() {
   };
   const goTo = (p: Place) => {
     const c = cellAt(p.lon, p.lat);
-    const land = c !== null && atlas.f.land[c];
+    const land = c !== null && !!atlas && !!atlas.f.land[c];
     s.setCell(land ? c : null);
     if (!wide) setSnap(0);
     setFlyTo({ lon: p.lon, lat: p.lat, zoom: 4 });
@@ -117,10 +127,10 @@ export default function App() {
   const closeCell = () => s.setCell(null);
 
   const map = (
-    <AtlasMap atlas={atlas} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
+    <AtlasMap atlas={atlas} ready={layerOk} onBase={base.current.resolve} onNames={names.current.resolve} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
       onHover={wide ? (cell, x, y) => setHover({ cell, x, y }) : undefined} dark={dark} projection={s.projection}
       initialView={{ longitude: WORLD.lon, latitude: WORLD.lat, zoom: worldZoom }}
-      sites={atlas.meta.sites} flyTo={flyTo} insets={insets} />
+      sites={atlas?.meta.sites ?? []} flyTo={flyTo} insets={insets} />
   );
   const tools = (
     <ToolColumn atlas={atlas} layer={layer} compact={!wide} onPlace={goTo} onRecenter={recenter} />
@@ -132,17 +142,17 @@ export default function App() {
       <div className="relative h-full w-full overflow-hidden">
         {map}
         <div ref={plateRef} className="pointer-events-none absolute left-0 top-0 z-10 p-3" style={{ ...safeTop, paddingLeft: "max(0.75rem, env(safe-area-inset-left))" }}>
-          <TitlePlate atlas={atlas} layer={layer} compact />
+          <TitlePlate atlas={layerOk ? atlas : null} layer={layer} compact />
         </div>
         {/* top right, beside the plate: clear of the detail sheet at every height it rests at */}
         <div className="pointer-events-none absolute right-0 top-0 z-10 p-3" style={{ ...safeTop, paddingRight: "max(0.75rem, env(safe-area-inset-right))" }}>
           {tools}
         </div>
-        {open ? (
+        {open && atlas ? (
           // the details carry the dock on top, so the year stays in reach while reading a cell
           <CompactSheet title={t("panel.details")} snaps={snaps} snap={snap} onSnap={setSnap} vh={vh} inertAtPeek={false} onDismiss={closeCell}
             peek={<Dock layer={layer} onLayer={pickLayer} bare row={dockRow} />}>
-            <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} />
+            {panelOk ? <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} dense layer={s.layer} onLayer={pickLayer} /> : <PanelSkeleton />}
           </CompactSheet>
         ) : (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3"
@@ -157,14 +167,14 @@ export default function App() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {map}
-      <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />
+      {atlas && layerOk && <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-4 p-4" style={safeTop}>
-        <TitlePlate atlas={atlas} layer={layer} compact={false} />
+        <TitlePlate atlas={layerOk ? atlas : null} layer={layer} compact={false} />
         {tools}
       </div>
-      {open && (
+      {open && atlas && (
         <section aria-label={t("panel.details")} className="panel absolute right-4 top-[4.75rem] z-10 max-h-[calc(100%-6rem)] w-[25rem] overflow-auto overscroll-contain p-4">
-          <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} />
+          {panelOk ? <CellPanel atlas={atlas} cell={s.cell!} year={year} onClose={closeCell} layer={s.layer} onLayer={pickLayer} /> : <PanelSkeleton />}
         </section>
       )}
       {/* centred, as in woodway: layer and year in one line, as wide as it needs; clear of the details when open */}
@@ -174,4 +184,21 @@ export default function App() {
       </div>
     </div>
   );
+}
+
+/** The cell's details while the last fields still load: the panel's shape in soft bars. */
+function PanelSkeleton() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-2">
+      <div className="skel h-5 w-48" /><div className="skel h-3 w-40" />
+      <div className="skel mt-1 h-12 w-full" /><div className="skel h-3 w-36" /><div className="skel h-24 w-full" /><div className="skel h-24 w-full" />
+    </div>
+  );
+}
+
+/** A promise and its resolve, for "this has happened" signals between the map and the loader. */
+function deferred() {
+  let resolve!: () => void;
+  const done = new Promise<void>((r) => { resolve = r; });
+  return { done, resolve };
 }

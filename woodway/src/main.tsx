@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import "./map/mapLib";   // start loading MapLibre now, in parallel with the data
 import "./index.css";
 import "./vaul.css";
 import "./ui/deck/deck.css";

@@ -38,16 +38,24 @@ def test_files_exist_and_are_small():
     size = (DATA / "fields.bin").stat().st_size + (DATA / "meta.json").stat().st_size
     assert size < 40e6  # raw
     # what the browser downloads: the gzipped fields plus meta.json, gzipped as a server would send it
-    sent = (DATA / "fields.bin.gz").stat().st_size + len(gzip.compress((DATA / "meta.json").read_bytes(), 9))
+    sent = sum(f.stat().st_size for f in (DATA / "fields").glob("*.bin.gz")) + len(gzip.compress((DATA / "meta.json").read_bytes(), 9))
     assert sent < 6e6
+    # the start layer (temperature change per tree: land, type, a, b) comes first and small
+    first = sum((DATA / "fields" / f"{n}.bin.gz").stat().st_size for n in ("land", "type", "a", "b"))
+    assert first < 0.4e6
 
 
 def test_gzipped_fields_are_the_raw_fields_and_reproducible():
-    gz = (DATA / "fields.bin.gz").read_bytes()
-    assert gzip.decompress(gz) == (DATA / "fields.bin").read_bytes()
-    assert gz[4:8] == b"\0\0\0\0"  # mtime 0: the same data gives the same bytes
-    # the loader tells inflated from gzipped bytes by the gzip magic; the raw file must never start with it
-    assert (DATA / "fields.bin").read_bytes()[:2] != b"\x1f\x8b"
+    meta, _ = _load()
+    raw = (DATA / "fields.bin").read_bytes()
+    assert sorted(p.name for p in (DATA / "fields").glob("*.bin.gz")) == sorted(f"{n}.bin.gz" for n in meta["fields"])
+    for name, d in meta["fields"].items():
+        gz = (DATA / "fields" / f"{name}.bin.gz").read_bytes()
+        n = d["length"] * (4 if d["dtype"] == "f4" else 1)
+        assert gzip.decompress(gz) == raw[d["offset"]: d["offset"] + n], name
+        assert gz[4:8] == b"\0\0\0\0"  # mtime 0: the same data gives the same bytes
+        # the loader tells inflated from gzipped bytes by the gzip magic: a field never starts with it (ocean first)
+        assert raw[d["offset"]: d["offset"] + 2] != b"\x1f\x8b", name
 
 
 def test_unmeasured_colour_and_three_reference_sites():

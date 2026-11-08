@@ -1,8 +1,9 @@
 """Data for woodway (woodway/public/data): every per-place result of the model on the 0.5 deg grid.
 
 Writes meta.json (grid, curves, palettes, global paths, reference values) and fields.bin (360x720
-fields, float32 or uint8, offsets in meta.json), plus fields.bin.gz (gzip -9, mtime 0, so the same data
-gives the same bytes), which the browser fetches and inflates; fields.bin stays as the fallback. The browser evaluates years exactly:
+fields, float32 or uint8, offsets in meta.json), plus each field alone as fields/<name>.bin.gz (gzip -9,
+mtime 0, so the same data gives the same bytes): the browser fetches the fields of the layer on screen first
+and the others after them, and inflates them; fields.bin stays as the fallback. The browser evaluates years exactly:
   tree:  dT(t) = a * dtCo2_type(t) + b * dtAlbUnit_type(t)   (nbs.aggregate: site factor and albedo
          product scale the two unit curves linearly)
   DAC:   net share interpolated linearly between the LCA base years (nbs.dac._interp does the same).
@@ -318,8 +319,17 @@ def main() -> None:
         "reference": reference,
     }
     raw = b"".join(f.parts)
-    (OUT / "fields.bin").write_bytes(raw)
-    (OUT / "fields.bin.gz").write_bytes(gzip.compress(raw, compresslevel=9, mtime=0))
+    (OUT / "fields.bin").write_bytes(raw)   # all fields in one, for browsers without DecompressionStream
+    # each field on its own, gzip -9 with mtime 0 (the same data gives the same bytes): the browser fetches the
+    # fields of the layer on screen first and the rest after it
+    fdir = OUT / "fields"
+    fdir.mkdir(exist_ok=True)
+    for old in fdir.glob("*.bin.gz"):
+        old.unlink()
+    for name, d in f.meta.items():
+        n = d["length"] * (4 if d["dtype"] == "f4" else 1)
+        (fdir / f"{name}.bin.gz").write_bytes(gzip.compress(raw[d["offset"]: d["offset"] + n], compresslevel=9, mtime=0))
+    (OUT / "fields.bin.gz").unlink(missing_ok=True)
     (OUT / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
                                    encoding="utf-8")
     print(f"wrote {OUT}: {f.offset / 1e6:.1f} MB fields, {len(reference)} reference cells")

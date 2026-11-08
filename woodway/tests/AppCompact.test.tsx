@@ -4,13 +4,16 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const map = vi.hoisted(() => ({ props: {} as Record<string, unknown> }));
-vi.mock("@/map/AtlasMap", () => ({ default: (p: Record<string, unknown>) => { map.props = p; return <div data-testid="map" />; } }));
+vi.mock("@/map/AtlasMap", () => ({ default: (p: Record<string, unknown>) => { map.props = p; // "map" once every field has arrived (the start layer's come first, the others in the background)
+    (p.onBase as (() => void) | undefined)?.(); (p.onNames as (() => void) | undefined)?.();   // land, lines and names stand at once here
+    const at = p.atlas as { meta: { fields: object }; f: Record<string, unknown> } | null;
+    return at && Object.keys(at.meta.fields).every((n) => at.f[n]) ? <div data-testid="map" /> : <div data-testid="map-loading" />; } }));
 const DIR = path.resolve(__dirname, "../public/data/");
 const BERLIN = [{ display_name: "Berlin, Deutschland", lat: "52.5170365", lon: "13.3888599" }];
 globalThis.fetch = (async (url: string) =>
   String(url).startsWith("https://nominatim.openstreetmap.org/")
     ? new Response(JSON.stringify(BERLIN))
-    : new Response(readFileSync(path.join(DIR, path.basename(String(url)))))) as unknown as typeof fetch;
+    : new Response(readFileSync(path.join(DIR, String(url).replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 
 import App from "@/App";
 import { useAtlas } from "@/store";

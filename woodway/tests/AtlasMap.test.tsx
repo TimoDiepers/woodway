@@ -36,7 +36,7 @@ import AtlasMap from "@/map/AtlasMap";
 import { act, waitFor } from "@testing-library/react";
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
+const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, u.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 const AACHEN = { lng: 6.08, lat: 50.78 };
 
 describe("AtlasMap", () => {

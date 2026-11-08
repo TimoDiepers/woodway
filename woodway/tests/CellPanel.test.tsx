@@ -17,7 +17,7 @@ const drawn = (root: HTMLElement) =>
   [...root.querySelectorAll(".recharts-line-curve")].filter((p) => (p.getAttribute("d") ?? "").length > 10).length;
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
+const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, u.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 
 describe("CellPanel", () => {
   it("shows forest type, cooling year and DAC for Aachen", async () => {

@@ -9,7 +9,7 @@ import { en } from "@/i18n/en";
 import { de } from "@/i18n/de";
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(url))))) as unknown as typeof fetch;
+const diskFetch = (async (url: string) => new Response(readFileSync(path.join(DIR, url.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 
 let at: Atlas;
 beforeAll(async () => { at = await loadAtlas("data/", diskFetch); });

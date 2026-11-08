@@ -22,7 +22,7 @@ const EMBEDDED = typeof window !== "undefined" && window.parent !== window;
  * Only what is reached for while exploring sits there (find, go home, how to read the map); the slides and the
  * display settings wait one tap further in "More", each with its name written out.
  */
-export function ToolColumn({ atlas, layer, compact, onPlace, onRecenter }: { atlas: Atlas; layer: Layer; compact: boolean; onPlace(p: Place): void; onRecenter(): void }) {
+export function ToolColumn({ atlas, layer, compact, onPlace, onRecenter }: { atlas: Atlas | null; layer: Layer; compact: boolean; onPlace(p: Place): void; onRecenter(): void }) {
   const t = useT();
   const year = useAtlas((s) => s.year);
   const touch = useMediaQuery("(pointer: coarse)") || compact;
@@ -49,7 +49,7 @@ export function ToolColumn({ atlas, layer, compact, onPlace, onRecenter }: { atl
     <Fragment key="recenter">{tool("recenter", t("tools.recenter"), <Compass size={18} aria-hidden />, () => { show(null); onRecenter(); })}</Fragment>,
     // the whole world in one chart, as the deck's anchor: Very Low, the trees, a vegan world, DACCS
     <Fragment key="world">{panel("world", t("tools.world"), <ChartSpline size={18} aria-hidden />, { title: t("tools.world") },
-      <GlobalStrip atlas={atlas} year={year} />, { wide: true })}</Fragment>,
+      atlas ? <GlobalStrip atlas={atlas} year={year} /> : <div aria-busy="true" className="flex flex-col gap-2"><div className="skel h-4 w-48" /><div className="skel h-40 w-full" /><div className="skel h-3 w-3/4" /></div>, { wide: true })}</Fragment>,
     <Fragment key="help">{panel("help", t("help.title"), <HelpCircle size={18} aria-hidden />, { title: t("help.title"), sub: t("help.sub") },
       <HelpContent touch={touch} source={t(layer.source)} />, { wide: true })}</Fragment>,
     ...(compact ? [] : [<span key="sep" className="mx-0.5 h-5 w-px bg-[var(--paper-line)]" aria-hidden />]),

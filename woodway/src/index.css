@@ -243,3 +243,11 @@ body::after {
   .year-range { height: 2.5rem; }
   .year-range::-webkit-slider-thumb { width: 20px; height: 20px; margin-top: -8px; }
 }
+
+/* loading: soft bars in the paper tones with a slow sheen, and content that fades in where they stood */
+.skel { border-radius: 4px; background: linear-gradient(90deg, var(--paper-line) 0%, rgb(var(--color-paper)) 50%, var(--paper-line) 100%);
+  background-size: 200% 100%; opacity: .7; animation: skel 1.4s ease-in-out infinite; }
+@keyframes skel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.fade-in { animation: fade-in .5s ease-out both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } .fade-in { animation: none; } }

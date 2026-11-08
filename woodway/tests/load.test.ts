@@ -18,34 +18,45 @@ function fakeData() {
   return { meta, buf };
 }
 
-type Serve = Partial<Record<"meta.json" | "fields.bin" | "fields.bin.gz", () => Response | Promise<Response>>>;
+type Serve = Partial<Record<string, () => Response | Promise<Response>>>;
 
-/** Serves meta.json, fields.bin and fields.bin.gz; `over` replaces single files; logs what was asked for. */
+/** Serves meta.json, fields.bin and one fields/<name>.bin.gz per field; `over` replaces single files (by their path
+ *  under data/); logs what was asked for. */
 function fetcher(over: Serve = {}, log: string[] = []): typeof fetch {
   const { meta, buf } = fakeData();
-  const files: Required<Serve> = {
+  const n = 360 * 720;
+  const files: Serve = {
     "meta.json": () => new Response(JSON.stringify(meta)),
     "fields.bin": () => new Response(buf),
-    "fields.bin.gz": () => new Response(gzipSync(buf)),
+    "fields/land.bin.gz": () => new Response(gzipSync(buf.slice(0, n))),
+    "fields/a.bin.gz": () => new Response(gzipSync(buf.slice(n, 5 * n))),
     ...over,
   };
   return (async (url: string) => {
-    const name = url.split("/").pop() as keyof Serve;
+    const name = url.replace(/^data\//, "");
     log.push(name);
-    return files[name]();
+    return (files[name] ?? (() => new Response("", { status: 404 })))();
   }) as unknown as typeof fetch;
 }
 const status404 = () => new Response("", { status: 404 });
 
 describe("loadAtlas", () => {
-  it("decodes the gzipped fields into typed arrays", async () => {
+  it("decodes each gzipped field into a typed array", async () => {
     const log: string[] = [];
     const at = await loadAtlas("data/", fetcher({ "fields.bin": status404 }, log));
-    expect(log.sort()).toEqual(["fields.bin.gz", "meta.json"]);
+    expect(log.sort()).toEqual(["fields/a.bin.gz", "fields/land.bin.gz", "meta.json"]);
     expect(at.f.land).toBeInstanceOf(Uint8Array);
     expect(at.f.a).toBeInstanceOf(Float32Array);
     expect(at.f.a[123]).toBe(2);
     expect(at.buildByCell.get(10 * 720 + 20)).toBe(0);
+  });
+  it("with `first`, resolves once those fields are there and brings the others after", async () => {
+    let more!: (a: unknown) => void;
+    const arrived = new Promise((r) => { more = r; });
+    const at = await loadAtlas("data/", fetcher(), { first: ["land"], onMore: (a) => more(a) });
+    expect(at.f.land).toBeInstanceOf(Uint8Array);
+    await arrived;
+    expect(at.f.a).toBeInstanceOf(Float32Array);
   });
   it("takes the plain fields when the browser cannot inflate", async () => {
     const DS = globalThis.DecompressionStream;
@@ -53,7 +64,7 @@ describe("loadAtlas", () => {
     delete globalThis.DecompressionStream;
     try {
       const log: string[] = [];
-      const at = await loadAtlas("data/", fetcher({ "fields.bin.gz": status404 }, log));
+      const at = await loadAtlas("data/", fetcher({}, log));
       expect(log.sort()).toEqual(["fields.bin", "meta.json"]);
       expect(at.f.a[5]).toBe(2);
     } finally {
@@ -62,11 +73,11 @@ describe("loadAtlas", () => {
   });
   it("accepts fields the server already inflated (Content-Encoding: gzip)", async () => {
     const { buf } = fakeData();
-    const at = await loadAtlas("data/", fetcher({ "fields.bin.gz": () => new Response(buf) }));
+    const at = await loadAtlas("data/", fetcher({ "fields/a.bin.gz": () => new Response(buf.slice(360 * 720)) }));
     expect(at.f.a[7]).toBe(2);
   });
   it("fetch failure names the file", async () => {
-    await expect(loadAtlas("data/", fetcher({ "fields.bin.gz": status404 }))).rejects.toMatchObject({ file: "fields.bin.gz" });
+    await expect(loadAtlas("data/", fetcher({ "fields/a.bin.gz": status404 }))).rejects.toMatchObject({ file: "fields/a.bin.gz" });
     await expect(loadAtlas("data/", fetcher({ "meta.json": status404 }))).rejects.toMatchObject({ file: "meta.json" });
     await expect(loadAtlas("data/", fetcher({ "meta.json": status404 }))).rejects.toBeInstanceOf(LoadError);
   });
@@ -82,10 +93,10 @@ describe("loadAtlas", () => {
   });
   it("broken or short field data names the field file", async () => {
     const junk = () => new Response(new Uint8Array([0x1f, 0x8b, 1, 2, 3]));
-    await expect(loadAtlas("data/", fetcher({ "fields.bin.gz": junk }))).rejects.toMatchObject({ file: "fields.bin.gz" });
+    await expect(loadAtlas("data/", fetcher({ "fields/a.bin.gz": junk }))).rejects.toMatchObject({ file: "fields/a.bin.gz" });
     const short = () => new Response(gzipSync(new Uint8Array(100)));
-    const err = await loadAtlas("data/", fetcher({ "fields.bin.gz": short })).catch((e) => e);
+    const err = await loadAtlas("data/", fetcher({ "fields/a.bin.gz": short })).catch((e) => e);
     expect(err).toBeInstanceOf(LoadError);
-    expect(err.file).toBe("fields.bin.gz");
+    expect(err.file).toBe("fields/a.bin.gz");
   });
 });

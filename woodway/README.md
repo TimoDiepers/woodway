@@ -12,7 +12,7 @@ Country borders (Natural Earth 1:50m) sit over the hexagons with a light casing;
     npm test
     npm run build                             # → dist/, published at the site root, the deck under slides/
 
-Data: `public/data/meta.json` (grid, type curves, palettes, global paths) and `fields.bin` (360×720 fields; the browser loads `fields.bin.gz`, written alongside with gzip -9 and mtime 0, and falls back to `fields.bin` where `DecompressionStream` is missing). The browser computes each year exactly: ΔT = a·ΔT_CO₂,type(t) + b·ΔT_albedo,type(t), DAC net share linear between the LCA base years.
+Data: `public/data/meta.json` (grid, type curves, palettes, global paths) and the 360×720 fields, each as `fields/<name>.bin.gz` (gzip -9, mtime 0), with `fields.bin` holding all of them as the fallback where `DecompressionStream` is missing. The browser loads in this order: the world's shape (sea and lines, asked for at start), the fields of the layer on screen, the place names, then the other fields in the background; each part fades in once it stands (land, then the hexagons, then the names), and the legend, the world chart and the cell details show skeletons until their data is there. The browser computes each year exactly: ΔT = a·ΔT_CO₂,type(t) + b·ΔT_albedo,type(t), DAC net share linear between the LCA base years.
 
 In the deck's last slide woodway runs in an iframe (`../?embed&lang=de&theme=light`): `?lang` and `?theme` set language and theme for that visit, and `?embed` hands the deck's paging keys back to it.
 

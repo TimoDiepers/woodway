@@ -8,7 +8,7 @@ import { hexToRgba, themedScale } from "@/color/scale";
 import { cellAt } from "@/map/lookup";
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
+const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, u.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 let at: Atlas;
 beforeAll(async () => { at = await loadAtlas("data/", diskFetch); });
 const pack = ([r, g, b, a]: number[]) => ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;

@@ -8,7 +8,7 @@ import { hexAt, hexCentres, hexRing, HEX_R_DEG, HEX_R_M, mercY } from "@/map/hex
 import { paintHexView } from "@/map/paint";
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
+const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, u.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 const wrap = (lon: number) => ((((lon + 180) % 360) + 360) % 360) - 180;
 const rows = (lat: Float32Array) => [...new Set(lat)].sort((a, b) => a - b);
 

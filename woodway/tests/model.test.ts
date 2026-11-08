@@ -5,7 +5,7 @@ import type { Atlas } from "@/data/types";
 import { deltaT, netShare, dacNet, dacBuildMt, coolsFrom, coolsUntil, cellSeries, yearIndex, setPlantYear, cellTotal, veganLand, bestandUptake, felling } from "@/model/model";
 
 const DIR = path.resolve(__dirname, "../public/data/");
-const diskFetch = (async (url: string) => new Response(readFileSync(path.join(DIR, path.basename(url))))) as unknown as typeof fetch;
+const diskFetch = (async (url: string) => new Response(readFileSync(path.join(DIR, url.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 
 let at: Atlas;
 beforeAll(async () => { at = await loadAtlas("data/", diskFetch); });

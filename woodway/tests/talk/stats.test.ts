@@ -5,7 +5,7 @@ import type { Atlas } from "@/data/types";
 import { coolingShare, medianDacNet, dacCapacityGt, buildP95 } from "@/talk/stats";
 
 const DIR = path.resolve(__dirname, "../../public/data/");
-const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, path.basename(u))))) as unknown as typeof fetch;
+const diskFetch = (async (u: string) => new Response(readFileSync(path.join(DIR, u.replace(/^.*data\//, ""))))) as unknown as typeof fetch;
 let at: Atlas;
 beforeAll(async () => { at = await loadAtlas("data/", diskFetch); });
 

@@ -102,4 +102,22 @@ export const LAYERS: Layer[] = [
 ];
 
 export const layerById = (id: LayerId): Layer => LAYERS.find((l) => l.id === id)!;
+
+/** The fields a layer reads (value and grey reasons), so the browser can fetch them first and know when it can draw. */
+const BASE = ["land", "type"];
+const FIELDS: Record<LayerId, string[]> = {
+  forestType: BASE, area: [...BASE, "area"],
+  sun: [...BASE, "measured", "sun"], darker: [...BASE, "measured", "darker"], cloud: [...BASE, "cloud"], light: [...BASE, "measured", "light"],
+  deltaT: [...BASE, "a", "b"], netShare: [...BASE, "a", "b"], cellTotal: [...BASE, "a", "b", "area"],
+  bestandUp: ["land", "bType", "bA", "bAge", "bB", "bArea"], felling: ["land", "bType", "bA", "bAge", "bB", "bArea", "bFell"],
+  veganLand: ["land", "freeType", "freeA", "freeB", "freeArea"],
+  elec: ["land", "dacOk", "elec"],
+  dacNet: ["land", "dacOk", "dacNet2020", "dacNet2030", "dacNet2040", "dacNet2050", "dacNet2075", "dacNet2100"],
+  dacBuild: ["land", "dacOk"],
+};
+export const fieldsOf = (id: LayerId): string[] => FIELDS[id];
+/** Every field of the layer has arrived. */
+export const layerReady = (at: Atlas, id: LayerId): boolean => FIELDS[id].every((n) => !!at.f[n]);
+/** Every field has arrived (the cell panel reads them all). */
+export const allReady = (at: Atlas): boolean => Object.keys(at.meta.fields).every((n) => !!at.f[n]);
 export const scaleOf = (at: Atlas, l: Layer): Scale | undefined => (l.scaleFn ? l.scaleFn(at) : l.scale === "__build" ? BUILD_SCALE : l.scale ? at.meta.scales[l.scale] : undefined);
