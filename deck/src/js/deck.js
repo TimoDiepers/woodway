@@ -2898,6 +2898,7 @@ class Deck {
     this.slides = [...this.deck.querySelectorAll('.slide')];
     this.drawer = document.getElementById('drawer');
     this.drawerBody = document.getElementById('drawer-body');
+    this.drawer.querySelector('.dr-pop')?.addEventListener('click', () => this.openNotesWindow());
     this.progress = document.querySelector('.progress');
     this.i = 0; this.step = 0; this.showAll = location.search.includes('all');
     this.embed = location.search.includes('embed') || !!window.__EMBED;   // slide preview inside the presenter view
@@ -2906,6 +2907,7 @@ class Deck {
     this.still = this.embed || this.showAll;
     if (this.showAll) document.documentElement.classList.add('all');
     this.peer = null;                                 // the presenter window, once it has spoken
+    this.peers = new Set();                           // every window that follows the talk (presenter, notes)
     this.mainEnd = this.slides.findIndex(s => s.classList.contains('backup'));
     if (this.mainEnd < 0) this.mainEnd = this.slides.length;
     this.decorate();
@@ -2952,11 +2954,12 @@ class Deck {
     // embedded woodway hands back the paging keys once a click has put focus into it
     if (d && d.src === 'woodway-key' && !this.embed) { if (d.dir === 'next') this.next(); else if (d.dir === 'prev') this.prev(); return; }
     if (!d || d.src !== 'dv') return;
-    if (this.embed) { if ('goto' in d) this.go(d.goto, d.step); return; }
-    this.peer = e.source;
+    if (this.embed) { if ('goto' in d) { this.go(d.goto, d.step); this.markNew(d.mark ? d.step : 0); } return; }
+    if (e.source) this.peers.add(e.source);
     if (d.cmd === 'next') this.next(); else if (d.cmd === 'prev') this.prev();
     else if (d.cmd === 'first') this.go(0, 0); else if (d.cmd === 'last') this.go(this.mainEnd - 1, 0);
     else if (d.cmd === 'replay') this.go(this.i, this.step);
+    else if (d.cmd === 'notes' && this.canEdit && Number.isInteger(d.n) && typeof d.html === 'string') this.saveNotesFrom(d.n, d.html, e.source);
     else if (d.cmd === 'goto' && Number.isInteger(d.n)) {
       const n = Math.max(0, Math.min(this.slides.length - 1, d.n));
       this.go(n, d.step === 'end' ? 'end' : Number.isInteger(d.step) ? d.step : 0);   // 'end' like prev(): the last state, drawn without replaying the slide
@@ -2984,6 +2987,18 @@ class Deck {
       if (!this.editing) return;
       const el = e.target.closest && e.target.closest('.slide [data-e], #drawer-body .ned');
       if (el) this.queueSave(el);
+      if (el && el.classList.contains('ned')) { this.typedAt = performance.now(); requestAnimationFrame(() => this.noteGutter()); }
+    }, true);
+    // Cmd+Z in the notes: a click assignment made after the last typing is undone here (the browser's own undo knows only the text)
+    this.clickHist = []; this.clickRedo = []; this.typedAt = 0;
+    document.addEventListener('keydown', e => {
+      if (!this.editing || !(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z' || !e.target.closest || !e.target.closest('#drawer-body .ned')) return;
+      const redo = e.shiftKey, from = redo ? this.clickRedo : this.clickHist, to = redo ? this.clickHist : this.clickRedo;
+      const op = from[from.length - 1];
+      if (!op || (!redo && op.t < this.typedAt)) return;   // the last change was typing: the browser undoes it
+      e.preventDefault(); from.pop();
+      this.applyClick(op.p, redo ? op.after : op.before); op.t = performance.now(); to.push(op);
+      this.queueSave(op.p.closest('.ned')); this.markNotes();
     }, true);
     // Esc leaves the text (the arrows turn pages again); Enter in a slide text does not start a new block
     document.addEventListener('keydown', e => {
@@ -3093,12 +3108,68 @@ class Deck {
     }
     ed.hidden = false;
     document.execCommand('defaultParagraphSeparator', false, 'p');
+    this.markNotes();
+  }
+  noteGutter() {
+    // edit mode: beside each paragraph of the notes a chip with its click; a click on the chip opens the choice
+    const box = this.drawerBody.querySelector(':scope > .neds'), ed = box && box.querySelector(':scope > .ned:not([hidden])');
+    if (!box) return;
+    let g = box.querySelector(':scope > .ned-gut');
+    if (!g) {
+      g = document.createElement('div'); g.className = 'ned-gut'; box.append(g);
+      g.addEventListener('mousedown', e => e.preventDefault());   // the cursor stays where it was
+      g.addEventListener('click', e => { const c = e.target.closest('.nck'); if (c) this.clickMenu(c); });
+    }
+    g.innerHTML = ''; if (!ed || !this.editing) return;
+    const s = this.slides[this.i];
+    for (const x of noteItems([...ed.querySelectorAll(':scope > p')], +s.dataset.start || 0, this.steps(s))) {
+      const c = document.createElement('button'); c.type = 'button'; c._p = x.el;
+      c.className = 'nck' + (x.q ? ' q' : '') + (!x.q && !x.el.hasAttribute('data-click') ? ' auto' : '') + (x.el.classList.contains('now') ? ' now' : '');
+      c.textContent = x.q ? 'Hintergrund' : noteLabel(x);
+      c.title = 'Klick wählen'; c.style.top = x.el.offsetTop + 'px'; g.append(c);
+    }
+  }
+  clickMenu(chip) {
+    // the choice for one paragraph: the slide's clicks (Shift: up to this click, for a paragraph that stays), background
+    document.querySelector('.nck-menu')?.remove();
+    const p = chip._p, s = this.slides[this.i], start = +s.dataset.start || 0, total = Math.max(this.steps(s), start);
+    const [lo, hi] = (p.getAttribute('data-click') || '').split('-').map(Number);
+    const m = document.createElement('div'); m.className = 'nck-menu';
+    let h = '';
+    for (let k = start; k <= total; k++) h += `<button type="button" data-k="${k}" class="${k >= lo && k <= (hi || lo) && !p.classList.contains('q') ? 'on' : ''}${k === this.step ? ' here' : ''}">${k === 0 ? 'Start' : k}</button>`;
+    m.innerHTML = `<div class="nm-row">${h}</div><div class="nm-row"><button type="button" data-k="q" class="${p.classList.contains('q') ? 'on' : ''}">Hintergrund</button><span class="nm-hint">Shift+Klick: bis zu diesem Klick · gelb umrandet: jetzt</span></div>`;
+    m.style.top = (chip.offsetTop + chip.offsetHeight + 4) + 'px';
+    chip.parentElement.append(m);
+    m.addEventListener('mousedown', e => e.preventDefault());
+    m.addEventListener('click', e => {
+      const b = e.target.closest('[data-k]'); if (!b) return;
+      if (b.dataset.k === 'q') this.setClick(p, { q: true });
+      else {
+        const k = +b.dataset.k, a = isNaN(lo) || p.classList.contains('q') ? k : lo;
+        this.setClick(p, { click: e.shiftKey && a !== k ? `${Math.min(a, k)}-${Math.max(a, k)}` : String(k) });
+      }
+      m.remove();
+    });
+    const off = e => { if (!m.contains(e.target) && e.target !== chip) { m.remove(); document.removeEventListener('pointerdown', off, true); } };
+    document.addEventListener('pointerdown', off, true);
+  }
+  readClick(p) { return { click: p.getAttribute('data-click'), q: p.classList.contains('q') }; }
+  applyClick(p, v) {
+    p.classList.toggle('q', !!v.q);
+    if (v.q || v.click === null || v.click === undefined) p.removeAttribute('data-click'); else p.setAttribute('data-click', v.click);
+  }
+  setClick(p, v) {
+    const before = this.readClick(p);
+    this.applyClick(p, v);
+    this.clickHist.push({ p, before, after: this.readClick(p), t: performance.now() }); this.clickRedo = [];
+    this.queueSave(p.closest('.ned')); this.markNotes();
   }
   clean(html) {
     // the page's own additions taken out again: subscript digits (subDigits) back to the characters of the source
     const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '+': '⁺', '−': '⁻' };
     return html.replace(/<span class="subd">(\d+)<\/span>/g, (_, d) => [...d].map(c => String.fromCharCode(c.charCodeAt(0) + 0x2050)).join(''))
       .replace(/<sup class="sx">([^<]+)<\/sup>/g, (_, d) => [...d].map(c => SUP[c] || c).join(''))   // supText's superscripts
+      .replace(/ class="(?:now| *)"/g, '').replace(/ class="(q) now"| class="now (q)"/g, ' class="q"')   // the lit paragraph of this click is the page's own mark
       .replace(/(<br>)+(?=<\/p>|$)/g, '').replace(/&nbsp;/g, ' ');
   }
   queueSave(el) {
@@ -3112,7 +3183,7 @@ class Deck {
     const items = [], done = [];
     for (const el of els) {
       const html = this.clean(el.innerHTML);
-      if (el.classList.contains('ned')) { items.push({ src: el.dataset.src, html }); done.push(() => { const n = this.slides.find(x => x.dataset.src === el.dataset.src)?.querySelector('.notes'); if (n) n.innerHTML = html; }); }
+      if (el.classList.contains('ned')) { items.push({ src: el.dataset.src, html }); done.push(() => { const n = this.slides.find(x => x.dataset.src === el.dataset.src)?.querySelector('.notes'); if (n) n.innerHTML = html; this.sync(); }); }
       else {
         if (!el.textContent.trim()) continue;   // an emptied text is not saved (Cmd+Z brings it back)
         const now = el.textContent;
@@ -3150,14 +3221,67 @@ class Deck {
   }
   sync() {
     // Tell the presenter window where we are and what comes next.
-    if (this.embed || !this.peer || this.peer.closed) return;
+    this.markNotes();
+    if (this.embed) return;
+    for (const w of [...this.peers]) if (!w || w.closed) this.peers.delete(w);
+    if (!this.peers.size) return;
     let ni = this.i, ns = this.step + 1;
     if (ns > this.steps(this.slides[this.i])) { ni = this.i + 1; ns = 0; }
-    this.peer.postMessage({ src: 'dv', state: { i: this.i, step: this.step, ni, ns, n: this.slides.length, main: this.mainEnd } }, '*');
+    const cs = this.slides[this.i], nt = cs.querySelector('.notes');
+    const msg = { src: 'dv', state: { i: this.i, step: this.step, ni, ns, n: this.slides.length, main: this.mainEnd, start: +cs.dataset.start || 0, steps: this.steps(cs), notes: nt ? nt.innerHTML : '' } };
+    for (const w of this.peers) w.postMessage(msg, '*');
+  }
+  saveNotesFrom(n, html, from) {
+    // notes typed in the presenter window: into the slide's source (serve.py), and into the page; the presenter hears back
+    const s = this.slides[n]; if (!s) return;
+    html = this.clean(html);
+    const nt = s.querySelector('.notes'); if (nt) nt.innerHTML = html;
+    const ed = this.drawerBody.querySelector(`.ned[data-src="${s.dataset.src}"]`); if (ed && ed !== document.activeElement) ed.innerHTML = html;
+    if (n === this.i && !this.editing) this.drawerBody.innerHTML = html.trim() ? html : '<p class="q">Keine Notizen.</p>';
+    this.saveQ = this.saveQ.then(async () => {
+      try {
+        const r = await fetch('/__notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ src: s.dataset.src, html }] }) });
+        const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+        from && !from.closed && from.postMessage({ src: 'dv', saved: true }, '*'); this.sync();
+      } catch (e) { from && !from.closed && from.postMessage({ src: 'dv', saved: false, error: e.message }, '*'); }
+    });
+    this.markNotes();
+  }
+  markNew(step) {
+    // the presenter's preview of the next click: what this click brings in, framed in red (not the whole slide, not the
+    // invisible markers that only switch a state)
+    for (const el of document.querySelectorAll('.pv-new')) el.classList.remove('pv-new');
+    if (!step) return;
+    const s = this.slides[this.i], sb = s.getBoundingClientRect(), area = sb.width * sb.height;
+    for (const el of s.querySelectorAll(`[data-step="${step}"]`)) {
+      if (el.closest('.notes') || el.hidden) continue;
+      const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2 || r.width * r.height > .7 * area) continue;
+      el.classList.add('pv-new');
+    }
+  }
+  markNotes() {
+    // the paragraphs of this click lit in the notes drawer (and in the editor)
+    const s = this.slides[this.i]; if (!s || this.embed) return;
+    const box = this.drawerBody.querySelector(':scope > .neds > .ned:not([hidden])') || this.drawerBody;
+    const els = [...box.querySelectorAll(':scope > p')]; if (!els.length) return;
+    const foc = noteFocus(noteItems(els, +s.dataset.start || 0, this.steps(s)), this.step);
+    for (const el of els) el.classList.remove('now');
+    for (const [x, k] of foc) if (k === 'cur') x.el.classList.add('now');
+    if (this.editing) this.noteGutter();
   }
   openPresenter() {
+    // presenting: no hover effects on the charts, no mouse pointer on the slides (as H and C)
+    if (!document.documentElement.classList.contains('notips')) this.tips(true);
+    if (!document.documentElement.classList.contains('nocursor')) this.cursor(true);
     if (this.peer && !this.peer.closed) { this.peer.focus(); return; }
     this.peer = window.open(location.href.split(/[?#]/)[0] + '?presenter', 'dv-presenter', 'width=1440,height=900');
+    if (this.peer) this.peers.add(this.peer);
+  }
+  openNotesWindow() {
+    // O: the notes alone in a window of their own, to put beside the slides (and edit there, on the local server)
+    if (this.notesWin && !this.notesWin.closed) { this.notesWin.focus(); return; }
+    this.notesWin = window.open(location.href.split(/[?#]/)[0] + '?presenter&notes', 'dv-notes', 'width=760,height=900');
+    if (this.notesWin) this.peers.add(this.notesWin);
   }
   decorate() {
     // Where the talk stands, top right: the three chapter discs in order, the current one larger in its ring with the
@@ -3713,6 +3837,7 @@ class Deck {
       else if (k === 'r' || k === 'R') this.go(this.i, this.step);
       else if (k === 'n' || k === 'N') this.notes();
       else if (k === 'p' || k === 'P') this.openPresenter();
+      else if (k === 'o' || k === 'O') this.openNotesWindow();
       else if (k === 'f' || k === 'F') this.fullscreen();
       else if (k === 'i' || k === 'I') this.hint(6000);
       else if (k === 'c' || k === 'C') this.cursor(!document.documentElement.classList.contains('nocursor'));
@@ -3872,14 +3997,44 @@ for (const sl of deckEl.querySelectorAll('.slide[data-start]')) for (const e of 
    which answers with its position; the two previews are the
    same deck in ?embed mode, steered by postMessage.
    =========================================================== */
+/* NOTES, ONE PARAGRAPH PER CLICK. A paragraph of a slide's notes carries data-click="3" (or "1-2": it stays for two clicks);
+   class q = background, for questions, no click. A paragraph without data-click follows the old way of writing: the first
+   is the slide as it opens, every one starting with "Klick" is the next click, the others stay with the one before. */
+function noteItems(els, start, total) {
+  const out = []; let cur = start;
+  for (const el of els) {
+    const q = el.classList.contains('q'); let steps = [];
+    if (!q) {
+      const a = (el.getAttribute('data-click') || '').trim();
+      if (a) for (const part of a.split(',')) { const m = /^(\d+)(?:-(\d+))?$/.exec(part.trim()); if (m) for (let k = +m[1]; k <= +(m[2] || m[1]); k++) steps.push(k); }
+      else { if (/^\s*Klick/.test(el.textContent)) cur++; steps = [Math.min(cur, Math.max(total, start))]; }
+      if (steps.length) cur = steps[steps.length - 1];
+    }
+    out.push({ el, steps, q, lo: steps[0], hi: steps[steps.length - 1] });
+  }
+  return out;
+}
+function noteLabel(x) { return x.lo === x.hi ? (x.lo === 0 ? 'Start' : 'Klick ' + x.lo) : 'Klick ' + x.lo + '–' + x.hi; }
+/* which paragraphs are said now (the ones for this click; if this click has none, the last that had), which were before, which come next */
+function noteFocus(items, step) {
+  const main = items.filter(x => !x.q && x.steps.length), res = new Map();
+  let cur = main.filter(x => x.lo <= step && step <= x.hi);
+  if (!cur.length) { const before = main.filter(x => x.hi < step); if (before.length) { const m = Math.max(...before.map(x => x.hi)); cur = before.filter(x => x.hi === m); } }
+  const lo = cur.length ? Math.min(...cur.map(x => x.lo)) : step + 1, hi = cur.length ? Math.max(...cur.map(x => x.hi)) : step;
+  const prevs = main.filter(x => x.hi < lo), nexts = main.filter(x => x.lo > hi);
+  const pm = prevs.length ? Math.max(...prevs.map(x => x.hi)) : null, nm = nexts.length ? Math.min(...nexts.map(x => x.lo)) : null;
+  for (const x of main) res.set(x, cur.includes(x) ? 'cur' : (pm !== null && x.hi === pm && prevs.includes(x)) ? 'prev' : (nm !== null && x.lo === nm && nexts.includes(x)) ? 'next' : 'far');
+  return res;
+}
 class Presenter {
   constructor() {
     const slides = [...document.querySelectorAll('#deck .slide')];
     this.notes = slides.map(s => (s.querySelector('.notes') || {}).innerHTML || '');
     this.titles = slides.map(s => s.dataset.title || '');
     const base = location.href.split(/[?#]/)[0] + '?embed';
-    document.title = 'Referentenansicht · ' + document.title;
-    document.documentElement.classList.add('presenter');
+    this.only = /[?&]notes\b/.test(location.search);
+    document.title = (this.only ? 'Notizen · ' : 'Referentenansicht · ') + document.title;
+    document.documentElement.classList.add('presenter'); if (this.only) document.documentElement.classList.add('pv-only');
     document.body.innerHTML = `
       <div class="pv">
         <header class="pv-bar">
@@ -3887,49 +4042,64 @@ class Presenter {
           <span id="pv-title"></span>
           <span class="pv-spacer"></span>
           <button id="pv-replay" title="Animation der aktuellen Folie neu abspielen (R)">↻ Animation</button>
+          <button id="pv-edit" hidden title="Notizen bearbeiten (E); gespeichert wird in die Folienquelle">Bearbeiten</button><i id="pv-msg"></i>
+          <button id="pv-tele" title="Teleprompter: nur der aktuelle Klick groß, davor und danach blass. Aus: alle Notizen (T)">Teleprompter</button>
           <button id="pv-small" title="Notizen kleiner">A−</button>
           <button id="pv-big" title="Notizen größer">A+</button>
           <span id="pv-timer" title="Klick: pausieren / fortsetzen">00:00</span>
           <button id="pv-reset">Timer zurücksetzen</button>
           <span id="pv-clock"></span>
         </header>
-        <section class="pv-main">
-          <iframe id="pv-cur" src="${base}#1" title="Aktuelle Folie" tabindex="-1"></iframe>
+        <section class="pv-prev">
+          <div class="pv-box"><h5>Aktuelle Folie</h5><div class="pv-fr pv-cur"><iframe id="pv-cur" src="${base}#1" title="Aktuelle Folie" tabindex="-1"></iframe></div></div>
+          <div class="pv-box"><h5>Als Nächstes</h5><div class="pv-fr pv-next"><iframe id="pv-next" src="${base}#2" title="Nächste Folie" tabindex="-1"></iframe><div id="pv-end">Ende des Vortrags</div></div></div>
+        </section>
+        <div id="pv-split" title="Ziehen: Vorschau größer oder kleiner" role="separator" aria-orientation="horizontal"></div>
+        <section class="pv-notesbox">
           <h5>Notizen</h5>
           <div id="pv-notes"></div>
-        </section>
-        <section class="pv-side">
-          <h5>Als Nächstes</h5>
-          <div class="pv-next"><iframe id="pv-next" src="${base}#2" title="Nächste Folie" tabindex="-1"></iframe><div id="pv-end">Ende des Vortrags</div></div>
+          <div id="pv-edwrap" hidden><div class="ned-gut"></div><div id="pv-ned" contenteditable="true" spellcheck="false"></div></div>
+          <div class="pv-nw l" title="Ziehen: Notizen breiter oder schmaler · Doppelklick: zurück"></div><div class="pv-nw r" title="Ziehen: Notizen breiter oder schmaler · Doppelklick: zurück"></div>
         </section>
         <p id="pv-lost" hidden>Keine Verbindung zur Präsentation. Öffne die Referentenansicht mit <kbd>P</kbd> aus dem Präsentationsfenster.</p>
       </div>`;
     this.cur = document.getElementById('pv-cur');
     this.nxt = document.getElementById('pv-next');
     this.state = null;
-    this.fontPx = 22; this.applyFont();
+    try { this.tele = localStorage.getItem('pv-tele') !== '0'; } catch (e) { this.tele = true; }
+    this.fontPx = 22; this.applyFont(); this.applyTele();
+    try { this.prevH = +localStorage.getItem('pv-prev-h') || 0; } catch (e) { this.prevH = 0; }
+    this.applyPrev();
+    try { this.noteW = +localStorage.getItem('pv-note-w') || 0; } catch (e) { this.noteW = 0; }
+    this.applyNoteW();
     this.t0 = Date.now(); this.paused = null;
     this.bind();
-    [this.cur, this.nxt].forEach(f => f.addEventListener('load', () => this.render()));
+    [this.cur, this.nxt].forEach(f => f.addEventListener('load', () => { f._k = null; this.render(); }));
     setInterval(() => this.tick(), 500); this.tick();
     this.send('hello');
     setTimeout(() => { if (!this.state) document.getElementById('pv-lost').hidden = false; }, 1500);
   }
-  send(cmd, n) { if (window.opener && !window.opener.closed) window.opener.postMessage({ src: 'dv', cmd, n }, '*'); }
+  send(cmd, n, html) { if (window.opener && !window.opener.closed) window.opener.postMessage({ src: 'dv', cmd, n, html }, '*'); }
   bind() {
     addEventListener('message', e => {
-      const d = e.data; if (!d || d.src !== 'dv' || !d.state) return;
-      this.state = d.state; document.getElementById('pv-lost').hidden = true; this.render();
+      const d = e.data; if (d && d.src === 'dv' && 'saved' in d) { this.msg(d.saved ? 'gespeichert' : 'nicht gespeichert: ' + d.error, !d.saved); return; }
+      if (!d || d.src !== 'dv' || !d.state) return;
+      this.state = d.state; document.getElementById('pv-lost').hidden = true;
+      if (this.only && this.canEdit && !this.editing) { this.editNotes(true); }
+      this.render(); if (this.editing && this.state.i === this.edI) this.gutter();
     });
     const jumper = slideJumper(() => this.titles.length, n => this.titles[n], n => this.send('goto', n));
     addEventListener('keydown', e => {
+      if (e.target.isContentEditable) { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } return; }   // typing in the notes
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key;
+      if ((k === 'e' || k === 'E') && this.canEdit) { e.preventDefault(); this.editNotes(!this.editing); return; }
       if (jumper(e)) { e.preventDefault(); return; }
       if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); this.send('next'); }
       else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); this.send('prev'); }
       else if (k === 'Home') this.send('first'); else if (k === 'End') this.send('last');
       else if (k === 'r' || k === 'R') this.send('replay');
+      else if (k === 't' || k === 'T') this.toggleTele();
     });
     document.getElementById('pv-replay').onclick = () => this.send('replay');
     document.getElementById('pv-reset').onclick = () => { this.t0 = Date.now(); this.paused = null; this.tick(); };
@@ -3937,22 +4107,177 @@ class Presenter {
       if (this.paused === null) this.paused = Date.now(); else { this.t0 += Date.now() - this.paused; this.paused = null; }
       this.tick();
     };
+    const split = document.getElementById('pv-split');
+    split.addEventListener('pointerdown', e => {
+      e.preventDefault(); split.setPointerCapture(e.pointerId);
+      const prev = document.querySelector('.pv-prev').getBoundingClientRect().top;
+      const move = ev => { this.prevH = ev.clientY - prev - 6; this.applyPrev(); };
+      const up = () => { split.removeEventListener('pointermove', move); split.removeEventListener('pointerup', up); try { localStorage.setItem('pv-prev-h', String(this.prevH)); } catch (er) {} };
+      split.addEventListener('pointermove', move); split.addEventListener('pointerup', up);
+    });
+    split.addEventListener('dblclick', () => { this.prevH = 0; this.applyPrev(); try { localStorage.removeItem('pv-prev-h'); } catch (er) {} });
+    addEventListener('resize', () => { this.applyPrev(); this.applyNoteW(); });
+    for (const hnd of document.querySelectorAll('.pv-nw')) {
+      hnd.addEventListener('pointerdown', e => {
+        e.preventDefault(); hnd.setPointerCapture(e.pointerId);
+        const box = document.querySelector('.pv-notesbox').getBoundingClientRect(), mid = box.left + box.width / 2;
+        const move = ev => { this.noteW = 2 * Math.abs(ev.clientX - mid) - 30; this.applyNoteW(); };
+        const up = () => { hnd.removeEventListener('pointermove', move); hnd.removeEventListener('pointerup', up); try { localStorage.setItem('pv-note-w', String(this.noteW)); } catch (er) {} };
+        hnd.addEventListener('pointermove', move); hnd.addEventListener('pointerup', up);
+      });
+      hnd.addEventListener('dblclick', () => { this.noteW = 0; this.applyNoteW(); try { localStorage.removeItem('pv-note-w'); } catch (er) {} });
+    }
+    document.getElementById('pv-tele').onclick = () => this.toggleTele();
+    document.getElementById('pv-edit').onclick = () => this.editNotes(!this.editing);
+    document.getElementById('pv-ned').addEventListener('input', () => { this.typedAt = performance.now(); this.msg('ungespeichert …'); clearTimeout(this._edT); this._edT = setTimeout(() => this.flushNotes(), 700); requestAnimationFrame(() => this.gutter()); });
+    const gut = document.querySelector('#pv-edwrap .ned-gut');
+    gut.addEventListener('mousedown', e => e.preventDefault());
+    gut.addEventListener('click', e => { const c = e.target.closest('.nck'); if (c) this.clickMenu(c); });
+    // Cmd+Z: a click assignment made after the last typing is undone here; text is the browser's own undo
+    this.hist = []; this.redo = []; this.typedAt = 0;
+    addEventListener('keydown', e => {
+      if (!this.editing || !(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return;
+      const back = !e.shiftKey, from = back ? this.hist : this.redo, to = back ? this.redo : this.hist, op = from[from.length - 1];
+      if (!op || (back && op.t < this.typedAt)) return;
+      e.preventDefault(); from.pop(); this.applyClick(op.p, back ? op.before : op.after); op.t = performance.now(); to.push(op);
+      this.flushNotes(); this.gutter();
+    }, true);
+    // served by deck/serve.py on this computer: the notes can be edited here too
+    if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname))
+      fetch('/__notes', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.edit) { this.canEdit = true; document.getElementById('pv-edit').hidden = false; if (this.only && this.state && !this.editing) this.editNotes(true); } }).catch(() => {});
     document.getElementById('pv-small').onclick = () => { this.fontPx = Math.max(14, this.fontPx - 2); this.applyFont(); };
     document.getElementById('pv-big').onclick = () => { this.fontPx = Math.min(40, this.fontPx + 2); this.applyFont(); };
+  }
+  applyNoteW() {   // width of the notes column [px], centred
+    const w = this.noteW ? Math.min(innerWidth - 60, Math.max(360, this.noteW)) : Math.min(innerWidth - 60, 1100);
+    document.documentElement.style.setProperty('--pv-nw', w + 'px');
+  }
+  applyPrev() {   // height of the preview row [px]; the two slides keep 16:9 and shrink with it
+    // as high as asked, but never so high that the two 16:9 slides no longer fit side by side in the window's width
+    const fitW = Math.floor((innerWidth - 40 - 28) / 2 * 9 / 16) + 20;
+    const max = Math.max(120, Math.min(innerHeight - 260, fitW)), h = this.prevH ? Math.min(max, Math.max(60, this.prevH)) : Math.round(Math.min(max, innerHeight * .36));
+    document.documentElement.style.setProperty('--pv-h', h + 'px');
+  }
+  msg(t, bad) { const m = document.getElementById('pv-msg'); m.textContent = t; m.classList.toggle('bad', !!bad); }
+  editNotes(on) {
+    // the notes of this slide as an editable text in place of the teleprompter; typing is sent to the projector window,
+    // which saves it into the slide's source. Turning the page keeps editing, with that slide's notes
+    if (on && !this.state) return;
+    if (!on) this.flushNotes();
+    this.editing = on;
+    document.documentElement.classList.toggle('pv-editing', on);
+    document.getElementById('pv-edit').textContent = on ? 'Fertig' : 'Bearbeiten';
+    document.getElementById('pv-edwrap').hidden = !on; document.getElementById('pv-notes').hidden = on;
+    if (on) this.loadEditor(); else { this.msg(''); this._nk = null; this.render(); }
+  }
+  loadEditor() {
+    const st = this.state, ed = document.getElementById('pv-ned');
+    this.edI = st.i;
+    const html = (st.notes !== undefined ? st.notes : this.notes[st.i] || '').trim();
+    ed.innerHTML = html || '<p><br></p>'; this.edMeta = { start: st.start || 0, steps: st.steps || 0 }; this.hist = []; this.redo = [];
+    document.execCommand('defaultParagraphSeparator', false, 'p');
+    // open at the paragraph of this click
+    const items = noteItems([...ed.querySelectorAll(':scope > p')], st.start || 0, st.steps || 0), foc = noteFocus(items, st.step);
+    const cur = items.find(x => foc.get(x) === 'cur');
+    const wrap = document.getElementById('pv-edwrap'); this.gutter();
+    wrap.scrollTop = cur ? Math.max(0, cur.el.offsetTop - wrap.clientHeight * .25) : 0;
+  }
+  flushNotes() {
+    clearTimeout(this._edT);
+    if (!this.editing || this.edI === undefined) return;
+    const ed = document.getElementById('pv-ned');
+    const html = ed.innerHTML.replace(/(<br>)+(?=<\/p>|$)/g, '').replace(/&nbsp;/g, ' ')
+      .replace(/ class="(?:now| *)"/g, '').replace(/ class="(q) now"| class="now (q)"/g, ' class="q"');   // the lit paragraph is this window's own mark
+    if (html === this._sentHtml && this.edI === this._sentI) return;
+    this._sentHtml = html; this._sentI = this.edI;
+    this.notes[this.edI] = html;
+    this.msg('speichert …'); this.send('notes', this.edI, html);
+  }
+  gutter() {
+    // a chip beside each paragraph with its click; the one of the click now lit
+    const ed = document.getElementById('pv-ned'), g = document.querySelector('#pv-edwrap .ned-gut');
+    g.innerHTML = ''; if (!this.editing || !this.edMeta) return;
+    const items = noteItems([...ed.querySelectorAll(':scope > p')], this.edMeta.start, this.edMeta.steps);
+    const foc = this.state && this.state.i === this.edI ? noteFocus(items, this.state.step) : new Map();
+    for (const x of items) x.el.classList.toggle('now', foc.get(x) === 'cur');
+    for (const x of items) {
+      const c = document.createElement('button'); c.type = 'button'; c._p = x.el;
+      c.className = 'nck' + (x.q ? ' q' : '') + (!x.q && !x.el.hasAttribute('data-click') ? ' auto' : '') + (foc.get(x) === 'cur' ? ' now' : '');
+      c.textContent = x.q ? 'Hintergrund' : noteLabel(x); c.title = 'Klick wählen';
+      c.style.top = (ed.offsetTop + x.el.offsetTop) + 'px'; g.append(c);
+    }
+  }
+  clickMenu(chip) {
+    document.querySelector('.nck-menu')?.remove();
+    const p = chip._p, start = this.edMeta.start, total = Math.max(this.edMeta.steps, start), now = this.state && this.state.i === this.edI ? this.state.step : -1;
+    const [lo, hi] = (p.getAttribute('data-click') || '').split('-').map(Number);
+    let h = '';
+    for (let k = start; k <= total; k++) h += `<button type="button" data-k="${k}" class="${k >= lo && k <= (hi || lo) && !p.classList.contains('q') ? 'on' : ''}${k === now ? ' here' : ''}">${k === 0 ? 'Start' : k}</button>`;
+    const m = document.createElement('div'); m.className = 'nck-menu';
+    m.innerHTML = `<div class="nm-row">${h}</div><div class="nm-row"><button type="button" data-k="q" class="${p.classList.contains('q') ? 'on' : ''}">Hintergrund</button><span class="nm-hint">Shift+Klick: bis zu diesem Klick · gelb umrandet: jetzt</span></div>`;
+    m.style.top = (chip.offsetTop + chip.offsetHeight + 4) + 'px'; chip.parentElement.append(m);
+    m.addEventListener('mousedown', e => e.preventDefault());
+    m.addEventListener('click', e => {
+      const b = e.target.closest('[data-k]'); if (!b) return;
+      let v;
+      if (b.dataset.k === 'q') v = { q: true };
+      else { const k = +b.dataset.k, a = isNaN(lo) || p.classList.contains('q') ? k : lo; v = { click: e.shiftKey && a !== k ? `${Math.min(a, k)}-${Math.max(a, k)}` : String(k) }; }
+      const before = { click: p.getAttribute('data-click'), q: p.classList.contains('q') };
+      this.applyClick(p, v); this.hist.push({ p, before, after: { click: p.getAttribute('data-click'), q: p.classList.contains('q') }, t: performance.now() }); this.redo = [];
+      m.remove(); this.flushNotes(); this.gutter();
+    });
+    const off = e => { if (!m.contains(e.target) && e.target !== chip) { m.remove(); document.removeEventListener('pointerdown', off, true); } };
+    document.addEventListener('pointerdown', off, true);
+  }
+  applyClick(p, v) { p.classList.toggle('q', !!v.q); if (!p.classList.length) p.removeAttribute('class'); if (v.q || v.click == null) p.removeAttribute('data-click'); else p.setAttribute('data-click', v.click); }
+  applyTele() { document.getElementById('pv-notes').classList.toggle('all', !this.tele); document.getElementById('pv-tele').classList.toggle('on', this.tele); }
+  toggleTele() { this.tele = !this.tele; try { localStorage.setItem('pv-tele', this.tele ? '1' : '0'); } catch (e) { /* only for this page */ } this.applyTele(); this.paintNotes(true); }
+  renderNotes(st) {
+    // the notes of the slide as a teleprompter: the paragraphs of this click large, the one before and the one after pale,
+    // the rest barely there (all of them stay in the list, scroll up or down if you lose the place); the paragraphs for
+    // questions in a fold at the end. Rebuilt only when the slide or its text changes (the projector sends the live notes)
+    const html = (st.notes !== undefined ? st.notes : this.notes[st.i] || '').trim(), box = document.getElementById('pv-notes');
+    const key = st.i + '|' + html;
+    if (this._nk !== key) {
+      this._nk = key; box.scrollTop = 0;
+      const doc = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html');
+      const ps = [...doc.body.querySelectorAll(':scope > p')];
+      box.innerHTML = '<div class="pn-list"></div>'; const list = box.firstChild;
+      this.items = noteItems(ps, st.start || 0, st.steps || 0);
+      const bg = document.createElement('details'); bg.className = 'pn-bg'; bg.innerHTML = '<summary>Hintergrund (bei Fragen)</summary>';
+      for (const x of this.items) {
+        const d = document.createElement('p'); d.className = 'pn'; x.dom = d;
+        const lab = x.q ? '' : `<span class="pn-k">${noteLabel(x)}</span>`;
+        d.innerHTML = lab + x.el.innerHTML;
+        (x.q ? bg : list).append(d);
+      }
+      if (!ps.length) list.innerHTML = '<p class="pn q">Keine Notizen.</p>';
+      if (bg.children.length > 1) box.append(bg);
+    }
+    this.curStep = st.step; this.paintNotes();
+  }
+  paintNotes(jump) {
+    if (!this.items) return;
+    const foc = noteFocus(this.items, this.curStep ?? 0), box = document.getElementById('pv-notes');
+    let first = null;
+    for (const x of this.items) { if (x.q) continue; const k = foc.get(x) || 'far'; x.dom.classList.remove('cur', 'prev', 'next', 'far'); x.dom.classList.add(k); if (k === 'cur' && !first) first = x.dom; }
+    if (!first) first = this.items.map(x => x.dom).find(d => d.classList.contains('next'));
+    if (first && this.tele) box.scrollTo({ top: Math.max(0, first.offsetTop - box.clientHeight * .28), behavior: jump ? 'auto' : 'smooth' });
   }
   applyFont() { document.documentElement.style.setProperty('--pv-notes', this.fontPx + 'px'); }
   render() {
     const st = this.state; if (!st) return;
-    const post = (f, i, step) => f.contentWindow && f.contentWindow.postMessage({ src: 'dv', goto: i, step }, '*');
-    post(this.cur, st.i, st.step);
+    const post = (f, i, step, mark) => f.contentWindow && f.contentWindow.postMessage({ src: 'dv', goto: i, step, mark: !!mark }, '*');
+    // a preview is only steered when its slide or click changes (each move is a full page step inside it)
+    const key = (f, i, step) => { const k = i + ':' + step; if (f._k === k) return false; f._k = k; return true; };
+    if (key(this.cur, st.i, st.step)) post(this.cur, st.i, st.step);
     const end = st.ni >= st.n || (st.i < st.main && st.ni >= st.main);
     document.getElementById('pv-end').hidden = !end; this.nxt.style.visibility = end ? 'hidden' : 'visible';
-    if (!end) post(this.nxt, st.ni, st.ns);
+    if (!end && key(this.nxt, st.ni, st.ns)) post(this.nxt, st.ni, st.ns, true);
     document.getElementById('pv-count').textContent = st.i < st.main ? `${st.i + 1} / ${st.main}` : `Backup ${st.i + 1 - st.main}`;
     document.getElementById('pv-title').textContent = this.titles[st.i];
-    const html = this.notes[st.i].trim();
-    const box = document.getElementById('pv-notes');
-    box.innerHTML = html || '<p class="q">Keine Notizen.</p>'; box.scrollTop = 0;
+    if (this.editing) { if (st.i !== this.edI) { this.flushNotes(); this.loadEditor(); } }
+    else this.renderNotes(st);
   }
   tick() {
     const ms = (this.paused ?? Date.now()) - this.t0, m = Math.floor(ms / 60000), sec = Math.floor(ms / 1000) % 60;
