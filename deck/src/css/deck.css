@@ -66,7 +66,7 @@
   --s-eps: #057772; --s-dm: #007391;   --s-mdc: #007c00;  --s-gc: #005388;   --s-conc: #006e90; --s-conco: #0e6c8c;
   --s-matm: #535c54; --s-katm: #055b49; --s-ch4: #015193;
   --s-e: #076db0;   --s-dphi: #753c66; --s-dphio: #546477; --s-pin: #9c5700;  --s-pout: #b21132; --s-pkw: #546f4a;
-  --s-dt: #902b3c;  --s-rf: #015b9b;   --s-sk: #904997;   --s-ft: #564337;   --s-par: #935433;
+  --s-dt: #902b3c;  --s-rf: #015b9b;   --s-sk: #904997;   --s-ft: #564337;   --s-par: #935433;  --s-psi: #0b5d78;
   --vapor: #17808a;                    /* water vapour and mixing over the forest (slide 15, step 1) */
   --layer: #5a4fa0;                    /* the rising mixed air layer (slide 15, step 2) */
   --land: #8c6d5a;                     /* ocean and land taking CO₂ back */
@@ -96,7 +96,7 @@
 .c-eps { --c: var(--s-eps); } .c-dm { --c: var(--s-dm); } .c-mdc { --c: var(--s-mdc); } .c-gc { --c: var(--s-gc); }
 .c-conc { --c: var(--s-conc); } .c-conco { --c: var(--s-conco); } .c-matm { --c: var(--s-matm); }
 .c-katm { --c: var(--s-katm); } .c-ch4 { --c: var(--s-ch4); } .c-dt { --c: var(--s-dt); } .c-rf { --c: var(--s-rf); }
-.c-sk { --c: var(--s-sk); } .c-ft { --c: var(--s-ft); } .c-par { --c: var(--s-par); }
+.c-sk { --c: var(--s-sk); } .c-ft { --c: var(--s-ft); } .c-par { --c: var(--s-par); } .c-psi { --c: var(--s-psi); }
 /* channel and surface roles */
 .c-co2 { --c: var(--co2); } .c-ray { --c: var(--ray); } .c-land { --c: var(--land); } .c-cool { --c: var(--fjord); }
 .c-ink { --c: var(--ink); } .c-muted { --c: var(--muted); } .c-ch { --c: var(--ch); } .c-hi { --c: var(--hi); }
@@ -2086,8 +2086,6 @@ sup.sx { font-size: .62em; line-height: 0; vertical-align: .62em; font-feature-s
 :is(.all, .embed) .ende-scene :is(.e-tree, .e-late) { animation: none; }
 @media (prefers-reduced-motion: reduce) { .ende-scene :is(.e-tree, .e-late) { animation: none !important; } }
 @media print { .ende-scene :is(.e-tree, .e-late) { animation: none !important; } }
-/* closing slide: the scene stands still (sway, walking, flying, rain …) until the click to the thanks; only the entrance runs */
-.slide.ende:not(:has(.ende-dank.shown)) .ende-scene *:not(.e-tree, .e-late, .e-dank, .e-sunrise, .e-night, .e-dawn, .flab) { animation-play-state: paused !important; }
 /* the balance with the vegan comparison comes in only with the click to the thanks */
 .ende-scene .e-dank { opacity: 0; transition: opacity .9s var(--ease) .4s, transform .9s var(--ease) .4s; transform: translateY(16px); }
 .slide.ende:has(.ende-dank.shown) .ende-scene .e-dank { opacity: 1; transform: none; }

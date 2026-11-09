@@ -60,6 +60,9 @@ const TEX_MACROS = {
   // CO2 in the atmosphere
   "\\eps":  "\\q{eps}{\\varepsilon_{\\mathrm{CO_2}}}",
   "\\dm":   "\\q{dm}{\\Delta m_{\\mathrm{CO_2}}}",
+  "\\psc":  "\\q{psi}{\\psi_{\\mathrm{CO_2}}}",                // impulse response of the earth: share of an emitted pulse still in the air
+  "\\MCO":  "\\fc{par}{\\boldsymbol{M}_{\\mathrm{CO_2}}}",   // molar masses [g/mol]: C to CO2
+  "\\MC":   "\\fc{par}{\\boldsymbol{M}_{\\mathrm{C}}}",
   "\\mco":  "\\q{mdc}{m_{\\mathrm{CO_2}}}",
   "\\mdc":  "\\rate{\\mco}",
   "\\gC":   "\\q{gc}{g_C}",
