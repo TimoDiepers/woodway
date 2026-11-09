@@ -1242,30 +1242,30 @@ def irf_side_figure(out_path: str, horizon: int = 150) -> str:
     # sized to its slot on the slide (530 x 360 px) at the scale of the other model charts (~0.675 px per figure px),
     # so lines and type match them
     fig, ax = plt.subplots(figsize=(6.0, 3.33), dpi=FIG_DPI)
-    fig.subplots_adjust(left=0.115, right=0.975, bottom=0.17, top=0.97)
+    fig.subplots_adjust(left=0.2, right=0.975, bottom=0.17, top=0.97)
     _clean_axes(ax)
     ax.axhline(0, color=C_INK_MUTED, linewidth=1.0)
-    ax.axhline(1, color=c_rm, linewidth=1.1, linestyle=(0, (2, 3)), alpha=0.8)
-    ax.fill_between(t, 0, g, color=c_rm, alpha=0.14, linewidth=0)
-    ax.fill_between(t, g, 1, color=c_back, alpha=0.16, linewidth=0)
-    ax.plot(t, g, color=c_rm, linewidth=2.6)
+    ax.axhline(-1, color=c_rm, linewidth=1.1, linestyle=(0, (2, 3)), alpha=0.8)
+    ax.fill_between(t, 0, -g, color=c_rm, alpha=0.14, linewidth=0)
+    ax.fill_between(t, -g, -1, color=c_back, alpha=0.16, linewidth=0)
+    ax.plot(t, -g, color=c_rm, linewidth=2.6)
     # one marked point is enough to read the curve: half a century on, about half is still missing in the air
     for yr in (50,):
-        ax.plot(yr, g[yr], "o", ms=7, color=c_rm, mec="white", mew=1.5, zorder=5)
-        ax.annotate(f"{100 * g[yr]:.0f} % nach {yr} Jahren", (yr, g[yr]), xytext=(6, 6), textcoords="offset points", ha="left",
-                    va="bottom", fontsize=12, color=C_INK)
+        ax.plot(yr, -g[yr], "o", ms=7, color=c_rm, mec="white", mew=1.5, zorder=5)
+        ax.annotate(f"{100 * g[yr]:.0f} % nach {yr} Jahren", (yr, -g[yr]), xytext=(4, -10), textcoords="offset points", ha="left",
+                    va="top", fontsize=12, color=C_INK)
     from nbs.response import _JOOS_A0 as a0
-    ax.axhline(a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
-    ax.text(horizon, a0 - 0.04, f"{100 * a0:.0f} % bleiben dauerhaft in der Luft", ha="right", va="top", fontsize=13.5, color=c_rm,
+    ax.axhline(-a0, color=c_rm, linewidth=1.1, linestyle=(0, (4, 4)), alpha=0.8)
+    ax.text(horizon, -a0 + 0.04, f"{100 * a0:.0f} % werden dauerhaft entfernt", ha="right", va="bottom", fontsize=13.5, color=c_rm,
             fontweight="bold")
-    ax.text(horizon - 2, 0.9, "von Land + Ozean zurück", ha="right", va="bottom", fontsize=13.5, color=c_back,
+    ax.text(horizon - 2, -0.96, "von Land + Ozean zurück", ha="right", va="bottom", fontsize=13.5, color=c_back,
             fontweight="bold")   # as large as the share that stays removed: the two parts of the same kilogram
     ax.set_xlim(0, horizon)
-    ax.set_ylim(-0.04, 1.12)
-    ax.set_yticks([0, 0.5, 1])
-    ax.set_yticklabels(["0", "0,5", "1"])
+    ax.set_ylim(-1.12, 0.1)
+    ax.set_yticks([-1, -0.5, 0])
+    ax.set_yticklabels(["−1 kg", "−0,5 kg", "0"])
     ax.set_xlabel("Jahre nach der Entnahme")
-    # y label on the slide as a formula overlay (psi_CO2), in the colour of the formula
+    # y label on the slide as a formula overlay (Delta m_CO2), in the colour of the formula
     return _save(fig, out_path)
 
 

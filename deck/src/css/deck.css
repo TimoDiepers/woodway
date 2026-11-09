@@ -2768,3 +2768,10 @@ svg.s17 .rays-tree { opacity: 0; }
    what matters bold) */
 .ende-text .ende-a .e-big { font-size: 72px; font-weight: 500; letter-spacing: -0.012em; padding-bottom: 0; color: color-mix(in srgb, var(--moss) 85%, var(--paper)); }
 .ende-text .ende-a .e-sub { margin-top: 6px; font-size: 124px; line-height: .98; font-style: normal; font-weight: 640; letter-spacing: -0.022em; color: var(--moss); }
+
+/* F18: the equation for the CO2 change in the air builds up in three steps; each step shows the whole line, the latest alone */
+.fline .fq:not(.shown) { display: none; }
+.fline .fq.shown { animation: fadein .5s var(--ease) both; }
+.fline .fq:has(~ .fq.shown) { display: none; }
+/* a factor that is inserted into the line on its click: no gap before (F18, the molar-mass ratio) */
+.fins:not(:has([data-step].shown)) { display: none; }
