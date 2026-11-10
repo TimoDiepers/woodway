@@ -9,7 +9,7 @@
     <div class="cpart" data-step="2"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#p-refl"/></svg><div><b>Reflexionsänderung</b><span>Wie ändert er, wieviel Sonnenlicht reflektiert wird?</span></div></div>
   </div>
   <aside class="notes">
-    <p data-click="0"><b>Ziel: 5:45.</b> Zwei Teile kommen von selbst: Zeitverlauf, Reflexion.</p>
+    <p data-click="0"><b>Ziel: 5:45.</b> Erst Zeitverlauf, dann Reflexionsänderung.</p>
     <p class="q">Falls Fragen kommen — Lokale Wirkungen wie Schatten, Luftfilter, Lärmschutz und Lebensraum wirken vor allem vor Ort und zählen für das globale Klima kaum; sie kommen ganz am Ende wieder vor. Die direkte Verdunstungskühlung ist im Modell nicht drin, nur die Wolken, die daraus entstehen.</p>
   </aside>
 </section>
@@ -25,11 +25,11 @@
     </div>
   </div>
   <aside class="notes" data-n="10">
-    <p data-click="0">„Eine Massenbilanz für den Kohlenstoff im Baum.“</p>
-    <p data-click="1">Klick: <b>Photosynthese.</b> „Hinein geht CO₂, daraus wird Biomasse.“</p>
-    <p data-click="2">Klick: <b>Zellatmung.</b> „Ein Teil wird wieder ausgeatmet.“</p>
-    <p data-click="3">Klick: <b>Zersetzung.</b> „Laub und Totholz zerfallen.“</p>
-    <p data-click="4">Klick: <b>Störung.</b> „Feuer, Sturm, Käfer.“ Zusammen eine Differenzialgleichung.</p>
+    <p data-click="0"><b>Was machen wir als erstes</b>? Massenbilanz. Änderung des im Baum gespeicherten Kohlenstoffs über Zeit.</p>
+    <p data-click="1">1. <b>Photosynthese.</b> Baum nimmt CO₂ aus Luft auf, daraus wird Biomasse.“</p>
+    <p data-click="2">2. Teil wird "<b>ausgeatmet</b>", wenn Baum für sich selber Energie gewinnt. <b>Zellatmung.</b></p>
+    <p data-click="3">3. <b>Zersetzung.</b> „Laub und Totholz zerfallen.“</p>
+    <p data-click="4">4. <b>Störung.</b> „Feuer, Sturm, Käfer.“ Zusammen eine Differenzialgleichung.</p>
     <p class="q">Falls Fragen kommen — Einheiten: alle Größen in kg Kohlenstoff, bezogen auf einen Baum und auf den betrachteten Zeitraum.<br>Der hochgestellte Index C sagt: Wir bilanzieren das Element Kohlenstoff, nicht die Gesamtmasse.</p>
   </aside>
 </section>
@@ -37,36 +37,36 @@
 <section class="slide" data-ch="baeume" data-title="Modellierung der Kohlenstoff-Aufnahme" data-part="1">
   <header class="sh"><h2>Modellierung der Kohlenstoff-Aufnahme</h2></header>
   <div class="body">
-    <div class="fline head c9-line"><span class="chip c-mb"><span>Kohlenstoff-Änderung im Baum</span><span class="tex">$\mBd$</span><span class="u">[kg<sub>C</sub>/a]</span></span><span class="gloss tex">$= \htmlClass{ub-wa}{\underbrace{\mPS - \mZA - \mZS}_{\st{2}{\fc{mb}{\text{Netto-Wachstum}}}}} - \htmlClass{ub-st}{\underbrace{\mST}_{\st{4}{\fc{st}{\text{Verlust}}}}}$</span></div>
+    <div class="fline head c9-line"><span class="chip c-mb"><span>Kohlenstoff-Änderung im Baum</span><span class="tex">$\mBd$</span><span class="u">[kg<sub>C</sub>/a]</span></span><span class="gloss tex">$= \htmlClass{ub-wa}{\underbrace{\mPS - \mZA - \mZS}_{\st{2}{\fc{mb}{\text{Netto-Wachstum}}}}} - \htmlClass{ub-st}{\underbrace{\mST}_{\st{3}{\fc{st}{\text{Verlust}}}}}$</span></div>
     <div class="c10-fit rise" data-step="1" style="--d:0"><svg viewBox="0 0 70 150" aria-hidden="true"><path d="M4 18 C 58 18 62 60 62 75 C 62 92 58 132 12 132" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/><path d="M22 122 L10 132 L22 142" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b class="fit-h">parametriert aus jährlich gemittelten globalen Messdaten</b></p></div>
     <!-- the model formula starts where its "=" sits under the "=" of the balance above (measured) -->
     <div class="c10-row">
-      <span class="chip c-mb rise" data-step="2"><span>Kohlenstoffvorrat im Baum</span><span class="tex">$\mB(\tm)$</span><span class="u">[kg<sub>C</sub>]</span></span><div class="eq left tex c10-model" data-step="2">$$= \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw} \st{4}{\left(1 - \sz \st{5}{\mathbf{e}^{\gam \dTw(\tm)}}\right)}$$</div>
+      <span class="chip c-mb rise" data-step="2"><span>Kohlenstoffvorrat im Baum</span><span class="tex">$\mB(\tm)$</span><span class="u">[kg<sub>C</sub>]</span></span><div class="eq left tex c10-model" data-step="2">$$= \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw} \st{3}{\left(1 - \sz \st{4}{\mathbf{e}^{\gam \dTw(\tm)}}\right)}$$</div>
     </div>
     <div class="c10-body split">
       <dl class="legend lg tex" style="align-content:center">
         <dt data-step="2">$\mmax$</dt><dd data-step="2">Kohlenstoff-Sättigungsvorrat [kg<sub>C</sub>]</dd>
         <dt data-step="2">$\kw$</dt><dd data-step="2">Wachstumsrate [1/a]</dd>
         <dt data-step="2">$\pw$</dt><dd data-step="2">Formparameter [–]</dd>
-        <dt data-step="4">$\sz$</dt><dd data-step="4">Störungsrate vorindustriell [1/a]</dd>
-        <dt data-step="5">$\gam$</dt><dd data-step="5">Anstieg der Störungsrate [1/K]</dd>
-        <dt data-step="5">$\dTw$</dt><dd data-step="5">Erwärmung gegenüber vorindustriell [K]</dd>
+        <dt data-step="3">$\sz$</dt><dd data-step="3">Störungsrate vorindustriell [1/a]</dd>
+        <dt data-step="4">$\gam$</dt><dd data-step="4">Anstieg der Störungsrate [1/K]</dd>
+        <dt data-step="4">$\dTw$</dt><dd data-step="4">Erwärmung gegenüber vorindustriell [K]</dd>
       </dl>
-      <figure class="stack fill" data-step="3">
+      <figure class="stack fill" data-step="2">
         <figcaption class="t-head figcap">Beispiel: Ein Baum im Aachener Wald</figcaption>
-        <div class="chart" data-chart="s12" data-step="3" data-delay="300" data-slot-steps="0,1,2,2" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, dann mit Störung bei 0, 1,5 und 3 K Erwärmung gegenüber 1850–1900"></div>
+        <div class="chart" data-chart="s12" data-step="2" data-delay="300" data-slot-steps="0,1,2,2" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, dann mit Störung bei 0, 1,5 und 3 K Erwärmung gegenüber 1850–1900"></div>
       </figure>
     </div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (maximaler Kohlenstoff je ha m<sup>C</sup><sub>max</sub>)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a>; <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a> (Wachstumsrate k)</span><span><a href="https://doi.org/10.1126/science.adx6329" target="_blank" rel="noopener">Grünig et al. 2026</a>; <a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (Anstieg der Störungsrate γ)</span><span><a href="https://doi.org/10.1038/nclimate3303" target="_blank" rel="noopener">Seidl et al. 2017</a> (Störungsrate s<sub>0</sub>)</span><span><i>Annahme</i> (Wachstumsform, Zersetzung)</span></p>
   <aside class="notes" data-n="12">
-    <p data-click="0">„Die Flüsse einzeln zu messen ist aussichtslos.“</p>
-    <p data-click="1">Klick: <b>Parametriert.</b> „Fürs Klima reichen jährlich gemittelte Messdaten.“</p>
-    <p data-click="2">Klick: <b>Wachstum.</b> S-Kurve mit drei Parametern: m_max, k, p.</p>
-    <p data-click="3">Klick: <b>Beispiel Aachen.</b> „Die volle Wirkung gibt es erst nach Jahrzehnten.“</p>
-    <p data-click="4">Klick: <b>Verlust.</b> „Was dasteht, kann abbrennen.“ s₀.</p>
-    <p data-click="5">Klick: <b>Erwärmung.</b> „Mit dem Klimawandel werden Störungen häufiger.“ Bei 1,5 Grad rund 40 % mehr.</p>
-    <p class="q">Falls Fragen kommen — Woher die Zahlen kommen: m_max = zusätzlicher Kohlenstoff je Hektar am Ort (Walker et al. 2022, ober- und unterirdisch, ohne Boden) ÷ 2000 Bäume; k aus der Zuwachsrate der ersten 30 Jahre (Cook-Patton et al. 2020), begrenzt durch Poorter et al. (2016): 90 % der Biomasse nach 66 Jahren. Sättigung: Aachen 49, Fairbanks 24, Marabá 69 kg<sub>C</sub> je Baum. Die Rückkopplung der Erwärmung auf die Störung ändert die Wirkung je Baum bis 2100 kaum (Backup „Die Erwärmung wirkt auf den Baum zurück“).</p>
+    <p data-click="0"><b>Woher </b>kriegen wir die Werte? Komliziert einzeln zu Messen, <b>im Detail aber gar nicht wichtig</b> für uns.</p>
+    <p data-click="1"><b>Als Basis</b> nehmen wir <b>jährliches Mittel von Messdaten von CO2 Flüssen über Wald.</b><br>Daraus <b>parametrierte Wachstumskurve. Hier für typischen Baum im Aachener Wald.</b></p>
+    <p data-click="2">Erstmal <b>Netto-Wachstum.</b> Sieht aus wie S-Kurve. <br>Formel-mäßig <b>e funktion mit drei Parametern</b>: max <b>Kohlenstoffvorrat</b>, <b>Wachstumsrate</b>, <b>Formparameter</b>. </p>
+    <p data-click="3">Haben noch Störung: <b>Verlustwahrscheinlichkeit.</b><br>Nicht nur Basis Störungsrate, die kann sich erhöhen.</p>
+    <p data-click="4">Je <b>höher unsere Temperaturerhöhung</b>, desto <b>höhere Verlustwahrscheinlichkeit</b>.</p>
+    <p data-click="4">Parameter für diese Kurven<b> können unterschiedlich sein</b>, je nachdem wo ich grade bin.</p>
+    <p class="q">Falls Fragen kommen — Woher die Zahlen kommen: m_max = zusätezlicher Kohlenstoff je Hektar am Ort (Walker et al. 2022, ober- und unterirdisch, ohne Boden) ÷ 2000 Bäume; k aus der Zuwachsrate der ersten 30 Jahre (Cook-Patton et al. 2020), begrenzt durch Poorter et al. (2016): 90 % der Biomasse nach 66 Jahren. Sättigung: Aachen 49, Fairbanks 24, Marabá 69 kg<sub>C</sub> je Baum. Die Rückkopplung der Erwärmung auf die Störung ändert die Wirkung je Baum bis 2100 kaum (Backup „Die Erwärmung wirkt auf den Baum zurück“).</p>
   </aside>
 </section>
 
@@ -82,10 +82,11 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a> (Waldtyp je Zelle)</span><span><i>Eigene Rechnung</i> (Wachstumskurven je Zelle)</span></p>
   <aside class="notes" data-n="13">
-    <p data-click="0"><b>Drei Orte für den ganzen Vortrag:</b> Aachen Mischwald, Marabá Regenwald, Fairbanks Nadelwald. 2100: 42, 62, 20 kg<sub>C</sub>.</p>
-    <p data-click="0">„Marabá wächst schneller und höher, Fairbanks ist kalt und langsam.“</p>
-    <p data-click="1">Klick: <b>drei Orte + Kurven.</b></p>
-    <p class="q">Falls Fragen kommen — Kohlenstoff ist je Ort für alle Waldtypen gleich (IPCC 2019: kein belastbarer Unterschied); die Typen unterscheiden sich in Albedo und Störung. Aufgenommen bis 2100: Aachen 163, Marabá 232, Fairbanks 81 kg CO₂. Kräftige Farbe: mindestens 30 % der Fläche wiederbewaldbar.</p>
+    <p data-click="0"><b>An Verschiedenen orten auf der Welt unterschiedliche Baumarten, die unterschiedlich schnell wachsen. </b></p>
+    <p data-click="0"><b>Beispielhaft gucken wir uns drei Orte an.</b></p>
+    <p data-click="1"><b>Aachen</b> Mischwald, <b>Marabá</b> Regenwald, <b>Fairbanks</b> Nadelwald</p>
+    <p data-click="1">Marabá wächst <b>schneller und höher</b>, Fairbanks ist <b>kalt und langsam</b></p>
+    <p data-click="1"><span style="color: rgb(185, 199, 176); font-size: 18.04px; font-style: italic;">Falls Fragen kommen — Kohlenstoff ist je Ort für alle Waldtypen gleich (IPCC 2019: kein belastbarer Unterschied); die Typen unterscheiden sich in Albedo und Störung. Aufgenommen bis 2100: Aachen 163, Marabá 232, Fairbanks 81 kg CO₂. Kräftige Farbe: mindestens 30 % der Fläche wiederbewaldbar.</span></p>
   </aside>
 </section>
 
@@ -101,7 +102,8 @@
     </div>
   </div>
   <aside class="notes" data-n="13a">
-    <p data-click="1">Von selbst: <b>Haken.</b> „Damit steht der Zeitverlauf.“</p>
+    <p data-click="1"><b>Haken dran</b>: Können CO2 Aufnahme über Zeit modellieren</p>
+    <p data-click="1">Kommen wir zu Reflexionsänderung</p>
   </aside>
 </section>
 
@@ -123,12 +125,14 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.4324/9780203407219" target="_blank" rel="noopener">Oke 1987</a> (typische Albedowerte)</span></p>
   <aside class="notes" data-n="14">
-    <p data-click="0">„Zwei Effekte: direkt das Laub, indirekt die Wolken.“ Eiche auf Wiese.</p>
-    <p data-click="1">Klick: <b>Albedo α:</b> „der Anteil des Lichts, der zurückgeht.“ 0 alles absorbiert, 1 Spiegel.</p>
-    <p data-click="2">Klick: Wiese 0,25, Eiche 0,15.</p>
-    <p data-click="3">Klick: <b>Δα_L = 0,10.</b> „So viel mehr Licht bleibt im System.“</p>
-    <p data-click="4">Klick: <b>Schnee.</b> 0,85 − 0,15 = 0,70. „Derselbe Baum, nur der Boden ist heller.“</p>
-    <p data-click="5">Klick: <b>Tanne.</b> 0,75. „Je heller der Boden, desto stärker.“</p>
+    <p data-click="0">Zwei Effekte: einmal <b>direkt</b>, einmal <b>indirekt</b></p>
+    <p data-click="0"><b>Erstmal direkt. </b>Sagen wir <b>wir stellen einen Baum auf ne Wiese. <br>Baum typischerweise dunkler als Umgebung. Wie quantifizieren?</b></p>
+    <p data-click="1"><b>Albedo</b>: Anteil des Lichts, der <b>zurückgeworfen</b> wirde<br>Null heißt alles geschluckt, eins heißt Spiegel</p>
+    <p data-click="2">Albedo Laub niedriger: Mehr Licht wird absorbiert.</p>
+    <p data-click="3">Differenz: so viel <b>mehr Energie bleibt</b> im System</p>
+    <p data-click="4">Gleicher Baum auf <b>Schnee</b>: Differenz <b>viel größer</b><br>Boden ist heller</p>
+    <p data-click="5"><b>Tanne</b> ist noch dunkler, differenz noch größer.</p>
+    <p data-click="5">Das war der direkte effekt. <b>Gibt aber noch indirekten Einfluss auf Reflexion</b>.</p>
     <p class="q">Falls Fragen kommen — Werte gerundet aus den Spannen bei Oke (1987): Wiese 0,25 − Laubwald 0,15; Schnee 0,85 − Laubwald 0,15; Schnee 0,85 − Nadelwald 0,10. Der Baum hat in beiden Fällen dieselbe Albedo; ein kahler Laubwald im Winter über Schnee ist eher etwas heller (rund 0,2, Betts &amp; Ball 1997), dann wäre Δα 0,65. Im Modell kommt Δα_L nicht aus einer Tabelle, sondern aus Satellitendaten Monat für Monat und Ort für Ort (Duveiller et al. 2018): Wald gegen Offenland, mit Schnee im Winter. Daraus wird mit der Einstrahlung die zusätzlich absorbierte Leistung (Folie „Netto-Energieänderung“). Alle Flächen im Vergleich im Backup „Reflexion von Sonnenlicht“.</p>
   </aside>
 </section>
@@ -139,8 +143,8 @@
     <div style="position:relative">
     <svg class="schema mo" data-export="s_wolken" viewBox="0 0 1424 610" style="width:100%; height:auto; max-height:505px; overflow:visible" aria-label="Schema: über Wald entstehen am Nachmittag mehr Haufenwolken als über Wiese"><defs><marker id="ah-wk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--ray)"/></marker><marker id="ah-wz" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--layer)"/></marker><marker id="ah-we" viewBox="0 0 10 10" refX="4" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--ink-2)"/></marker></defs><g font-family="IBM Plex Sans">
   
-  <g class="pop" data-step="3"><defs><linearGradient id="wk-tg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d6604d"/><stop offset="1" stop-color="#4f86a6"/></linearGradient></defs><rect x="-16" y="40" width="10" height="540" rx="5" fill="url(#wk-tg)"/><text x="-26" y="56" text-anchor="end" font-size="21" font-weight="600" fill="#4f86a6">kalt</text><text x="-26" y="576" text-anchor="end" font-size="21" font-weight="600" fill="#d6604d">warm</text></g>
-  <g class="pop" data-step="3"><rect x="20" y="380" width="420" height="200" fill="var(--layer)" opacity=".10"/><rect x="460" y="150" width="420" height="430" fill="var(--layer)" opacity=".13"/>
+  <g class="pop" data-step="2"><defs><linearGradient id="wk-tg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d6604d"/><stop offset="1" stop-color="#4f86a6"/></linearGradient></defs><rect x="-16" y="40" width="10" height="540" rx="5" fill="url(#wk-tg)"/><text x="-26" y="56" text-anchor="end" font-size="21" font-weight="600" fill="#4f86a6">kalt</text><text x="-26" y="576" text-anchor="end" font-size="21" font-weight="600" fill="#d6604d">warm</text></g>
+  <g class="pop" data-step="2"><rect x="20" y="380" width="420" height="200" fill="var(--layer)" opacity=".10"/><rect x="460" y="150" width="420" height="430" fill="var(--layer)" opacity=".13"/>
     <path d="M20 380 H440" stroke="var(--layer)" stroke-width="3"/><path d="M460 150 H880" stroke="var(--layer)" stroke-width="3"/>
     <path d="M230 470 V398" stroke="var(--layer)" stroke-width="3.5" marker-end="url(#ah-wz)"/><path d="M670 360 V170" stroke="var(--layer)" stroke-width="3.5" marker-end="url(#ah-wz)"/>
     <path d="M20 150 H880" stroke="var(--ink-2)" stroke-width="2.5" stroke-dasharray="10 9"/>
@@ -150,21 +154,21 @@
   <rect x="20" y="570" width="420" height="10" fill="#b9cf96"/><rect x="20" y="580" width="860" height="22" fill="#d9cfb9"/><line x1="20" y1="580" x2="880" y2="580" stroke="#8c7a58" stroke-width="3" stroke-linecap="round"/>
   <g class="m-sway"><g transform="translate(520 580) scale(0.432)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(600 580) scale(0.504)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(690 580) scale(0.456)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(775 580) scale(0.516)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(850 580) scale(0.420)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g></g>
   <text x="230" y="525" text-anchor="middle" font-size="22" font-weight="600" fill="var(--ink)">Wiese</text>
-  <g class="pop" data-step="1"><g class="mi td-vapor" fill="none" stroke="var(--vapor)" stroke-width="4" stroke-linecap="round"><path style="--k:0s" d="M150 550 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.1s" d="M300 556 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0s" d="M540 370 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0.5s" d="M630 350 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.0s" d="M720 366 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.5s" d="M800 352 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0.8s" d="M860 380 q-7 -10 0 -20 q7 -10 0 -20"/></g>
+  <g class="pop" data-step="0"><g class="mi td-vapor" fill="none" stroke="var(--vapor)" stroke-width="4" stroke-linecap="round"><path style="--k:0s" d="M150 550 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.1s" d="M300 556 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0s" d="M540 370 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0.5s" d="M630 350 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.0s" d="M720 366 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:1.5s" d="M800 352 q-7 -10 0 -20 q7 -10 0 -20"/><path style="--k:0.8s" d="M860 380 q-7 -10 0 -20 q7 -10 0 -20"/></g>
     </g>
-  <g class="pop" data-step="2"><g class="m-fan m-eddy"><path d="M530.9 315.0 A22 22 0 1 1 550.0 326.0" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#ah-we)"/></g><g class="m-fan m-eddy"><path d="M770.9 311.0 A22 22 0 1 1 790.0 322.0" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#ah-we)"/></g></g>
-  <g class="pop" data-step="4"><use href="#cloud" transform="translate(670 140) scale(0.95)"/>
+  <g class="pop" data-step="1"><g class="m-fan m-eddy"><path d="M530.9 315.0 A22 22 0 1 1 550.0 326.0" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#ah-we)"/></g><g class="m-fan m-eddy"><path d="M770.9 311.0 A22 22 0 1 1 790.0 322.0" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#ah-we)"/></g></g>
+  <g class="pop" data-step="3"><use href="#cloud" transform="translate(670 140) scale(0.95)"/>
     <path class="ray-l" d="M798.1 42.2 L725.1 73" stroke="var(--sun-ray)" marker-end="url(#sr-in)"/><path class="ray-p m-flow" d="M794.4 43.8 L738 67.6" stroke="var(--sun-ray)"/><path class="ray-l" d="M725.1 73 L756.6 24.3" stroke="var(--ray)" marker-end="url(#sr-out)"/><path class="ray-p m-flow" d="M727.3 69.6 L749 36.1" stroke="var(--ray)"/></g>
-  <g class="pop" data-step="1"><circle cx="950" cy="70" r="19" fill="var(--vapor)"/><text x="950" y="78" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">1</text><text x="982" y="79" font-size="25" font-weight="600" fill="var(--ink)">Mehr Wasserdampf, mehr Mischung</text><text x="982" y="116" font-size="22" fill="var(--ink-2)"><tspan x="982">Wald verdunstet mehr als Wiese</tspan><tspan x="982" dy="29">oder Acker; raue Kronen sorgen</tspan><tspan x="982" dy="29">für mehr Turbulenzen</tspan></text></g>
-  <g class="pop" data-step="3"><circle cx="950" cy="270" r="19" fill="var(--layer)"/><text x="950" y="278" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">2</text><text x="982" y="279" font-size="25" font-weight="600" fill="var(--ink)">Luftschicht steigt schneller</text><text x="982" y="316" font-size="22" fill="var(--ink-2)"><tspan x="982">Feuchte Luft gelang höher, wo </tspan><tspan x="982" dy="29">es kälter ist.</tspan></text></g>
-  <g class="pop" data-step="4"><circle cx="950" cy="470" r="19" fill="var(--ray)"/><text x="950" y="478" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">3</text><text x="982" y="479" font-size="25" font-weight="600" fill="var(--ink)">Wolkenbildung</text><text x="982" y="516" font-size="22" fill="var(--ink-2)"><tspan x="982">Feuchte Luft kondensiert zu Wolken,</tspan><tspan x="982" dy="29">die zusätzlich Licht reflektieren</tspan></text></g>
+  <g class="pop" data-step="0"><circle cx="950" cy="70" r="19" fill="var(--vapor)"/><text x="950" y="78" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">1</text><text x="982" y="79" font-size="25" font-weight="600" fill="var(--ink)">Mehr Wasserdampf, mehr Mischung</text><text x="982" y="116" font-size="22" fill="var(--ink-2)"><tspan x="982">Wald verdunstet mehr als Wiese</tspan><tspan x="982" dy="29">oder Acker; raue Kronen sorgen</tspan><tspan x="982" dy="29">für mehr Turbulenzen</tspan></text></g>
+  <g class="pop" data-step="2"><circle cx="950" cy="270" r="19" fill="var(--layer)"/><text x="950" y="278" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">2</text><text x="982" y="279" font-size="25" font-weight="600" fill="var(--ink)">Luftschicht steigt schneller</text><text x="982" y="316" font-size="22" fill="var(--ink-2)"><tspan x="982">Feuchte Luft gelang höher, wo </tspan><tspan x="982" dy="29">es kälter ist.</tspan></text></g>
+  <g class="pop" data-step="3"><circle cx="950" cy="470" r="19" fill="var(--ray)"/><text x="950" y="478" text-anchor="middle" font-size="21" font-weight="600" fill="var(--paper)">3</text><text x="982" y="479" font-size="25" font-weight="600" fill="var(--ink)">Wolkenbildung</text><text x="982" y="516" font-size="22" fill="var(--ink-2)"><tspan x="982">Feuchte Luft kondensiert zu Wolken,</tspan><tspan x="982" dy="29">die zusätzlich Licht reflektieren</tspan></text></g>
   <!-- the steps' numbers in the drawing: 1 at the vapour over the trees, 2 at the rising layer, 3 at the cloud -->
-  <g class="pop" data-step="1"><circle cx="585" cy="342" r="16" fill="var(--vapor)"/><text x="585" y="348" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">1</text></g>
-  <g class="pop" data-step="3"><circle cx="700" cy="250" r="16" fill="var(--layer)"/><text x="700" y="256" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">2</text></g>
-  <g class="pop" data-step="4"><circle cx="572" cy="118" r="16" fill="var(--ray)"/><text x="572" y="124" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">3</text></g>
+  <g class="pop" data-step="0"><circle cx="585" cy="342" r="16" fill="var(--vapor)"/><text x="585" y="348" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">1</text></g>
+  <g class="pop" data-step="2"><circle cx="700" cy="250" r="16" fill="var(--layer)"/><text x="700" y="256" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">2</text></g>
+  <g class="pop" data-step="3"><circle cx="572" cy="118" r="16" fill="var(--ray)"/><text x="572" y="124" text-anchor="middle" font-size="18" font-weight="600" fill="var(--paper)">3</text></g>
 </g></svg>
     </div>
-    <div class="rise" data-step="5" style="display:flex; align-items:center; gap:28px; margin-top:22px">
+    <div class="rise" data-step="4" style="display:flex; align-items:center; gap:28px; margin-top:22px">
       <div class="fline" style="flex:none; flex-wrap:nowrap"><span class="chip c-daw"><span>Albedoänderung</span><span class="tex">$\daw(\tm)$</span></span><span class="gloss"><span class="tex">$= \big(\q{albw}{f_{\mathrm{Boden}}}(\tm) - \q{albb}{f_{\mathrm{Baum}}}(\tm)\big)\, \alw$</span></span></div>
       <dl class="legend" style="margin-left:auto; min-width:0">
         <dt>$\q{albw}{f_{\mathrm{Boden}}}$</dt><dd>Wolkenbedeckung über Boden [–]</dd>
@@ -175,12 +179,12 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-021-24551-5" target="_blank" rel="noopener">Duveiller et al. 2021</a> (Wolkenbedeckung über Wald)</span><span><a href="https://doi.org/10.1073/pnas.2026241118" target="_blank" rel="noopener">Cerasoli et al. 2021</a> (Wolken-Albedo ΔαWolke)</span></p>
   <aside class="notes" data-n="14a">
-    <p data-click="0">„Der indirekte Effekt, und er ist klein.“</p>
-    <p data-click="1">Klick: <b>Verdunstung.</b> „Wald gibt mehr Wasser ab.“</p>
-    <p data-click="2">Klick: <b>Turbulenz.</b> „Die raue Krone wirbelt die Luft auf.“</p>
-    <p data-click="3">Klick: <b>Aufstieg.</b> „Die feuchte Luft steigt höher, dort kondensiert sie.“</p>
-    <p data-click="4">Klick: <b>Wolken.</b> „Mehr Wolken, mehr Licht geht zurück.“</p>
-    <p data-click="5">Klick: <b>Δα_W.</b> „Zusätzliche Bedeckung mal Albedo der Wolke, aus Satellitendaten. Wie beim Laub: Boden minus Baum. Mehr Wolken über Wald, also negativ.“</p>
+    <p data-click="0">Wald <b>verdunstet mehr</b> Wasser als Wiese</p>
+    <p data-click="1">Raue Krone sorgt für <b>mehr Turbulenz</b></p>
+    <p data-click="2">Feuchte Luft <b>steigt höher</b>, wo's kälter ist, und <b>kondensiert</b></p>
+    <p data-click="3"><b>Mehr Wolken</b>, also geht mehr Licht zurück</p>
+    <p data-click="4">In Formel: zusätzliche Bewölkung über wald, aus <b>Satellitendaten</b><br>Multipliziert mit wieviel mehr Licht Wolke reflektiert, wieder ein Albedo-Delta.</p>
+    <p data-click="4">Damit haben wir albedo änderung durch den Baum selbst und durch Wolken, die bringen wir jetzt zusammen</p>
     <p class="q">Falls Fragen kommen — Warum über Wald manchmal weniger Wolken (Duveiller et al. 2021): Mit Schnee, im Winter und Frühjahr in Nordamerika, Russland und Osteuropa, kehrt sich das Vorzeichen um. Der dunkle Wald nimmt mehr Strahlung auf, darüber wächst eine tiefe, trockene Mischungsschicht, die niedrige Wolken eher verhindert; über verschneitem Offenland ist die Luft stabil geschichtet, dort steht eher Nebel. Ein Teil kann auch daher kommen, dass der Satellit Schnee und Wolken verwechselt. Im südlichen Amazonas in der Trockenzeit bilden sich flache Haufenwolken eher über gerodeten, zerstückelten Flächen: rauere Oberfläche, mehr Thermik, über dem geschlossenen Wald weniger (auch Wang et al. 2009, PNAS 106, 3670). Ebenfalls umgekehrt: Corn Belt im Sommer, Indien zu Beginn des Monsuns. Im Modell zählt jeder Monat mit seinem Vorzeichen; übers Jahr bleibt in Aachen und Fairbanks ein kühlender Rest, in Marabá ein kleiner wärmender (+0,7 W je ausgewachsenem Baum).</p>
   </aside>
 </section>
@@ -202,11 +206,11 @@
   </div>
   <!-- the end: both effects per tree as a card in front, the slide blurred behind it -->
   <aside class="notes" data-n="16">
-    <p data-click="0">„Beide Effekte in einer Größe: Q̇_α, in Watt.“</p>
-    <p data-click="1">Klick: Δα_L <b>plus</b> Δα_W.</p>
-    <p data-click="2">Klick: <b>q̇_ein und A_B.</b> „Einstrahlung mal Kronenfläche, und beide ändern sich mit der Zeit.“</p>
-    <p data-click="3">Klick: „Wieder aus jährlich gemittelten Messdaten.“</p>
-    <p data-click="4">Klick: <b>Karte und drei Orte.</b> Aachen 20 W, Fairbanks 63 W: „Schnee.“ Marabá 17 W: „schon alles grün.“ „Viel bei Schnee und Wüste, wenig in den Tropen.“</p>
+    <p data-click="0">Beide Effekte zusammen in <b>einer Größe</b>: zusätzlich absorbierte Leistung, in Watt</p>
+    <p data-click="1">albedo von Laub <b>plus</b> Wolken</p>
+    <p data-click="2">Mal <b>Einstrahlung</b> und <b>Kronenfläche</b>, beides ändert sich mit der Zeit</p>
+    <p data-click="3">Werte wieder aus <b>jährlich gemittelten Messdaten</b></p>
+    <p data-click="4"><b>Karte</b>: viel bei <b>Schnee und Wüste</b>, wenig in den <b>Tropen</b><br>Fairbanks <b>am stärksten</b> wegen Schnee, Marabá am schwächsten, da ist schon alles grün</p>
     <p class="q">Falls Fragen kommen — 2100, Baum gepflanzt 2026: Aachen 20, Fairbanks 63, Marabá 17 W; nur Albedo 24, 64, 16 W; Wolken −4, −1, +1 W; ausgewachsen mit geschlossener Krone 29, 103, 21 W. Monatlich gerechnet, A_B wächst bis 5 m². Marabá: Wolkenterm leicht positiv, in der Trockenzeit weniger Wolken über Wald.</p>
   </aside>
 </section>
@@ -230,7 +234,7 @@
   <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Einstrahlung, Albedo-Kontrast)</span><span><a href="https://doi.org/10.1029/2025JG009284" target="_blank" rel="noopener">Williams et al. 2026</a> (Kronenschluss über die Zeit)</span></p>
   <!-- the end: both effects per tree as a card in front, the slide blurred behind it -->
   <aside class="notes" data-n="16a">
-    <p data-click="4">Von selbst: <b>Fairbanks allein, Laub und Wolken:</b> +64 W und −1 W. „Die Wolken spielen dort kaum eine Rolle, das Laub macht fast alles.“</p>
+    <p data-click="4"><b>Fairbanks</b> aufgeteilt: fast alles kommt vom <b>Laub</b><br>Wolken spielen <b>kaum eine Rolle</b></p>
   </aside>
 </section>
 
@@ -262,7 +266,7 @@
       <div class="ovtrail" aria-hidden="true"><span class="st done" style="--c:var(--moss)"><span class="ic"><svg data-fly="baeume" viewBox="0 0 100 100"><use href="#e-baeume" width="100" height="100"/></svg><svg class="ok" viewBox="0 0 34 30" aria-hidden="true"><path d="M4 16 l9 9 l17 -20"/></svg></span>Baum-Modell</span><span class="st next" style="--c:var(--clay)"><span class="ic"><svg data-fly="klima" viewBox="0 0 100 100"><use href="#e-klima" width="100" height="100"/></svg></span>Klima-Modell</span><span class="st later" style="--c:var(--fjord)"><span class="ic"><svg data-fly="vergleich" viewBox="0 0 100 100"><use href="#e-potenzial" width="100" height="100"/></svg></span>Potenziale</span></div>
     </div></div>
   <aside class="notes" data-n="16b">
-    <p data-click="5">Von selbst: <b>Karte Baum-Modell.</b> „Kilogramm und Watt, aber noch keine Temperatur.“</p>
+    <p data-click="5"><b>Baum-Modell steht</b>: wir haben Kilogramm und Watt<br>Aber <b>noch keine Temperatur</b>, also Klima-Modell</p>
   </aside>
 </section>
 

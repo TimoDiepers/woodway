@@ -1482,7 +1482,7 @@ def forest_type_map_figure(out_path: str) -> str:
     world_site_labels(ax, lambda s_: map_site_value(data, s_), dict(mfc="white", mec=C_INK), fairbanks_up=False)
     areas = {t: float(w[typ == t].sum() / 1e13) for t in TYPES}
     order = sorted(TYPES, key=lambda t: -areas[t])
-    handles = [Patch(facecolor=TYPE_COLORS[t], label=f"{TYPE_NAMES[t]}\n{de_gha(areas[t])}") for t in order]
+    handles = [Patch(facecolor=TYPE_COLORS[t], label=TYPE_NAMES[t]) for t in order]   # the type only, no area
     handles.append(Patch(facecolor=_COLOR_LAND, label="nicht wiederbewaldbar\n(Wald, Acker, Stadt, …)"))
     ax.text(0.995, 0.03, "Kräftige Farbe: ≥ 30 % der Fläche wiederbewaldbar", transform=ax.transAxes, ha="right",
             fontsize=10, color=C_INK_MUTED)

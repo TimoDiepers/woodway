@@ -3,207 +3,11 @@
      ===================================================== -->
 
 <!-- Einordnung -->
-<section class="slide backup" data-title="CMIP7: Erwärmung">
-  <header class="sh"><h2>Selbst die ambitioniertesten Szenarien verfehlen 1,5&nbsp;°C</h2></header>
-  <div class="body">
-    <div class="chart" data-ec="temperatur" data-label="Erwärmung der sieben CMIP7-Markerszenarien bis 2150, Median und 5–95 %, mit Beobachtung seit 1950"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:900">Selbst Very Low: Höchstwert 1,8 °C (2049), unter 1,5 °C erst nach 2120.</p></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (CMIP7-Erwärmungspfade)</span><span><a href="https://doi.org/10.5194/essd-18-3889-2026" target="_blank" rel="noopener">Forster et al. 2026</a> (beobachtete Erwärmung)</span><span><a href="https://www.carbonbrief.org/explainer-the-cmip7-emissions-scenarios-and-how-they-explore-future-climate-change" target="_blank" rel="noopener">Hausfather 2026</a> (Grafikvorlage Carbon Brief)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Selbst im ambitioniertesten Szenario (Very Low) steigt die Erwärmung im Median auf 1,8 °C (2049) und liegt 2100 noch bei 1,6 °C — unter 1,5 °C erst nach 2120. Alle anderen Szenarien bleiben darüber.</p>
-    <p data-click="0">Das sind die neuen Szenarien, mit denen die Klimamodelle für den nächsten IPCC-Bericht rechnen. Wir zeigen vier der sieben Wege: Very Low, Medium-Low, Medium und High. Selbst der ambitionierteste Weg, Very Low, überschreitet 1,5 °C: Im Median steigt die Erwärmung auf 1,8 °C um 2050 und kommt erst im nächsten Jahrhundert wieder darunter.</p>
-    <p class="q">Falls Fragen kommen — Werte (Median) 2100: VL 1,60 °C, ML 2,27, M 2,98, H 3,45 °C; nicht gezeigt LN 1,70, L 1,86, HL 2,87 °C. Quelle der Läufe: FaIR-Ensemble des ScenarioMIP-Beschreibungspapiers (fair-calibrate 1.5.0); Carbon Brief nutzt 1.4.5, die Mediane weichen um wenige Hundertstel ab. Neu gerechnet mit scripts/fetch_cmip7_data.py.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-title="CMIP7: CO₂-Entnahme">
-  <header class="sh"><h2>… und kommen nur mit CO₂-Entnahme in die Nähe</h2></header>
-  <div class="body">
-    <div class="chart" data-ec="entnahme" data-label="CO₂-Entnahme je Jahr bis 2150 und kumuliert 2024–2100 in den sieben CMIP7-Markerszenarien"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1600">Weniger Erwärmung → mehr Entnahme: Very Low setzt 335 Gt CO₂ bis 2100 voraus.</p></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/gmd-19-2627-2026" target="_blank" rel="noopener">van Vuuren et al. 2026</a> (CMIP7-CO₂-Entnahme)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Je niedriger die Erwärmung, desto mehr CO₂-Entnahme setzen die Szenarien voraus: Very Low rund 335 Gt bis 2100, Medium-Low (2,3 °C) 279 Gt. Die Szenarien ohne Entnahme (Medium, High) liegen 2100 bei 3,0 und 3,5 °C.</p>
-    <p data-click="0">Und selbst in die Nähe von 1,5 °C kommen die Szenarien nur, weil sie annehmen, dass wir CO₂ wieder aus der Luft holen. Links aufsummiert seit 2024: Very Low entnimmt bis 2100 rund 335 Gigatonnen, Medium-Low 279; rechts dieselben Summen als Balken. Bis 2100 — bis dahin soll die Erwärmung klein bleiben, und bis dahin rechnet der ganze Vortrag. Das ist der Bedarf, gegen den er am Ende rechnet.</p>
-    <p class="q">Falls Fragen kommen — Kumuliert 2024–2100 (neuartig + Land): VL 109 + 226, ML 104 + 175 Gt CO₂, Medium und High praktisch null; nicht gezeigt L 244 + 329, LN 786 + 34, HL 104 + 129 Gt CO₂. Carbon Brief zählt bis 2150 und mit Bodenkohlenstoff und kommt für Very Low auf 655 Gt. Alle Folien rechnen mit diesen Daten bis 2100 (Very Low 335 Gt).</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="dac" data-title="Methodischer Beitrag">
-  <header class="sh"><h2>Methodischer Beitrag</h2></header>
-  <div class="body">
-    <table style="margin-top:4px">
-      <thead><tr><th style="width:20%">Gebraucht</th><th style="width:26%">Baum</th><th style="width:25%">DACCS</th><th style="width:29%">Erst damit sichtbar</th></tr></thead>
-      <tbody style="vertical-align:top">
-        <tr class="rise"><td class="key">Systemgrenze bis zur Temperatur</td><td>Wachstum, Albedo, Wolken, Ozean und Land, steigende CO₂-Konzentration, Störung</td><td>Strom, Anlage, Sorbens, Speicherung (Ökobilanz)</td><td>Netto-Anteil je Ort: Aachen 68 %, Fairbanks −98 %<br>→ auf der Hälfte der Fläche wärmt der Baum</td></tr>
-        <tr class="rise" data-step="1"><td class="key">Je Ort und je Jahr</td><td>0,5°-Zellen: Waldtyp, Kohlenstoff, gemessene Albedo mit Zeitverlauf</td><td>Wetter am Ort; Strommix je Region und Jahr (REMIND-EU über premise)</td><td>Rangfolgen statt eines Mittelwerts</td></tr>
-        <tr class="rise" data-step="2"><td class="key">Ein kalibrierter Klima-Emulator, ein Horizont</td><td>FaIR: Entnahme als negative Emission, Albedo als Antrieb<br>→ Szenario Very Low ohne Entnahme, bewertet 2100</td><td>Entnahme je Jahr<br>→ netto nach eigenen Emissionen (GWP100)</td><td>Zeitverlauf statt einer Zahl<br>→ bis 2061 kühlt „überall pflanzen“ stärker, danach schwächer<br>→ Verzögerung wirkt vor allem um 2050</td></tr>
-      <tr class="rise" data-step="3"><td class="key">Ausbau optimieren</td><td>—</td><td>Lineares Programm: Speicher je Land (Gidden 2025), η<sub>C</sub> je Ort und Jahr</td><td>nötige Kapazität für 1,5&nbsp;°C<br>→ so schnell wuchs nie eine Technik</td></tr>
-      </tbody>
-    </table>
-    <p class="rise t-text sm" data-step="4" style="margin-top:22px"><b class="t-kicker">Nicht im Modell</b> &nbsp; Kosten · großräumige Wolkenantwort (Wolken über Wald nur lokal) · dynamische Schneedecke · Flüssig-DAC · Zusatzstrom statt Netzmittel · Injektionsraten je Becken · ein Klimamitglied statt Ensemble</p>
-    <div style="flex:1"></div>
-    <p class="takeaway" data-step="5" style="--d:0">Neu: eine zeitaufgelöste Rechnung je Ort für Baum und DACCS, mit kalibriertem Klima-Emulator und Ausbau-Optimierung.</p>
-  </div>
-  <aside class="notes">
-    <p class="q">Ausführlich: Die einzelnen Bausteine gibt es in der Literatur. Neu ist ihre Kombination: dieselbe zeitaufgelöste Rechnung je Ort für Aufforstung und DACCS, mit einem kalibrierten Klima-Emulator statt fester Umrechnungsfaktoren.</p>
-    <p data-click="0">Was hat es gebraucht, um diese Fragen zu beantworten? Drei Dinge. Erstens die Systemgrenze bis zur Temperatur: Erst mit Ozean, Land, vollerer Atmosphäre und Störung sieht man, wie viel die Albedo vom Nutzen des Kohlenstoffs frisst — in Aachen ein Drittel, in Fairbanks mehr als alles — und dass der Baum auf der Hälfte der Fläche wärmt. Am Baum allein gerechnet, wie in der naiven Rechnung, käme Aachen auf −157 statt −37 · 10⁻¹⁵ K (Backup „Was jede Erweiterung der Systemgrenze kostet“). Zweitens je Ort und je Jahr rechnen: Nur so entstehen Rangfolgen — wo zuerst, wo nicht — statt eines globalen Mittelwerts. Drittens ein echtes Klimamodell statt fester Faktoren: Wir lassen den Klima-Emulator FaIR laufen, der auf Messungen und auf die großen Klimamodelle kalibriert ist. Er rechnet selbst, dass sich die Senken füllen, dass jedes Kilogramm bei mehr CO₂ schwächer wirkt und wie träge die Erde reagiert. Erst damit lassen sich Tempo und Wirkung von Baum und Maschine im selben Horizont vergleichen; GWP100 und statische Bilanzen sehen nur Endzustände. Viertens die Optimierung: Erst mit Speicher- und Wachstumsgrenzen sieht man, wie viel DACCS wann nötig ist und dass der Speicher, nicht der Strom, die Orte bestimmt.</p>
-    <p class="q">Falls Fragen kommen — Einordnung, ehrlich: Zeitaufgelöst rechnen auch andere — Kirschbaum et al. 2011 (ein Standort), Arora &amp; Montenegro 2011, Weber et al. 2024 und Liang et al. 2025 (Erdsystem- bzw. dynamische Modelle, ganze Szenarien). Statisch und je Ort rechnen Hasler et al. 2024 und Rohatyn et al. 2022. Das Tempo der Albedo stammt aus Williams et al. 2026. Unseres Wissens neu ist die Kombination: je Ort und Jahr, vom Baum bis zur Temperatur, mit Szenario-Hintergrund und Störung, und derselbe Rahmen für DACCS. FaIR: Version 2.2, Parametersatz fair-calibrate 1.4.1, ein Mitglied nahe dem Ensemble-Median (ECS 2,9 K), nach einer vorab festgelegten Regel gewählt (docs/methods/klimamodell-fair.md). Grenzen: keine Kosten; Strom als Netzmittel der Region; Schneedecke statisch (boreal eher zu streng); Klimanormal 2011–2020 für DAC; DAC-Emissionen mit GWP100 statt durch FaIR. Vergleich mit anderen Studien: Backup „Einordnung: andere Studien“.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-title="Hype und Kritik">
-  <!-- one story: the simple sum, published in Science, set off a wave of hope; the critique followed within months -->
-  <header class="sh"><h2>Großer Hype, scharfe Kritik</h2></header>
-  <div class="body">
-    <div class="hk split even">
-      <div class="hkcol"><p class="hkk t-kicker c-ch">Der Hype</p><div class="clips sm">
-        <a class="clip sci key" href="https://doi.org/10.1126/science.aax0848" target="_blank" rel="noopener" style="--r:-1.2deg; left:0; top:0; width:340px"><span class="cl-in"><span class="cl-src"><b>Science</b> Bastin et al. · 5 July 2019</span><span class="cl-h">The global tree restoration potential</span><span class="cl-by">die Studie hinter den Schlagzeilen</span></span></a>
-        <a class="clip" href="https://www.tagesspiegel.de/wirtschaft/waelder-als-rettung-die-wichtigste-waffe-gegen-die-klimakrise-sind-baeume/24525964.html" target="_blank" rel="noopener" style="--r:1.4deg; left:366px; top:14px; width:300px; --d:350"><span class="cl-in"><span class="cl-src"><b>Tagesspiegel</b> 4. Juli 2019</span><span class="cl-dach">Wälder als Rettung</span><span class="cl-h">„Die wichtigste Waffe gegen die Klimakrise sind Bäume“</span></span></a>
-        <a class="clip" href="https://nationalgeographic.de/umwelt/2019/07/zuericher-studie-baeumepflanzen-ist-der-beste-klimaschutz/" target="_blank" rel="noopener" style="--r:-1.6deg; left:6px; top:196px; width:262px; --d:650"><span class="cl-in"><span class="cl-src"><b>National Geographic</b> 5. Juli 2019</span><span class="cl-h">Züricher Studie: Bäumepflanzen ist der beste Klimaschutz</span></span></a>
-        <a class="clip" href="https://www.derstandard.at/story/2000105924910/die-beste-massnahme-gegen-den-klimawandel" target="_blank" rel="noopener" style="--r:1deg; left:450px; top:214px; width:222px; --d:950"><span class="cl-in"><span class="cl-src"><b>derStandard</b> Juli 2019</span><span class="cl-dach">Bewaldung</span><span class="cl-h">Die beste Maßnahme gegen den Klimawandel</span></span></a>
-        <a class="clip" href="https://www.higgs.ch/rettet-uns-der-wald/22379/" target="_blank" rel="noopener" style="--r:2deg; left:276px; top:236px; width:166px; --d:1250"><span class="cl-in"><span class="cl-src"><b>higgs</b> 5. Juli 2019</span><span class="cl-h">Rettet uns der Wald?</span></span></a>
-        <a class="clip" href="https://www-cdn.plant-for-the-planet.org/wp-content/uploads/2021/02/2f7e3d02-focus-de-1000-milliarden-baeume-als-ziel-20190302.pdf" target="_blank" rel="noopener" style="--r:-1deg; left:0; top:420px; width:220px; --d:1550"><span class="cl-in"><span class="cl-src"><b>FOCUS Online</b> 2. März 2019</span><span class="cl-dach">Plant-for-the-Planet</span><span class="cl-h">1000 Milliarden Bäume als Ziel</span></span></a>
-        <a class="clip" href="https://futurezone.at/digital-life/teamtrees-spendenaufruf-fuer-20-millionen-baeume-geht-viral/400658621" target="_blank" rel="noopener" style="--r:1.4deg; left:228px; top:404px; width:218px; --d:1850"><span class="cl-in"><span class="cl-src"><b>futurezone</b> 26. Oktober 2019</span><span class="cl-h">#TeamTrees: Spendenaufruf für 20 Millionen Bäume geht viral</span></span></a>
-        <a class="clip en" href="https://www.tbsnews.net/environment/trump-says-us-join-one-trillion-trees-initiative-38149" target="_blank" rel="noopener" style="--r:-1.2deg; left:456px; top:418px; width:216px; --d:2150"><span class="cl-in"><span class="cl-src"><b>Reuters</b> 21 January 2020</span><span class="cl-h">Trump says US to join one trillion trees initiative</span></span></a>
-      </div></div>
-      <div class="hkcol"><p class="hkk t-kicker c-clay rise" data-step="1">Die Kritik</p><div class="clips sm">
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aay8334" target="_blank" rel="noopener" style="--r:0.8deg; left:356px; top:0px; width:320px; --d:0"><span class="cl-in"><span class="cl-src"><b>Science</b> Grainger et al. · 18 Oct 2019</span><span class="cl-h">Comment on “The global tree restoration potential”</span></span></a>
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aaz0388" target="_blank" rel="noopener" style="--r:-0.6deg; left:364px; top:40px; width:320px; --d:180"><span class="cl-in"><span class="cl-src"><b>Science</b> Lewis et al. · 18 Oct 2019</span><span class="cl-h">Comment on “The global tree restoration potential”</span></span></a>
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aay8060" target="_blank" rel="noopener" style="--r:1deg; left:356px; top:80px; width:320px; --d:360"><span class="cl-in"><span class="cl-src"><b>Science</b> Friedlingstein et al. · 18 Oct 2019</span><span class="cl-h">Comment on “The global tree restoration potential”</span></span></a>
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aay7976" target="_blank" rel="noopener" style="--r:-0.4deg; left:364px; top:120px; width:320px; --d:540"><span class="cl-in"><span class="cl-src"><b>Science</b> Veldman et al. · 18 Oct 2019</span><span class="cl-h">Comment on “The global tree restoration potential”</span></span></a>
-        <a data-step="1" class="clip" href="https://www.higgs.ch/wald-studie-der-eth-im-kreuzfeuer-der-kritik/25968/" target="_blank" rel="noopener" style="--r:-1.4deg; left:0; top:14px; width:320px; --d:900"><span class="cl-in"><span class="cl-src"><b>higgs</b> 21. Oktober 2019</span><span class="cl-h">Wald-Studie der ETH im Kreuzfeuer der Kritik</span></span></a>
-        <a data-step="1" class="clip" href="https://www.tagesspiegel.de/wissen/forscher-bezweifeln-studie-zur-aufforstung-gegen-den-klimawandel-5038183.html" target="_blank" rel="noopener" style="--r:1.2deg; left:14px; top:206px; width:320px; --d:1200"><span class="cl-in"><span class="cl-src"><b>Tagesspiegel</b> 22. Oktober 2019</span><span class="cl-dach">Mit Bäumen die Welt retten</span><span class="cl-h">Forscher bezweifeln Studie zur Aufforstung gegen den Klimawandel</span></span></a>
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aaz0111" target="_blank" rel="noopener" style="--r:.6deg; left:356px; top:160px; width:320px; --d:1500"><span class="cl-in"><span class="cl-src"><b>Science</b> Skidmore et al. · 29 Nov 2019</span><span class="cl-h">Comment on “The global tree restoration potential”</span></span></a>
-        <a data-step="1" class="clip sci" href="https://doi.org/10.1126/science.aba8232" target="_blank" rel="noopener" style="--r:-1deg; left:200px; top:430px; width:340px; --d:1800"><span class="cl-in"><span class="cl-src"><b>Science</b> Holl &amp; Brancalion · 8 May 2020</span><span class="cl-h">Tree planting is not a simple solution</span></span></a>
-      </div></div>
-    </div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1126/science.aax0848" target="_blank" rel="noopener">Bastin et al. 2019</a> (Studie zum Aufforstungspotenzial)</span><span>Kommentare in Science 366: <a href="https://doi.org/10.1126/science.aay7976" target="_blank" rel="noopener">Veldman et al.</a>; <a href="https://doi.org/10.1126/science.aay8060" target="_blank" rel="noopener">Friedlingstein et al.</a>; <a href="https://doi.org/10.1126/science.aaz0388" target="_blank" rel="noopener">Lewis et al.</a>; <a href="https://doi.org/10.1126/science.aay8334" target="_blank" rel="noopener">Grainger et al.</a>; <a href="https://doi.org/10.1126/science.aaz0111" target="_blank" rel="noopener">Skidmore et al.</a></span><span><a href="https://doi.org/10.1126/science.aba8232" target="_blank" rel="noopener">Holl &amp; Brancalion 2020</a> (Kommentar in Science)</span><span>Schlagzeilen (Links auf den Ausschnitten): <a href="https://www.tagesspiegel.de/wirtschaft/waelder-als-rettung-die-wichtigste-waffe-gegen-die-klimakrise-sind-baeume/24525964.html" target="_blank" rel="noopener">Tagesspiegel 2019a</a>; <a href="https://nationalgeographic.de/umwelt/2019/07/zuericher-studie-baeumepflanzen-ist-der-beste-klimaschutz/" target="_blank" rel="noopener">National Geographic 2019</a>; <a href="https://www.derstandard.at/story/2000105924910/die-beste-massnahme-gegen-den-klimawandel" target="_blank" rel="noopener">derStandard 2019</a>; <a href="https://www.higgs.ch/rettet-uns-der-wald/22379/" target="_blank" rel="noopener">higgs 2019a</a>, <a href="https://www.higgs.ch/wald-studie-der-eth-im-kreuzfeuer-der-kritik/25968/" target="_blank" rel="noopener">2019b</a>; <a href="https://futurezone.at/digital-life/teamtrees-spendenaufruf-fuer-20-millionen-baeume-geht-viral/400658621" target="_blank" rel="noopener">futurezone 2019</a>; <a href="https://www.tbsnews.net/environment/trump-says-us-join-one-trillion-trees-initiative-38149" target="_blank" rel="noopener">Reuters 2020</a>; <a href="https://www.tagesspiegel.de/wissen/forscher-bezweifeln-studie-zur-aufforstung-gegen-den-klimawandel-5038183.html" target="_blank" rel="noopener">Tagesspiegel 2019b</a>; <a href="https://www-cdn.plant-for-the-planet.org/wp-content/uploads/2021/02/2f7e3d02-focus-de-1000-milliarden-baeume-als-ziel-20190302.pdf" target="_blank" rel="noopener">FOCUS Online 2019</a></span></p>
-  <aside class="notes">
-    <p data-click="0">Genau so stand es 2019 in Science, in einer Studie aus Zürich: Auf der Erde wäre Platz für fast zehn Millionen Quadratkilometer neuen Wald, genug für zwei Drittel des CO₂, das wir bisher ausgestoßen haben. Die Schlagzeilen waren begeistert, der Tagesspiegel schrieb: „Die wichtigste Waffe gegen die Klimakrise sind Bäume.“ National Geographic: Bäumepflanzen ist der beste Klimaschutz. Und Kampagnen wie Plant-for-the-Planet setzten sich 1000 Milliarden Bäume zum Ziel. Anfang 2020 machte das Weltwirtschaftsforum in Davos daraus die Initiative 1t.org, eine Billion Bäume, sogar Trump sagte zu.</p>
-    <p data-click="1">Klick: Aber die Forschung widersprach schnell. In Science erschienen gleich fünf Kommentare. Die Schlagzeilen drehten: „Wald-Studie der ETH im Kreuzfeuer der Kritik“, und derselbe Tagesspiegel schrieb: „Forscher bezweifeln Studie zur Aufforstung.“ 2020 dann das Fazit in Science: Tree planting is not a simple solution.</p>
-    <p data-click="1">Die Zahlen wurden um rund 60 Prozent nach unten korrigiert. Die Rechnung war zu einfach. Also die Frage dieses Vortrags: Wie viel kühlt ein Baum wirklich?</p>
-    <p class="q">Falls Fragen kommen — Weitere Schlagzeilen: Guardian „mind-blowing potential“, Äthiopien pflanzt 350 Mio. Bäume an einem Tag, China 2022: 70 Mrd. Bäume bis 2030. Kritik auch von Stefan Rahmstorf (RealClimate). 205 GtC nach Bastin, nach den Kommentaren rund 81 GtC (Veldman et al.: „approximately five times too large“). Hauptkritik: Savannen und Grasland als Wiederbewaldung gezählt, Albedo im Norden ignoriert, Bodenkohlenstoff überschätzt, Wald wirkt nur langsam. Backup „Die Rechnung in der Literatur“.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-title="Die Rechnung in der Literatur">
-  <header class="sh"><h2>Dieselbe Rechnung in der Literatur: Bastin et al. (2019)</h2></header>
-  <div class="body">
-    <div class="lit-sum">
-      <div>
-        <div class="rise t-stat xl c-moss"><span class="count" data-to="205" data-dec="0">205</span> GtC</div>
-        <div class="rise t-note">Bastin et al. 2019 · auf 9 Mio. km²</div>
-        <div class="rise t-stat lg c-clay" data-step="2" style="margin-top:44px">→ 81 GtC</div>
-        <div class="rise t-note" data-step="2">korrigiert binnen Monaten</div>
-      </div>
-      <div>
-        <p class="rise" style="--d:300">Bastin et al. 2019 in Science: 9 Mio. km² zusätzliche Waldfläche, 205 GtC zusätzlicher Speicher.</p>
-        <p class="rise" data-step="1" style="margin-top:18px">Eines der meistdiskutierten Klimapapiere überhaupt — und die wissenschaftliche Grundlage der Kampagne „eine Billion Bäume“.</p>
-        <p class="rise" data-step="2" style="--d:300; margin-top:18px">Binnen Monaten korrigierte die Fachwelt den Wert auf rund 81 GtC. Weitere Kritik wurde als Kriterienkatalog formuliert.</p>
-      </div>
-    </div>
-    <div style="flex:1"></div>
-    <p class="takeaway" data-step="3" style="--d:0">Die Überschlagsrechnung ist publiziert, vielfach zitiert und politisch wirksam geworden. Wir korrigieren deshalb nicht ihr Ergebnis, sondern ihre Bilanzgrenze.</p>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1126/science.aax0848" target="_blank" rel="noopener">Bastin et al. 2019</a> (Studie zum Aufforstungspotenzial)</span><span><a href="https://doi.org/10.1126/science.aay7976" target="_blank" rel="noopener">Veldman et al. 2019</a>; <a href="https://doi.org/10.1126/science.aay8060" target="_blank" rel="noopener">Friedlingstein et al. 2019</a> (Korrektur, Kommentare in Science)</span></p>
-  <aside class="notes">
-    
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="vergleich" data-title="Einordnung: andere Studien">
-  <header class="sh"><h2>Einordnung: andere Studien</h2></header>
-  <div class="body">
-    <div class="chart" data-chart="v1b" data-label="Anteil des Kohlenstoffnutzens, der nach Albedo bleibt: Literatur und dieses Modell"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0">Alle Studien sehen es: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende.</p></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41467-025-64317-x" target="_blank" rel="noopener">Riley et al. 2025</a> (Auswertung bestehender Projekte)</span><span><a href="https://doi.org/10.1126/science.adg6196" target="_blank" rel="noopener">Weber et al. 2024</a>; <a href="https://doi.org/10.1038/s43247-026-03331-3" target="_blank" rel="noopener">Fahrenbach et al. 2026</a> (Erdsystemmodelle)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a>; <a href="https://doi.org/10.1126/science.abm9684" target="_blank" rel="noopener">Rohatyn et al. 2022</a> (statische Bilanzen)</span><span><a href="https://doi.org/10.1126/sciadv.adn7915" target="_blank" rel="noopener">Liang et al. 2025</a> (dynamisches Vegetationsmodell)</span><span><i>Eigene Rechnung</i> (dieses Modell)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Alle Studien sehen dasselbe: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende, aus drei Gründen: Die wiederbewaldbare Fläche liegt oft im Norden und im Trockenen; unser Kohlenstoff ist aus Messungen hochgerechnet, etwa halb so viel wie im Erdsystemmodell; und wir bewerten 2100, nicht im Endzustand. Mit Haslers statischer Formel kämen wir auf 21 %.</p>
-    <p data-click="0">Einheit: welcher Anteil des reinen Kohlenstoffnutzens nach der Albedo übrig bleibt. Gemeinsam haben alle: den Rückfluss von CO₂ aus Ozean und Land über eine Impulsantwort (Hasler: Joos-Mittel, Restanteil über 100 Jahre). Was dieses Modell zusätzlich abbildet: (1) den Zeitverlauf — Wachstum und Kronenschluss Jahr für Jahr, bewertet als Erwärmung in einem genannten Jahr; Hasler vergleicht maximalen Kohlenstoff mit maximaler Albedo und nennt den Zeitverlauf selbst als offene Lücke („ignores the time frame over which both unfold … additional work is urgently needed“); (2) einen Hintergrund, der sich ändert: ein Szenario (Very Low ohne Entnahme) statt fester 400 ppm, mit einem Kohlenstoffkreislauf, dessen Senken nachlassen (FaIR); (3) Störungen, die mit der Erwärmung zunehmen (Hasler: keine). Liang et al. rechnen Klima und Feuer ebenfalls dynamisch und landen mit 30 % am nächsten. Fahrenbach et al. (CESM2, voll gekoppelt) enthalten zusätzlich die großräumige Kühlung durch Verdunstung in den Tropen; unser Modell hat davon nur die lokalen Wolken über dem Wald (Duveiller et al. 2021) — dort sind wir eher zu streng. Riley et al. werten bestehende Projekte aus, die schon dort liegen, wo Albedo wenig kostet. Woher die Abweichungen kommen: Hasler — vor allem die Fläche (auf Walkers Karte rechnet er selbst mit mehr Offset), dann der Horizont 2100 statt Endzustand. Fahrenbach — vor allem die Kohlenstoffmenge: CESM2 lässt etwa doppelt so viel wachsen (≈ 100 statt 51 t C/ha); mit dieser Menge kämen auch wir auf rund 65 %. Gegenprobe: Die ganze Entnahme als Zeitreihe in einen vollen FaIR-Lauf gegeben, liefert dasselbe wie unsere Rechnung (18 % gegen 17 % bis 2100). Eine Annahme mit Gewicht: Störungen lichten den Wald, der dann weniger Licht schluckt — das bringt bis 2100 rund 20 Prozentpunkte zurück. Warum wir strenger sind: 2100 ist der Baum längst gesättigt, der größte Teil seiner Entnahme liegt Jahrzehnte zurück, die Albedo wirkt dagegen voll; dazu die Fläche (Walker et al. 2022), boreal- und trockengebietslastig — für genau diese Karte findet Hasler auf 65 % der Fläche über 50 % Offset, wir mit seiner Formel 73 %. Grenze dieses Modells: Die Schneedecke ist statisch, boreal fällt die Albedo-Strafe späterer Jahrzehnte daher eher zu hoch aus. Methode: docs/methods/abgleich-hasler-waldtypen.md.</p>
-  </aside>
-</section>
-
-<!-- Grundlagen: Baum und Klima -->
-<section class="slide backup" data-ch="baeume" data-title="C-Aufnahme über die Zeit">
-  <header class="sh"><h2>C-Aufnahme über die Zeit</h2></header>
-  <div class="body">
-    <div class="eq tex">$$\mBd = \mPS - \mZA - \mZS - \mST$$</div>
-    <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column"><div class="chart" data-slot-steps="0,1,2" data-chart="s11" data-label="Kohlenstoffflüsse eines Baums auf drei Zeitskalen: Tag, Jahr, Jahrzehnte (illustrativ)"></div><div style="position:absolute; right:1.5%; bottom:9%; width:45%"><p class="takeaway" data-step="3" style="--d:0">Annahme: Für das Klima zählt nur der Jahresmittelwert.</p></div></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1007/s10021-005-0105-7" target="_blank" rel="noopener">Chapin et al. 2006</a> (Begriffe der Kohlenstoffflüsse)</span></p>
-  <aside class="notes" data-n="11">
-    <p data-click="0">Oben die vollständige Bilanz eines Baums: Photosynthese nimmt Kohlenstoff auf, Zellatmung, Zersetzung und Störung geben ihn wieder ab. Diese vier Flüsse laufen auf ganz verschiedenen Zeitskalen.</p>
-    <p data-click="1">Über den Tag: Tagsüber überwiegt die Photosynthese, nachts bleibt nur die Zellatmung. Über das Jahr: Im Sommer nimmt der Baum kräftig auf, im Winter gibt er wenig ab; die Respiration läuft das ganze Jahr, dazu zersetzen sich Laub und Totholz. Über Jahrzehnte: Der Vorrat wächst, bis Zuwachs und Zersetzung sich ausgleichen, und eine Störung kann einen großen Teil auf einmal freisetzen.</p>
-    <p data-click="2">Für die Klimawirkung interessiert uns nicht der einzelne Tag, sondern was über Jahre und Jahrzehnte bleibt. Deshalb mitteln wir über Tag und Jahreszeit und modellieren die Jahreswerte. Wie, zeigt die nächste Folie.</p>
-    <p class="q">Falls Fragen kommen — Alle drei Panels in kg<sub>C</sub> je Baum und aufeinander skaliert: Ein Sommertag ergibt rund 26 g C, ein Jahr netto gut 1 kg<sub>C</sub>, passend zum Zuwachs des Aachener Modellbaums (höchstens rund 1 kg<sub>C</sub> im Jahr). Verläufe illustrativ, keine Messdaten; das Modell hat keinen Jahresgang. Die Winterabgabe über Wäldern stammt vor allem aus der Zersetzung, der Baum selbst liegt im Winter nur knapp unter null. Flussbegriffe nach Chapin et al. (2006).</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="baeume" data-title="Reflexion von Sonnenlicht">
-  <header class="sh"><h2>Reflexion von Sonnenlicht</h2></header>
-  <div class="body">
-    <svg class="schema mo" data-export="s_reflexion" viewBox="0 0 1424 540" style="flex:1; width:100%; min-height:0" aria-label="Fünf Oberflächen, gleiches Sonnenlicht: Schnee wirft 85 % zurück, Sand 35 %, Wiese 25 %, Wald 10 %, Ozean 6 %; der Rest wird absorbiert">
-    <g font-family="IBM Plex Sans">
-      <g class="rise" style="--d:150">
-        <rect x="22" y="380" width="240" height="44" rx="6" fill="#f6f7f8" stroke="#c9d2d8" stroke-width="2"/>
-        <path class="ray-l" d="M44 40 L138 372" stroke="var(--sun-ray)" marker-end="url(#sr-in)" style="--srw:5"/><path class="ray-p" d="M46 46 L134 362" stroke="var(--sun-ray)" style="--srw:5"/>
-        <path class="ray-l" d="M146 372 L238 48" stroke="var(--ray)" marker-end="url(#sr-out)" style="--srw:7.3"/><path class="ray-p" d="M150 362 L234 60" stroke="var(--ray)" style="--srw:7.3"/>
-        <text x="258" y="34" text-anchor="end" font-size="30" font-weight="700" fill="var(--ray)">85 %</text>
-        <text x="142" y="462" text-anchor="middle" font-size="26" font-weight="600" fill="var(--ink)">Schnee</text>
-        <text x="142" y="494" text-anchor="middle" font-size="19" fill="#9a3b22">15 % absorbiert</text>
-      </g>
-      <g class="rise" style="--d:320">
-        <rect x="306" y="380" width="240" height="44" rx="6" fill="#e2c894" stroke="#c7a868" stroke-width="2"/>
-        <path class="ray-l" d="M328 40 L422 372" stroke="var(--sun-ray)" marker-end="url(#sr-in)" style="--srw:5"/><path class="ray-p" d="M330 46 L418 362" stroke="var(--sun-ray)" style="--srw:5"/>
-        <path class="ray-l" d="M430 372 L522 48" stroke="var(--ray)" marker-end="url(#sr-out)" style="--srw:3.8"/><path class="ray-p" d="M434 362 L518 60" stroke="var(--ray)" style="--srw:3.8"/>
-        <text x="542" y="34" text-anchor="end" font-size="30" font-weight="700" fill="var(--ray)">35 %</text>
-        <text x="426" y="462" text-anchor="middle" font-size="26" font-weight="600" fill="var(--ink)">Sand</text>
-        <text x="426" y="494" text-anchor="middle" font-size="19" fill="#9a3b22">65 % absorbiert</text>
-      </g>
-      <g class="rise" style="--d:490">
-        <rect x="590" y="380" width="240" height="44" rx="6" fill="#9cbc72" stroke="#7f9f58" stroke-width="2"/>
-        <path class="ray-l" d="M612 40 L706 372" stroke="var(--sun-ray)" marker-end="url(#sr-in)" style="--srw:5"/><path class="ray-p" d="M614 46 L702 362" stroke="var(--sun-ray)" style="--srw:5"/>
-        <path class="ray-l" d="M714 372 L806 48" stroke="var(--ray)" marker-end="url(#sr-out)" style="--srw:3.1"/><path class="ray-p" d="M718 362 L802 60" stroke="var(--ray)" style="--srw:3.1"/>
-        <text x="826" y="34" text-anchor="end" font-size="30" font-weight="700" fill="var(--ray)">25 %</text>
-        <text x="710" y="462" text-anchor="middle" font-size="26" font-weight="600" fill="var(--ink)">Wiese</text>
-        <text x="710" y="494" text-anchor="middle" font-size="19" fill="#9a3b22">75 % absorbiert</text>
-      </g>
-      <g class="rise" style="--d:660">
-        <rect x="874" y="380" width="240" height="44" rx="6" fill="#3d5a2e" stroke="#2c4521" stroke-width="2"/><circle cx="894" cy="382" r="22" fill="#3d5a2e"/><circle cx="934" cy="382" r="22" fill="#4a6b38"/><circle cx="974" cy="382" r="22" fill="#3d5a2e"/><circle cx="1014" cy="382" r="22" fill="#4a6b38"/><circle cx="1054" cy="382" r="22" fill="#3d5a2e"/><circle cx="1094" cy="382" r="22" fill="#4a6b38"/>
-        <path class="ray-l" d="M896 40 L990 372" stroke="var(--sun-ray)" marker-end="url(#sr-in)" style="--srw:5"/><path class="ray-p" d="M898 46 L986 362" stroke="var(--sun-ray)" style="--srw:5"/>
-        <path class="ray-l" d="M998 372 L1090 48" stroke="var(--ray)" marker-end="url(#sr-out)" style="--srw:2.1"/><path class="ray-p" d="M1002 362 L1086 60" stroke="var(--ray)" style="--srw:2.1"/>
-        <text x="1110" y="34" text-anchor="end" font-size="30" font-weight="700" fill="var(--ray)">10 %</text>
-        <text x="994" y="462" text-anchor="middle" font-size="26" font-weight="600" fill="var(--ink)">Wald</text>
-        <text x="994" y="494" text-anchor="middle" font-size="19" fill="#9a3b22">90 % absorbiert</text>
-      </g>
-      <g class="rise" style="--d:830">
-        <rect x="1158" y="380" width="240" height="44" rx="6" fill="#2f5f7f" stroke="#24506c" stroke-width="2"/><path d="M1158 388 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#7fb0cc" stroke-width="2.5" fill="none"/>
-        <path class="ray-l" d="M1180 40 L1274 372" stroke="var(--sun-ray)" marker-end="url(#sr-in)" style="--srw:5"/><path class="ray-p" d="M1182 46 L1270 362" stroke="var(--sun-ray)" style="--srw:5"/>
-        <path class="ray-l" d="M1282 372 L1374 48" stroke="var(--ray)" marker-end="url(#sr-out)" style="--srw:1.8"/><path class="ray-p" d="M1286 362 L1370 60" stroke="var(--ray)" style="--srw:1.8"/>
-        <text x="1394" y="34" text-anchor="end" font-size="30" font-weight="700" fill="var(--ray)">6 %</text>
-        <text x="1278" y="462" text-anchor="middle" font-size="26" font-weight="600" fill="var(--ink)">Ozean</text>
-        <text x="1278" y="494" text-anchor="middle" font-size="19" fill="#9a3b22">94 % absorbiert</text>
-      </g>
-    </g></svg>
-    <div class="fline refl-def rise" data-step="1"><span class="chip c-alb"><span>Albedo</span><span class="tex">$\alb$</span></span><span class="gloss">= Anteil des Sonnenlichts, der reflektiert wird: von 0 (alles absorbiert) bis 1 (alles reflektiert)</span></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.4324/9780203407219" target="_blank" rel="noopener">Oke 1987</a> (typische Albedowerte)</span></p>
-  <aside class="notes" data-n="12a">
-    <p data-click="0">Die zweite Wirkung hat mit Licht zu tun. Erst ganz allgemein: Auf jede Fläche fällt dasselbe Sonnenlicht. Wie viel davon wieder zurückgeht, hängt von ihrer Helligkeit ab. Frischer Schnee wirft 85 Prozent zurück, Sand ein gutes Drittel, eine Wiese ein Viertel, Wald nur ein Zehntel, das offene Meer noch weniger.</p>
-    <p data-click="0">Was nicht zurückgeht, wird absorbiert und erwärmt die Fläche. Deshalb ist ein schwarzes Auto im Sommer heißer als ein weißes.</p>
-    <p data-click="1">Klick: Den zurückgeworfenen Anteil nennt man Albedo, α: 0 heißt alles wird absorbiert, 1 alles reflektiert. Gleich schauen wir, was ein Baum daran ändert.</p>
-  </aside>
-</section>
-
 <section class="slide backup" data-ch="baeume" data-title="Einstrahlung, Albedo-Kontrast und Wolken">
   <header class="sh"><h2>Einstrahlung, Albedo-Kontrast und Wolken</h2></header>
   <div class="body">
     <div class="chart" style="flex:1; min-height:0" data-chart="b8i" data-label="Drei Karten: Einstrahlung am Boden, wie viel dunkler der Wald ist, und zusätzliche Reflexion durch Wolken"></div>
+    <p class="t-text" style="margin-top:6px; font-size:19px; line-height:1.4; max-width:1640px">Die drei Größen von <span class="tex">$\dQ$</span> je 0,5°-Zelle: Sonneneinstrahlung am Boden; um wie viel die Albedo des typischen Waldes unter der des Offenlands liegt, das er ersetzt (Satellit MODIS, Wald gegen benachbartes Offenland, Jahresmittel mit Schnee); um wie viel Wolken über Wald die Reflexion ändern. Grau: keine lokale Messung, im Modell der Median des Breitenbandes. Ohne den Wolkenterm ändert sich wenig: Wolken gleichen im Flächenmittel 7&nbsp;% der Albedo aus, kühlend sind dann 4,5 statt 4,7&nbsp;Mio.&nbsp;km².</p>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Albedo-Kontrast Wald/Offenland)</span><span><a href="https://doi.org/10.1038/s41467-021-24551-5" target="_blank" rel="noopener">Duveiller et al. 2021</a> (Wolkenbedeckung über Wald)</span></p>
   <aside class="notes" data-n="15">
@@ -213,46 +17,6 @@
     <p class="q">Falls Fragen kommen — warum weniger Wolken: In den Tropen in der Trockenzeit verdunstet der Wald mit seinen tiefen Wurzeln weiter und bleibt kühl; über der heißen Rodung daneben steigt die Luft auf, über dem Wald sinkt sie ab, und absinkende Luft unterdrückt Wolken. Im Frühjahr mit Schnee ist die Messung unsicher, weil der Satellit Schnee und Wolken schwer trennt; im Sommer stehen auch im Norden mehr Wolken über dem Wald.</p>
     <p data-click="0">In Aachen gleichen die Wolken im Jahresmittel rund 15 % der Albedo aus (5 von 34 W je Baum). In Fairbanks kaum, in Marabá verstärken sie die Albedo leicht.</p>
     <p class="q">Falls Fragen kommen — Grenzen: Die Satellitenmethode sieht nur den lokalen Effekt niedriger Haufenwolken; Wind verwischt ihn, eher eine Unterschätzung. Langwellige Wirkung niedriger Wolken vernachlässigt (klein). Ob die Wolken durch Verdunstung, Rauigkeit oder Duftstoffe der Bäume (BVOC) entstehen, trennt die Messung nicht; sie misst die Summe. Keine Änderung der Wolken mit dem Klima. Cerasoli et al. finden in den Mittelbreiten eine stärkere, netto kühlende Wirkung, aber aus einem Breitenvergleich, der auch großräumige Unterschiede enthält.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="baeume" data-title="Mit und ohne Wolken">
-  <header class="sh"><h2>Mit und ohne Wolken</h2></header>
-  <div class="body">
-    <table class="tbl-lg" style="margin-top:24px">
-      <thead><tr><th style="width:52%">Größe (Baum gepflanzt 2026, bewertet 2100)</th><th style="width:24%">ohne Wolken</th><th style="width:24%">mit Wolken (Modell)</th></tr></thead>
-      <tbody>
-        <tr><td>Zusätzlich absorbiert je Baum: Aachen (DE) · Fairbanks (US) · Marabá (BR)</td><td>24 · 64 · 16 W</td><td>20 · 63 · 17 W</td></tr>
-        <tr><td>Netto-Anteil je Baum: Aachen (DE) · Fairbanks (US) · Marabá (BR)</td><td>67 · −79 · 84 %</td><td>72 · −76 · 84 %</td></tr>
-        <tr><td>Kühlende Fläche (von 8,3 Mio. km² wiederbewaldbar)</td><td>4,5 Mio. km²</td><td>4,7 Mio. km²</td></tr>
-        <tr><td>Netto-Entnahme dort, CO₂ (brutto)</td><td>63 Gt (110 Gt)</td><td>69 Gt (114 Gt)</td></tr>
-        <tr><td>Anteil am Entnahmebedarf von Very Low (335 Gt)</td><td>19 %</td><td>21 %</td></tr>
-      </tbody>
-    </table>
-    <p class="t-text tbl-note" style="margin-top:36px">Wolken gleichen im Flächenmittel 7 % der Albedo aus. Abgleich mit Cerasoli et al. 2021: Auch dort kühlen die Wolken über Wald in 30–45° N; dort überwiegen sie die Albedo sogar, bei uns nicht (Breitenvergleich mit großräumigen Unterschieden gegen lokale Satellitenmessung).</p>
-    <div style="flex:1"></div>
-    <p class="takeaway">Die Wolken verschieben die Zahlen um wenige Prozent; die Aussagen bleiben.</p>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Modell mit und ohne Wolken)</span></p>
-  <aside class="notes">
-    <p data-click="0">Falls jemand fragt, wie viel die Wolken ausmachen: dieselbe Rechnung ohne den Wolkenterm. In Aachen nehmen die Wolken rund ein Siebtel der Albedo-Wirkung weg, in Fairbanks kaum etwas, in Marabá verstärken sie sie leicht, weil in der Trockenzeit über Wald weniger Wolken stehen. Die kühlende Fläche wächst von 4,5 auf 4,7 Mio. km², die Netto-Entnahme von 63 auf 69 Gt.</p>
-    <p class="q">Falls Fragen kommen — Die Umrechnung (Reflexion 0,5, Nachmittagsanteil 0,5) stand fest, bevor gerechnet wurde. Nur lokale niedrige Wolken; großräumige Antworten auf Aufforstung (Luo et al. 2024, Hua et al. 2023) sind nicht enthalten.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="baeume" data-title="Gemeinsame Währung: Energie">
-  <header class="sh"><h2>Gemeinsame Währung: Energie</h2></header>
-  <div class="body">
-    <div class="chart" data-chart="b10" data-label="Licht wärmt (oben), entnommenes CO₂ kühlt (unten), beide in Watt je Baum"></div>
-    <div class="foot">
-      <div class="eq tex rise" style="--d:1800">$$\q{dq}{\dot{Q}_{\mathrm{CO_2}}}(\tm) = \eps(\tm)\,\Ae\,\mco(\tm)$$</div>
-      <p class="takeaway" data-step="1" style="--d:0">Als Energie überwiegt das CO₂ überall vom ersten Jahr an (rund 0,9&nbsp;W je kg); in Fairbanks überholt das Licht ihn.</p>
-    </div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (Strahlungseffizienz εCO₂)</span><span><i>Eigene Rechnung</i> (CO₂-Aufnahme des Modellbaums, naive Bilanz)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Kilogramm CO₂ und Watt Licht lassen sich nur in einer gemeinsamen Währung vergleichen: Energie. Licht wärmt (oben), das bisher entnommene CO₂ kühlt (unten) — rund 0,9 W je kg. So gerechnet überwiegt das CO₂ an allen drei Orten vom ersten Jahr an; in Fairbanks (US) holt das Licht ihn ein und überholt ihn, bei Marabá (BR) nur wenig. Offen bleiben zwei Fragen, die nicht der Baum beantwortet, sondern das Klimasystem: Wie lange fehlt das CO₂ der Luft? Und wie stark wirkt jedes Kilogramm?</p>
-    <p data-click="0">Watt sind Watt. Die Albedo liefert sie direkt. Für das CO₂ fragen wir: Wie viel Wärmestrahlung hält ein Kilogramm in der Luft zurück? Lehrbuchwert mal Erdoberfläche: knapp ein Watt je Kilogramm. Damit sind beide Kurven in derselben Einheit. Diese Rechnung hat zwei stille Annahmen — dass das CO₂ in der Luft bleibt und dass jedes Kilogramm gleich wirkt. Beides hängt nicht vom Baum ab, sondern vom Rest des Klimasystems. Das ist das nächste Kapitel. (Die Albedo kommt dort noch mit dem Faktor τ ≈ 0,8 für den Weg nach oben.)</p>
   </aside>
 </section>
 
@@ -287,138 +51,6 @@
   </aside>
 </section>
 
-<section class="slide backup" data-ch="klima" data-title="Gesamter Strahlungsantrieb je Baum">
-  <header class="sh"><h2>Gesamter Strahlungsantrieb je Baum</h2></header>
-  <div class="body">
-    <div class="fline head"><span class="chip">Beide Terme zusammen</span><span class="tex">$\htmlClass{fd}{\phit(\tm) = \tatm}\;\;\hl{dq loc}{\dQ(\tm)}\,\htmlClass{fd}{\Ae^{-1}}\;\;\htmlClass{fd}{+ \eps(\tm)}\;\;\hl{dm loc}{\dm(\tm)}$</span></div>
-    <dl class="legend sm two tex tdefs"><dt>$\phit$</dt><dd>Strahlungsantrieb des Baums [W/m²]</dd><dt>$\eps$</dt><dd>Antrieb je kg CO₂ [W/m² je kg], Folie „Strahlungsantrieb von CO₂“</dd><dt>$\tatm$</dt><dd>Transmissionsgrad der Atmosphäre [–]: 0,854</dd><dt class="loc">$\dm$</dt><dd class="loc">CO₂-Änderung der Atmosphäre [kg], &lt; 0 — Folie „Kohlenstoffkreislauf: Ozean und Land“</dd><dt class="loc">$\dQ$</dt><dd class="loc">zusätzlich absorbierte Strahlung [W]</dd><dt>$\Ae$</dt><dd>Erdoberfläche [m²]: 5,1 · 10¹⁴</dd></dl>
-    <p class="rise locstep t-head" data-step="1" style="--d:0; margin-top:22px">Vom Ort abhängig: <span class="tex">$\dQ(\tm)$</span> und <span class="tex">$\dm(\tm)$</span> (Albedo, Wachstum; Kapitel Bäume) → <b>Netto-Antrieb an drei Orten:</b></p>
-    <div class="chart" data-step="1" data-slot-steps="0,0,0" data-chart="k10" data-label="Antrieb je Baum in Aachen (DE), Fairbanks (US) und Marabá (BR): CO₂ kühlt, Albedo wärmt, Summe"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="2" style="--d:0">Mit φ wissen wir, wie groß der Antrieb ist → noch nicht, wie stark sich die Temperatur ändert.</p></div>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Strahlungsantrieb je Baum)</span></p>
-  <aside class="notes">
-    <p data-click="0">Oben die ganze Gleichung: der Albedo-Term ausgeschrieben, dazu der CO₂-Term aus ε und Δm. Darunter alle Größen noch einmal.</p>
-    <p data-click="1">Klick: Vom Ort hängen zwei Größen ab, umrahmt: die zusätzlich absorbierte Strahlung und die CO₂-Änderung der Atmosphäre — Albedo und Wachstum aus dem Kapitel Bäume. Jetzt sehen wir, was an Netto-Antrieb herauskommt, an drei Orten zugleich.</p>
-    <p class="q">Ausführlich: Beide Antriebe in derselben Einheit, addiert: An allen drei Orten überwiegt der kühlende CO₂-Antrieb; in Fairbanks (US) überwiegt der Albedo-Antrieb, bei Marabá (BR) nur wenig. Der Albedo-Antrieb wächst mit dem Kronenschluss, der CO₂-Antrieb mit dem Vorrat, abgeschwächt durch die Impulsantwort und das CO₂, das schon in der Luft ist.</p>
-    <p data-click="1">Oben: Beide Faktoren des CO₂-Terms sind bekannt, der Albedo-Term seit Beginn des Kapitels. Jetzt setzen wir die Gleichung zusammen.</p>
-    <p data-click="1">Jetzt laufen beide Wege zusammen: der Albedo-Antrieb vom Anfang des Kapitels und der CO₂-Antrieb, den wir eben in zwei Schritten gebaut haben. Beide in Watt je Quadratmeter Erde, also lassen sie sich addieren. Grün kühlt der Kohlenstoff, orange wärmt die Albedo, schwarz die Summe. An allen drei Orten bleibt die Summe kühlend; in Fairbanks überwiegt die Albedo.</p>
-    <p class="q">Falls Fragen kommen — τ = 0,854: Anteil einer Reflexionsänderung an der Oberfläche, der am Oberrand der Atmosphäre ankommt (Wolken und Gase absorbieren einen Teil). A_atm = 5,1 · 10¹⁴ m². Herleitung der Energiebilanz und der Verdunstung, die an dieser Grenze nicht als Antrieb zählt: Backup.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="klima" data-title="Rückkopplung und Wärmespeicher" data-km-off="refl chips">
-  <header class="sh"><h2>Rückkopplung und Wärmespeicher</h2></header>
-  <div class="body">
-    <div class="fline head"><!-- the line as the slide before ends, and the question: what does the tree do to the temperature? --><span class="part cont"><span class="chip c-phi"><span>Strahlungsantrieb</span><span class="tex">$\phit(\tm)$</span><span class="u">[W/m²]</span></span><span class="tex">$=$ <span class="hl c-phic">$\phic(\tm)$<svg class="fcheck on" viewBox="0 0 34 30" aria-hidden="true" style="color:var(--c)"><path d="M4 16 l9 9 l17 -20" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span> $+$ <span class="hl c-phia">$\phia(\tm)$<svg class="fcheck on" viewBox="0 0 34 30" aria-hidden="true" style="color:var(--c)"><path d="M4 16 l9 9 l17 -20" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span></span><span class="tex" data-step="0">$\;\longrightarrow\;$</span><span class="hl c-dt on" data-step="0"><span class="tex">$\dTB(\tm) =$</span> <span class="qm tex">$?$</span></span></span></div>
-    <div class="split sketch center"><div class="ghwrap"><svg class="schema anim s21 cc" data-export="s_temperatur" viewBox="0 0 880 560" style="width:860px; height:547px; overflow:visible; align-self:start" aria-label="Vom Antrieb zur Temperatur: Der Baum holt CO₂ aus der Luft, oben entweicht mehr Wärme, die Erde verliert Energie; die kühlere Erde strahlt weniger ab, der Verlust schrumpft; Land und Ozean puffern als Wärmespeicher und kühlen nur langsam ab">
-  <defs><marker id="k5-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--co2)"/></marker><marker id="k5-k" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#5f7f48"/></marker><marker id="k5-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#ffffff"/></marker><marker id="k5-e" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#8c6d5a"/></marker>
-    <marker id="tp-y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--sun-ray)"/></marker>
-    <marker id="tp-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--ray)"/></marker>
-    <marker id="tp-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="context-stroke"/></marker>
-    <marker id="tp-s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--s-sk)"/></marker>
-    <marker id="tp-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--co2)"/></marker>
-    <marker id="tp-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#8a7f6c"/></marker>
-  <linearGradient id="tp-tg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d6604d"/><stop offset="1" stop-color="#4f86a6"/></linearGradient><linearGradient id="tp-cool" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c5f7c" stop-opacity=".5"/><stop offset=".45" stop-color="#2c5f7c" stop-opacity=".22"/><stop offset="1" stop-color="#2c5f7c" stop-opacity=".04"/></linearGradient><marker id="tp-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--co2)"/></marker><marker id="tp-k" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#1b2420"/></marker></defs>
-  <g font-family="IBM Plex Sans">
-    <!-- the picture of the slide before, without the carbon cycle: light, reflection, heat, 1 kg CO2 into the tree -->
-    <g>
-      <rect x="0" y="74" width="880" height="402" fill="#e3edf2"/>
-      <line x1="0" y1="74" x2="880" y2="74" stroke="var(--muted)" stroke-width="2" stroke-dasharray="8 6"/>
-      <text x="495" y="38" text-anchor="middle" font-size="20" fill="var(--muted)"><tspan x="495">Oberrand der</tspan><tspan x="495" dy="24">Atmosphäre</tspan></text>
-      <rect x="0" y="476" width="880" height="34" fill="#d9cfb9"/>
-      <line x1="0" y1="476" x2="880" y2="476" stroke="#8c7a58" stroke-width="3"/>
-      <g transform="translate(220 476) scale(0.5393)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#3b3024" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#5f7f48"/><circle cx="80" cy="-234" r="64" fill="#6f8f55"/><circle cx="-34" cy="-194" r="48" fill="#5f7f48"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #6f8f55 50%, #5f7f48)"/><circle cx="48" cy="-312" r="68" fill="#6f8f55"/><circle cx="0" cy="-271" r="84" fill="#6f8f55"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #7f9c64 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#7f9c64"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #5f7f48 88%, #000)"/></g>
-      <path class="kb-sun ray-l" d="M125 58 L196 280" stroke="var(--sun-ray)" marker-end="url(#sr-in)"/><path class="kb-sun ray-p flow t-sw" d="M126.1 61.5 L192.1 267.8" stroke="var(--sun-ray)"/>
-      <text class="kb-sun" x="14" y="236" font-size="22" fill="var(--ink-2)">Sonnenlicht</text>
-      <text class="kb-sun" x="14" y="262" font-size="18" fill="var(--muted)">kurzwellig</text>
-      <path class="kb-refl ray-l" d="M198 283 L275.8 40" stroke="var(--ray)" marker-end="url(#sr-out)"/><path class="kb-refl ray-p flow t-sw" d="M199 279.8 L271.9 52" stroke="var(--ray)"/>
-      <text class="kb-refl" x="256" y="150" text-anchor="start" font-size="22" fill="var(--ink-2)">Reflexion</text>
-      <path class="kb-heat flow t-lw" d="M770.0 472.0 L773.8 469.5 L777.2 467.0 L780.0 464.5 L782.0 462.0 L782.9 459.5 L782.8 457.0 L781.5 454.5 L779.3 452.0 L776.3 449.5 L772.8 447.0 L769.0 444.5 L765.3 442.0 L762.0 439.5 L759.4 437.0 L757.7 434.5 L757.0 432.0 L757.4 429.6 L759.0 427.1 L761.4 424.6 L764.6 422.1 L768.2 419.6 L772.0 417.1 L775.6 414.6 L778.8 412.1 L781.2 409.6 L782.6 407.1 L783.0 404.6 L782.2 402.1 L780.5 399.6 L777.8 397.1 L774.5 394.6 L770.8 392.1 L767.0 389.6 L763.5 387.1 L760.5 384.6 L758.3 382.1 L757.2 379.6 L757.1 377.1 L758.1 374.6 L760.2 372.1 L763.0 369.6 L766.5 367.1 L770.3 364.6 L774.0 362.1 L777.4 359.6 L780.2 357.1 L782.1 354.6 L782.9 352.1 L782.7 349.7 L781.4 347.2 L779.1 344.7 L776.1 342.2 L772.5 339.7 L768.7 337.2 L765.1 334.7 L761.8 332.2 L759.2 329.7 L757.6 327.2 L757.0 324.7 L757.5 322.2 L759.1 319.7 L761.6 317.2 L764.8 314.7 L768.5 312.2 L772.3 309.7 L775.9 307.2 L779.0 304.7 L781.3 302.2 L782.7 299.7 L783.0 297.2 L782.2 294.7 L780.3 292.2 L777.6 289.7 L774.2 287.2 L770.5 284.7 L766.7 282.2 L763.2 279.7 L760.3 277.2 L758.2 274.7 L757.1 272.2 L757.1 269.8 L758.2 267.3 L760.3 264.8 L763.2 262.3 L766.7 259.8 L770.5 257.3 L774.2 254.8 L777.6 252.3 L780.3 249.8 L782.2 247.3 L783.0 244.8 L782.7 242.3 L781.3 239.8 L779.0 237.3 L775.9 234.8 L772.3 232.3 L768.5 229.8 L764.8 227.3 L761.6 224.8 L759.1 222.3 L757.5 219.8 L757.0 217.3 L757.6 214.8 L759.2 212.3 L761.8 209.8 L765.1 207.3 L768.7 204.8 L772.5 202.3 L776.1 199.8 L779.1 197.3 L781.4 194.8 L782.7 192.3 L782.9 189.9 L782.1 187.4 L780.2 184.9 L777.4 182.4 L774.0 179.9 L770.3 177.4 L766.5 174.9 L763.0 172.4 L760.2 169.9 L758.1 167.4 L757.1 164.9 L757.2 162.4 L758.3 159.9 L760.5 157.4 L763.5 154.9 L767.0 152.4 L770.8 149.9 L774.5 147.4 L777.8 144.9 L780.5 142.4 L782.2 139.9 L783.0 137.4 L782.6 134.9 L781.2 132.4 L778.8 129.9 L775.6 127.4 L772.0 124.9 L768.2 122.4 L764.6 119.9 L761.4 117.4 L759.0 114.9 L757.4 112.4 L757.0 110.0 L757.7 107.5 L759.4 105.0 L762.0 102.5 L765.3 100.0 L769.0 97.5 L772.8 95.0 L776.3 92.5 L779.3 90.0 L781.5 87.5 L782.8 85.0 L782.9 82.5 L782.0 80.0 L780.0 77.5 L777.2 75.0 L773.8 72.5 L770.0 70.0 L770.0 40.0" stroke="#b2182b" stroke-width="3.5" fill="none" marker-end="url(#tp-r)"/>
-      <text class="kb-heat" x="744" y="410" text-anchor="end" font-size="22" fill="var(--ink-2)">Wärme-</text>
-      <text class="kb-heat" x="744" y="436" text-anchor="end" font-size="22" fill="var(--ink-2)">abstrahlung</text>
-      <text class="kb-heat" x="744" y="460" text-anchor="end" font-size="18" fill="var(--muted)">langwellig</text>
-    </g>
-    <g>
-      <rect x="0" y="478" width="500" height="58" fill="#d9cfb9"/>
-      <rect x="0" y="536" width="500" height="80" fill="#a39684"/>
-      <path d="M0 536 H500" stroke="#8c7f6c" stroke-width="2"/>
-      <rect x="500" y="474" width="380" height="14" fill="#e3edf2"/>
-      <path d="M500 476 q15 8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t20 0 L880 616 L500 616 Z" fill="#7fb0cc"/>
-      <rect x="500" y="536" width="380" height="80" fill="#5f93b3"/>
-      <path d="M500 476 q15 8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t20 0" stroke="#4f86a6" stroke-width="2.5" fill="none"/>
-      <text x="868" y="500" text-anchor="end" font-size="22" font-weight="600" fill="#fff">Ozean</text>
-      <text x="40" y="500" font-size="22" font-weight="600" fill="#5b4a2e">Land</text>
-    </g>
-    <g class="km-past"><rect x="-6" y="74" width="892" height="548" rx="22" fill="none" stroke="#1b2420" stroke-width="3" stroke-dasharray="12 7"/><text x="14" y="604" font-size="21" font-weight="600" fill="#1b2420">Bilanzgrenze</text></g><g class="km-past"><path class="flowc" d="M361.9 394.2 A50 50 0 0 1 454.9 386.1" stroke="#5f7f48" stroke-width="4" fill="none" marker-end="url(#k5-k)"/><path class="flowc" d="M458.1 421.8 A50 50 0 0 1 365.1 429.9" stroke="#5f7f48" stroke-width="4" fill="none" marker-end="url(#k5-k)"/><path class="flowc" d="M590.8 526.8 A72 48 0 0 1 724.7 519.0" stroke="#ffffff" stroke-width="4" fill="none" marker-end="url(#k5-w)"/><path class="flowc" d="M729.2 553.2 A72 48 0 0 1 595.3 561.0" stroke="#ffffff" stroke-width="4" fill="none" marker-end="url(#k5-w)"/><path class="flowc" d="M436 352 C 450 330 462 300 468 266" stroke="#8c6d5a" stroke-width="4.5" fill="none" marker-end="url(#k5-e)"/><path class="flowc" d="M670 460 C 640 380 580 310 524 252" stroke="#8c6d5a" stroke-width="4.5" fill="none" marker-end="url(#k5-e)"/><use href="#cloud" transform="translate(212 214) scale(0.6)"/></g><g class="co2-col"><g transform="translate(180 0)"><g transform="rotate(-25 604 420)"><g class="mol" style="--ph:-0.37s"><line x1="587.32" y1="417.7" x2="604" y2="417.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="587.32" y1="422.3" x2="604" y2="422.3" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="417.7" x2="604" y2="417.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="422.3" x2="604" y2="422.3" stroke="var(--ink)" stroke-width="1.58"/><circle cx="587.32" cy="420" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="604" cy="420" r="6.6" fill="#555"/><circle cx="620.68" cy="420" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></g></g><g transform="translate(180 0)"><g transform="rotate(15 576 365)"><g class="mol" style="--ph:-0.74s"><line x1="559.32" y1="362.7" x2="576" y2="362.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="559.32" y1="367.3" x2="576" y2="367.3" stroke="var(--ink)" stroke-width="1.58"/><line x1="592.68" y1="362.7" x2="576" y2="362.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="592.68" y1="367.3" x2="576" y2="367.3" stroke="var(--ink)" stroke-width="1.58"/><circle cx="559.32" cy="365" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="576" cy="365" r="6.6" fill="#555"/><circle cx="592.68" cy="365" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></g></g><g transform="translate(180 0)"><g transform="rotate(-35 604 310)"><g class="mol" style="--ph:-1.11s"><line x1="587.32" y1="307.7" x2="604" y2="307.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="587.32" y1="312.3" x2="604" y2="312.3" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="307.7" x2="604" y2="307.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="312.3" x2="604" y2="312.3" stroke="var(--ink)" stroke-width="1.58"/><circle cx="587.32" cy="310" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="604" cy="310" r="6.6" fill="#555"/><circle cx="620.68" cy="310" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></g></g><g class="mol-off" transform="translate(180 0)"><g transform="rotate(30 576 255)"><g class="mol" style="--ph:-1.48s"><line x1="559.32" y1="252.7" x2="576" y2="252.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="559.32" y1="257.3" x2="576" y2="257.3" stroke="var(--ink)" stroke-width="1.58"/><line x1="592.68" y1="252.7" x2="576" y2="252.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="592.68" y1="257.3" x2="576" y2="257.3" stroke="var(--ink)" stroke-width="1.58"/><circle cx="559.32" cy="255" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="576" cy="255" r="6.6" fill="#555"/><circle cx="592.68" cy="255" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></g></g><g class="mol-off" transform="translate(180 0)"><g transform="rotate(-10 604 200)"><g class="mol" style="--ph:-1.85s"><line x1="587.32" y1="197.7" x2="604" y2="197.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="587.32" y1="202.3" x2="604" y2="202.3" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="197.7" x2="604" y2="197.7" stroke="var(--ink)" stroke-width="1.58"/><line x1="620.68" y1="202.3" x2="604" y2="202.3" stroke="var(--ink)" stroke-width="1.58"/><circle cx="587.32" cy="200" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="604" cy="200" r="6.6" fill="#555"/><circle cx="620.68" cy="200" r="4.8" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g></g></g></g><g class="km-phi"><rect x="168" y="308" width="104" height="42" rx="21" fill="#f6f1e6" stroke="var(--t-bal)" stroke-width="2.5"/><text x="200" y="337" text-anchor="middle" font-size="22" font-weight="600" fill="var(--s-phi)"><tspan font-family="KaTeX_Math" font-style="italic" font-weight="700" font-size="24">Δφ</tspan><tspan font-family="KaTeX_Math" font-style="italic" font-size="15" dy="6">B</tspan></text><path d="M240 327 l7 7 l13 -15" stroke="var(--s-phi)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-    <g class="pop" style="--d:200"><g class="km-past co2fly">
-      <ellipse cx="470" cy="200" rx="96" ry="54" fill="var(--co2)" fill-opacity=".06" stroke="var(--co2)" stroke-width="2" stroke-dasharray="6 6"/><g opacity=".3">
-      <g class="mol" style="--ph:-0.00s"><line x1="404.2" y1="182.48" x2="432" y2="182.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="404.2" y1="189.52" x2="432" y2="189.52" stroke="var(--ink)" stroke-width="2.64"/><line x1="459.8" y1="182.48" x2="432" y2="182.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="459.8" y1="189.52" x2="432" y2="189.52" stroke="var(--ink)" stroke-width="2.64"/><circle cx="404.2" cy="186" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="432" cy="186" r="11.0" fill="#555"/><circle cx="459.8" cy="186" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g><g class="mol" style="--ph:-0.37s"><line x1="482.2" y1="172.48" x2="510" y2="172.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="482.2" y1="179.52" x2="510" y2="179.52" stroke="var(--ink)" stroke-width="2.64"/><line x1="537.8" y1="172.48" x2="510" y2="172.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="537.8" y1="179.52" x2="510" y2="179.52" stroke="var(--ink)" stroke-width="2.64"/><circle cx="482.2" cy="176" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="510" cy="176" r="11.0" fill="#555"/><circle cx="537.8" cy="176" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g><g class="mol" style="--ph:-0.74s"><line x1="442.2" y1="222.48" x2="470" y2="222.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="442.2" y1="229.52" x2="470" y2="229.52" stroke="var(--ink)" stroke-width="2.64"/><line x1="497.8" y1="222.48" x2="470" y2="222.48" stroke="var(--ink)" stroke-width="2.64"/><line x1="497.8" y1="229.52" x2="470" y2="229.52" stroke="var(--ink)" stroke-width="2.64"/><circle cx="442.2" cy="226" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><circle cx="470" cy="226" r="11.0" fill="#555"/><circle cx="497.8" cy="226" r="8.0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/></g>
-</g>
-      <text x="470" y="128" text-anchor="middle" font-size="25" font-weight="600" fill="var(--t-co2)">−1 kg CO₂</text>
-      <path class="flowc" d="M382 226 C 352 246 326 262 306 286" stroke="var(--co2)" stroke-width="4.5" fill="none" marker-end="url(#tp-g)"/>
-      <text x="320" y="318" font-size="20" font-weight="600" fill="var(--t-co2)">in den</text>
-      <text x="320" y="342" font-size="20" font-weight="600" fill="var(--t-co2)">Baum</text></g>
-    </g>
-    <!-- 1: what the tree does in sum: a negative forcing -->
-    <g class="pop" data-step="1">
-      <rect x="168" y="308" width="104" height="42" rx="21" fill="#f6f1e6" stroke="var(--t-bal)" stroke-width="2.5"/>
-      <text x="220" y="337" text-anchor="middle" font-size="22" font-weight="600" fill="var(--s-phi)"><tspan font-family="KaTeX_Math" font-style="italic" font-weight="700" font-size="24">Δφ</tspan><tspan font-family="KaTeX_Math" font-style="italic" font-size="15" dy="6">B</tspan><tspan dy="-6"> &lt; 0</tspan></text>
-    </g>
-    <!-- 2: the heat store S is the top layer, land and upper ocean (FaIR's first layer; the deep ocean is slower):
-         it gives off heat and cools, slowly (its tint deepens with the curve beside, CSS) -->
-    <g class="pop ts3" data-step="3">
-      <g class="tp-store"><rect x="0" y="478" width="500" height="58" fill="#4f86a6" opacity=".22"/>
-      <path d="M500 476 q15 8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t20 0 L880 536 L500 536 Z" fill="#2c5f7c" opacity=".2"/></g>
-      <!-- the store itself marked: land and ocean down to the deep sea, tinted in S's colour, its name in it -->
-      <rect x="0" y="478" width="880" height="138" fill="var(--s-sk)" opacity=".14"/>
-      <!-- the heat comes up out of the store: its own arrow in the store's colour, straight (it is not radiation), flowing -->
-      <path class="flow t-lw lw-root" d="M770 530 V481" stroke="var(--s-sk)" stroke-width="6" fill="none" marker-end="url(#tp-s)"/>
-      <!-- and from the deep sea, thinner and slower: it gives heat up to the upper ocean, over centuries -->
-      <path class="flow t-lw lw-deep" d="M770 608 V545" stroke="var(--s-sk)" stroke-width="4" fill="none" marker-end="url(#tp-s)"/>
-      <text x="868" y="600" text-anchor="end" font-size="22" font-weight="600" fill="#fff">Tiefsee</text>
-      <rect x="342" y="525" width="196" height="44" rx="10" fill="color-mix(in srgb, var(--s-sk) 12%, #f6f1e6)"/>
-      <text x="440" y="555" text-anchor="middle" font-size="19" font-weight="600" fill="var(--s-sk)">Wärmespeicher</text>
-</g>
-    <!-- 3: a cooler Earth radiates less (R): the heat arrow thins and cools (CSS), the loss shrinks until balanced -->
-    <g class="pop ts2" data-step="2">
-      <rect x="548" y="414" width="196" height="44" rx="10" fill="color-mix(in srgb, var(--s-rf) 12%, #f6f1e6)"/>
-      <text x="646" y="444" text-anchor="middle" font-size="19" font-weight="600" fill="var(--s-rf)">Rückkopplung</text>
-    </g>
-  </g>
-</svg></div><div class="ghsteps stack"><p class="gh-lead t-say">Vom Antrieb zur Temperatur wird es noch komplizierter</p><div class="rise" data-step="1" style="--d:200"><p class="nstep"><b class="badge c-phi">1</b>Antrieb negativ: mehr hinaus als herein, die Erde verliert Energie und kühlt ab</p></div><div class="rise" data-step="2" style="--d:200"><p class="nstep"><b class="badge c-rf">2</b>Rückkopplung: die kühlere Erde strahlt weniger ab, bis wieder so viel hinausgeht wie hereinkommt</p></div><div class="rise" data-step="3" style="--d:200"><p class="nstep"><b class="badge c-sk">3</b>Wärmespeicher: Boden und Ozean geben Wärme an die Atmosphäre ab, das bremst die Abkühlung</p></div></div>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Very Low ohne CO₂-Entnahme)</span></p>
-  <aside class="notes">
-    <p data-click="0">Falls gefragt wird, was zwischen Antrieb und Temperatur passiert: die Effekte einzeln, im Bild.</p>
-    <p data-click="1">Klick: Zuerst der Baum selbst. Das CO₂, das er aufnimmt, verschwindet aus der Luft in den Baum; zusammen mit der Albedo ergibt das seinen Antrieb, und der ist negativ: Es geht mehr hinaus als herein, der Wärmepfeil wird dicker. Die Erde verliert Energie und kühlt ab.</p>
-    <p data-click="2">Klick: Aber nicht beliebig weit: die Rückkopplung, blau. Die kühlere Erde strahlt weniger ab, der Wärmepfeil wird wieder dünner, bis wieder so viel hinausgeht wie hereinkommt. Dann bleibt die Temperatur stehen, auf einem neuen, etwas kühleren Stand.</p>
-    <p data-click="3">Klick: Und nicht sofort: der Wärmespeicher, lila. Boden und Ozean, bis in die Tiefsee, haben viel Wärme gespeichert und geben sie an die Atmosphäre ab, der Pfeil aus dem Ozean; aus der Tiefsee kommt langsamer Wärme nach. Das bremst die Abkühlung: Die Temperatur sinkt nur langsam.</p>
-    <p class="q">Als Formel und Jahr für Jahr: die nächsten Backup-Folien. FaIR rechnet dasselbe mit drei Schichten (Wärmekapazität 3,7 / 11,8 / 108 W·a/(m²·K)), der tiefe Ozean reagiert über Jahrhunderte.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="klima" data-title="Energiebilanz Jahr für Jahr">
-  <header class="sh"><h2>Energiebilanz Jahr für Jahr: ein Jahr Antrieb</h2></header>
-  <div class="body">
-    <div class="split center">
-      <div class="chart" data-ec="tbal" data-step="0" style="height:520px" data-label="Energiebilanz Jahr für Jahr für ein Jahr Antrieb von −1 W/m² (−31,6 MJ/m²): oben je Jahr der Antrieb (nach unten) und die Rückkopplung (nach oben: die kühlere Erde strahlt weniger ab), daneben die Änderung im Wärmespeicher, ihre Summe; unten die Temperatur. Nur mit dem Speicher sinkt sie um 0,27 K und bleibt dort; mit der Rückkopplung holt die Erde die Energie Jahr für Jahr zurück und die Temperatur kehrt in wenigen Jahren auf heute zurück"></div>
-      <div class="stack" style="align-self:center">
-        <div class="rise" style="--d:300"><p class="nstep"><b class="badge c-phi">1</b>Antrieb <span class="tex">$\phit(\tm)$</span>: ein Jahr, −31,6 MJ/m²</p></div>
-        <div class="rise" data-step="1" style="--d:200"><p class="nstep"><b class="badge c-sk">2</b>Speicher <span class="tex">$\Sk$</span>: puffert, −0,27 K</p></div>
-        <div class="rise" data-step="2" style="--d:200"><p class="nstep"><b class="badge c-rf">3</b>Rückkopplung <span class="tex">$\Rf$</span>: holt die Energie zurück</p></div>
-      </div>
-    </div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/gmd-14-3007-2021" target="_blank" rel="noopener">Leach et al. 2021</a>; <a href="https://doi.org/10.5194/gmd-17-8569-2024" target="_blank" rel="noopener">Smith et al. 2024</a> (Wärmekapazität C und R der obersten Schicht)</span><span><i>Eigene Rechnung</i> (Energiebilanz mit einer Schicht)</span></p>
-  <aside class="notes" data-n="46">
-    <p data-click="0">Für Fragen: dieselbe Rechnung Jahr für Jahr, wie FaIR sie macht, für den einfachsten Fall: ein einziges Jahr Antrieb, −1 W/m², dann nichts mehr. Das ist die Antwort f aus der Formel. Oben die Energiebilanz je Jahr in Megajoule je Quadratmeter, plus heißt, die Erde behält Energie, minus, sie verliert. Je Jahr links der Antrieb und die Rückkopplung, daneben die Änderung im Speicher, ihre Summe. Unten die Temperatur am Ende jedes Jahres. Im ersten Jahr verliert die Erde 31,6 MJ/m².</p>
-    <p data-click="1">Klick: Nur der Speicher: Er verliert genau das. Für ein Kelvin braucht er rund 117 MJ/m², also sinkt die Temperatur um 0,27 K, und ohne Rückkopplung bliebe sie dort, gestrichelt.</p>
-    <p data-click="2">Klick: Mit der Rückkopplung: Die kühlere Erde strahlt weniger ab; jedes Jahr behält sie etwas Energie, die Balken nach oben, und genau das kommt in den Speicher zurück. Die Temperatur ist nach wenigen Jahren zurück auf heute; über alle Jahre holt die Rückkopplung genau die 31,6 MJ/m² zurück, die der Antrieb genommen hat. S legt fest, wie tief es geht; S und R zusammen, wie schnell es zurückkommt, rund drei Jahre.</p>
-    <p class="q">Falls Fragen kommen — Die Balken jedes Jahres gehen genau auf: Antrieb plus Rückkopplung gleich Änderung im Speicher (erster Hauptsatz je Jahr), aus der exakten Lösung über das Jahr integriert. FaIR rechnet mit drei Schichten; die tiefe Schicht gibt einen kleinen Rest über Jahrhunderte, hier nicht gezeigt. Der Baum hat jedes Jahr seinen eigenen, wachsenden Antrieb; seine Temperaturwirkung ist die Summe solcher Antworten.</p>
-  </aside>
-</section>
-
 <section class="slide backup" data-ch="klima" data-title="Lösung der Energiebilanz">
   <header class="sh"><h2>Die Antwort f genau: Lösung der Energiebilanz</h2></header>
   <div class="body">
@@ -446,50 +78,23 @@
   </aside>
 </section>
 
-<section class="slide backup" data-ch="klima" data-title="Die Erwärmung wirkt auf den Baum zurück">
-  <header class="sh"><h2>Die Erwärmung wirkt auf den Baum zurück</h2></header>
-  <div class="body">
-    <div class="chart" data-chart="k13" data-label="Wirkung je Baum im Jahr 2100 nach Pflanzjahr, Aachen (DE), Fairbanks (US) und Marabá (BR)"></div>
-    <div class="foot">
-      <div class="eq tex rise" style="--d:1800">$$\pd = \pdo\,\mathbf{e}^{\gam\,\T(\tm)}$$</div>
-      <p class="takeaway" data-step="1" style="--d:0">Mehr Störung lichtet den Wald: 2100 kühlt er sogar etwas mehr. 2085 gepflanzt kühlt er in Aachen nur noch 32&nbsp;%.</p>
-    </div>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Rückwirkung der Erwärmung)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Und die Erwärmung wirkt zurück: Je wärmer es wird, desto häufiger Feuer, Sturm und Käfer. Störungen kosten Kohlenstoff, lichten aber auch den Wald — dann schluckt er weniger Licht. Unterm Strich kühlt der Wald dadurch 2100 sogar etwas mehr. Ein später gepflanzter Baum kühlt bis 2100 deutlich weniger, ihm bleibt weniger Zeit: 2085 gepflanzt in Aachen (DE) nur noch 32 %.</p>
-    <p data-click="0">Balken: Wirkung je Baum im Jahr 2100 nach Pflanzjahr. Enthalten sind höhere Störungsrate, vollere Atmosphäre und weniger verbleibende Zeit; getrennt zeigt sie die Leiter im Backup („Was jede Erweiterung der Systemgrenze kostet“).</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="klima" data-title="Was jede Erweiterung der Systemgrenze kostet">
-  <header class="sh"><h2>Was jede Erweiterung der Systemgrenze kostet</h2></header>
-  <div class="body">
-    <div class="chart" data-stops="auto" data-chart="k14" data-label="Temperaturwirkung je Baum 2100 nach jeder Erweiterung der Systemgrenze"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:1800">Jede Stufe kostet Kühlung, am meisten Ozean und Land: Aachen 157 → 47, Fairbanks 78 → +24 (wärmt), Marabá 224 → 77.</p></div>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Stufen der Systemgrenze)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Jede Erweiterung kostet Kühlung: in Aachen (DE) von 157 auf 47 (·10⁻¹⁵ K je Baum); den größten Schritt macht die Rückgabe durch Ozean und Land. In Fairbanks (US) kippt es: aus 78 Kühlung werden 24 Erwärmung, bei Marabá (BR) von 224 noch 77. Nur die Störung gibt etwas zurück: Sie lichtet den Wald, der dann weniger Licht schluckt. Eine Ökobilanz mit GWP100 sieht nur einen Teil davon: Sie mittelt die Rückgabe über 100 Jahre bei festem CO₂-Hintergrund — vollere Atmosphäre und Rückkopplung auf den Baum fehlen ihr.</p>
-    <p data-click="0">Leiter: Temperaturwirkung je Baum in 2100 nach jeder Erweiterung der Systemgrenze, kumulativ (nbs.storyline_figures.ladder_delta_t). Aachen: -157 → -137 → -65 → -46 → -47; Fairbanks: -78 → -14 → +22 → +32 → +24; Marabá: -224 → -209 → -105 → -77 → -77 (·10⁻¹⁵ K). Bewusst nicht das Jahr t*: Wo Kohlenstoff und Albedo nah beieinander liegen, kippt eine moderate Änderung das Jahr von früh auf „nie“, obwohl sich die Temperaturwirkung nur wenig verschiebt. „Vollere Atmosphäre“ umfasst den Schritt vom Lehrbuchwert 1,76 (entspricht 389 ppm) auf den logarithmischen Antrieb mit dem Hintergrund von Very Low ohne Entnahme und den Wechsel von der Joos- auf die FaIR-Rückgabe.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="vergleich" data-title="Einfluss des Pflanzjahres">
-  <header class="sh"><h2>Einfluss des Pflanzjahres</h2></header>
-  <div class="body">
-    <div class="chart" data-chart="w3" data-label="Kühlung 2050 und 2100 nach Pflanzjahr, gemessen an der Pflanzung 2026, kühlende Flächen"></div>
-    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:1800">Für 2100 fast egal, für 2050 entscheidend: fünf Jahre später kosten dort knapp ein Viertel der Kühlung.</p></div>
-  </div>
-  <p class="src"><span><i>Eigene Rechnung</i> (Wirkung je Pflanzjahr)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Für die Kühlung im Jahr 2100 ist es fast gleich, ob 2026 oder 2046 gepflanzt wird. Für das Maximum der Erwärmung um 2050 nicht: Eine Verzögerung um fünf Jahre verringert die Kühlung dort um knapp ein Viertel, um zehn Jahre um die Hälfte, um zwanzig Jahre fast vollständig. Für die Wirkung um 2050 ist der Pflanzzeitpunkt entscheidend.</p>
-    <p data-click="0">Im Kapitel Klima haben wir gesehen: Ein später gepflanzter Baum kühlt bis 2100 weniger, weil ihm Zeit fehlt. Hier dasselbe für alle Bäume auf der kühlenden Fläche. Hellgrün die Kühlung im Jahr 2100: Ob 2026 oder 2046 gepflanzt — fast gleich; der jüngere Wald bindet bis dahin noch kräftig, und seine Albedo ist noch nicht voll da. Dunkelgrün die Kühlung um 2050, wenn die Erwärmung im niedrigsten Szenario ihren Höhepunkt hat. Da zählt nur, was bis dahin gewachsen ist: fünf Jahre Warten kosten knapp ein Viertel, zehn Jahre die Hälfte. Wer die Spitze der Erwärmung drücken will, muss jetzt pflanzen.</p>
-    <p class="q">Falls Fragen kommen — Kühlung 2050 relativ zur Pflanzung 2026: 2031 77 %, 2036 51 %, 2041 26 %, 2046 7 %. Kühlung 2100: 102 % bis 104 % (der jüngere Wald hat 2100 weniger Albedo-Strafe und wächst noch). Je Baum gerechnet und aufsummiert (linear); absolut kühlt die Pflanzung 2026 so 2050 um 17,0 · 10⁻³ K, etwas mehr als im FaIR-Lauf mit der ganzen Fläche (15,9 · 10⁻³ K). Die Störung steigt mit der Erwärmung; in Very Low sinkt die Erwärmung nach 2050 wieder, ein später gepflanzter Wald verliert deshalb kaum mehr an Störung. Spätere Pflanzjahre als 2046 im Kapitel Klima je Baum.</p>
-  </aside>
-</section>
-
 <!-- DACCS: aus dem Hauptteil (Modell und schnellster Ausbau) -->
+
+<section class="slide backup" data-ch="vergleich" data-title="Einordnung: andere Studien">
+  <header class="sh"><h2>Einordnung: andere Studien</h2></header>
+  <div class="body">
+    <div class="chart" data-chart="v1b" data-label="Anteil des Kohlenstoffnutzens, der nach Albedo bleibt: Literatur und dieses Modell"></div>
+    <div class="foot"><div></div><p class="takeaway" data-step="1" style="--d:0">Alle Studien sehen es: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende.</p></div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41467-025-64317-x" target="_blank" rel="noopener">Riley et al. 2025</a> (Auswertung bestehender Projekte)</span><span><a href="https://doi.org/10.1126/science.adg6196" target="_blank" rel="noopener">Weber et al. 2024</a>; <a href="https://doi.org/10.1038/s43247-026-03331-3" target="_blank" rel="noopener">Fahrenbach et al. 2026</a> (Erdsystemmodelle)</span><span><a href="https://doi.org/10.1038/s41467-024-46577-1" target="_blank" rel="noopener">Hasler et al. 2024</a>; <a href="https://doi.org/10.1126/science.abm9684" target="_blank" rel="noopener">Rohatyn et al. 2022</a> (statische Bilanzen)</span><span><a href="https://doi.org/10.1126/sciadv.adn7915" target="_blank" rel="noopener">Liang et al. 2025</a> (dynamisches Vegetationsmodell)</span><span><i>Eigene Rechnung</i> (dieses Modell)</span></p>
+  <aside class="notes">
+    <p class="q">Ausführlich: Alle Studien sehen dasselbe: Die Albedo frisst einen großen Teil des Kohlenstoffnutzens. Wir liegen am strengen Ende, aus drei Gründen: Die wiederbewaldbare Fläche liegt oft im Norden und im Trockenen; unser Kohlenstoff ist aus Messungen hochgerechnet, etwa halb so viel wie im Erdsystemmodell; und wir bewerten 2100, nicht im Endzustand. Mit Haslers statischer Formel kämen wir auf 21 %.</p>
+    <p data-click="0">Einheit: welcher Anteil des reinen Kohlenstoffnutzens nach der Albedo übrig bleibt. Gemeinsam haben alle: den Rückfluss von CO₂ aus Ozean und Land über eine Impulsantwort (Hasler: Joos-Mittel, Restanteil über 100 Jahre). Was dieses Modell zusätzlich abbildet: (1) den Zeitverlauf — Wachstum und Kronenschluss Jahr für Jahr, bewertet als Erwärmung in einem genannten Jahr; Hasler vergleicht maximalen Kohlenstoff mit maximaler Albedo und nennt den Zeitverlauf selbst als offene Lücke („ignores the time frame over which both unfold … additional work is urgently needed“); (2) einen Hintergrund, der sich ändert: ein Szenario (Very Low ohne Entnahme) statt fester 400 ppm, mit einem Kohlenstoffkreislauf, dessen Senken nachlassen (FaIR); (3) Störungen, die mit der Erwärmung zunehmen (Hasler: keine). Liang et al. rechnen Klima und Feuer ebenfalls dynamisch und landen mit 30 % am nächsten. Fahrenbach et al. (CESM2, voll gekoppelt) enthalten zusätzlich die großräumige Kühlung durch Verdunstung in den Tropen; unser Modell hat davon nur die lokalen Wolken über dem Wald (Duveiller et al. 2021) — dort sind wir eher zu streng. Riley et al. werten bestehende Projekte aus, die schon dort liegen, wo Albedo wenig kostet. Woher die Abweichungen kommen: Hasler — vor allem die Fläche (auf Walkers Karte rechnet er selbst mit mehr Offset), dann der Horizont 2100 statt Endzustand. Fahrenbach — vor allem die Kohlenstoffmenge: CESM2 lässt etwa doppelt so viel wachsen (≈ 100 statt 51 t C/ha); mit dieser Menge kämen auch wir auf rund 65 %. Gegenprobe: Die ganze Entnahme als Zeitreihe in einen vollen FaIR-Lauf gegeben, liefert dasselbe wie unsere Rechnung (18 % gegen 17 % bis 2100). Eine Annahme mit Gewicht: Störungen lichten den Wald, der dann weniger Licht schluckt — das bringt bis 2100 rund 20 Prozentpunkte zurück. Warum wir strenger sind: 2100 ist der Baum längst gesättigt, der größte Teil seiner Entnahme liegt Jahrzehnte zurück, die Albedo wirkt dagegen voll; dazu die Fläche (Walker et al. 2022), boreal- und trockengebietslastig — für genau diese Karte findet Hasler auf 65 % der Fläche über 50 % Offset, wir mit seiner Formel 73 %. Grenze dieses Modells: Die Schneedecke ist statisch, boreal fällt die Albedo-Strafe späterer Jahrzehnte daher eher zu hoch aus. Methode: docs/methods/abgleich-hasler-waldtypen.md.</p>
+  </aside>
+</section>
+
+<!-- Grundlagen: Baum und Klima -->
+
 <section class="slide backup" data-ch="vergleich" data-title="Als Forst: ernten und neu pflanzen">
   <!-- the managed forest on a slide of its own: the left chart stands as slide 27 left it; on the right the schematic
        (three clicks), then the forest curve on the left and what a harvest does to it, then the world chart as on slide
@@ -584,91 +189,6 @@
   </aside>
 </section>
 
-<section class="slide chapter brk ambient holzweg backup" data-ch="dac" data-title="Andere Wege: Mangroven, DACCS, Aerosole">
-  <div class="ctext"><h1 class="rise">Und andere Wege<em>?</em></h1></div>
-  <svg class="deco mo" data-export="s_holzweg" viewBox="0 0 1600 900" aria-hidden="true"><g class="m-sway"><g transform="translate(-40 830) scale(0.4607)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(110.5 830) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(259.5 830) scale(0.8991)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #212d27 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #212d27 55%, #0b100e) 55%, #1d2823)"/></g></g><g class="m-sway"><g transform="translate(410 830) scale(0.4607)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(560.5 830) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(709.5 830) scale(0.8991)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #212d27 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #212d27 55%, #0b100e) 55%, #1d2823)"/></g></g><g class="m-sway"><g transform="translate(860 830) scale(0.4607)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(1010 830) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(1160 830) scale(0.8991)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #212d27 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #212d27 55%, #0b100e) 55%, #1d2823)"/></g></g><g class="m-sway"><g transform="translate(1310 830) scale(0.4607)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(1460 830) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#212d27"/><circle cx="80" cy="-234" r="64" fill="#1d2823"/><circle cx="-34" cy="-194" r="48" fill="#212d27"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #1d2823 50%, #212d27)"/><circle cx="48" cy="-312" r="68" fill="#1d2823"/><circle cx="0" cy="-271" r="84" fill="#1d2823"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #18221d 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#18221d"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #212d27 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(1610 830) scale(0.8991)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #212d27 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #212d27 55%, #0b100e) 55%, #1d2823)"/></g></g><path d="M0 900 V830 C 300 812 700 820 1000 826 C 1250 832 1450 822 1600 818 V900 Z" fill="#101513"/><g class="m-sway"><g transform="translate(30.5 880) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#2b3a32"/><circle cx="80" cy="-234" r="64" fill="#26342d"/><circle cx="-34" cy="-194" r="48" fill="#2b3a32"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="48" cy="-312" r="68" fill="#26342d"/><circle cx="0" cy="-271" r="84" fill="#26342d"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #212e28 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#212e28"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #2b3a32 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(260 880) scale(0.8377)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#2b3a32"/><circle cx="80" cy="-234" r="64" fill="#26342d"/><circle cx="-34" cy="-194" r="48" fill="#2b3a32"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="48" cy="-312" r="68" fill="#26342d"/><circle cx="0" cy="-271" r="84" fill="#26342d"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #212e28 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#212e28"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #2b3a32 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(490 880) scale(0.8677)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #2b3a32 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #2b3a32 55%, #0b100e) 55%, #26342d)"/></g></g><g class="m-sway"><g transform="translate(720.5 880) scale(0.6073)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#2b3a32"/><circle cx="80" cy="-234" r="64" fill="#26342d"/><circle cx="-34" cy="-194" r="48" fill="#2b3a32"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="48" cy="-312" r="68" fill="#26342d"/><circle cx="0" cy="-271" r="84" fill="#26342d"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #212e28 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#212e28"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #2b3a32 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(950 880) scale(0.8377)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#0f1412"/><path d="M-3 -116 C -18 -146 -36 -170 -56 -194 M3 -134 C 20 -158 36 -178 54 -200" stroke="#0f1412" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="-80" cy="-226" r="62" fill="#2b3a32"/><circle cx="80" cy="-234" r="64" fill="#26342d"/><circle cx="-34" cy="-194" r="48" fill="#2b3a32"/><circle cx="38" cy="-196" r="50" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="-46" cy="-306" r="66" fill="color-mix(in srgb, #26342d 50%, #2b3a32)"/><circle cx="48" cy="-312" r="68" fill="#26342d"/><circle cx="0" cy="-271" r="84" fill="#26342d"/><circle cx="40" cy="-338" r="44" fill="color-mix(in srgb, #212e28 88%, #fff)"/><circle cx="92" cy="-258" r="30" fill="#212e28"/><circle cx="-92" cy="-204" r="30" fill="color-mix(in srgb, #2b3a32 88%, #000)"/></g></g><g class="m-sway"><g transform="translate(1640 880) scale(1.0060)"><rect x="-7" y="-104" width="14" height="104" fill="#0f1412"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L -68 -79 L -30 -166 L -52 -164 L -18 -246 L -34 -244Z" fill="color-mix(in srgb, #2b3a32 55%, #0b100e)"/><path d="M0 -334 L 34 -244 L 18 -246 L 52 -164 L 30 -166 L 68 -79 L 0 -79Z" fill="color-mix(in srgb, color-mix(in srgb, #2b3a32 55%, #0b100e) 55%, #26342d)"/></g></g></svg>
-  <div class="hw3">
-    <div class="hwk3" data-step="1"><p class="pk t-kicker lg c-ch">Bäume pflanzen</p><svg class="mo" viewBox="0 0 420 250" aria-hidden="true"><rect x="0" y="206" width="420" height="34" fill="#2b2620"/><line x1="0" y1="206" x2="420" y2="206" stroke="#8c7a58" stroke-width="3"/><rect x="0" y="200" width="420" height="6" fill="#6b5d45"/><rect x="250" y="199" width="64" height="8" rx="2" fill="#5fae76"/><text x="282" y="236" text-anchor="middle" font-size="26" font-weight="600" fill="#a6e3b4">frei</text><text x="125" y="236" text-anchor="middle" font-size="26" fill="#8d958f">genutzt</text><g class="m-sway"><g transform="translate(268 206) scale(0.17)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><circle cx="-80" cy="-226" r="62" fill="#2f6b45"/><circle cx="80" cy="-234" r="64" fill="#3a7a50"/><circle cx="-46" cy="-306" r="66" fill="#2a5e3d"/><circle cx="48" cy="-312" r="68" fill="#3a7a50"/><circle cx="0" cy="-271" r="84" fill="#3a7a50"/><circle cx="40" cy="-338" r="44" fill="#4a8a5c"/></g></g><g class="m-sway"><g transform="translate(296 206) scale(0.24)"><path d="M-14 0 C -10 -76 -8 -166 -5 -266 L 5 -266 C 8 -166 10 -76 14 0Z" fill="#3b3024"/><circle cx="-80" cy="-226" r="62" fill="#2f6b45"/><circle cx="80" cy="-234" r="64" fill="#3a7a50"/><circle cx="-46" cy="-306" r="66" fill="#2a5e3d"/><circle cx="48" cy="-312" r="68" fill="#3a7a50"/><circle cx="0" cy="-271" r="84" fill="#3a7a50"/><circle cx="40" cy="-338" r="44" fill="#4a8a5c"/></g></g><g class="m-mol" style="--ph:0s"><g transform="translate(110 70) scale(1)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><g class="m-mol" style="--ph:0.8s"><g transform="translate(175 40) scale(0.9)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><g class="m-mol" style="--ph:1.6s"><g transform="translate(60 120) scale(0.85)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g></svg><ul class="why t-text lg"><li><span class="no" aria-hidden="true">✕</span><span>zu wenig Platz: nur <b>8,3&nbsp;Mio. km²</b> frei</span></li><li><span class="no" aria-hidden="true">✕</span><span>zu langsam: Spitze 2050 nur <b>−0,01&nbsp;K</b></span></li></ul></div>
-    <div class="hwk3" data-step="2"><p class="pk t-kicker lg c-ch">Mangroven</p><svg class="mo" viewBox="0 0 420 250" aria-hidden="true"><rect x="0" y="206" width="420" height="34" fill="#2b2620"/><path d="M0 206 H150 C 190 206 200 214 240 214 H420 V240 H0 Z" fill="#2b2620"/><rect x="150" y="196" width="270" height="44" fill="#1f3b4d" opacity=".9"/><path class="m-drift" d="M170 204 q12 -6 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 t24 0 t24 0 t24 0 t24 0" stroke="#6fb7e0" stroke-width="2.5" fill="none" opacity=".7"/><line x1="0" y1="206" x2="150" y2="206" stroke="#8c7a58" stroke-width="3"/><g class="m-sway"><g transform="translate(124 190) scale(0.75)"><path d="M0 0 V-60 M0 -20 C -14 -10 -22 0 -26 20 M0 -20 C 14 -10 22 0 26 20 M0 -30 C -8 -20 -12 0 -12 20 M0 -30 C 8 -20 12 0 12 20" stroke="#5b4630" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="-22" cy="-70" r="24" fill="#2f6b45"/><circle cx="20" cy="-74" r="26" fill="#3a7a50"/><circle cx="0" cy="-90" r="28" fill="#3a7a50"/><circle cx="8" cy="-100" r="14" fill="#4a8a5c"/></g></g><g class="m-sway"><g transform="translate(160 190) scale(0.9)"><path d="M0 0 V-60 M0 -20 C -14 -10 -22 0 -26 20 M0 -20 C 14 -10 22 0 26 20 M0 -30 C -8 -20 -12 0 -12 20 M0 -30 C 8 -20 12 0 12 20" stroke="#5b4630" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="-22" cy="-70" r="24" fill="#2f6b45"/><circle cx="20" cy="-74" r="26" fill="#3a7a50"/><circle cx="0" cy="-90" r="28" fill="#3a7a50"/><circle cx="8" cy="-100" r="14" fill="#4a8a5c"/></g></g><g class="m-sway"><g transform="translate(196 190) scale(0.7)"><path d="M0 0 V-60 M0 -20 C -14 -10 -22 0 -26 20 M0 -20 C 14 -10 22 0 26 20 M0 -30 C -8 -20 -12 0 -12 20 M0 -30 C 8 -20 12 0 12 20" stroke="#5b4630" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="-22" cy="-70" r="24" fill="#2f6b45"/><circle cx="20" cy="-74" r="26" fill="#3a7a50"/><circle cx="0" cy="-90" r="28" fill="#3a7a50"/><circle cx="8" cy="-100" r="14" fill="#4a8a5c"/></g></g><rect x="104" y="222" width="110" height="6" rx="3" fill="#5fae76"/><text x="159" y="250" text-anchor="middle" font-size="26" font-weight="600" fill="#a6e3b4">0,8 Mha</text><g class="m-mol" style="--ph:0s"><g transform="translate(300 70) scale(0.9)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><g class="m-mol" style="--ph:0.7s"><g transform="translate(360 120) scale(0.8)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g></svg><ul class="why t-text lg"><li><span class="no" aria-hidden="true">✕</span><span>binden viel, aber wiederherstellbar sind nur <b>0,8&nbsp;Mha</b></span></li><li><span class="no" aria-hidden="true">✕</span><span>auch nur CO₂: wirkt langsam</span></li></ul></div>
-    <div class="hwk3" data-step="3"><p class="pk t-kicker lg c-ch">Direct Air Capture<br>mit CO₂-Speicherung</p><svg class="mo" viewBox="0 0 420 250" aria-hidden="true"><rect x="0" y="206" width="420" height="34" fill="#2b2620"/><line x1="0" y1="206" x2="420" y2="206" stroke="#8c7a58" stroke-width="3"/><path d="M0 222 H420" stroke="#3a332a" stroke-width="2"/><ellipse cx="230" cy="232" rx="54" ry="7" fill="#14181a" stroke="#6b5d45" stroke-width="2"/><rect x="140" y="70" width="180" height="70" rx="10" fill="#2f383b" stroke="#6d756f" stroke-width="3"/><circle cx="170" cy="104" r="22" fill="#20282b" stroke="#6d756f" stroke-width="3"/><path class="m-fan" d="M170 86 V122 M152 104 H188" stroke="#9aa39d" stroke-width="5" stroke-linecap="round"/><circle cx="230" cy="104" r="22" fill="#20282b" stroke="#6d756f" stroke-width="3"/><path class="m-fan" d="M230 86 V122 M212 104 H248" stroke="#9aa39d" stroke-width="5" stroke-linecap="round"/><circle cx="290" cy="104" r="22" fill="#20282b" stroke="#6d756f" stroke-width="3"/><path class="m-fan" d="M290 86 V122 M272 104 H308" stroke="#9aa39d" stroke-width="5" stroke-linecap="round"/><rect x="220" y="140" width="20" height="66" fill="#3a4447"/><path class="m-flowd" d="M230 146 V226" stroke="#7fd09a" stroke-width="5" stroke-dasharray="3 9" stroke-linecap="round"/><rect x="156" y="140" width="10" height="66" fill="#3a4447"/><rect x="294" y="140" width="10" height="66" fill="#3a4447"/><g class="m-drift"><g class="m-mol" style="--ph:0s"><g transform="translate(70 80) scale(0.9)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><g class="m-mol" style="--ph:0.6s"><g transform="translate(96 128) scale(0.8)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g></g><path class="m-flow" d="M24 104 H124" stroke="#9aa39d" stroke-width="3" stroke-dasharray="10 10" opacity=".6"/><text x="356" y="44" text-anchor="middle" font-size="30" font-weight="700" fill="#e0a83e">€</text><text x="388" y="66" text-anchor="middle" font-size="22" font-weight="700" fill="#e0a83e" opacity=".7">€</text></svg><ul class="why t-text lg"><li><span class="no" aria-hidden="true">✕</span><span>langsamer Ausbau: heute erst <b>0,01&nbsp;Mt/a</b>, gebraucht Gt</span></li><li><span class="no" aria-hidden="true">✕</span><span>teuer: <b>380&nbsp;Mrd.&nbsp;€</b> bis 2050, für −0,6&nbsp;·&nbsp;10⁻³&nbsp;K</span></li></ul></div>
-    <div class="hwk3" data-step="4"><p class="pk t-kicker lg c-ch">Aerosolinjektion</p><svg class="mo" viewBox="0 0 420 250" aria-hidden="true"><circle cx="372" cy="36" r="34" fill="#e8b84f" opacity=".18"/><g class="m-rays" stroke="#d9a441" stroke-width="3.2" stroke-linecap="round" opacity=".75"><line x1="402.0" y1="36.0" x2="412.0" y2="36.0"/><line x1="393.2" y1="57.2" x2="400.3" y2="64.3"/><line x1="372.0" y1="66.0" x2="372.0" y2="76.0"/><line x1="350.8" y1="57.2" x2="343.7" y2="64.3"/><line x1="342.0" y1="36.0" x2="332.0" y2="36.0"/><line x1="350.8" y1="14.8" x2="343.7" y2="7.7"/><line x1="372.0" y1="6.0" x2="372.0" y2="-4.0"/><line x1="393.2" y1="14.8" x2="400.3" y2="7.7"/></g><circle cx="372" cy="36" r="24" fill="#e8b84f" opacity=".9"/><g class="m-drift"><circle cx="20" cy="90" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="29" cy="101" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="38" cy="89" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="47" cy="100" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="56" cy="88" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="65" cy="99" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="74" cy="87" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="83" cy="98" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="92" cy="86" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="101" cy="97" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="110" cy="108" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="119" cy="96" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="128" cy="107" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="137" cy="95" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="146" cy="106" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="155" cy="94" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="164" cy="105" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="173" cy="93" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="182" cy="104" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="191" cy="92" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="200" cy="103" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="209" cy="91" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="218" cy="102" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="227" cy="90" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="236" cy="101" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="245" cy="89" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="254" cy="100" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="263" cy="88" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="272" cy="99" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="281" cy="87" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="290" cy="98" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="299" cy="86" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="308" cy="97" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="317" cy="108" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="326" cy="96" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="335" cy="107" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="344" cy="95" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="353" cy="106" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="362" cy="94" r="3.4" fill="#c9cfc9" opacity="0.67"/><circle cx="371" cy="105" r="3.4" fill="#c9cfc9" opacity="0.51"/><circle cx="380" cy="93" r="3.4" fill="#c9cfc9" opacity="0.35"/><circle cx="389" cy="104" r="3.4" fill="#c9cfc9" opacity="0.59"/><circle cx="398" cy="92" r="3.4" fill="#c9cfc9" opacity="0.43"/><circle cx="407" cy="103" r="3.4" fill="#c9cfc9" opacity="0.67"/></g><path class="ray-l" d="M336 52 L262 92" stroke="var(--sun-ray)" marker-end="url(#sr-in)"/><path class="ray-p m-flow" d="M332.5 53.9 L274.3 85.3" stroke="var(--sun-ray)"/><path class="ray-l" d="M262 92 L232 40" stroke="var(--ray)" marker-end="url(#sr-out)"/><path class="ray-p m-flow" d="M260 88.5 L239 52.1" stroke="var(--ray)"/><g class="m-bob"><path transform="translate(152 0) scale(-1 1)" d="M40 62 l34 -4 l8 -10 l6 0 l-4 12 l22 -2 l6 -6 l5 0 l-3 9 l-3 1 l3 9 l-5 0 l-6 -6 l-22 -2 l4 12 l-6 0 l-8 -10 l-34 -4 z" fill="#d6dbd6"/></g><path class="m-flow" d="M38 62 H4" stroke="#c9cfc9" stroke-width="4" stroke-dasharray="6 8" opacity=".5"/><rect x="0" y="206" width="420" height="34" fill="#2b2620"/><line x1="0" y1="206" x2="420" y2="206" stroke="#8c7a58" stroke-width="3"/><g class="m-mol" style="--ph:0s"><g transform="translate(120 170) scale(0.85)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><g class="m-mol" style="--ph:0.9s"><g transform="translate(190 150) scale(0.85)"><line x1="-27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="-27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="-3.52" x2="0" y2="-3.52" stroke="#d6dbd6" stroke-width="2.64"/><line x1="27.8" y1="3.52" x2="0" y2="3.52" stroke="#d6dbd6" stroke-width="2.64"/><circle cx="-27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/><circle cx="0" cy="0" r="11" fill="#8d958f"/><circle cx="27.8" cy="0" r="8" fill="#14181a" stroke="#d6dbd6" stroke-width="3"/></g></g><text x="340" y="236" text-anchor="middle" font-size="26" fill="#8d958f">CO₂ bleibt</text></svg><ul class="why t-text lg"><li><span class="no" aria-hidden="true">✕</span><span>Risiko durch „Abbruchschock“</span></li><li><span class="no" aria-hidden="true">✕</span><span>das CO₂ bleibt, das Meer versauert weiter</span></li></ul></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (freie Fläche)</span><span><a href="https://doi.org/10.1038/ngeo1123" target="_blank" rel="noopener">Donato et al. 2011</a>; <a href="https://www.mangrovealliance.org/mangrove-forests/" target="_blank" rel="noopener">Global Mangrove Alliance 2022</a> (Kohlenstoffaufnahme Mangroven)</span><span><a href="https://www.iea.org/reports/direct-air-capture-2022" target="_blank" rel="noopener">IEA 2022</a>; <a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a>; <a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (DACCS-Ausbau und -Kosten)</span><span><a href="https://doi.org/10.1088/1748-9326/aae98d" target="_blank" rel="noopener">Smith &amp; Wagner 2018</a> (Aerosole in der Stratosphäre)</span><span><i>Eigene Rechnung</i> (Erwärmungsspitze)</span></p>
-  <aside class="notes">
-    <p data-click="0">Falls gefragt wird, was sonst diskutiert wird: Woran hakt es jeweils? Zuerst die Bäume zum Vergleich.</p>
-    <p data-click="1">Klick: Bäume: Es fehlt Platz, frei sind nur 8,3 Millionen Quadratkilometer. Und sie wirken zu langsam: Ein Baum holt sein CO₂ über Jahrzehnte, und CO₂ aus der Luft wirkt schwach. </p>
-    <p data-click="2">Klick: Mangroven binden je Hektar ein Vielfaches, mit ihrem Boden rund 1 000 Tonnen Kohlenstoff. Aber sie wachsen nur an tropischen Küsten; wiederherstellbar sind weltweit 8 000 Quadratkilometer, ein Tausendstel unserer Fläche. Und es bleibt CO₂, das langsam und schwach wirkt.</p>
-    <p data-click="3">Klick: Direct Air Capture mit Speicherung, kurz DACCS: Maschinen, die CO₂ aus der Luft filtern und unter die Erde bringen. Platz brauchen sie kaum. Aber heute laufen rund 0,01 Megatonnen im Jahr; selbst bei einem Ausbau wie einst die Windkraft sinkt die Spitze um 0,6 · 10⁻³ K, für 380 Milliarden Euro. Auch das bleibt CO₂: schwach und spät.</p>
-    <p data-click="4">Klick: Schnell wirkt nur eines: Aerosolinjektion, Schwefel in die Stratosphäre, der Sonnenlicht abschirmt wie bei einem Vulkanausbruch. Billig wäre es. Aber es braucht eigene Flugzeuge, und hört man auf, kommt die ganze Erwärmung in wenigen Jahren zurück.</p>
-    <p data-click="4">Gesucht ist also etwas, das kurzfristig kühlt, wenig Platz braucht, günstig, schnell umsetzbar und risikoarm ist (nur sagen, nicht auf der Folie).</p>
-    <p class="q">Falls Fragen kommen — Mangroven: rund 1 000 t C/ha mit Boden (Donato et al. 2011), aber nur 0,82 Mha wiederherstellbar (Global Mangrove Alliance 2022); Plantagen: Monokultur, Wasser, geerntet. Weitere Entnahme: Alle neuen Verfahren zusammen 1,35 Mt 2023 (State of CDR 2024). Gesteinsmehl 0,5–2 Gt/a möglich, 80–180 $/t (Beerling et al. 2020). BECCS (Energiepflanzen verbrennen, CO₂ speichern): 380–700 Mha für 3,3 Gt C/a, in Konkurrenz zur Nahrung (Smith et al. 2016). Ozean: Alkalinisierung, Eisendüngung, bisher nur Versuche, Folgen offen. DAC: 0,01 Mt/a (IEA 2022), geplant 8,8 Mt/a 2030 (Zurbriggen et al. 2026), Kosten bis 2050 optimistisch 0,38 Bio. € (Okosun et al. 2026). Stratosphäre: rund 2,25 Mrd. $/a in den ersten 15 Jahren (Smith &amp; Wagner 2018); Pinatubo kühlte 1992 um rund 0,5 K; CO₂ bleibt, das Meer versauert weiter. Auch schnell und billig: Methan aus Öl, Gas und Kohle abdichten; ergänzt die Ernährung, schafft aber keinen Platz.</p>
-  </aside>
-</section>
-
-<section class="slide dark backup" data-ch="dac" data-title="DAC-Modell">
-  <header class="sh"><h2>DAC-Modell: je Ort und je Jahr</h2></header>
-  <div class="body">
-    <p class="lq">Kann DACCS die Kurve unter 1,5&nbsp;°C drücken? Erst: Was bringt eine Tonne?</p>
-    <div class="anker split even">
-      <div class="chart" data-step="0" data-ec="anker0" data-label="Erwärmung gegenüber vorindustriell 2026 bis 2100, Very Low ohne seine CO₂-Entnahme und mit den Bäumen: Spitze um 2050 bei 1,82 °C, 0,32 über 1,5 °C"></div>
-      <svg class="schema flowsvg" viewBox="0 0 690 560" style="width:100%; height:100%; min-height:0" aria-label="Rechenweg des DAC-Modells: Wetter je Ort ergibt den Energiebedarf je Tonne; der Strommix je Region und Jahr; beides in einer zeitexpliziten Ökobilanz; daraus die CO₂-Entnahmeeffizienz je Zelle und Jahr, im Median 46 Prozent 2026 und 91 Prozent 2040">
-        <defs><marker id="ah-dk3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
-        <g font-family="IBM Plex Sans">
-          <g data-step="0"><text x="0" y="16" font-size="17" letter-spacing="1.5" fill="var(--muted)">SORBENS-DAC JE ORT · 0,5°-ZELLE</text>
-            <rect x="0" y="28" width="300" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="16" y="60" font-size="21" font-weight="600" fill="var(--ink)">Wetter</text><text x="16" y="88" font-size="19" fill="var(--ink-2)">Temperatur, Feuchte</text><path class="m-flow" d="M304 67 H372" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><rect x="380" y="28" width="310" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="396" y="60" font-size="21" font-weight="600" fill="var(--ink)">Energie je Tonne</text><text x="396" y="88" font-size="19" fill="var(--ink-2)">1,1 bis 1,9 MWh Strom</text></g>
-          <g data-step="1"><text x="0" y="140" font-size="17" letter-spacing="1.5" fill="var(--muted)">JE JAHR · 2026–2100</text>
-            <rect x="0" y="152" width="300" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="16" y="184" font-size="21" font-weight="600" fill="var(--ink)">Strommix</text><text x="16" y="212" font-size="19" fill="var(--ink-2)">je Region und Jahr</text><path class="m-flow" d="M304 191 H372" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><path class="m-flow" d="M535 110 V144" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/><rect x="380" y="152" width="310" height="78" rx="10" fill="var(--paper-deep)" stroke="var(--paper-line)" stroke-width="2"/><text x="396" y="184" font-size="21" font-weight="600" fill="var(--ink)">Zeitexpl. Ökobilanz</text><text x="396" y="212" font-size="19" fill="var(--ink-2)">Strom × Mix + Anlage</text></g>
-          <g data-step="2"><path class="m-flow" d="M535 234 V256" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dk3)"/>
-            <rect x="0" y="262" width="690" height="96" rx="10" fill="var(--fjord)"/><text x="18" y="296" font-size="22" font-weight="600" fill="var(--paper)">CO₂-Entnahmeeffizienz η<tspan font-size="15" baseline-shift="sub">C</tspan> je Zelle und Jahr</text><text x="18" y="334" font-size="20" fill="var(--paper)">= 1 − Emissionen je entnommener t · Median <tspan font-size="24" font-weight="600" fill="#f0b04a">46 %</tspan> 2026, <tspan font-size="24" font-weight="600" fill="#f0b04a">91 %</tspan> 2040</text></g>
-          
-        </g>
-      </svg>
-    </div>
-    <p class="takeaway" data-step="3" style="--d:0">Netto bleibt heute die Hälfte, 2040 schon 91&nbsp;%. <span class="tq">Wie viel bringt DACCS bis zur Spitze?</span></p>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozessmodell Sorbens-DAC)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klimadaten CRU TS)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Energiebedarf, Strommix)</span><span><a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (GWP100)</span></p>
-  <aside class="notes" data-n="B">
-    <p data-click="0">Links der Anker für den Rest: die Erwärmung in Grad: gestrichelt Very Low ohne die 335 Gigatonnen Entnahme, die das Szenario annimmt, Spitze 2050 bei 1,84 °C; grün mit den Bäumen kaum darunter, 1,82 °C, also 0,32 Grad über 1,5 °C.</p>
-    <p data-click="0">Kann DACCS die Kurve unter 1,5 °C drücken? Erst: Was bringt eine Tonne? Rechts, wie ich DAC modelliere: Sorbens-DAC, Gebläse drücken Luft durch ein Amin, Dampf um 100 °C löst das CO₂ wieder ab, es wird verdichtet und gespeichert.</p>
-    <p data-click="0">Wie viel Energie das braucht, hängt vom Ort ab: Aus dem Wetter jeder Zelle rechnet das Prozessmodell 1,1 bis 1,9 Megawattstunden Strom je Tonne. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme.</p>
-    <p data-click="1">Klick: Und vom Jahr: Woher der Strom kommt, ändert sich, Strommix je Region und Jahr aus REMIND-EU. Beides zusammen in einer zeitexpliziten Ökobilanz.</p>
-    <p data-click="2">Klick: Was von einer entnommenen Tonne netto bleibt, nenne ich die CO₂-Entnahmeeffizienz eta C, je Zelle und Jahr: im Median 46 Prozent heute, 91 Prozent 2040, wenn der Strom sauberer wird.</p>
-    <p data-click="3">Klick: Mit heutigem Strom bleibt also knapp die Hälfte; je sauberer der Strom, desto mehr. DACCS hängt damit an der Zeit, wie die Bäume. Wie viel bringt DACCS bis zur Spitze?</p>
-    <p class="q">Falls Fragen kommen — Gerechnet mit Brightway und premise: ecoinvent 3.12 mit REMIND-EU-Strompfaden, sechs Stützjahre, dazwischen interpoliert; 45 183 Landzellen mal 75 Jahre. Die Ökobilanzen löst ein iterativer Löser mit Warmstart, rund 80-mal schneller als der direkte.</p>
-    <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte der CO₂-Entnahmeeffizienz im Anhang.</p>
-  </aside>
-</section>
-
-
-<section class="slide dark backup" data-ch="dac" data-title="DACCS bis zur Spitze">
-  <header class="sh"><h2>DACCS bis zur Spitze</h2></header>
-  <div class="body">
-    <p class="lq">Wie viel bringt DACCS bis zur Spitze?</p>
-    <div class="anker split even">
-      <div class="chart" data-ec="anker1" data-label="Erwärmung gegenüber vorindustriell 2026 bis 2100: Very Low ohne seine CO₂-Entnahme, mit den Bäumen, und mit DACCS beim schnellsten Ausbau: bis zur Spitze 2050 kaum ein Unterschied, danach steil nach unten, bis 2087 der Speicher voll ist"></div>
-      <div class="flow">
-        <div class="fbw t-text" data-step="0"><p class="pk t-kicker c-ch">Ausbau, so schnell es geht</p>
-          <div class="chart dj" data-step="0" data-ec="daccsausbau" data-label="DACCS 2026 bis 2100: bis 2030 die geplante Kapazität von 8,8 Mt CO₂ im Jahr, danach 20 Prozent mehr im Jahr; 2050 erst 0,34 Gt CO₂ im Jahr, 2086 240 Gt CO₂ im Jahr, 2087 ist der sichere Speicher voll"></div>
-          <p>bis 2030 die geplante Kapazität, dann +20&nbsp;%/a wie einst die Windkraft, bis der Speicher voll ist; gebaut, wo η<sub>C</sub> am höchsten ist</p></div>
-        <div class="fb t-text" data-step="1"><p class="pk t-kicker c-ch">Bis 2050</p><div><p><b class="big">0,34&nbsp;Gt/a</b>, zusammen 2&nbsp;Gt: Die Spitze sinkt um 0,6&nbsp;·&nbsp;10⁻³&nbsp;K, die Lücke ist 320&nbsp;·&nbsp;10⁻³&nbsp;K.</p></div></div>
-        <div class="fb t-text" data-step="2"><p class="pk t-kicker c-ch">Kosten</p><div><p>Selbst das kostet bis 2050 <b class="big">380&nbsp;Mrd.&nbsp;€</b>, optimistisch gerechnet.</p></div></div>
-        <div class="fb t-text" data-step="3"><p class="pk t-kicker c-ch">Danach</p><div><p>Ab 2075 kühlt DACCS deutlich, bis 2087 der Speicher voll ist. Die Kurve vor der Spitze biegt es nicht.</p></div></div>
-      </div>
-    </div>
-    <p class="takeaway" data-step="4" style="--d:0">DACCS kommt für die Spitze zu spät. <span class="tq">Was wirkt kurzfristig?</span></p>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (DACCS-Ausbau)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicherkapazität je Land)</span><span><i>Eigene Rechnung</i> (DACCS-Ausbau je Land und Jahr)</span></p>
-  <aside class="notes" data-n="B">
-    <p data-click="0">Wie viel bringt DACCS bis zur Spitze? Ich baue es so schnell aus, wie es überhaupt denkbar ist. Rechts der Ausbau: Bis 2030 nehme ich die Kapazität, die heute geplant ist, knapp 9 Megatonnen im Jahr, hinterlegt; danach wächst sie jedes Jahr um 20 Prozent, so schnell wie einst die Windkraft. Gebaut wird dort, wo die CO₂-Entnahmeeffizienz am höchsten ist; gestrichelt, was netto entnommen wird, fast alles. Keine Optimierung, kein Ziel, einfach so viel wie möglich. Und selbst 2050 sind es erst 0,34 Gigatonnen im Jahr.</p>
-    <p data-click="1">Klick: Rot gestrichelt im Anker, bis zur Spitze 2050: Man sieht sie kaum, sie liegt auf den Bäumen. 2050 laufen 0,34 Gigatonnen im Jahr, zusammen sind 2 Gigatonnen entnommen. Die Spitze sinkt um 0,6 · 10⁻³ K; die Lücke ist 320 · 10⁻³ K.</p>
-    <p data-click="2">Klick: Und selbst dieser Ausbau kostet bis 2050 rund 380 Milliarden Euro, mit den optimistischen Kosten aus der Literatur.</p>
-    <p data-click="3">Klick: Danach wächst DACCS weiter, im Anker nach 2050: Ab etwa 2075 kühlt es deutlich, kurz vor 2090 laufen 240 Gigatonnen im Jahr, und 2087 ist der sichere Speicher voll, markiert; ab da knickt die Kurve, es kann nichts mehr gespeichert werden. Langfristig senkt DACCS also die Erwärmung. Aber die Kurve vor der Spitze biegt es nicht: Bis die Anlagen stehen, ist die Spitze vorbei, und was entnommen wird, kühlt erst über Jahre.</p>
-    <p data-click="4">Klick: DACCS kommt für die Spitze zu spät. Was wirkt kurzfristig?</p>
-    <p class="q">Falls Fragen kommen — Kosten bis 2050: optimistisch 0,38, Median 0,74, pessimistisch 1,26 Bio. € (Okosun et al. 2026; Investition, Fixkosten, Sorbens, Energie; nicht abgezinst). Um die Spitze auf 1,5 °C zu drücken, müssten bis 2050 rund 900 Gt heraus: 1 000 Gt um 2030 entnommen kühlen 2050 um 0,4 K. Selbst mit 50 %/a wären es bis 2050 nur 88 Gt. Was es bräuchte, um mit DACCS später zurück auf 1,5 °C zu kommen, rechnet eine Kostenoptimierung im Backup.</p>
-  </aside>
-</section>
-
-<!-- Grundlagen: DAC -->
 <section class="slide dark backup" data-ch="dac" data-title="DAC-Modell: Schema">
   <header class="sh"><h2>DACCS-Modell: je Ort und je Jahr</h2></header>
   <div class="body">
@@ -721,8 +241,14 @@
         </g>
       </g>
     </svg>
-    <p class="takeaway" data-step="4" style="--d:0">Mit heutigem Strom bleibt von einer entnommenen Tonne netto knapp die Hälfte (46&nbsp;%), 2040 schon 91&nbsp;%. <span class="tq">Wie viel DACCS braucht es also, wo und wann?</span></p>
+    <div class="mdl t-text">
+      <div><p class="dk t-kicker">Prozess</p><p>Sorbens-DAC (Amin), dampfunterstützte Temperatur-Vakuum-Wechseladsorption; Wärme aus einer Wärmepumpe, also alles Strom. CO₂ verdichtet und im Gestein gespeichert.</p></div>
+      <div><p class="dk t-kicker">Energie je Tonne, je Ort</p><p>Niveau: 0,5&nbsp;MWh Strom + 1,5&nbsp;MWh Wärme (premise). Abhängigkeit von Temperatur und Feuchte nach Sendi et al., Klima 2011–2020 je 0,5°-Zelle: 1,1–1,9&nbsp;MWh Strom. Kein DAC, wo der kälteste Monat unter −15&nbsp;°C liegt.</p></div>
+      <div><p class="dk t-kicker">Ökobilanz, je Jahr</p><p>Anlage, Sorbens, Strom und Speicherung in ecoinvent 3.12, Strommix je Region und Jahr aus REMIND-EU (SSP2-NDC) über premise, 2026–2100. η<sub>C</sub> = 1 − Treibhausgase (GWP100) je entnommener Tonne.</p></div>
+    </div>
+    <p class="takeaway" data-step="4" style="--d:0">Mit heutigem Strom bleibt von einer entnommenen Tonne netto knapp die Hälfte (46&nbsp;%), 2040 schon 91&nbsp;%.</p>
   </div>
+  <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozessmodell, Klimaabhängigkeit)</span><span><a href="https://doi.org/10.1038/s41597-020-0453-3" target="_blank" rel="noopener">Harris et al. 2020</a> (Klimadaten CRU TS)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Energiebedarf, Strommix, premise)</span><span><i>Eigene Rechnung</i> (η<sub>C</sub> je Zelle und Jahr)</span></p>
   <aside class="notes" data-n="B">
     <p data-click="0">Die Maschine: Gebläse drücken Luft durch ein Sorbens, ein Amin, an dem das CO₂ haften bleibt. Dann wird die Kammer geschlossen, Dampf um 100 °C löst das CO₂ wieder ab; es wird verdichtet und in tiefe Gesteinsschichten gepresst. Mit Wärmepumpe braucht das rund 1,5 Megawattstunden Strom je Tonne.</p>
     <p data-click="1">Klick: Wie viel genau, hängt vom Ort ab. Aus dem Wetter jeder Zelle, Temperatur und Feuchte, rechnet das Prozessmodell den Energiebedarf: 1,1 bis 1,9 MWh. Kalte Luft drückt die Wärmepumpe, feuchte Luft kostet Wärme, weil Wasser mitadsorbiert wird.</p>
@@ -731,94 +257,6 @@
     <p data-click="4">Klick: Mit heutigem Strom bleibt also knapp die Hälfte einer entnommenen Tonne netto übrig; je sauberer der Strom, desto mehr. Und weil das je Ort und Jahr anders ist, die Frage: Wie viel DACCS braucht es, wo und wann?</p>
     <p class="q">Falls Fragen kommen — Gerechnet mit Brightway und premise: ecoinvent 3.12 mit REMIND-EU-Strompfaden, sechs Stützjahre, dazwischen interpoliert; 45 183 Landzellen mal 75 Jahre. Die Ökobilanzen löst ein iterativer Löser mit Warmstart, rund 80-mal schneller als der direkte.</p>
     <p class="q">Falls Fragen kommen — Ausschluss: Zellen mit kältestem Monat unter −15 °C (borealer Gürtel), wie bei Sendi et al. Niveau aus premise (0,5 MWh Strom + 1,5 MWh Wärme je t), nur die Klimaabhängigkeit aus Sendi. Prozessfolie und Karte der CO₂-Entnahmeeffizienz im Anhang.</p>
-  </aside>
-</section>
-
-<section class="slide backup" data-ch="dac" data-title="Sorbens-DAC: Prozess und Energiebedarf">
-  <header class="sh"><h2>Sorbens-DAC: Prozess und Energiebedarf</h2></header>
-  <div class="body">
-    <svg class="schema mo" data-export="s_dac_prozess" viewBox="0 0 1424 470" style="width:100%; flex:1; min-height:0" aria-label="Sorbens-DAC in drei Schritten und sein Energiebedarf je Tonne CO₂">
-      <defs><marker id="ah-dp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="var(--muted)"/></marker></defs>
-      <g font-family="IBM Plex Sans">
-        <!-- 1 Ansaugen -->
-        <g class="pop" style="--d:100">
-          <rect x="40" y="60" width="210" height="140" rx="10" fill="var(--paper-deep)" stroke="var(--fjord)" stroke-width="3"/>
-          <circle cx="90" cy="130" r="30" fill="var(--fjord)"/>
-          <path class="m-fan" d="M90 108 V152 M68 130 H112" stroke="var(--paper-deep)" stroke-width="5" stroke-linecap="round"/>
-          <rect x="140" y="72" width="60" height="116" fill="#d8cfbb"/>
-          <path d="M150 72 V188 M160 72 V188 M170 72 V188 M180 72 V188 M190 72 V188" stroke="#b8ab8e" stroke-width="2"/>
-          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-0.00s" cx="146" cy="92" r="6"/><circle class="m-bob" style="--ph:-0.37s" cx="168" cy="120" r="6"/><circle class="m-bob" style="--ph:-0.74s" cx="152" cy="150" r="6"/><circle class="m-bob" style="--ph:-1.11s" cx="186" cy="104" r="6"/><circle class="m-bob" style="--ph:-1.48s" cx="176" cy="168" r="6"/></g>
-          <path class="m-flow" d="M2 110 H36 M2 150 H36" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
-          <path class="m-flow" d="M226 56 V22" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
-          <text x="240" y="24" font-size="19" fill="var(--muted)">CO₂-arme Abluft</text>
-          <circle cx="24" cy="272" r="20" fill="var(--fjord)"/><text x="24" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">1</text>
-          <text x="56" y="281" font-size="26" font-weight="600" fill="var(--ink)">Ansaugen</text>
-          <text x="4" y="326" font-size="20" fill="var(--ink-2)">Gebläse: Luft durch</text>
-          <text x="4" y="354" font-size="20" fill="var(--ink-2)">ein Sorbens (Amin)</text>
-          <text x="4" y="382" font-size="20" fill="var(--ink-2)">→ CO₂ bindet daran</text>
-          <rect x="4" y="408" width="90" height="38" rx="19" fill="var(--fjord-soft)"/><text x="49" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Strom</text>
-        </g>
-        <path class="m-flow pop" data-step="1" d="M262 130 H338" stroke="var(--co2)" stroke-width="4" fill="none" marker-end="url(#ah-dp)"/>
-        <!-- 2 Ablösen -->
-        <g class="pop" data-step="1">
-          <rect x="350" y="60" width="210" height="140" rx="10" fill="var(--paper-deep)" stroke="var(--fjord)" stroke-width="3"/>
-          <rect x="425" y="72" width="60" height="116" fill="#d8cfbb"/>
-          <path d="M435 72 V188 M445 72 V188 M455 72 V188 M465 72 V188 M475 72 V188" stroke="#b8ab8e" stroke-width="2"/>
-          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-1.85s" cx="392" cy="96" r="6"/><circle class="m-bob" style="--ph:-2.22s" cx="510" cy="88" r="6"/><circle class="m-bob" style="--ph:-2.59s" cx="398" cy="160" r="6"/><circle class="m-bob" style="--ph:-0.36s" cx="520" cy="150" r="6"/><circle class="m-bob" style="--ph:-0.73s" cx="500" cy="118" r="6"/></g>
-          <g stroke="var(--alb)" stroke-width="4" fill="none" stroke-linecap="round">
-            <path class="m-steam" d="M400 238 q8 -8 0 -16 q-8 -8 0 -16"/><path class="m-steam" d="M455 238 q8 -8 0 -16 q-8 -8 0 -16"/><path class="m-steam" d="M510 238 q8 -8 0 -16 q-8 -8 0 -16"/>
-          </g>
-          <circle cx="334" cy="272" r="20" fill="var(--fjord)"/><text x="334" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">2</text>
-          <text x="366" y="281" font-size="26" font-weight="600" fill="var(--ink)">Ablösen</text>
-          <text x="314" y="326" font-size="20" fill="var(--ink-2)">Vakuum, Dampf (100 °C)</text>
-          <text x="314" y="354" font-size="20" fill="var(--ink-2)">→ CO₂ löst sich ab</text>
-          <text x="314" y="382" font-size="20" fill="var(--ink-2)"></text>
-          <rect x="314" y="408" width="200" height="38" rx="19" fill="#efcfae"/><text x="414" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Wärme um 100 °C</text>
-        </g>
-        <path class="m-flow pop" data-step="2" d="M572 130 H648" stroke="var(--co2)" stroke-width="4" fill="none" marker-end="url(#ah-dp)"/>
-        <!-- 3 Speichern -->
-        <g class="pop" data-step="2">
-          <rect x="660" y="150" width="230" height="56" fill="#d9cfb9"/>
-          <path d="M660 168 H890 M660 188 H890" stroke="#c3b79c" stroke-width="2"/>
-          <line x1="660" y1="150" x2="890" y2="150" stroke="#8c7a58" stroke-width="3"/>
-          <rect x="664" y="84" width="104" height="56" rx="8" fill="var(--fjord)"/>
-          <text x="716" y="118" text-anchor="middle" font-size="17" fill="var(--paper)">Verdichter</text>
-          <path d="M768 112 H800 V198" stroke="#5d665f" stroke-width="10" fill="none"/>
-          <g fill="var(--co2)"><circle class="m-bob" style="--ph:-1.10s" cx="790" cy="200" r="6"/><circle class="m-bob" style="--ph:-1.47s" cx="808" cy="196" r="6"/><circle class="m-bob" style="--ph:-1.84s" cx="800" cy="186" r="6"/></g>
-          <circle cx="644" cy="272" r="20" fill="var(--fjord)"/><text x="644" y="280" text-anchor="middle" font-size="22" font-weight="600" fill="var(--paper)">3</text>
-          <text x="676" y="281" font-size="26" font-weight="600" fill="var(--ink)">Speichern</text>
-          <text x="624" y="326" font-size="20" fill="var(--ink-2)">Verdichten, transportieren</text>
-          <text x="624" y="354" font-size="20" fill="var(--ink-2)">→ Einlagerung in tiefe</text>
-          <text x="624" y="382" font-size="20" fill="var(--ink-2)">Gesteinsschichten</text>
-          <rect x="624" y="408" width="90" height="38" rx="19" fill="var(--fjord-soft)"/><text x="669" y="434" text-anchor="middle" font-size="20" fill="var(--ink)">Strom</text>
-        </g>
-        <!-- Energie je Tonne -->
-        <g class="pop" data-step="3">
-          <line x1="940" y1="20" x2="940" y2="450" stroke="var(--paper-line)" stroke-width="2"/>
-          <text x="975" y="44" font-size="24" font-weight="600" fill="var(--ink)">Energie je Tonne CO₂</text>
-          <text x="975" y="100" font-size="20" fill="var(--muted)">Wärme direkt zugeführt</text>
-          <rect x="975" y="114" width="270" height="46" fill="var(--alb)"/><text x="989" y="145" font-size="20" fill="#fff">Wärme 1,5</text>
-          <rect x="1245" y="114" width="90" height="46" fill="var(--fjord)"/><text x="1290" y="145" text-anchor="middle" font-size="18" fill="#fff">Strom 0,5</text>
-          <text x="1345" y="145" font-size="20" fill="var(--ink)">MWh</text>
-          <path class="m-flow" d="M1110 166 V206" stroke="var(--muted)" stroke-width="3" fill="none" marker-end="url(#ah-dp)"/>
-          <text x="1124" y="194" font-size="19" fill="var(--muted)">Wärmepumpe</text>
-          <text x="975" y="236" font-size="20" fill="var(--muted)">mit Wärmepumpe: nur noch Strom</text>
-          <rect x="975" y="250" width="90" height="46" fill="var(--fjord)"/><text x="1020" y="281" text-anchor="middle" font-size="19" fill="#fff">0,5</text>
-          <rect x="1065" y="250" width="180" height="46" fill="var(--fjord-soft)"/><text x="1155" y="281" text-anchor="middle" font-size="19" fill="var(--ink)">für die Wärme ≈ 1</text>
-          <text x="1255" y="281" font-size="20" font-weight="600" fill="var(--ink)">≈ 1,5 MWh</text>
-          <text x="975" y="350" font-size="20" fill="var(--ink-2)">Je nach Klima 1,1 bis 1,9 MWh</text>
-          <text x="975" y="378" font-size="20" fill="var(--ink-2)">→ kalt: COP sinkt</text>
-          <text x="975" y="406" font-size="20" fill="var(--ink-2)">→ feucht: mehr Wärmebedarf</text>
-        </g>
-      </g>
-    </svg>
-    <div class="foot"><div></div><p class="takeaway" data-step="4" style="--d:0">Kandidat für die Lücke: DACCS, rund 1,5 MWh Strom je Tonne CO₂.</p></div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1016/j.oneear.2022.09.003" target="_blank" rel="noopener">Sendi et al. 2022</a> (Prozessmodell Sorbens-DAC)</span><span><a href="https://doi.org/10.1016/j.rser.2022.112311" target="_blank" rel="noopener">Sacchi et al. 2022</a> (Energiebedarf je t)</span></p>
-  <aside class="notes">
-    <p class="q">Ausführlich: Für die Lücke kommt vor allem Direct Air Capture in Frage. Der Prozess ist energieintensiv. Mit Wärmepumpe wird der gesamte Bedarf elektrisch: rund 1,5 MWh je Tonne CO₂. Die CO₂-Entnahmeeffizienz hängt damit von der Emissionsintensität des Stroms ab, der Strombedarf vom lokalen Klima.</p>
-    <p data-click="0">Die Lücke muss technische Entnahme schließen. Am weitesten entwickelt ist Direct Air Capture, hier das Sorbens-Verfahren. Wie funktioniert es? Erstens: Gebläse drücken Luft durch ein Sorbens, ein Material mit Aminen, an dem das CO₂ haften bleibt. Zweitens: Ist es voll, wird die Kammer geschlossen; Vakuum und Dampf um 100 °C lösen das CO₂ wieder ab. Drittens: Das CO₂ wird verdichtet und in tiefen Gesteinsschichten eingelagert. Das kostet vor allem Energie, rechts je Tonne: anderthalb Megawattstunden Wärme und eine halbe Strom. Mit einer Wärmepumpe wird aus der Wärme Strom — dann hängt alles am Strom. Und wie viel Strom, hängt am Wetter.</p>
-    <p class="q">Falls Fragen kommen — Energie aus dem premise-Datensatz (Sorbens-DAC, 100 kt/a, ecoinvent 3.12): 0,5 MWh Strom und 5,4 GJ Wärme je t. Wärmepumpe nach Sendi et al. 2022: 50 % des Carnot-Werts, Senke 120 °C, COP 1,5–2,0. Climeworks meldet für Hinwil 3,3 MWh Wärme und 0,7 MWh Strom je t, etwa doppelt so viel Wärme — das ist eine Sensitivität (Backup). Flüssig-DAC (Kalilauge, Hochtemperatur) ist nicht enthalten.</p>
   </aside>
 </section>
 
@@ -851,15 +289,43 @@
 </aside>
 </section>
 
+<section class="slide dark backup" data-ch="dac" data-title="DACCS bis zur Spitze">
+  <header class="sh"><h2>DACCS bis zur Spitze</h2></header>
+  <div class="body">
+    <p class="lq">Wie viel bringt DACCS bis zur Spitze?</p>
+    <div class="anker split even">
+      <div class="chart" data-ec="anker1" data-label="Erwärmung gegenüber vorindustriell 2026 bis 2100: Very Low ohne seine CO₂-Entnahme, mit den Bäumen, und mit DACCS beim schnellsten Ausbau: bis zur Spitze 2050 kaum ein Unterschied, danach steil nach unten, bis 2087 der Speicher voll ist"></div>
+      <div class="flow">
+        <div class="fbw t-text" data-step="0"><p class="pk t-kicker c-ch">Ausbau, so schnell es geht</p>
+          <div class="chart dj" data-step="0" data-ec="daccsausbau" data-label="DACCS 2026 bis 2100: bis 2030 die geplante Kapazität von 8,8 Mt CO₂ im Jahr, danach 20 Prozent mehr im Jahr; 2050 erst 0,34 Gt CO₂ im Jahr, 2086 240 Gt CO₂ im Jahr, 2087 ist der sichere Speicher voll"></div>
+          <p>bis 2030 die geplante Kapazität, dann +20&nbsp;%/a wie einst die Windkraft, bis der Speicher voll ist; gebaut, wo η<sub>C</sub> am höchsten ist</p></div>
+        <div class="fb t-text" data-step="1"><p class="pk t-kicker c-ch">Bis 2050</p><div><p><b class="big">0,34&nbsp;Gt/a</b>, zusammen 2&nbsp;Gt: Die Spitze sinkt um 0,6&nbsp;·&nbsp;10⁻³&nbsp;K, die Lücke ist 320&nbsp;·&nbsp;10⁻³&nbsp;K.</p></div></div>
+        <div class="fb t-text" data-step="2"><p class="pk t-kicker c-ch">Kosten</p><div><p>Selbst das kostet bis 2050 <b class="big">380&nbsp;Mrd.&nbsp;€</b>, optimistisch gerechnet.</p></div></div>
+        <div class="fb t-text" data-step="3"><p class="pk t-kicker c-ch">Danach</p><div><p>Ab 2075 kühlt DACCS deutlich, bis 2087 der Speicher voll ist. Die Kurve vor der Spitze biegt es nicht.</p></div></div>
+      </div>
+    </div>
+    <p class="takeaway" data-step="4" style="--d:0">DACCS kommt für die Spitze zu spät.</p>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (DACCS-Ausbau)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicherkapazität je Land)</span><span><i>Eigene Rechnung</i> (DACCS-Ausbau je Land und Jahr)</span></p>
+  <aside class="notes" data-n="B">
+    <p data-click="0">Wie viel bringt DACCS bis zur Spitze? Ich baue es so schnell aus, wie es überhaupt denkbar ist. Rechts der Ausbau: Bis 2030 nehme ich die Kapazität, die heute geplant ist, knapp 9 Megatonnen im Jahr, hinterlegt; danach wächst sie jedes Jahr um 20 Prozent, so schnell wie einst die Windkraft. Gebaut wird dort, wo die CO₂-Entnahmeeffizienz am höchsten ist; gestrichelt, was netto entnommen wird, fast alles. Keine Optimierung, kein Ziel, einfach so viel wie möglich. Und selbst 2050 sind es erst 0,34 Gigatonnen im Jahr.</p>
+    <p data-click="1">Klick: Rot gestrichelt im Anker, bis zur Spitze 2050: Man sieht sie kaum, sie liegt auf den Bäumen. 2050 laufen 0,34 Gigatonnen im Jahr, zusammen sind 2 Gigatonnen entnommen. Die Spitze sinkt um 0,6 · 10⁻³ K; die Lücke ist 320 · 10⁻³ K.</p>
+    <p data-click="2">Klick: Und selbst dieser Ausbau kostet bis 2050 rund 380 Milliarden Euro, mit den optimistischen Kosten aus der Literatur.</p>
+    <p data-click="3">Klick: Danach wächst DACCS weiter, im Anker nach 2050: Ab etwa 2075 kühlt es deutlich, kurz vor 2090 laufen 240 Gigatonnen im Jahr, und 2087 ist der sichere Speicher voll, markiert; ab da knickt die Kurve, es kann nichts mehr gespeichert werden. Langfristig senkt DACCS also die Erwärmung. Aber die Kurve vor der Spitze biegt es nicht: Bis die Anlagen stehen, ist die Spitze vorbei, und was entnommen wird, kühlt erst über Jahre.</p>
+    <p data-click="4">Klick: DACCS kommt für die Spitze zu spät. Was wirkt kurzfristig?</p>
+    <p class="q">Falls Fragen kommen — Kosten bis 2050: optimistisch 0,38, Median 0,74, pessimistisch 1,26 Bio. € (Okosun et al. 2026; Investition, Fixkosten, Sorbens, Energie; nicht abgezinst). Um die Spitze auf 1,5 °C zu drücken, müssten bis 2050 rund 900 Gt heraus: 1 000 Gt um 2030 entnommen kühlen 2050 um 0,4 K. Selbst mit 50 %/a wären es bis 2050 nur 88 Gt. Was es bräuchte, um mit DACCS später zurück auf 1,5 °C zu kommen, rechnet eine Kostenoptimierung im Backup.</p>
+  </aside>
+</section>
+
+<!-- Grundlagen: DAC -->
+
 <section class="slide dark backup" data-ch="dac" data-title="DACCS kostenoptimal: wo">
   <header class="sh"><h2>Kostenoptimierung von DACCS: wo und wie viel</h2></header>
   <div class="body">
-    <p class="lq">Was bräuchte es, um mit DACCS zurück auf 1,5&nbsp;°C zu kommen?</p>
     <div class="dsim split">
-      <div class="dmapcol"><div class="optbox card line fd t-text sm" role="group" aria-label="Die Kostenoptimierung wählt Bau und Betrieb je Land und Jahr. Ziel: so früh wie möglich zurück auf 1,5 °C, dabei möglichst geringe Kosten, optimistisch nach Okosun et al. 2026. Grenzen: CO₂-Entnahmeeffizienz je Ort und Jahr, Speicher je Land, Ausbau höchstens 20 Prozent im Jahr">
-        <div><p class="dk t-kicker">Optimierung wählt</p><p>Bau und Betrieb<br>je Land und Jahr</p></div>
-        <div class="ziel"><p class="dk t-kicker">Ziel</p><ol><li>so früh wie möglich zurück auf 1,5&nbsp;°C</li><li>dabei möglichst geringe Kosten (optimistisch)</li></ol></div>
-        <div><p class="dk t-kicker">Grenzen</p><p>CO₂-Entnahmeeffizienz je Ort und Jahr<br>Speicher je Land · Ausbau ≤&nbsp;20&nbsp;%/a</p></div>
+      <div class="dmapcol"><div class="optbox card line fd t-text sm" role="group" aria-label="Lineares Programm für DACCS: Bau und Betrieb je Land und Jahr, Ziel, Nebenbedingungen">
+        <div><p class="dk t-kicker">Entscheidet</p><p>Bau und Betrieb je Land und Jahr, 2026–2100 (lineares Programm)</p><p class="dk t-kicker" style="margin-top:12px">Ziel</p><ol class="ziel"><li>frühestes Jahr, ab dem die Erwärmung jedes Jahr bei höchstens 1,5&nbsp;°C liegt</li><li>dabei geringste Kosten: Investition, Fixkosten, Sorbens, Energie (optimistisch, unverzinst)</li></ol></div>
+        <div><p class="dk t-kicker">Nebenbedingungen</p><ul class="dots"><li>Kühlung (η<sub>C</sub> × Entnahme, über die FaIR-Antwort) ≥ Erwärmung über 1,5&nbsp;°C</li><li>Betrieb ≤ Anlagen der letzten 20 Jahre; Anlagen dürfen stillstehen</li><li>Summe je Land ≤ sicherer Speicher</li><li>Welt: bis 2030 auf 8,8&nbsp;Mt/a, danach ≤ +20&nbsp;%/a</li><li>je Land η<sub>C</sub> der besten 10&nbsp;% der Zellen nahe Speicher; nur wo η<sub>C</sub> &gt; 0</li></ul></div>
       </div><p class="dk mapcap rise t-kicker" data-step="1" style="--d:0">Wo bis 2083 entnommen wird</p><div class="dmap rise fs" data-step="1" style="--d:0" data-path="opt" data-scale="opt" data-w="918"><img data-src="@@DACFILM_LAND@@" alt=""><img data-src="@@DACFILM_BASINS@@" alt=""><canvas role="img" aria-label="Weltkarte: CO₂-Entnahme durch DACCS 2026 bis 2083 je 2°-Block, verteilt über 50 Länder mit Speicher"></canvas></div><div class="dleg rise" data-step="1" style="--d:200"></div></div>
       <div class="dside rise" data-step="1" style="--d:400">
         <p class="dk t-kicker">Ergebnis · ≤&nbsp;20&nbsp;%/a, Kosten optimistisch</p>
@@ -871,12 +337,38 @@
       </div>
     </div>
   </div>
-  <p class="src"><span><a href="https://doi.org/10.5194/essd-17-965-2025" target="_blank" rel="noopener">Friedlingstein et al. 2025</a> (fossile Emissionen)</span><span><i>Eigene Rechnung</i> (Kostenoptimierung DACCS)</span></p>
+  <p class="src"><span><a href="https://doi.org/10.1038/s41467-026-72691-3" target="_blank" rel="noopener">Zurbriggen et al. 2026</a> (Ausbau)</span><span><a href="https://doi.org/10.1038/s41586-025-09423-y" target="_blank" rel="noopener">Gidden et al. 2025</a> (Speicher je Land)</span><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (Kosten)</span><span><a href="https://doi.org/10.5194/essd-17-965-2025" target="_blank" rel="noopener">Friedlingstein et al. 2025</a> (fossile Emissionen)</span><span><i>Eigene Rechnung</i> (Optimierung)</span></p>
   <aside class="notes" data-n="B">
     <p data-click="0">Für die Frage: Was bräuchte es, um mit DACCS zurück auf 1,5 °C zu kommen? Die Kostenoptimierung wählt Bau und Betrieb je Land und Jahr. Das Ziel: so früh wie möglich zurück auf 1,5 °C und dort bleiben, dabei möglichst geringe Kosten, mit den optimistischen Kosten von Okosun et al. Die Grenzen: die CO₂-Entnahmeeffizienz je Ort und Jahr aus dem DAC-Modell, der sichere Speicher je Land, und der Ausbau wächst ab den 8,8 Megatonnen von 2030 um höchstens 20 Prozent im Jahr.</p>
     <p data-click="1">Klick: Das Ergebnis. Zurück auf 1,5 °C erst 2083, dafür um 2080 72 Gigatonnen im Jahr; zusammen 680 Gigatonnen, 47 Prozent der sicheren Speicher, verteilt über 50 Länder, vorne die USA, Australien, Kanada und China.</p>
     <p data-click="2">Klick: 72 Gigatonnen im Jahr, fast doppelt so viel wie alle fossilen Emissionen heute.</p>
     <p class="q">Falls Fragen kommen — Das Rückkehrjahr ist das früheste, das das Tempo erlaubt (Bisektion). Danach sinkt die Kurve unter 1,5 °C: Very Low sinkt von selbst, und das gespeicherte CO₂ kühlt weiter. Die Aufteilung auf Länder ist nicht ganz eindeutig; eindeutig sind die Menge und die großen Standorte.</p>
+  </aside>
+</section>
+
+<section class="slide dark backup" data-ch="dac" data-title="Kosten von DACCS">
+  <header class="sh"><h2>Was DACCS kostet</h2></header>
+  <div class="body">
+    <div class="warten split wide">
+      <div class="chart" data-ec="kosten" data-label="Jährliche Kosten von DACCS 2026 bis 2100, Median mit Spanne, verglichen mit den fossilen Subventionen weltweit und dem BIP der EU-27"></div>
+      <div class="side">
+        <div class="vt v4" role="table" aria-label="Kosten von DACCS je Kostenannahme: Euro je Tonne, teuerstes Jahr und Summe 2026 bis 2100">
+          <div class="r head t-kicker" role="row"><span role="columnheader">Kosten</span><span role="columnheader">€/t</span><span role="columnheader">Spitze</span><span role="columnheader">Summe</span></div>
+          <div class="r main" role="row"><span role="cell">optimistisch</span><span role="cell">157</span><span role="cell">10,7</span><span role="cell">108</span></div>
+          <div class="r" role="row"><span role="cell"><i class="ln dac"></i>Median</span><span role="cell">287</span><span role="cell">19,8</span><span role="cell">196</span></div>
+          <div class="r" role="row"><span role="cell">pessimistisch</span><span role="cell">466</span><span role="cell">30,7</span><span role="cell">319</span></div>
+        </div>
+        <p class="dsub t-text">Spitze in Bio. € im teuersten Jahr (2079), Summe in Bio. € bis 2100</p>
+        <p class="takeaway" data-step="2" style="--d:600">Optimistisch 108&nbsp;Bio.&nbsp;€ bis 2100; im teuersten Jahr 11&nbsp;Bio.&nbsp;€, knapp drei Fünftel des EU-BIP.</p>
+      </div>
+    </div>
+  </div>
+  <p class="src"><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (DACCS-Kosten)</span><span><a href="https://ec.europa.eu/eurostat/databrowser/view/nama_10_gdp/default/table" target="_blank" rel="noopener">Eurostat nama_10_gdp</a> (BIP EU-27)</span><span><a href="https://www.iea.org/data-and-statistics/data-product/fossil-fuel-subsidies-database" target="_blank" rel="noopener">IEA Fossil Fuel Subsidies Database</a> (explizite Subventionen)</span><span><i>Eigene Rechnung</i> (Kostenvergleich der Pläne)</span></p>
+  <aside class="notes" data-n="B">
+    <p data-click="0">Was kostet DACCS bei höchstens 20 Prozent Ausbau im Jahr? Der Plan stammt aus der Kostenoptimierung mit den optimistischen Kosten von Okosun et al.; die rote Linie bewertet denselben Plan mit dem Median, das Band reicht von optimistisch bis pessimistisch. Am teuersten wird es um 2079, kurz vor der Rückkehr auf 1,5 °C: optimistisch 11 Billionen Euro im Jahr, im Median 20.</p>
+    <p data-click="1">Klick: Zum Vergleich die fossilen Subventionen weltweit, die direkt gezahlt werden: rund 0,6 Billionen Euro im Jahr. Das teuerste Jahr kostet selbst optimistisch fast das 19-Fache.</p>
+    <p data-click="2">Klick: Und die ganze Wirtschaftsleistung der EU-27: 18,1 Billionen Euro im Jahr. Optimistisch kostet das teuerste Jahr knapp drei Fünftel davon, im Median mehr als alles; bis 2100 zusammen 108 Billionen, sechs Jahre EU-BIP.</p>
+    <p class="q">Falls Fragen kommen — Der IMF zählt bei den fossilen Subventionen auch nicht bezahlte Umwelt- und Gesundheitsschäden mit, rund 7 Billionen USD 2022; das ist kein Geld, das ausgegeben wird, darum nicht auf der Folie. Kosten nicht abgezinst, € von 2024; Investition und Fixkosten je Anlage, Sorbens und Energie je Tonne. Mit 50 oder 100 %/a: 228 und 362 Bio. € optimistisch.</p>
   </aside>
 </section>
 
@@ -898,7 +390,7 @@
           <div class="r rise" data-step="2" role="row"><span role="cell"><i class="ln" style="border-color:#d0644a"></i>Wald: Albedo</span><span role="cell">−1</span><span role="cell">−8</span></div>
           <div class="r rise main" data-step="3" role="row"><span role="cell"><i class="ln" style="border-color:#f2ede2"></i>netto</span><span role="cell">205</span><span role="cell">210</span></div>
         </div>
-        <p class="takeaway" data-step="3" style="--d:300">Fast alles ist Methan: 0,2&nbsp;K kühler schon 2050. <span class="tq">Was heißt das für die Lücke?</span></p>
+        <p class="takeaway" data-step="3" style="--d:300">Fast alles ist Methan: 0,2&nbsp;K kühler schon 2050.</p>
       </div>
     </div>
   </div>
@@ -944,32 +436,6 @@
   </aside>
 </section>
 
-<section class="slide dark backup" data-ch="dac" data-title="Kosten von DACCS">
-  <header class="sh"><h2>Was DACCS kostet</h2></header>
-  <div class="body">
-    <div class="warten split wide">
-      <div class="chart" data-ec="kosten" data-label="Jährliche Kosten von DACCS 2026 bis 2100, Median mit Spanne, verglichen mit den fossilen Subventionen weltweit und dem BIP der EU-27"></div>
-      <div class="side">
-        <div class="vt v4" role="table" aria-label="Kosten von DACCS je Kostenannahme: Euro je Tonne, teuerstes Jahr und Summe 2026 bis 2100">
-          <div class="r head t-kicker" role="row"><span role="columnheader">Kosten</span><span role="columnheader">€/t</span><span role="columnheader">Spitze</span><span role="columnheader">Summe</span></div>
-          <div class="r main" role="row"><span role="cell">optimistisch</span><span role="cell">157</span><span role="cell">10,7</span><span role="cell">108</span></div>
-          <div class="r" role="row"><span role="cell"><i class="ln dac"></i>Median</span><span role="cell">287</span><span role="cell">19,8</span><span role="cell">196</span></div>
-          <div class="r" role="row"><span role="cell">pessimistisch</span><span role="cell">466</span><span role="cell">30,7</span><span role="cell">319</span></div>
-        </div>
-        <p class="dsub t-text">Spitze in Bio. € im teuersten Jahr (2079), Summe in Bio. € bis 2100</p>
-        <p class="takeaway" data-step="2" style="--d:600">Optimistisch 108&nbsp;Bio.&nbsp;€ bis 2100; im teuersten Jahr 11&nbsp;Bio.&nbsp;€, knapp drei Fünftel des EU-BIP.</p>
-      </div>
-    </div>
-  </div>
-  <p class="src"><span><a href="https://doi.org/10.1016/j.ijggc.2026.104743" target="_blank" rel="noopener">Okosun et al. 2026</a> (DACCS-Kosten)</span><span><a href="https://ec.europa.eu/eurostat/databrowser/view/nama_10_gdp/default/table" target="_blank" rel="noopener">Eurostat nama_10_gdp</a> (BIP EU-27)</span><span><a href="https://www.iea.org/data-and-statistics/data-product/fossil-fuel-subsidies-database" target="_blank" rel="noopener">IEA Fossil Fuel Subsidies Database</a> (explizite Subventionen)</span><span><i>Eigene Rechnung</i> (Kostenvergleich der Pläne)</span></p>
-  <aside class="notes" data-n="B">
-    <p data-click="0">Was kostet DACCS bei höchstens 20 Prozent Ausbau im Jahr? Der Plan stammt aus der Kostenoptimierung mit den optimistischen Kosten von Okosun et al.; die rote Linie bewertet denselben Plan mit dem Median, das Band reicht von optimistisch bis pessimistisch. Am teuersten wird es um 2079, kurz vor der Rückkehr auf 1,5 °C: optimistisch 11 Billionen Euro im Jahr, im Median 20.</p>
-    <p data-click="1">Klick: Zum Vergleich die fossilen Subventionen weltweit, die direkt gezahlt werden: rund 0,6 Billionen Euro im Jahr. Das teuerste Jahr kostet selbst optimistisch fast das 19-Fache.</p>
-    <p data-click="2">Klick: Und die ganze Wirtschaftsleistung der EU-27: 18,1 Billionen Euro im Jahr. Optimistisch kostet das teuerste Jahr knapp drei Fünftel davon, im Median mehr als alles; bis 2100 zusammen 108 Billionen, sechs Jahre EU-BIP.</p>
-    <p class="q">Falls Fragen kommen — Der IMF zählt bei den fossilen Subventionen auch nicht bezahlte Umwelt- und Gesundheitsschäden mit, rund 7 Billionen USD 2022; das ist kein Geld, das ausgegeben wird, darum nicht auf der Folie. Kosten nicht abgezinst, € von 2024; Investition und Fixkosten je Anlage, Sorbens und Energie je Tonne. Mit 50 oder 100 %/a: 228 und 362 Bio. € optimistisch.</p>
-  </aside>
-</section>
-
 <section class="slide backup" data-ch="dac" data-title="Ein Jahr vegan: die Rechnung">
   <header class="sh"><h2>Ein Jahr vegan: die Rechnung</h2></header>
   <div class="body">
@@ -1001,3 +467,4 @@
     <p class="q">Falls Fragen kommen — Ein Baum kühlt bis 2050 so wenig, weil er 2026 als Setzling startet (rund 2.000 je Hektar) und die Albedo einen Teil zurücknimmt. Flug nur CO₂; mit Kondensstreifen etwa doppelt so viel Wirkung je Flug, also gut die Hälfte der Flüge. Auf allen kühlenden Flächen ist Platz für rund 100 Bäume je Mensch, nicht für 1.400 (24 Jahre vegan).</p>
   </aside>
 </section>
+
