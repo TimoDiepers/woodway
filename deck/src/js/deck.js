@@ -4048,6 +4048,7 @@ class Presenter {
           <button id="pv-big" title="Notizen größer">A+</button>
           <span id="pv-timer" title="Klick: pausieren / fortsetzen">00:00</span>
           <button id="pv-reset">Timer zurücksetzen</button>
+          <label id="pv-marks" title="Zeitmarken, durch Komma getrennt, als Minuten oder mm:ss; die letzte färbt den Timer rot, die anderen gelb">Zeitmarken <input id="pv-marks-in" spellcheck="false"></label>
           <span id="pv-clock"></span>
         </header>
         <section class="pv-prev">
@@ -4061,6 +4062,8 @@ class Presenter {
           <div id="pv-edwrap" hidden><div class="ned-gut"></div><div id="pv-ned" contenteditable="true" spellcheck="false"></div></div>
           <div class="pv-nw l" title="Ziehen: Notizen breiter oder schmaler · Doppelklick: zurück"></div><div class="pv-nw r" title="Ziehen: Notizen breiter oder schmaler · Doppelklick: zurück"></div>
         </section>
+        <div id="pv-title-note" hidden><b>Timer zurücksetzen!</b><span>kurz vor dem ersten Wort</span><button id="pv-reset2">Jetzt zurücksetzen</button></div>
+        <div id="pv-alert" hidden></div>
         <p id="pv-lost" hidden>Keine Verbindung zur Präsentation. Öffne die Referentenansicht mit <kbd>P</kbd> aus dem Präsentationsfenster.</p>
       </div>`;
     this.cur = document.getElementById('pv-cur');
@@ -4084,7 +4087,7 @@ class Presenter {
     addEventListener('message', e => {
       const d = e.data; if (d && d.src === 'dv' && 'saved' in d) { this.msg(d.saved ? 'gespeichert' : 'nicht gespeichert: ' + d.error, !d.saved); return; }
       if (!d || d.src !== 'dv' || !d.state) return;
-      this.state = d.state; document.getElementById('pv-lost').hidden = true;
+      this.state = d.state; document.getElementById('pv-lost').hidden = true; this.titleNote();
       if (this.only && this.canEdit && !this.editing) { this.editNotes(true); }
       this.render(); if (this.editing && this.state.i === this.edI) this.gutter();
     });
@@ -4102,7 +4105,8 @@ class Presenter {
       else if (k === 't' || k === 'T') this.toggleTele();
     });
     document.getElementById('pv-replay').onclick = () => this.send('replay');
-    document.getElementById('pv-reset').onclick = () => { this.t0 = Date.now(); this.paused = null; this.tick(); };
+    const reset = () => { this.t0 = Date.now(); this.paused = null; this.hit = new Set(); this.resetAt = Date.now(); document.getElementById('pv-alert').hidden = true; this.tick(); this.titleNote(); setTimeout(() => this.titleNote(), 1300); };
+    document.getElementById('pv-reset').onclick = reset; document.getElementById('pv-reset2').onclick = reset;
     document.getElementById('pv-timer').onclick = () => {
       if (this.paused === null) this.paused = Date.now(); else { this.t0 += Date.now() - this.paused; this.paused = null; }
       this.tick();
@@ -4129,6 +4133,10 @@ class Presenter {
     }
     document.getElementById('pv-tele').onclick = () => this.toggleTele();
     document.getElementById('pv-edit').onclick = () => this.editNotes(!this.editing);
+    const mi = document.getElementById('pv-marks-in');
+    try { mi.value = localStorage.getItem('pv-marks') || '30, 40'; } catch (e) { mi.value = '30, 40'; }
+    mi.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' || e.key === 'Escape') mi.blur(); });
+    mi.addEventListener('change', () => { try { localStorage.setItem('pv-marks', mi.value); } catch (e) { /* only for this page */ } this.hit = new Set(this.marks().filter(m => (this.paused ?? Date.now()) - this.t0 >= m.s * 1000).map(m => m.s)); this.tick(); });
     document.getElementById('pv-ned').addEventListener('input', () => { this.typedAt = performance.now(); this.msg('ungespeichert …'); clearTimeout(this._edT); this._edT = setTimeout(() => this.flushNotes(), 700); requestAnimationFrame(() => this.gutter()); });
     const gut = document.querySelector('#pv-edwrap .ned-gut');
     gut.addEventListener('mousedown', e => e.preventDefault());
@@ -4279,11 +4287,40 @@ class Presenter {
     if (this.editing) { if (st.i !== this.edI) { this.flushNotes(); this.loadEditor(); } }
     else this.renderNotes(st);
   }
+  marks() {
+    // the time marks, kept in this browser (edited in edit mode, E): "30, 40" or "0:15, 30:00"; the last one is red
+    let txt; try { txt = localStorage.getItem('pv-marks'); } catch (e) { /* only for this page */ }
+    const secs = (txt || '30, 40').split(/[,;\s]+/).map(x => x.trim()).filter(Boolean).map(x => {
+      const m = /^(\d+)(?::(\d{1,2}))?$/.exec(x); return m ? +m[1] * 60 + (+m[2] || 0) : NaN;
+    }).filter(x => x > 0).sort((a, b) => a - b);
+    const name = v => v % 60 ? `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')} min` : `${v / 60} Minuten`;
+    return secs.map((v, j) => ({ s: v, cls: j === secs.length - 1 ? 'm2' : 'm1', text: name(v) + ' vorbei' }));
+  }
+  titleNote() {
+    // on the title slide: a red reminder to start the timer from zero; once reset there, it turns green
+    const el = document.getElementById('pv-title-note'), on = this.state && this.state.i === 0 && !(this.resetAt && Date.now() - this.resetAt > 1200);
+    el.hidden = !on; if (!on) return;
+    const fresh = this.resetAt && this.state && Date.now() - this.resetAt < 10 * 60 * 1000;
+    el.classList.toggle('ok', !!fresh);
+    el.querySelector('b').textContent = fresh ? 'Timer läuft ab Null ✓' : 'Timer zurücksetzen!';
+  }
   tick() {
     const ms = (this.paused ?? Date.now()) - this.t0, m = Math.floor(ms / 60000), sec = Math.floor(ms / 1000) % 60;
     const t = document.getElementById('pv-timer');
     t.textContent = `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     t.classList.toggle('paused', this.paused !== null);
+    // time marks: from 30 min the timer turns amber, from 40 min red, and each mark is announced once in a banner
+    // (the 15 s mark only to try it out)
+    const MARKS = this.marks();
+    this.hit = this.hit || new Set();
+    const passed = MARKS.filter(m => ms >= m.s * 1000);
+    t.classList.toggle('m1', passed.some(m => m.cls === 'm1') && !passed.some(m => m.cls === 'm2'));
+    t.classList.toggle('m2', passed.some(m => m.cls === 'm2'));
+    for (const m of passed) if (!this.hit.has(m.s)) {
+      this.hit.add(m.s);
+      const a = document.getElementById('pv-alert'); a.textContent = m.text; a.className = m.cls; a.hidden = false;
+      clearTimeout(this._alT); this._alT = setTimeout(() => { a.hidden = true; }, 12000);
+    }
     document.getElementById('pv-clock').textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   }
 }
