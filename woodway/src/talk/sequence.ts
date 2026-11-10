@@ -6,9 +6,9 @@ export type Item = { kind: "deck"; i: number } | { kind: "atlas"; id: AtlasSlide
 export const ANCHORS: { id: AtlasSlideId; after: string }[] = [
   { id: "jedeZelle", after: "Ein Baum an jedem Ort" },
   { id: "albedo", after: "Ein Baum an jedem Ort" },
-  { id: "dacStrom", after: "DAC-Modell" },
+  { id: "dacStrom", after: "DAC-Modell: Schema" },
   { id: "dacAusbau", after: "DACCS kostenoptimal: wo" },
-  { id: "atlas", after: "Woodway: alle Ergebnisse interaktiv" },
+  { id: "atlas", after: "Backup" },
 ];
 
 export const SEQUENCE: Item[] = DECK_TITLES.flatMap((title, i) => [
