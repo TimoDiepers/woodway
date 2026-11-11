@@ -37,7 +37,7 @@ const TEX_MACROS = {
   // sunlight, energy, albedo
   "\\qin":  "\\q{qin}{\\dot{q}_{\\mathrm{ein}}}",
   "\\alb":  "\\q{alb}{\\alpha}",
-  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{L}}}",   // L: Laub
+  "\\dal":  "\\q{dal}{\\Delta\\alpha_{\\mathrm{B}}}",   // B: Baum
   "\\daw":  "\\q{daw}{\\Delta\\alpha_{\\mathrm{W}}}",
   "\\alw":  "\\q{alw}{\\Delta\\alpha_{\\mathrm{Wolke}}}",   // a contrast: how much more a cloud reflects than the ground
   "\\dfw":  "\\q{dfw}{\\Delta f_{\\mathrm{W}}}",
@@ -97,7 +97,7 @@ const TEX_MACROS = {
 
 // the figures' own formula labels (mpl texts that are one $…$) and the colour role of the symbol they show
 const CHART_TEX_ROLE = {
-  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{L}}': 'dal',
+  '\\dot{q}_{\\mathrm{ein}}': 'qin', '\\Delta\\alpha_{\\mathrm{L}}': 'dal', '\\Delta\\alpha_{\\mathrm{B}}': 'dal',
   '\\Delta\\alpha_{\\mathrm{W}}': 'daw', '\\dot{Q}_{\\alpha}': 'dq'
 };
 
@@ -743,7 +743,7 @@ const EC_ORTE3 = {
   // the curves and the name each carries on the plot
   parts: [
     { key: 'co2', name: 'CO₂', role: 'phic' },
-    { key: 'laub', name: 'Albedo direkt (Laub)', role: 'dal' },
+    { key: 'laub', name: 'Albedo direkt (Baum)', role: 'dal' },
     { key: 'wolke', name: 'Albedo indirekt (Wolken)', role: 'daw' },
     { key: 'dt', name: 'netto', role: 'ink', net: true }],
   // a name on each curve, outside its area: CO2 under its curve, the leaves above theirs, the clouds, which stay near
@@ -831,7 +831,7 @@ const EC_LICHT = {
       const x = st.name === 'Marabá' ? 2072 : st.name === 'Fairbanks' ? 2046 : 2080;
       out.push({ key: 'n' + st.name, grid: 0, x, y: at(st.dt, x), text: st.name, role: 'ink', color: st.color, side: st.name === 'Marabá' ? 'below' : 'above' });
     });
-    if (k >= 1) out.push({ key: 'laub', grid: 0, x: 2082, y: at(F.laub, 2082) * .62, text: 'Albedo (Laub)', role: 'dal', side: 'above' });
+    if (k >= 1) out.push({ key: 'laub', grid: 0, x: 2082, y: at(F.laub, 2082) * .62, text: 'Albedo (Baum)', role: 'dal', side: 'above' });
     if (k >= 1) out.push({ key: 'wolke', grid: 0, x: 2062, y: at(F.wolke, 2062), text: 'Albedo (Wolken)', role: 'daw', side: 'below' });
     return out;
   },
@@ -846,7 +846,7 @@ const EC_LICHT = {
       lineStyle: { color: col, width: 2.4 }, itemStyle: { color: col }, areaStyle: { color: col, opacity: .2, origin: 'auto' },
       endLabel: { show: true, formatter: sg(ys[n]), color: col, fontFamily: EC.font, fontSize: 18, fontWeight: 600, distance: 8, offset: id === 'laub' ? [0, 18] : [0, 0] },
       labelLayout: { moveOverlap: 'shiftY' }, animationDuration: 1300, animationEasing: 'cubicInOut' });
-    if (k >= 1) part('laub', 'Albedo (Laub)', cLeaf, F.laub);
+    if (k >= 1) part('laub', 'Albedo (Baum)', cLeaf, F.laub);
     if (k >= 1) part('wolke', 'Albedo (Wolken)', cCloud, F.wolke);
     D.sites.forEach(st => {
       // with the split, the other two sites go
@@ -4042,19 +4042,16 @@ class Presenter {
           <span id="pv-count">–</span>
           <span id="pv-title"></span>
           <span class="pv-spacer"></span>
-          <button id="pv-replay" title="Animation der aktuellen Folie neu abspielen (R)">↻ Animation</button>
+          <button id="pv-replay" title="Animation der aktuellen Folie neu abspielen (R)">↻</button>
           <button id="pv-edit" hidden title="Notizen bearbeiten (E); gespeichert wird in die Folienquelle">Bearbeiten</button><i id="pv-msg"></i>
           <button id="pv-tele" title="Teleprompter: nur der aktuelle Klick groß, davor und danach blass. Aus: alle Notizen (T)">Teleprompter</button>
           <button id="pv-small" title="Notizen kleiner">A−</button>
           <button id="pv-big" title="Notizen größer">A+</button>
-          <span id="pv-timer" title="Klick: pausieren / fortsetzen">00:00</span>
-          <button id="pv-reset">Timer zurücksetzen</button>
-          <label id="pv-marks" title="Zeitmarken, durch Komma getrennt, als Minuten oder mm:ss; die letzte färbt den Timer rot, die anderen gelb">Zeitmarken <input id="pv-marks-in" spellcheck="false"></label>
-          <span id="pv-clock"></span>
-        </header>
+                                                </header>
         <section class="pv-prev">
-          <div class="pv-box"><h5>Aktuelle Folie</h5><div class="pv-fr pv-cur"><iframe id="pv-cur" src="${base}#1" title="Aktuelle Folie" tabindex="-1"></iframe></div></div>
+          <div class="pv-box"><h5>Aktuelle Folie <button id="pv-live" title="Den Projektor-Bildschirm live zeigen, mit allem, was dort zu sehen ist (Laserpointer, Markierungen des Presenters)">Live-Bild</button></h5><div class="pv-fr pv-cur"><video id="pv-video" muted playsinline hidden></video><iframe id="pv-cur" src="${base}#1" title="Aktuelle Folie" tabindex="-1"></iframe></div></div>
           <div class="pv-box"><h5>Als Nächstes</h5><div class="pv-fr pv-next"><iframe id="pv-next" src="${base}#2" title="Nächste Folie" tabindex="-1"></iframe><div id="pv-end">Ende des Vortrags</div></div></div>
+          <div class="pv-time"><span id="pv-timer" title="Klick: pausieren / fortsetzen">00:00</span><span id="pv-clock"></span><div class="pv-tbtn"><button id="pv-reset">Zurücksetzen</button><button id="pv-tsmall" title="Uhr kleiner">−</button><button id="pv-tbig" title="Uhr größer">+</button></div><label id="pv-marks" title="Zeitmarken, durch Komma getrennt, als Minuten oder mm:ss; die letzte färbt den Timer rot, die anderen gelb">Zeitmarken <input id="pv-marks-in" spellcheck="false"></label></div>
         </section>
         <div id="pv-split" title="Ziehen: Vorschau größer oder kleiner" role="separator" aria-orientation="horizontal"></div>
         <section class="pv-notesbox">
@@ -4133,6 +4130,13 @@ class Presenter {
       hnd.addEventListener('dblclick', () => { this.noteW = 0; this.applyNoteW(); try { localStorage.removeItem('pv-note-w'); } catch (er) {} });
     }
     document.getElementById('pv-tele').onclick = () => this.toggleTele();
+    // the timer's size, separately from the notes (kept in this browser)
+    try { this.tScale = +localStorage.getItem('pv-tscale') || 1; } catch (e) { this.tScale = 1; }
+    const tSize = d => { this.tScale = Math.min(1.8, Math.max(.4, Math.round((this.tScale + d) * 10) / 10)); document.documentElement.style.setProperty('--pv-tscale', this.tScale); try { localStorage.setItem('pv-tscale', String(this.tScale)); } catch (e) { /* only for this page */ } };
+    tSize(0);
+    document.getElementById('pv-tsmall').onclick = () => tSize(-.1);
+    document.getElementById('pv-tbig').onclick = () => tSize(.1);
+    document.getElementById('pv-live').onclick = () => this.live(!this.stream);
     document.getElementById('pv-edit').onclick = () => this.editNotes(!this.editing);
     const mi = document.getElementById('pv-marks-in');
     try { mi.value = localStorage.getItem('pv-marks') || '30, 40'; } catch (e) { mi.value = '30, 40'; }
@@ -4239,6 +4243,21 @@ class Presenter {
     document.addEventListener('pointerdown', off, true);
   }
   applyClick(p, v) { p.classList.toggle('q', !!v.q); if (!p.classList.length) p.removeAttribute('class'); if (v.q || v.click == null) p.removeAttribute('data-click'); else p.setAttribute('data-click', v.click); }
+  async live(on) {
+    // the current slide as the projector shows it: a capture of that screen (the browser asks which one), so whatever a
+    // presenter remote draws over the slide (spotlight, circle, laser) shows here too. Off again: the deck preview
+    const v = document.getElementById('pv-video'), btn = document.getElementById('pv-live');
+    if (!on) {
+      if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+      this.stream = null; v.srcObject = null; v.hidden = true; this.cur.style.visibility = ''; btn.classList.remove('on'); return;
+    }
+    try {
+      this.stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'monitor', frameRate: 30 }, audio: false });
+    } catch (e) { this.msg('Live-Bild nicht freigegeben', true); return; }
+    v.srcObject = this.stream; v.hidden = false; await v.play().catch(() => {});
+    this.cur.style.visibility = 'hidden'; btn.classList.add('on');
+    this.stream.getVideoTracks()[0].addEventListener('ended', () => this.live(false));   // "Freigabe beenden" in the browser
+  }
   applyTele() { document.getElementById('pv-notes').classList.toggle('all', !this.tele); document.getElementById('pv-tele').classList.toggle('on', this.tele); }
   toggleTele() { this.tele = !this.tele; try { localStorage.setItem('pv-tele', this.tele ? '1' : '0'); } catch (e) { /* only for this page */ } this.applyTele(); this.paintNotes(true); }
   renderNotes(st) {
@@ -4280,6 +4299,7 @@ class Presenter {
       const k = this.tele ? ['cur', 'next', 'prev', 'far'].find(c => x.dom.classList.contains(c)) : 'cur', f = SC[k];
       x.dom.style.transform = f === 1 ? '' : `scale(${f})`;
       x.dom.style.marginBottom = (GAP - (1 - f) * x.dom.offsetHeight) + 'px';
+      const lab = x.dom.querySelector('.pn-k'); if (lab) lab.style.transform = f === 1 ? '' : `translateX(${-112 * (1 - f) / f}px) scale(${Math.max(.75, .9 / f) * f / f})`;
     }
     if (first && this.tele) {
       // the current click at the top: what comes next has the room; of what was said only the last line stays in view
