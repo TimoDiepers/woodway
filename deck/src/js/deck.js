@@ -3779,7 +3779,9 @@ class Deck {
       const cont = entering && s.dataset.start !== undefined && this.step === +s.dataset.start;
       if ((animate || late) && !cont && !deckCalm.matches && k >= 0 && k <= ch.nSteps) {
         ch.play(k);
-      } else ch.final(k);
+      } else if (entering || ch.k == null || ch.k !== Math.max(0, Math.min(k, ch.nSteps || 0))) ch.final(k);
+      // else: this click does not change the chart's picture (it stands at its last part, or has not started yet):
+      // no redraw, which on a world map cost 100-150 ms per click
     }
     for (const c of s.querySelectorAll('.count')) {
       const host = c.closest('[data-step]'), k = host ? +host.dataset.step : 0;
