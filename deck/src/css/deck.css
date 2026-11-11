@@ -2784,7 +2784,7 @@ svg.s17 .rays-tree { opacity: 0; }
 .fins:not(:has([data-step].shown)) { display: none; }
 
 /* presenter view: the notes as a teleprompter (the paragraphs of this click large, the neighbours pale, the rest barely there) */
-#pv-notes { position: relative; padding-bottom: 45vh; scroll-behavior: smooth; }
+#pv-notes { position: relative; padding-bottom: 45vh; }
 #pv-notes .pn { margin: 0 0 .9em; padding-left: 112px; position: relative; font-size: var(--pv-notes); line-height: 1.5; opacity: .14; transition: opacity .4s var(--ease); }
 #pv-notes .pn.prev { opacity: .5; }
 #pv-notes .pn.next { opacity: .7; font-size: calc(var(--pv-notes) * 1.18); line-height: 1.45; }
@@ -2911,3 +2911,24 @@ html.pv-editing #pv-marks { display: inline-flex; }
 /* F7/F8: the symbols in the chips as large as the formula beside them */
 .c9-line:has(.chip .mfrac) > .chip .tex, .c10-row > .chip .tex { font-size: 34px; }
 .c10-body .figcap { transform: translate(-86px, 24px); }   /* centred over the plot area, not over plot plus line labels */
+
+/* teleprompter: what was said slides out at the top (only its last line, small and pale, under a fade); what comes next has the room */
+#pv-notes:not(.all) .pn.prev { opacity: .4; font-size: calc(var(--pv-notes) * .85); }
+#pv-notes:not(.all) .pn.far:not(.after) { opacity: 0; }
+
+/* teleprompter sizes for a laptop screen: now large, next readable, the rest small */
+#pv-notes:not(.all) .pn { font-size: calc(var(--pv-notes) * .9); }
+#pv-notes:not(.all) .pn.cur { font-size: calc(var(--pv-notes) * 1.35); line-height: 1.38; margin-bottom: .7em; }
+#pv-notes:not(.all) .pn.next { font-size: calc(var(--pv-notes) * 1.05); }
+#pv-notes:not(.all) .pn.prev { font-size: calc(var(--pv-notes) * .8); opacity: .35; }
+
+/* the paragraph before the current one: only its last line is in view, fading upwards */
+#pv-notes:not(.all) .pn.prev { -webkit-mask-image: linear-gradient(to top, #000 0, #000 1.2em, transparent 2.6em); mask-image: linear-gradient(to top, #000 0, #000 1.2em, transparent 2.6em); }
+
+/* teleprompter: one size for all paragraphs (that of the current one), the others scaled down (Presenter.paintNotes),
+   so no line ever breaks differently when it comes into focus */
+#pv-notes:not(.all) .pn, #pv-notes:not(.all) .pn.cur, #pv-notes:not(.all) .pn.next, #pv-notes:not(.all) .pn.prev {
+  font-size: calc(var(--pv-notes) * 1.35); line-height: 1.38; margin-top: 0; transform-origin: 112px 0;   /* the text's left edge stays put */
+  transition: transform .35s var(--ease), opacity .35s var(--ease); }
+#pv-notes:not(.all) .pn-k { font-size: 15px; }
+#pv-notes:not(.all) .pn-k { left: 0; transform-origin: 0 0; }

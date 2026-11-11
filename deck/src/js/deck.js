@@ -20,7 +20,8 @@ const TEX_MACROS = {
   "\\rate":  "\\dfrac{\\mathbf{d}\\,#1}{\\mathbf{d}\\tm}",   // \rate{\mB} = dm_B/dt
   // carbon in the tree
   "\\mB":   "\\q{mb}{m^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{B}}}",   // carbon in the tree (C: the element, not the whole mass); C one size smaller, so it does not crowd the B
-  "\\mBd":  "\\rate{\\mB}",                         // the balance, as a rate
+  "\\mBd":  "\\rate{\\mB}",
+  "\\mBu":  "\\q{mb}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{B}}}",   // the tree's carbon uptake per year (F18, convolved with psi)                         // the balance, as a rate
   "\\mPS":  "\\q{ps}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{PS}}}",     // a flux: kg C per year
   "\\mZA":  "\\q{re}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZA}}}",
   "\\mZS":  "\\q{zs}{\\dot{m}^{\\raisebox{0.05em}{$\\scriptscriptstyle\\mathrm{C}$}}_{\\mathrm{ZS}}}",
@@ -2262,15 +2263,15 @@ class MplChart {
           const share2 = L.cats === 'umstieg' ? 1 : .32 + .68 * f;
           col = mapMix('#ddd6c7', cat.color, share2);
           if (enter) run = { dur: 220 + share2 * MAP_PACE, frames: [{ percent: 0, style: { fill: MAP_PAPER } }, { percent: .1, style: { fill: '#ddd6c7' } }, { percent: 1, style: { fill: col } }] };
-          tip = cat.label + (L.cats === 'waldtyp' ? `<br>${Math.round(Math.min(1, share) * 30)}${share >= 1 ? '+' : ''} % der Landfläche wiederbewaldbar` : '');
+          tip = () => cat.label + (L.cats === 'waldtyp' ? `<br>${Math.round(Math.min(1, share) * 30)}${share >= 1 ? '+' : ''} % der Landfläche wiederbewaldbar` : '');
         } else {
           const sc = M.scales[L.scale], v = L.frames ? this.frameValue(L, j) : cell[2];
-          col = mapScale(sc, v); tip = mapFmt(v, sc) + (L.frames ? ` (${Math.round(this.year ?? L.years[0])})` : '');
+          col = mapScale(sc, v); tip = () => mapFmt(v, sc) + (L.frames ? ` (${Math.round(this.year ?? L.years[0])})` : '');   // its text only when hovered: toLocaleString for 45 000 cells cost a click
           if (enter) run = mapRun(sc, v);
           const fj = FL ? fromLook.get(r * g.nx + c) : undefined;
           if (run && fj !== undefined) run = mapFrom(mapScale(M.scales[FL.scale], FL.cells[fj][2]), col);
         }
-        const it = tip ? { value: [lon, lat], col, tipf: () => this.mapTip(i, li, lon, lat, tip, col) } : { value: [lon, lat], col, tooltip: { show: false } };
+        const it = tip ? { value: [lon, lat], col, tipf: () => this.mapTip(i, li, lon, lat, typeof tip === 'function' ? tip() : tip, col) } : { value: [lon, lat], col, tooltip: { show: false } };
         if (run) it.run = run;
         items.push(it);
       }
@@ -4070,7 +4071,7 @@ class Presenter {
     this.nxt = document.getElementById('pv-next');
     this.state = null;
     try { this.tele = localStorage.getItem('pv-tele') !== '0'; } catch (e) { this.tele = true; }
-    this.fontPx = 22; this.applyFont(); this.applyTele();
+    this.fontPx = 24; this.applyFont(); this.applyTele();
     try { this.prevH = +localStorage.getItem('pv-prev-h') || 0; } catch (e) { this.prevH = 0; }
     this.applyPrev();
     try { this.noteW = +localStorage.getItem('pv-note-w') || 0; } catch (e) { this.noteW = 0; }
@@ -4268,24 +4269,42 @@ class Presenter {
     if (!this.items) return;
     const foc = noteFocus(this.items, this.curStep ?? 0), box = document.getElementById('pv-notes');
     let first = null;
-    for (const x of this.items) { if (x.q) continue; const k = foc.get(x) || 'far'; x.dom.classList.remove('cur', 'prev', 'next', 'far'); x.dom.classList.add(k); if (k === 'cur' && !first) first = x.dom; }
+    let ahead = false;   // far paragraphs after the current one stay faintly visible, those before it go
+    for (const x of this.items) { if (x.q) continue; const k = foc.get(x) || 'far'; if (k === 'cur' || k === 'next') ahead = true; x.dom.classList.remove('cur', 'prev', 'next', 'far', 'after'); x.dom.classList.add(k); if (k === 'far' && ahead) x.dom.classList.add('after'); if (k === 'cur' && !first) first = x.dom; }
     if (!first) first = this.items.map(x => x.dom).find(d => d.classList.contains('next'));
-    if (first && this.tele) box.scrollTo({ top: Math.max(0, first.offsetTop - box.clientHeight * .28), behavior: jump ? 'auto' : 'smooth' });
+    // every paragraph is set at the size of the current one and only scaled down: its line breaks never change when
+    // it moves into focus. The room a scaled paragraph leaves below it is taken back with a negative margin
+    const SC = { cur: 1, next: .8, prev: .62, far: .66 }, GAP = 16;
+    for (const x of this.items) {
+      if (x.q) continue;
+      const k = this.tele ? ['cur', 'next', 'prev', 'far'].find(c => x.dom.classList.contains(c)) : 'cur', f = SC[k];
+      x.dom.style.transform = f === 1 ? '' : `scale(${f})`;
+      x.dom.style.marginBottom = (GAP - (1 - f) * x.dom.offsetHeight) + 'px';
+    }
+    if (first && this.tele) {
+      // the current click at the top: what comes next has the room; of what was said only the last line stays in view
+      const prevs = this.items.map(x => x.dom).filter(d => d.classList.contains('prev')), pv = prevs[prevs.length - 1];
+      const keep = pv ? parseFloat(getComputedStyle(pv).lineHeight) * SC.prev + 12 : 0;
+      box.scrollTo({ top: Math.max(0, first.offsetTop - keep), behavior: jump ? 'auto' : 'smooth' });
+    }
   }
   applyFont() { document.documentElement.style.setProperty('--pv-notes', this.fontPx + 'px'); }
   render() {
     const st = this.state; if (!st) return;
-    const post = (f, i, step, mark) => f.contentWindow && f.contentWindow.postMessage({ src: 'dv', goto: i, step, mark: !!mark }, '*');
-    // a preview is only steered when its slide or click changes (each move is a full page step inside it)
-    const key = (f, i, step) => { const k = i + ':' + step; if (f._k === k) return false; f._k = k; return true; };
-    if (key(this.cur, st.i, st.step)) post(this.cur, st.i, st.step);
-    const end = st.ni >= st.n || (st.i < st.main && st.ni >= st.main);
-    document.getElementById('pv-end').hidden = !end; this.nxt.style.visibility = end ? 'hidden' : 'visible';
-    if (!end && key(this.nxt, st.ni, st.ns)) post(this.nxt, st.ni, st.ns, true);
+    // the notes and the bar first: they must answer the click at once; the two previews (whole decks, sharing this
+    // window's thread) follow a moment later, the current one before the next
     document.getElementById('pv-count').textContent = st.i < st.main ? `${st.i + 1} / ${st.main}` : `Backup ${st.i + 1 - st.main}`;
     document.getElementById('pv-title').textContent = this.titles[st.i];
     if (this.editing) { if (st.i !== this.edI) { this.flushNotes(); this.loadEditor(); } }
     else this.renderNotes(st);
+    const post = (f, i, step, mark) => f.contentWindow && f.contentWindow.postMessage({ src: 'dv', goto: i, step, mark: !!mark }, '*');
+    // a preview is only steered when its slide or click changes (each move is a full page step inside it)
+    const key = (f, i, step) => { const k = i + ':' + step; if (f._k === k) return false; f._k = k; return true; };
+    const end = st.ni >= st.n || (st.i < st.main && st.ni >= st.main);
+    document.getElementById('pv-end').hidden = !end; this.nxt.style.visibility = end ? 'hidden' : 'visible';
+    clearTimeout(this._pvT1); clearTimeout(this._pvT2);   // fast clicking: only the last state is drawn
+    this._pvT1 = setTimeout(() => { if (key(this.cur, st.i, st.step)) post(this.cur, st.i, st.step); }, 420);   // after the notes have scrolled
+    this._pvT2 = setTimeout(() => { if (!end && key(this.nxt, st.ni, st.ns)) post(this.nxt, st.ni, st.ns, true); }, 650);
   }
   marks() {
     // the time marks, kept in this browser (edited in edit mode, E): "30, 40" or "0:15, 30:00"; the last one is red

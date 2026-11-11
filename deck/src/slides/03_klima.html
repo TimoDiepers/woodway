@@ -107,7 +107,7 @@
     <p data-click="0">Was gibts noch im Thermodynamik-Werkzeugkasten? <b>Energiebilanz. Was kommt rein, was raus?</b><br>Rein kommt <b>Sonnenlicht</b>, raus gehen <b>Reflexion und Wärmestrahlung</b></p>
     <p data-click="1"><b>Bilanzgrenze</b>: Oberrand der Atmosphäre, dort zählt <b>nur Strahlung</b></p>
     <p data-click="2">Bilanz: <b>rein minus raus</b>, typischerweise normiert man strahlung pro fläche, also noch gesamtfläche der Atmosphärenoberfläche</p>
-    <p data-click="3">Ohne Baum haben wir schon ungleichgewicht, bleibt mehr drin. Fassen wir zusammen als phi base. <br><b>Aus Best Case Szenario</b> vom Anfang, also <b>gegeben</b></p>
+    <p data-click="3">Ohne Baum haben wir schon ungleichgewicht. <br><b>Definiert durch Best-Case Szenario</b> vom Anfang. &lt;<br>Fassen wir zusammen als <b>Basisantrieb delta phi</b></p>
     <p data-click="4">Gleiche Bilanz <b>mit extra Baum</b>: das bleibt, der Baum bringt <b>seinen Antrieb</b> dazu<br>Das ist unsere <b>offene Frage</b></p>
     <p data-click="5">Der Antrieb vom Baum hat <b>zwei Teile</b>: CO₂ und Albedo</p>
     <p data-click="6"><b>Zuerst das CO₂</b></p>
@@ -182,18 +182,17 @@
     </g>
     <g class="pop" data-step="7" style="--d:300"></g>
   </g>
-</svg></div><div class="stack"><div class="rise" data-step="3" style="--d:200"><div class="rise" data-step="3" style="--d:0; position:relative"><div class="chart" data-step="3" style="height:300px; margin-top:-40px" data-slot-steps="0" data-chart="k3s" data-label="Impulsantwort: wie viel von 1 kg entnommenem CO₂ der Atmosphäre über 150 Jahre noch fehlt; der Rest kommt aus Land und Ozean zurück"></div><div class="axlab" style="left:16px; top:50%; font-size:22px">CO₂-Menge</div></div></div><div class="fline" style="margin-top:6px; white-space:nowrap; min-height:84px"><span class="tex" style="font-size:26px">$\st{4}{\dm(\tm) =}\ \st{5}{-\mB(\tm)}\,\htmlClass{fins}{\st{6}{\,\dfrac{\MCO}{\MC}\,}}\,\st{5}{\psc(\tm)}$</span></div><dl class="legend sm tex tdefs" style="margin-top:8px"><dt class="rise" data-step="4" style="--d:300">$\dm$</dt><dd class="rise" data-step="4" style="--d:300">CO₂-Änderung der Atmosphäre [kg]</dd><dt class="rise" data-step="5" style="--d:300">$\psc$</dt><dd class="rise" data-step="5" style="--d:300">Impulsantwort der Erde [–]</dd><dt class="rise" data-step="5" style="--d:300">$\mB$</dt><dd class="rise" data-step="5" style="--d:300">Kohlenstoff im Baum [kg<sub>C</sub>]</dd><dt class="rise" data-step="6" style="--d:300">$\MCO/\MC$</dt><dd class="rise" data-step="6" style="--d:300">Molmassen [g/mol]: 44 / 12</dd></dl></div></div>
+</svg></div><div class="stack"><div class="rise" data-step="3" style="--d:200"><div class="rise" data-step="3" style="--d:0; position:relative"><div class="chart" data-step="3" style="height:300px; margin-top:-40px" data-slot-steps="0" data-chart="k3s" data-label="Impulsantwort: wie viel von 1 kg entnommenem CO₂ der Atmosphäre über 150 Jahre noch fehlt; der Rest kommt aus Land und Ozean zurück"></div><div class="axlab" style="left:16px; top:50%; font-size:22px">CO₂-Menge</div></div></div><div class="fline" style="margin-top:6px; white-space:nowrap; min-height:84px"><span class="tex" style="font-size:26px">$\st{4}{\dm(\tm) =}\ \st{5}{-}\htmlClass{fins}{\st{6}{\,\dfrac{\MCO}{\MC}}}\,\st{5}{\big(\mBu(\tm) \ast \psc(\tm)\big)}$</span></div><dl class="legend sm tex tdefs" style="margin-top:8px"><dt class="rise" data-step="4" style="--d:300">$\dm$</dt><dd class="rise" data-step="4" style="--d:300">CO₂-Änderung der Atmosphäre [kg]</dd><dt class="rise" data-step="5" style="--d:300">$\psc$</dt><dd class="rise" data-step="5" style="--d:300">Impulsantwort der Erde [–]</dd><dt class="rise" data-step="5" style="--d:300">$\mBu$</dt><dd class="rise" data-step="5" style="--d:300">Kohlenstoff-Aufnahme des Baums [kg<sub>C</sub>/a]</dd><dt class="rise" data-step="5" style="--d:300">$\ast$</dt><dd class="rise" data-step="5" style="--d:300">Faltung: jede Jahresaufnahme ist ein Puls, der mit ψ abklingt; alle Pulse addiert</dd><dt class="rise" data-step="6" style="--d:300">$\MCO/\MC$</dt><dd class="rise" data-step="6" style="--d:300">Molmassen [g/mol]: 44 / 12</dd></dl></div></div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.5194/acp-13-2793-2013" target="_blank" rel="noopener">Joos et al. 2013</a> (Impulsantwort der Erde)</span><span><a href="https://doi.org/10.1038/s41558-021-01061-2" target="_blank" rel="noopener">Zickfeld et al. 2021</a> (Entnahme als gespiegelter Puls)</span></p>
   <aside class="notes" data-n="20">
-    <p data-click="0">CO₂-Antrieb ist <b>wie viel CO₂ fehlt</b> mal <b>was das bewirkt</b></p>
-    <p data-click="0">Baum nimmt <b>zb 1kg  CO₂ auf</b></p>
-    <p data-click="3">CO₂ nicht für immer 1kg weniger. Anderes gleichgewicht mit C-Kreislauf in <b>Ozean und Land<br>--&gt;Geben einen Teil zurücl</b></p>
+    <p data-click="0">CO₂-Antrieb ist <b>wie viel CO₂ fehlt</b> mal <b>was das bewirkt<br></b>Baum nimmt <b>zb 1kg  CO₂ auf</b></p>
+    <p data-click="3">CO₂ nicht für immer 1kg weniger. Anderes gleichgewicht mit C-Kreislauf in <b>Ozean und Land<br>--&gt;Geben einen Teil zurück</b></p>
     <p data-click="3">Nach 50 Jahren ist nur noch <b>ein halbes Kilo weniger netto in Atmosphäre</b></p>
     <p data-click="4">In Formeln: die <b>CO₂-Änderung</b> der Atmosphäre</p>
     <p data-click="5">Setzt sich zusammen aus Kohlenstoffaufnahme Baum von vorhin<br>UND der sog. Impulsantwort der Kohlenstoff-Kreisläufe, psi, den wir in Kurve sehen</p>
     <p data-click="6">Unser Kohlenstoff im Baum müssen wir noch <b>von C in CO2-Massen umrechnen</b> -&gt; <b>Verhältnis der Molmassen</b></p>
-    <p data-click="7"><b>Haken</b>. Wieviel Strahlungsantrieb hat das CO2 was bleibt?</p>
+    <p data-click="7"><b>Haken dran</b>. Aber wieviel Strahlungsantrieb hat das CO2 was bleibt?</p>
     <p class="q">Falls Fragen kommen — Joos et al. (2013), Mittel aus Erdsystem- und Boxmodellen für einen Puls vor heutigem Hintergrund: a₀ = 0,217; a = 0,224 / 0,282 / 0,276; τ = 394 / 36,5 / 4,3 Jahre. Physikalisch: schnelle Durchmischung mit der Deckschicht des Ozeans, langsamer Austausch mit der Tiefsee, ganz langsam Karbonatchemie und Verwitterung; dazu das Land über Photosynthese und Böden. Für eine Emission gilt dieselbe Kurve mit umgekehrtem Vorzeichen; Zickfeld et al. (2021) finden eine Asymmetrie erst für große Pulse (klein bei ±100 GtC). Im Modell rechnet das FaIR (Folie „Vom Strahlungsantrieb zur Temperatur“), vor dem Hintergrund von Very Low ohne Entnahme (2100: 38 % statt 44 % eines Pulses von 2026).</p>
   </aside>
 </section>
@@ -310,10 +309,10 @@
     <p data-click="0">CO2 nimmt Einfluss auf Strahlungsbilanz</p>
     <p data-click="1">Für <b>kurzwelliges Sonnenlicht interessiert sich CO₂ nicht</b>, lässt es durch</p>
     <p data-click="2"><b>Anders die langwellige Wärmeabstrahlung</b>: CO₂ <b>absorbiert</b> und strahlt sie in alle Richtungen wieder ab</p>
-    <p data-click="3">Passiert <b>Schicht für Schicht</b><br>Immer wieder auch nach unten reflektiert, <b>oben kommt weniger an</b>. Ins All kommt sie erst aus großer, <b>kalter Höhe -&gt; weniger Energie abgestrahlt</b></p>
+    <p data-click="3">Passiert <b>Schicht für Schicht</b><br>Immer wieder auch nach unten reflektiert, <b>oben kommt weniger an</b>.<br>Je <b>mehr CO2</b> <b>desto höher letzte Abtrahlung</b>. Dort ist <b>kälter</b> -&gt;<b> weniger Energie abgestrahlt</b></p>
     <p data-click="4">Baum nimmt CO₂ raus, Abstrahlhöhe <b>tiefer und wärmer</b><br><b>Mehr Wärme entkommt</b>, es kühlt</p>
     <p data-click="5">Diesen <b>Treibhauseffekt</b> fassen wir zusammen in <b>Strahlungseffizienz<br>-&gt; zusätzlicher Antrieb in Atmosphäre je kg CO2.</b></p>
-    <p data-click="6"><b>Haken dran, e</b>rster Teil fertig.</p>
+    <p data-click="6"><b>Damit haben wir alles für den CO2 Antrieb.</b></p>
     <p class="q">Falls Fragen kommen (Backup „Strahlungsantrieb von CO₂: Kurven“) — ε ist kein fester Wert. Wie stark wirkt jedes Kilogramm? Das hängt davon ab, wie viel CO₂ schon da ist: Im Zentrum der Absorptionsbande ist die Atmosphäre schon undurchlässig; zusätzliches CO₂ wirkt nur noch an den Rändern der Bande, deshalb wächst der Antrieb logarithmisch und jedes weitere Kilogramm bewirkt weniger. Deshalb steht die Konzentration c im Nenner, ε_CO₂ = 5,35 W/m² / (k c). Zum Merken: heute 1,61 · 10⁻¹⁵ Watt je Quadratmeter und Kilogramm; in unserem Szenario, Very Low ohne Entnahme, steigt die Konzentration bis 2038 noch etwas und sinkt dann wieder, 2100 sind es 1,66.</p>
     <p class="q">Falls Fragen kommen — Antrieb des gesamten CO₂: 5,35 ln(c/c₀) W/m² (Myhre et al. 1998, aus Strahlungstransfer-Modellen); die Ableitung je kg ist ε_CO₂ = 5,35/(k c). FaIR nutzt eine genauere, zustandsabhängige Formel (Meinshausen et al. 2020); entlang unseres Szenarios (höchstens 440 ppm) weicht der Koeffizient um weniger als 0,5 % ab. Kurven dazu: Backup „Strahlungsantrieb von CO₂: Kurven“. Emissionshöhe: Pierrehumbert (2011, Physics Today); Benestad (2016, Theor. Appl. Climatol.); bei weiterer CO₂-Zunahme stammt rund 90 % des zusätzlichen Effekts aus der höheren Emissionshöhe (J. Climate 33(9), 2020).</p>
   </aside>
@@ -411,7 +410,7 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.5194/acp-9-5539-2009" target="_blank" rel="noopener">Lenton &amp; Vaughan 2009</a> (Transmission der Atmosphäre τ<sub>atm</sub>)</span></p>
   <aside class="notes">
-    <p data-click="0">Wir haben noch Albedo. Ist der <b>einfachere Teil</b></p>
+    <p data-click="0">Dazu kommt jetzt noch Albedo. Ist der <b>einfachere Teil</b></p>
     <p data-click="1">Zusätzlich absorbierte Leistung haben wir schon aus dem <b>Baum-Modell</b></p>
     <p data-click="2"><b>Beziehen auf die Fläche</b> der Atmosphäre, also Watt je Quadratmeter</p>
     <p data-click="3">Nicht alles kommt am Oberrand Atm. an. <br>-&gt; Mal <b>Transmissionsgrad</b></p>
