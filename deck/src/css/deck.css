@@ -2963,3 +2963,14 @@ html.pv-editing #pv-marks { display: inline-flex; }
 .pv-time #pv-clock { font-size: calc(22px * var(--pv-tscale, 1)); }
 .pv-time .pv-tbtn { display: flex; gap: 6px; }
 .pv-time .pv-tbtn #pv-tsmall, .pv-time .pv-tbtn #pv-tbig { padding: 4px 10px; min-width: 30px; }
+
+/* ===== print (PDF): white paper for the light slides (no ink on the cream), dark slides stay dark; every slide's
+   final state complete: no faded formula, no shadows, overlays opaque instead of a blur the printer cannot render */
+@media print {
+  :root { --paper: #ffffff; --paper-deep: #f3f1ec; }
+  .slide:not(.dark):not(.brk):not(.chapter):not(.hwq):not(.holzweg) { background: #ffffff; }
+  .slide.title .who, .slide.title .who.rise { top: auto !important; }
+  .slide:has(.f-chk.shown) .fexp.alb { opacity: 1 !important; }
+  .ovl { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(255, 255, 255, .9) !important; }
+  .slide:not(.dark):not(.brk):not(.hwq):not(.holzweg) :is(.takeaway, .card, .ovb, .clip) { box-shadow: none !important; }
+}

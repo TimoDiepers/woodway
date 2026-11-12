@@ -609,7 +609,7 @@ const EC_KURS = { steps: 2,
       { id: 'rr', tipName: 'Lücke über 1,5 °C', type: 'line', stack: 'rot', stackStrategy: 'all', data: cut(P(over), x), showSymbol: false, silent: true, z: 2, lineStyle: { width: 0 },
         itemStyle: { color: KURS_COL.rot }, areaStyle: { color: KURS_COL.rot, opacity: .28 },
         markPoint: { silent: true, symbol: 'circle', symbolSize: 0, data: x >= 2096 ? [{ coord: [2068, 1.5 + over[i] / 2] }] : [],
-                     label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: 'Lücke: 320 Gt CO₂-Entnahme' } } });
+                     label: { show: true, position: 'inside', color: '#8e0d16', fontFamily: EC.font, fontSize: 20, fontWeight: 600, formatter: '320 Gt CO₂-Entnahme' } } });
   }
   const ax = { color: EC.muted, fontFamily: EC.font, fontSize: 19 };
   return {
