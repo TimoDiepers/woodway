@@ -1054,7 +1054,7 @@ def tree_effect_figure(out_path: str) -> str:
     sites = json.loads((Path(__file__).resolve().parents[2] / "deck/chart_data/tempsum.json").read_text())["sites"]
     dt = {s["name"]: s["dt"][-1] for s in sites}   # 2100
     return _world_map_skeleton(out_path, "k15", "Wirkung je Baum im Jahr 2100 [10⁻¹⁵ K]: grün kühlt, orange wärmt",
-                               [-90, -60, -30, 0, 15, 30, 45], "kein Platz für Bäume",
+                               [-400, -300, -200, -100, 0, 100, 200], "kein Platz für Bäume",
                                lambda v: f"{de_signed(v)} · 10⁻¹⁵ K", site_label=lambda s: f"{de_signed(dt[s.name])} · 10⁻¹⁵ K")
 
 

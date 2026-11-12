@@ -47,12 +47,12 @@ from nbs.constants import M_CO2_PER_C, T_START, YEARS  # noqa: E402
 from nbs.grid import grid_lats, grid_lons  # noqa: E402
 from nbs.landscape import land_mask  # noqa: E402
 from nbs.site_factor import site_factor, site_factor_grid  # noqa: E402
-from nbs.forest_data import TYPES, key_grid, typical_type  # noqa: E402
+from nbs.forest_data import TREES_PER_HA as _TREES_PER_HA, TYPES, key_grid, typical_type  # noqa: E402
 from nbs.species import SPECIES, get_species  # noqa: E402
 from nbs.tree import simulate_deterministic  # noqa: E402
 
 SPECIES_KEY: str | None = None
-_STAND_AREA_M2 = 5.0  # 2000 trees/ha (nbs.forest_data.TREES_PER_HA)
+_STAND_AREA_M2 = 1e4 / _TREES_PER_HA  # ground per tree [m²] (nbs.forest_data.TREES_PER_HA)
 """None = each cell / site with its own typical forest (2026-10-05). The
 running example used to be one species, Norway spruce, everywhere."""
 
@@ -611,7 +611,7 @@ def carbon_curve_figure(out_path: str) -> str:
         ax.annotate(f"{s.label}  {c[-1]:.0f} kg", (YEARS[-1], c[-1]), xytext=(14, 0), textcoords="offset points",
                     fontsize=14, fontweight="bold", color=C_INK, va="center", annotation_clip=False)
     fig.text(0.08, 0.025, "Typischer Wald je Ort (Hasler et al. 2024): Mischwald. Zusätzlicher Kohlenstoff je Ort "
-             "(Walker et al. 2022), Tempo aus Cook-Patton et al. (2020), 2000 Bäume/ha, Störung mit heutiger Rate.",
+             "(Walker et al. 2022), Tempo aus Cook-Patton et al. (2020), 450 Bäume/ha, Störung mit heutiger Rate.",
              fontsize=10.5, color=C_INK_MUTED)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -630,7 +630,7 @@ def albedo_annual_map_figure(out_path: str) -> str:
 
     annual = -typical_light_product() * _STAND_AREA_M2 * closure_end_grid()
     return _world_map_skeleton(out_path, "b8", "zusätzlich absorbiertes Sonnenlicht je Baum im Jahr 2100, Jahresmittel [W]",
-                               [0, 20, 40, 60, 80, 100], "kein Platz für Bäume", None,
+                               [0, 100, 200, 300, 400], "kein Platz für Bäume", None,
                                site_label=lambda s: f"{annual[site_cell(s)]:.0f} W je Baum", width=6.9, lats=(-56, 87), fit=True)   # room above Alaska for Fairbanks's label
 
 

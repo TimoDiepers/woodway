@@ -60,7 +60,7 @@ potential in about 40 % of the reforestable cells (mostly tropical evergreen
 broadleaf and boreal evergreen needleleaf) -- the two datasets do not fit
 there, and the field value is the more conservative, documented limit."""
 ADMISSIBLE_SHARE = 0.10
-TREES_PER_HA = 2000.0  # 5 m^2 per tree, as before: per-tree numbers = per-hectare / 2000
+TREES_PER_HA = 450.0  # trees left standing per ha after self-thinning (Albert et al. 2025): per-tree numbers = per-hectare / 450
 
 
 @lru_cache(maxsize=1)

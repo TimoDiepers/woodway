@@ -38,10 +38,10 @@ def test_parameters_are_physically_plausible(key):
     import numpy as np
 
     sp = get_species(key)
-    assert 1.0 < sp.m_max_kgC < 150.0  # 2-300 t C/ha at 2000 trees/ha
+    assert 4.0 < sp.m_max_kgC < 700.0  # 2-300 t C/ha at 450 trees/ha
     assert 0.0 < sp.k <= -np.log(1.0 - F30_CAP**0.5) / 30.0 + 1e-12
     assert sp.p == 2.0
-    assert sp.stand_area_m2 == 5.0
+    assert sp.stand_area_m2 == pytest.approx(1e4 / 450.0)
     assert 0.0 < sp.p_disturb < 0.05
     assert 0.0 <= sp.eps_immediate <= 1.0
     assert sp.igbp_class == IGBP[key.split("_")[0]]

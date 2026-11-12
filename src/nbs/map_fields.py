@@ -34,8 +34,8 @@ SCALES = {
     # orange family (darker, warming), more clouds = the deck's cloud blue (brighter, cooling)
     "wolken": {"stops": ["#86420a", "#d07a30", "#ebc39a", "#ece7d8", "#a9cbdc", "#4f8fb0", "#1d4e6a"],
                "domain": [-1.5, 3], "mid": 0, "unit": "%"},
-    # extra absorbed light per tree [W]: straw -> orange -> brick -> wine (wide hue walk so 40 vs 60 W reads)
-    "licht": {"stops": ["#f6e3b4", "#efb35d", "#dc7330", "#b33b2a", "#7a1c3a", "#3e1032"], "domain": [0, 100], "unit": "W"},
+    # extra absorbed light per tree [W]: straw -> orange -> brick -> wine (wide hue walk so 180 vs 270 W reads)
+    "licht": {"stops": ["#f6e3b4", "#efb35d", "#dc7330", "#b33b2a", "#7a1c3a", "#3e1032"], "domain": [0, 450], "unit": "W"},
     # electricity per t CO2 [MWh]: diverging around the median, cheap = teal, costly = umber
     "strom": {"stops": ["#0f5c63", "#58a7a3", "#eae5d6", "#d9a55a", "#8e4d16"], "domain": [1.1, 1.9], "mid": 1.5,
               "unit": "MWh/t"},
@@ -46,7 +46,7 @@ SCALES = {
     # temperature effect of one tree in 2100 [fK = 10^-15 K]: diverging at 0, cooling = the CO2 green family,
     # warming = the albedo orange family (the same pair as "kühlt/wärmt" in the Vergleich chapter)
     "baumwirkung": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
-                    "domain": [-90, 45], "mid": 0, "unit": "10⁻¹⁵ K"},
+                    "domain": [-400, 200], "mid": 0, "unit": "10⁻¹⁵ K"},
     # what reforesting all free area of a block brings in 2100, per land area: same diverging palette
     "lohnt": {"stops": ["#14532d", "#3f8a55", "#a9cf9a", "#ece7d8", "#efb98a", "#d0632a", "#7d2e10"],
               "domain": [-12, 8], "mid": 0, "unit": "10⁻⁶ K je 10 000 km²"},

@@ -166,7 +166,8 @@ def growth_model_figure(out_path: str) -> str:
     _clean_axes(ax)
     # the later curves each on their own (invisible) axes, a hair lower at the top: the deck shows each one click later
     l, b, w, h = ax.get_position().bounds
-    lo, hi = 0, 52
+    sp = _site_species(next(s for s in SITES if s.name == "Aachen"))
+    lo, hi = 0, float(np.ceil(biomass_closed(YEARS - YEARS[0], sp).max() * 1.1 / 10.0) * 10.0)   # headroom for the labels
     overlays = []
     for j in (1, 2, 3):
         cut = 0.0045 * j
@@ -175,7 +176,6 @@ def growth_model_figure(out_path: str) -> str:
         a.set_xlim(T_START, 2100)
         a.set_ylim(lo, hi - (hi - lo) * cut / h)   # same data mapping as the main axes
         overlays.append(a)
-    sp = _site_species(next(s for s in SITES if s.name == "Aachen"))
     flat = lambda k: simulate_deterministic(sp, np.full(len(YEARS), k)).stock_kgC
     curves = [
         (ax, biomass_closed(YEARS - YEARS[0], sp), "#2f7a45", "-", 2.6, "nur Wachstum", 12),

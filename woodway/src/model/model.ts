@@ -99,7 +99,7 @@ export function cellSeries(at: Atlas, cell: number): CellSeries | null {
 
 // --- per land area: what a whole cell's forest does [10⁻⁶ K per 10 000 km² of the cell], as the deck's map
 // "Wo lohnt sich Aufforstung?" (nbs.map_fields.total_effect): ΔT per tree x trees / cell area -------------------
-const STAND_M2 = 5;   // 2000 trees per ha (nbs.forest_data.TREES_PER_HA)
+const STAND_M2 = 1e4 / 450;   // 450 trees per ha (nbs.forest_data.TREES_PER_HA)
 const R2 = 5.1006e14 / (4 * Math.PI);
 const CELL_M2 = Array.from({ length: 360 }, (_, i) => {
   const a = ((90 - 0.5 * i) * Math.PI) / 180, b = ((90 - 0.5 * (i + 1)) * Math.PI) / 180;

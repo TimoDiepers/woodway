@@ -2473,7 +2473,7 @@ svg .mol-off { transition: opacity .7s var(--ease); }
 .c9-line .gloss .katex svg { transform: scaleY(.62); transform-origin: 50% 0; }
 .c9-line .ub-st svg { transition: opacity .5s var(--ease); }
 .c9-line .ub-wa svg { transition: opacity .5s var(--ease); }
-.slide:has(.c10-body dt[data-step="2"]:not(.shown)) .c9-line .ub-wa svg, .slide:has(.c10-body dt[data-step="3"]:not(.shown)) .c9-line .ub-st svg { opacity: 0; }
+.c9-line .ub-wa:has([data-step]:not(.shown)) svg, .c9-line .ub-st:has([data-step]:not(.shown)) svg { opacity: 0; }   /* a brace comes with its label */
 /* slide 14: the bracket's brace arrives with its label Δφ (click 2) */
 .bilanz .ub-dphi svg { transition: opacity .6s var(--ease); }
 .slide:has(.bl-leg dt[data-step="3"]:not(.shown)) .bilanz .ub-dphi svg { opacity: 0; }

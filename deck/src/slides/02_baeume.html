@@ -37,36 +37,37 @@
 <section class="slide" data-ch="baeume" data-title="Modellierung der Kohlenstoff-Aufnahme" data-part="1">
   <header class="sh"><h2>Modellierung der Kohlenstoff-Aufnahme</h2></header>
   <div class="body">
-    <div class="fline head c9-line"><span class="chip c-mb"><span>Kohlenstoff-Änderung</span><span class="tex">$\mBd$</span></span><span class="gloss tex">$= \htmlClass{ub-wa}{\underbrace{\mPS(\tm) - \mZA(\tm) - \mZS(\tm)}_{\st{2}{\fc{mb}{\text{Netto-Wachstum}}}}} - \htmlClass{ub-st}{\underbrace{\mST(\tm)}_{\st{3}{\fc{st}{\text{Verlust}}}}}$</span></div>
+    <div class="fline head c9-line"><span class="chip c-mb"><span>Kohlenstoff-Änderung</span><span class="tex">$\mBd$</span></span><span class="gloss tex">$= \htmlClass{ub-wa}{\underbrace{\mPS(\tm) - \mZA(\tm) - \mZS(\tm)}_{\st{2}{\fc{mb}{\text{Netto-Wachstum}}}}} - \htmlClass{ub-st}{\underbrace{\mST(\tm)}_{\st{4}{\fc{st}{\text{Verlust}}}}}$</span></div>
     <div class="c10-fit rise" data-step="1" style="--d:0"><svg viewBox="0 0 70 150" aria-hidden="true"><path d="M4 18 C 58 18 62 60 62 75 C 62 92 58 132 12 132" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/><path d="M22 122 L10 132 L22 142" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b class="fit-h">parametriert aus jährlich gemittelten globalen Messdaten</b></p></div>
     <!-- the model formula starts where its "=" sits under the "=" of the balance above (measured) -->
     <div class="c10-row">
-      <span class="chip c-mb rise" data-step="2"><span>Kohlenstoff-Vorrat</span><span class="tex">$\mB(\tm)$</span></span><div class="eq left tex c10-model" data-step="2">$$= \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw} \st{3}{\left(1 - \sz \st{4}{\mathbf{e}^{\gam \dTw(\tm)}}\right)}$$</div>
+      <span class="chip c-mb rise" data-step="3"><span>Kohlenstoff-Vorrat</span><span class="tex">$\mB(\tm)$</span></span><div class="eq left tex c10-model" data-step="3">$$= \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw} \st{4}{\left(1 - \sz \st{5}{\mathbf{e}^{\gam \dTw(\tm)}}\right)}$$</div>
     </div>
     <div class="c10-body split">
       <dl class="legend lg tex" style="align-content:center">
-        <dt data-step="2">$\mmax$</dt><dd data-step="2">Kohlenstoff-Sättigungsvorrat [kg<sub>C</sub>]</dd>
-        <dt data-step="2">$\kw$</dt><dd data-step="2">Wachstumsrate [1/a]</dd>
-        <dt data-step="2">$\pw$</dt><dd data-step="2">Formparameter [–]</dd>
-        <dt data-step="3">$\sz$</dt><dd data-step="3">Störungsrate vorindustriell [1/a]</dd>
-        <dt data-step="4">$\gam$</dt><dd data-step="4">Anstieg der Störungsrate [1/K]</dd>
-        <dt data-step="4">$\dTw$</dt><dd data-step="4">Erwärmung gegenüber vorindustriell [K]</dd>
+        <dt data-step="3">$\mmax$</dt><dd data-step="3">Kohlenstoff-Sättigungsvorrat [kg<sub>C</sub>]</dd>
+        <dt data-step="3">$\kw$</dt><dd data-step="3">Wachstumsrate [1/a]</dd>
+        <dt data-step="3">$\pw$</dt><dd data-step="3">Formparameter [–]</dd>
+        <dt data-step="4">$\sz$</dt><dd data-step="4">Störungsrate vorindustriell [1/a]</dd>
+        <dt data-step="5">$\gam$</dt><dd data-step="5">Anstieg der Störungsrate [1/K]</dd>
+        <dt data-step="5">$\dTw$</dt><dd data-step="5">Erwärmung gegenüber vorindustriell [K]</dd>
       </dl>
-      <figure class="stack fill" data-step="2">
+      <figure class="stack fill" data-step="3">
         <figcaption class="t-head figcap">Beispiel: Ein Baum im Aachener Wald</figcaption>
-        <div class="chart" data-chart="s12" data-step="2" data-delay="300" data-slot-steps="0,1,2,2" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, dann mit Störung bei 0, 1,5 und 3 K Erwärmung gegenüber 1850–1900"></div>
+        <div class="chart" data-chart="s12" data-step="3" data-delay="300" data-slot-steps="0,1,2,2" data-label="Kohlenstoffvorrat eines Baums 2026–2100: nur Wachstum, dann mit Störung bei 0, 1,5 und 3 K Erwärmung gegenüber 1850–1900"></div>
       </figure>
     </div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1073/pnas.2111312119" target="_blank" rel="noopener">Walker et al. 2022</a> (maximaler Kohlenstoff je ha m<sup>C</sup><sub>max</sub>)</span><span><a href="https://doi.org/10.1038/s41586-020-2686-x" target="_blank" rel="noopener">Cook-Patton et al. 2020</a>; <a href="https://doi.org/10.1038/nature16512" target="_blank" rel="noopener">Poorter et al. 2016</a> (Wachstumsrate k)</span><span><a href="https://doi.org/10.1126/science.adx6329" target="_blank" rel="noopener">Grünig et al. 2026</a>; <a href="https://doi.org/10.1017/9781009157896" target="_blank" rel="noopener">IPCC 2021</a> (Anstieg der Störungsrate γ)</span><span><a href="https://doi.org/10.1038/nclimate3303" target="_blank" rel="noopener">Seidl et al. 2017</a> (Störungsrate s<sub>0</sub>)</span><span><i>Annahme</i> (Wachstumsform, Zersetzung)</span></p>
   <aside class="notes" data-n="12">
-    <p data-click="0"><b>Woher </b>kriegen wir die Werte? Komliziert einzeln zu Messen, deshalb <b>Netto-Co2</b> Flüsse über Waldern</p>
+    <p data-click="0"><b>Woher </b>kriegen wir die Werte? <b>Netto-Co2</b> Flüsse über Wald messen.<br>Zeitabhängig, könnten wir ganz fein machen (zb nur photosynthese wenn grade sonne scheint), so fein ist aber eig egal für klima -&gt; jährliche durschnitte reichen</p>
     <p data-click="1">Aus denen nehmen wir <b>jährliches Mittel </b><br>-&gt; <b>parametrierte Wachstumskurve</b></p>
-    <p data-click="2">Vorderen Terme fassen wir unter <b>Netto-Wachstum </b>zusammen<b>.</b> Sieht aus wie S-Kurve, hier gezeigt für <b>Durchschnittsbaum im Aachener Wald. <i>ACHSEN ERKLÄREN.</i></b><br>Formel-mäßig <b>e funktion mit drei Parametern</b>: max <b>Kohlenstoffvorrat</b>, <b>Wachstumsrate</b>, <b>Formparameter</b>. </p>
-    <p data-click="3">Haben noch Störung: <b>Verlustwahrscheinlichkeit.</b><br>Nicht nur Basis Störungsrate, die kann sich erhöhen.</p>
-    <p data-click="4">Je <b>höher unsere Temperaturerhöhung</b>, desto <b>höhere Verlustwahrscheinlichkeit</b>.</p>
-    <p data-click="4">Parameter für diese Kurven<b> können unterschiedlich sein</b>, je nachdem wo ich grade bin.</p>
-    <p class="q">Falls Fragen kommen — Woher die Zahlen kommen: m_max = zusätezlicher Kohlenstoff je Hektar am Ort (Walker et al. 2022, ober- und unterirdisch, ohne Boden) ÷ 2000 Bäume; k aus der Zuwachsrate der ersten 30 Jahre (Cook-Patton et al. 2020), begrenzt durch Poorter et al. (2016): 90 % der Biomasse nach 66 Jahren. Sättigung: Aachen 49, Fairbanks 24, Marabá 69 kg<sub>C</sub> je Baum. Die Rückkopplung der Erwärmung auf die Störung ändert die Wirkung je Baum bis 2100 kaum (Backup „Die Erwärmung wirkt auf den Baum zurück“).</p>
+    <p data-click="2">Vorderen Terme fassen wir unter <b>Netto-Wachstum </b>zusammen<b>.</b></p>
+    <p data-click="3">Sieht aus wie S-Kurve, hier gezeigt für <b>Durchschnittsbaum im Aachener Wald. <i>ACHSEN ERKLÄREN.</i></b><br>Formel-mäßig <b>e funktion mit drei Parametern</b>: max <b>Kohlenstoffvorrat</b>, <b>Wachstumsrate</b>, <b>Formparameter</b>. </p>
+    <p data-click="4">Haben noch Störung: <b>Verlustwahrscheinlichkeit.</b><br>Nicht nur Basis Störungsrate, die kann sich erhöhen.</p>
+    <p data-click="5">Je <b>höher unsere Temperaturerhöhung</b>, desto <b>höhere Verlustwahrscheinlichkeit</b>.</p>
+    <p data-click="5">Parameter für diese Kurven<b> können unterschiedlich sein</b>, je nachdem wo ich grade bin.</p>
+    <p class="q">Falls Fragen kommen — Woher die Zahlen kommen: m_max = zusätezlicher Kohlenstoff je Hektar am Ort (Walker et al. 2022, ober- und unterirdisch, ohne Boden) ÷ 450 Bäume, die bis 2100 stehen (Albert et al. 2025); k aus der Zuwachsrate der ersten 30 Jahre (Cook-Patton et al. 2020), begrenzt durch Poorter et al. (2016): 90 % der Biomasse nach 66 Jahren. Sättigung: Aachen 218, Fairbanks 107, Marabá 308 kg<sub>C</sub> je Baum. Die Rückkopplung der Erwärmung auf die Störung ändert die Wirkung je Baum bis 2100 kaum (Backup „Die Erwärmung wirkt auf den Baum zurück“).</p>
   </aside>
 </section>
 
@@ -86,7 +87,7 @@
     <p data-click="0"><b>Beispielhaft gucken wir uns drei Orte an.</b></p>
     <p data-click="1"><b>Aachen</b> Mischwald, <b>Marabá</b> Regenwald, <b>Fairbanks</b> Nadelwald</p>
     <p data-click="1">Marabá wächst <b>schneller und höher</b>, Fairbanks ist <b>kalt und langsam</b></p>
-    <p class="q"><span style="color: rgb(185, 199, 176); font-size: 18.04px; font-style: italic;">Falls Fragen kommen — Kohlenstoff ist je Ort für alle Waldtypen gleich (IPCC 2019: kein belastbarer Unterschied); die Typen unterscheiden sich in Albedo und Störung. Aufgenommen bis 2100: Aachen 163, Marabá 232, Fairbanks 81 kg CO₂. Kräftige Farbe: mindestens 30 % der Fläche wiederbewaldbar.</span></p>
+    <p class="q"><span style="color: rgb(185, 199, 176); font-size: 18.04px; font-style: italic;">Falls Fragen kommen — Kohlenstoff ist je Ort für alle Waldtypen gleich (IPCC 2019: kein belastbarer Unterschied); die Typen unterscheiden sich in Albedo und Störung. Aufgenommen bis 2100: Aachen 725, Marabá 1030, Fairbanks 360 kg CO₂. Kräftige Farbe: mindestens 30 % der Fläche wiederbewaldbar.</span></p>
   </aside>
 </section>
 
@@ -125,11 +126,11 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.4324/9780203407219" target="_blank" rel="noopener">Oke 1987</a> (typische Albedowerte)</span></p>
   <aside class="notes" data-n="14">
-    <p data-click="0">Zwei Effekte: einmal <b>direkt</b>, einmal <b>indirekt</b></p>
-    <p data-click="0"><b>Erstmal direkt. </b>Sagen wir <b>wir stellen einen Baum auf ne Wiese. <br>Baum typischerweise dunkler als Umgebung. Wie quantifizieren?</b></p>
+    <p data-click="0">Zwei Effekte: Erste ist <b>direkte Reflexionsänderung</b> durch den Baum</p>
+    <p data-click="0">Sagen wir <b>wir stellen einen Baum auf ne Wiese. <br>Baum reflektiert weniger Licht als Umgebung. Wie quantifizieren?</b></p>
     <p data-click="1"><b>Albedo</b>: Anteil des Lichts, der <b>zurückgeworfen</b> wirde<br>Null heißt alles geschluckt, eins heißt Spiegel</p>
     <p data-click="2">Albedo Baum niedriger: Mehr Licht wird absorbiert.</p>
-    <p data-click="3">Differenz: so viel <b>mehr Energie bleibt</b> im System</p>
+    <p data-click="3">Differenz <b>Albedokontrast</b>: so viel <b>mehr Licht wird absorbiert, </b>dessen <b>Energie</b> <b>bleibt</b> also im System</p>
     <p data-click="4">Gleicher Baum auf <b>Schnee</b>: Differenz <b>viel größer</b><br>Boden ist heller</p>
     <p data-click="5"><b>Tanne</b> ist noch dunkler, differenz noch größer.</p>
     <p data-click="5">Das war der direkte effekt. <b>Gibt aber noch indirekten Einfluss auf Reflexion</b>.</p>
@@ -169,7 +170,7 @@
 </g></svg>
     </div>
     <div class="rise" data-step="4" style="display:flex; align-items:center; gap:28px; margin-top:22px">
-      <div class="fline" style="flex:none; flex-wrap:nowrap"><span class="chip c-daw"><span>Albedoänderung</span><span class="tex">$\daw(\tm)$</span></span><span class="gloss"><span class="tex">$= \big(\q{albw}{f_{\mathrm{Boden}}}(\tm) - \q{albb}{f_{\mathrm{Baum}}}(\tm)\big)\, \alw$</span></span></div>
+      <div class="fline" style="flex:none; flex-wrap:nowrap"><span class="chip c-daw"><span>Albedokontrast</span><span class="tex">$\daw(\tm)$</span></span><span class="gloss"><span class="tex">$= \big(\q{albw}{f_{\mathrm{Boden}}}(\tm) - \q{albb}{f_{\mathrm{Baum}}}(\tm)\big)\, \alw$</span></span></div>
       <dl class="legend" style="margin-left:auto; min-width:0">
         <dt>$\q{albw}{f_{\mathrm{Boden}}}$</dt><dd>Wolkenbedeckung über Boden [–]</dd>
         <dt>$\q{albb}{f_{\mathrm{Baum}}}$</dt><dd>Wolkenbedeckung über Wald [–]</dd>
@@ -179,13 +180,13 @@
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/s41467-021-24551-5" target="_blank" rel="noopener">Duveiller et al. 2021</a> (Wolkenbedeckung über Wald)</span><span><a href="https://doi.org/10.1073/pnas.2026241118" target="_blank" rel="noopener">Cerasoli et al. 2021</a> (Wolken-Albedo ΔαWolke)</span></p>
   <aside class="notes" data-n="14a">
-    <p data-click="0">Dadurch, dass sich über Wald mehr Wolken bilden.<br>Wald <b>verdunstet mehr</b> Wasser als Wiese</p>
-    <p data-click="1">Raue Krone sorgt für <b>mehr Turbulenz</b></p>
-    <p data-click="2">Feuchte Luft <b>steigt höher</b>, wo's kälter ist, und <b>kondensiert</b></p>
-    <p data-click="3"><b>Mehr Wolken</b>, also geht mehr Licht zurück</p>
-    <p data-click="4">In Formel: zusätzliche Bewölkung über wald<br>Multipliziert mit wieviel mehr Licht Wolke reflektiert, wieder ein Albedo-Delta.</p>
-    <p data-click="4">Damit haben wir albedo änderung durch den Baum selbst und durch Wolken, die bringen wir jetzt zusammen</p>
-    <p class="q">Falls Fragen kommen — Warum über Wald manchmal weniger Wolken (Duveiller et al. 2021): Mit Schnee, im Winter und Frühjahr in Nordamerika, Russland und Osteuropa, kehrt sich das Vorzeichen um. Der dunkle Wald nimmt mehr Strahlung auf, darüber wächst eine tiefe, trockene Mischungsschicht, die niedrige Wolken eher verhindert; über verschneitem Offenland ist die Luft stabil geschichtet, dort steht eher Nebel. Ein Teil kann auch daher kommen, dass der Satellit Schnee und Wolken verwechselt. Im südlichen Amazonas in der Trockenzeit bilden sich flache Haufenwolken eher über gerodeten, zerstückelten Flächen: rauere Oberfläche, mehr Thermik, über dem geschlossenen Wald weniger (auch Wang et al. 2009, PNAS 106, 3670). Ebenfalls umgekehrt: Corn Belt im Sommer, Indien zu Beginn des Monsuns. Im Modell zählt jeder Monat mit seinem Vorzeichen; übers Jahr bleibt in Aachen und Fairbanks ein kühlender Rest, in Marabá ein kleiner wärmender (+0,7 W je ausgewachsenem Baum).</p>
+    <p data-click="0">Dadurch, dass sich über Wald mehr Wolken bilden.<br>Wald <b>verdunstet Wasser, </b>bei<b> Zellatmung</b> und durch <b>Evapotranspiration -&gt; mehr</b> als auf Wiese</p>
+    <p data-click="1">Raue Krone sorgt für <b>mehr Luftverwirbelung</b></p>
+    <p data-click="2">Feuchte Luft <b>steigt höher. Temperaturgradient </b>in Atmosphäre<b>. </b><b>kalt genug -&gt;</b> <b>kondensiert</b></p>
+    <p data-click="3"><b>Mehr Wolken</b>, Reflektieren gut, also geht mehr Licht zurück</p>
+    <p data-click="4">In Formel: wieder Albedokontrast<br><b>zusätzliche Bewölkung</b> über wald <br>Multipliziert mit <b>wieviel mehr Licht Wolke reflektiert</b></p>
+    <p data-click="4">Damit haben wir albedo änderung durch den Baum selbst und durch Wolken, die können wir noch <b>zusammenrechnen</b></p>
+    <p class="q">Falls Fragen kommen — Warum über Wald manchmal weniger Wolken (Duveiller et al. 2021): Mit Schnee, im Winter und Frühjahr in Nordamerika, Russland und Osteuropa, kehrt sich das Vorzeichen um. Der dunkle Wald nimmt mehr Strahlung auf, darüber wächst eine tiefe, trockene Mischungsschicht, die niedrige Wolken eher verhindert; über verschneitem Offenland ist die Luft stabil geschichtet, dort steht eher Nebel. Ein Teil kann auch daher kommen, dass der Satellit Schnee und Wolken verwechselt. Im südlichen Amazonas in der Trockenzeit bilden sich flache Haufenwolken eher über gerodeten, zerstückelten Flächen: rauere Oberfläche, mehr Thermik, über dem geschlossenen Wald weniger (auch Wang et al. 2009, PNAS 106, 3670). Ebenfalls umgekehrt: Corn Belt im Sommer, Indien zu Beginn des Monsuns. Im Modell zählt jeder Monat mit seinem Vorzeichen; übers Jahr bleibt in Aachen und Fairbanks ein kühlender Rest, in Marabá ein kleiner wärmender (+3 W je ausgewachsenem Baum).</p>
   </aside>
 </section>
 
@@ -201,18 +202,18 @@
     <!-- as the growth slide: the map on the left, the three sites on the right, the light split into leaves and clouds -->
     <div class="split sketch mapwide" style="flex:1; min-height:0">
       <div class="sidecol" data-step="4"><div class="chart" data-chart="b8" data-step="4" data-label="Weltkarte: zusätzlich absorbierte Sonnenstrahlung je Baum, gepflanzt 2026, im Jahr 2100, Jahresmittel"></div></div>
-      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 20 W, Fairbanks 63 W, Marabá 17 W; dann Fairbanks allein, in Teilen: Albedo des Baums +64 W, Wolken −1 W"></div></div>
+      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 90 W, Fairbanks 279 W, Marabá 75 W; dann Fairbanks allein, in Teilen: Albedo des Baums +283 W, Wolken −4 W"></div></div>
     </div>
   </div>
   <!-- the end: both effects per tree as a card in front, the slide blurred behind it -->
   <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Einstrahlung, Albedo-Kontrast)</span><span><a href="https://doi.org/10.1029/2025JG009284" target="_blank" rel="noopener">Williams et al. 2026</a> (Kronenschluss über die Zeit)</span></p>
   <aside class="notes" data-n="16">
-    <p data-click="0">Beide Effekte zusammen in <b>einer Größe</b>: zusätzlich absorbierte Leistung, in Watt</p>
-    <p data-click="1">albedo von Laub <b>plus</b> Wolken</p>
+    <p data-click="0"><b>zusätzlich absorbierte Leistung</b> durch Albedokontrast:</p>
+    <p data-click="1">albedo von Baum <b>plus</b> Wolken</p>
     <p data-click="2">Mal <b>Einstrahlung</b> und <b>Kronenfläche</b>, beides ändert sich mit der Zeit</p>
     <p data-click="3">Werte wieder aus <b>jährlich gemittelten Messdaten</b></p>
     <p data-click="4"><b>Karte</b>: viel bei <b>Schnee und Wüste</b>, wenig in den <b>Tropen</b><br>Fairbanks <b>am stärksten. warum? Beiträge angucken</b></p>
-    <p class="q">Falls Fragen kommen — 2100, Baum gepflanzt 2026: Aachen 20, Fairbanks 63, Marabá 17 W; nur Albedo 24, 64, 16 W; Wolken −4, −1, +1 W; ausgewachsen mit geschlossener Krone 29, 103, 21 W. Monatlich gerechnet, A_B wächst bis 5 m². Marabá: Wolkenterm leicht positiv, in der Trockenzeit weniger Wolken über Wald.</p>
+    <p class="q">Falls Fragen kommen — 2100, Baum gepflanzt 2026: Aachen 90, Fairbanks 279, Marabá 75 W; nur Albedo 106, 283, 72 W; Wolken −16, −4, +2 W; ausgewachsen mit geschlossener Krone 129, 459, 95 W. Monatlich gerechnet, A_B wächst bis 22 m² (450 Bäume je ha). Marabá: Wolkenterm leicht positiv, in der Trockenzeit weniger Wolken über Wald.</p>
   </aside>
 </section>
 
@@ -229,7 +230,7 @@
     <!-- as the growth slide: the map on the left, the three sites on the right, the light split into leaves and clouds -->
     <div class="split sketch mapwide" style="flex:1; min-height:0">
       <div class="sidecol" data-step="4"><div class="chart" data-chart="b8" data-step="4" data-label="Weltkarte: zusätzlich absorbierte Sonnenstrahlung je Baum, gepflanzt 2026, im Jahr 2100, Jahresmittel"></div></div>
-      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 20 W, Fairbanks 63 W, Marabá 17 W; dann Fairbanks allein, in Teilen: Albedo des Baums +64 W, Wolken −1 W"></div></div>
+      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 90 W, Fairbanks 279 W, Marabá 75 W; dann Fairbanks allein, in Teilen: Albedo des Baums +283 W, Wolken −4 W"></div></div>
     </div>
   </div>
   <p class="src"><span><a href="https://doi.org/10.1038/sdata.2018.14" target="_blank" rel="noopener">Duveiller et al. 2018</a> (Einstrahlung, Albedo-Kontrast)</span><span><a href="https://doi.org/10.1029/2025JG009284" target="_blank" rel="noopener">Williams et al. 2026</a> (Kronenschluss über die Zeit)</span></p>
@@ -252,7 +253,7 @@
     <!-- as the growth slide: the map on the left, the three sites on the right, the light split into leaves and clouds -->
     <div class="split sketch mapwide" style="flex:1; min-height:0">
       <div class="sidecol" data-step="4"><div class="chart" data-chart="b8" data-step="4" data-label="Weltkarte: zusätzlich absorbierte Sonnenstrahlung je Baum, gepflanzt 2026, im Jahr 2100, Jahresmittel"></div></div>
-      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 20 W, Fairbanks 63 W, Marabá 17 W; dann Fairbanks allein, in Teilen: Albedo des Baums +64 W, Wolken −1 W"></div></div>
+      <div class="sidecol" data-step="4"><div class="chart" data-ec="licht" data-step="4" style="flex:1; min-height:0" data-label="Zusätzlich absorbiertes Sonnenlicht je Baum, 2026 bis 2100: netto Aachen 90 W, Fairbanks 279 W, Marabá 75 W; dann Fairbanks allein, in Teilen: Albedo des Baums +283 W, Wolken −4 W"></div></div>
     </div>
   </div>
   <!-- the end: both effects per tree as a card in front, the slide blurred behind it -->
@@ -261,7 +262,7 @@
         <p class="ovh t-say">Beide Wirkungen je Baum</p>
         <div class="ovf">
           <span class="lab"><svg class="ico" viewBox="0 0 100 100" aria-hidden="true"><use href="#p-co2"/></svg>Kohlenstoff-Aufnahme</span><span class="frow"><span class="tex">$\mB(\tm) = \mmax\left(1 - \mathbf{e}^{-\kw\,\tm}\right)^{\pw} \left(1 - \sz \mathbf{e}^{\gam \dTw(\tm)}\right)$</span><b class="unit" style="--c:var(--s-mb)">[kg<sub>C</sub>]</b></span>
-          <span class="lab"><svg class="ico" viewBox="0 0 100 100" aria-hidden="true"><use href="#p-refl"/></svg>Netto-Energieänderung durch Reflexion</span><span class="frow"><span class="tex">$\dQ(\tm) = \qin(\tm) \big(\dal(\tm) + \daw(\tm)\big) \Ab(\tm)$</span><b class="unit" style="--c:var(--s-dq)">[W]</b></span>
+          <span class="lab"><svg class="ico" viewBox="0 0 100 100" aria-hidden="true"><use href="#p-refl"/></svg>Netto-Energieänderung durch Reflexion</span><span class="frow"><span class="tex">$\dQ(\tm) = \qin(\tm)\,\Ab(\tm) \big(\dal(\tm) + \daw(\tm)\big)$</span><b class="unit" style="--c:var(--s-dq)">[W]</b></span>
         </div>
       </div>
       <div class="ovtrail" aria-hidden="true"><span class="st done" style="--c:var(--moss)"><span class="ic"><svg data-fly="baeume" viewBox="0 0 100 100"><use href="#e-baeume" width="100" height="100"/></svg><svg class="ok" viewBox="0 0 34 30" aria-hidden="true"><path d="M4 16 l9 9 l17 -20"/></svg></span>Baum-Modell</span><span class="st next" style="--c:var(--clay)"><span class="ic"><svg data-fly="klima" viewBox="0 0 100 100"><use href="#e-klima" width="100" height="100"/></svg></span>Klima-Modell</span><span class="st later" style="--c:var(--fjord)"><span class="ic"><svg data-fly="vergleich" viewBox="0 0 100 100"><use href="#e-potenzial" width="100" height="100"/></svg></span>Potenziale</span></div>

@@ -76,7 +76,7 @@ def test_boreal_tree_is_a_seventy_watt_light_bulb():
     correctly, not that the slide's number is right.
     """
     w = light_bulb_watts(fallback_delta_alpha(60.0), fallback_q_sw(60.0), BOREAL)
-    assert 55.0 < w < 90.0
+    assert 245.0 < w < 400.0   # the 55-90 W of 2000 trees/ha, at 450 trees/ha (crown area x 4.44)
 
 
 def test_tropical_tree_is_about_half_a_boreal_one():

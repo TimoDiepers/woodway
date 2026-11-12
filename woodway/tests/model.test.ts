@@ -14,7 +14,7 @@ describe("model", () => {
   it("reproduces the exporter's reference cells", () => {
     for (const r of at.meta.reference) {
       const c = r.i * 720 + r.j;
-      expect(deltaT(at, c, 2050)).toBeCloseTo(r.dt2050, 20);
+      expect(deltaT(at, c, 2050) / r.dt2050).toBeCloseTo(1, 5);   // relative: float32 fields
       expect(deltaT(at, c, 2100) / r.dt2100).toBeCloseTo(1, 5);
       expect(netShare(at, c, 2100) / r.net2100).toBeCloseTo(1, 5);
       for (const [y, v] of [[2026, r.dac2026], [2045, r.dac2045]] as const) {
@@ -106,7 +106,7 @@ describe("whole cells, today's forest and the planting year", () => {
   });
   it("the whole cell is the tree's effect times its trees", () => {
     const r = at.meta.reference[0], c = r.i * 720 + r.j;
-    expect(cellTotal(at, c, 2100)).toBeCloseTo((deltaT(at, c, 2100) * (at.f.area[c] / 5) / cellM2(c)) * 1e16, 6);
+    expect(cellTotal(at, c, 2100)).toBeCloseTo((deltaT(at, c, 2100) * (at.f.area[c] / (1e4 / 450)) / cellM2(c)) * 1e16, 6);
   });
   it("a later planting year shifts the tree: nothing before it, less by 2050, back to the reference with 2026", () => {
     const r = at.meta.reference[0], c = r.i * 720 + r.j;

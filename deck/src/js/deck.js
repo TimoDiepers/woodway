@@ -772,18 +772,19 @@ const EC_ORTE3 = {
     const D = window.TEMPSUM, n = D.years.length - 1;
     const sites = this.order.map(o => Object.assign({ forest: o.forest }, D.sites.find(x => x.name === o.name)));
     const all = sites.flatMap(x => [...x.dt, ...x.co2, ...x.laub, ...x.wolke]);
-    const ymin = Math.floor(Math.min(...all) / 20) * 20, ymax = Math.ceil(Math.max(...all) / 20) * 20;
+    const span = Math.max(...all) - Math.min(...all), yst = span > 300 ? 100 : span > 120 ? 50 : 20;   // a grid line per step
+    const ymin = Math.floor(Math.min(...all) / yst) * yst, ymax = Math.ceil(Math.max(...all) / yst) * yst;
     // values in femtokelvin (1 fK = 10⁻¹⁵ K): the tree's effect is that small
     const sg = v => (v > 0.05 ? '+' : v < -0.05 ? '−' : '±') + ecNum(Math.abs(v), Math.abs(v) < 5 ? 1 : 0);
     const parts = this.parts.map(pt => Object.assign({ color: pt.role === 'ink' ? EC.ink : cssColor('--s-' + pt.role, EC.ink) }, pt));
     // three panels: the first two leave room only for a number at their end, the last one for the names too
     // (it carries the key for all three); the y labels only at the first
-    const L = [4.2, 36.5, 68.8], W = '25.6%', last = sites.length - 1;   // the full width: only a value after each panel (the unit is on the axis)
+    const L = [5.0, 37.2, 69.4], W = '25.6%', last = sites.length - 1;   // the full width: only a value after each panel (the unit is on the axis)
     const grid = sites.map((_, i) => ({ left: L[i] + '%', width: W, top: 74, bottom: 44 }));
     const xAxis = sites.map((_, i) => ecAxis({ gridIndex: i, type: 'value', min: 2026, max: 2100,
       axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2050, 2075, 2100], formatter: v => String(v) } }));
-    const yAxis = sites.map((_, i) => ecAxis({ gridIndex: i, type: 'value', min: ymin, max: ymax, interval: 20,
-      name: i === 0 ? 'ΔT je Baum [10⁻¹⁵ K]' : '', nameTex: i === 0 ? '$\\dT$ je Baum [10⁻¹⁵ K]' : undefined, nameLocation: 'middle', nameGap: 56,
+    const yAxis = sites.map((_, i) => ecAxis({ gridIndex: i, type: 'value', min: ymin, max: ymax, interval: yst,
+      name: i === 0 ? 'ΔT je Baum [10⁻¹⁵ K]' : '', nameTex: i === 0 ? '$\\dT$ je Baum [10⁻¹⁵ K]' : undefined, nameLocation: 'middle', nameGap: 66,
       axisLabel: { show: i === 0, color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => v === 0 ? '0' : ecNum(v, 0).replace('-', '−') },
       splitLine: { show: true, lineStyle: { color: EC.grid } } }));
     // the parts' areas fade from the curve towards zero, at every year relative to the curve's own value there: ten
@@ -858,10 +859,10 @@ const EC_LICHT = {
     });
     return {
       animationDurationUpdate: 1100, animationEasingUpdate: 'cubicInOut',
-      grid: { left: 86, right: 62, top: 20, bottom: 44, containLabel: false },
+      grid: { left: 98, right: 92, top: 20, bottom: 44, containLabel: false },
       xAxis: ecAxis({ type: 'value', min: 2026, max: 2100, axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, customValues: [2026, 2060, 2100], formatter: v => String(v) } }),
-      yAxis: ecAxis({ type: 'value', min: -10, max: 70, interval: 10, name: 'W je Baum', nameTex: '$\\dQ$ je Baum [W]', nameLocation: 'middle', nameGap: 52,
-        axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => (v % 20 === 0 ? String(v).replace('-', '−') : '') },
+      yAxis: ecAxis({ type: 'value', min: -50, max: 300, interval: 50, name: 'W je Baum', nameTex: '$\\dQ$ je Baum [W]', nameLocation: 'middle', nameGap: 62,
+        axisLabel: { color: EC.muted, fontFamily: EC.font, fontSize: 19, formatter: v => (v % 100 === 0 ? String(v).replace('-', '−') : '') },
         splitLine: { show: true, lineStyle: { color: EC.grid } } }),
       series
     };

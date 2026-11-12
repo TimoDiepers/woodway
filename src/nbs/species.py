@@ -134,7 +134,7 @@ _COMMON_SOURCES: dict[str, ParamSource] = {
     "stand_area_m2": ParamSource(
         "annahme",
         _SPEC,
-        "Standflaeche eines Baumes, entspricht 1600-2500 Baeumen je Hektar. "
+        "Standflaeche eines Baumes, 450 Baeume je Hektar nach der Selbstausduennung (Albert et al. 2025). "
         "Geht linear in den Albedo-Kanal und in jede Flaechenhochrechnung ein.",
     ),
     "alpha_canopy": ParamSource(
@@ -262,7 +262,7 @@ def _type_sources() -> dict[str, ParamSource]:
         "m_max_kgC": ParamSource(
             "abgeleitet", _WALKER,
             "Median des nicht realisierten Potenzials (oberirdisch + unterirdisch, ohne Boden) auf den "
-            "wiederbewaldbaren Flächen dieses Typs und dieser Zone, je Baum bei 2000 Bäumen/ha. Je Zelle "
+            "wiederbewaldbaren Flächen dieses Typs und dieser Zone, je Baum bei 450 Bäumen/ha. Je Zelle "
             "skaliert mit dem Wert der Zelle (nbs.site_factor)."),
         "k": ParamSource(
             "abgeleitet", f"{_COOK_PATTON}; {_POORTER}",

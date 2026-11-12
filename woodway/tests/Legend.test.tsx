@@ -15,7 +15,7 @@ describe("Legend", () => {
   it("writes negative ticks with the true minus sign", () => {
     const { container } = render(<Legend atlas={at} layer={layerById("deltaT")} />);
     const ticks = [...container.querySelectorAll(".tabular-nums span")].map((s) => s.textContent);
-    expect(ticks[0]).toBe("−90");
+    expect(ticks[0]).toBe("−400");
     expect(ticks.join(" ")).not.toMatch(/-/);
   });
   it("puts a short unit on the line of the ticks", () => {
