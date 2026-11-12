@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/react";
+
+// CI runners are slower than a laptop: the map (lazy, with its data) can take more than the default 1 s to appear
+configure({ asyncUtilTimeout: 5000 });
 
 // jsdom doesn't implement ResizeObserver; Radix's Slider (used in
 // MorePopover) reads element size on mount via @radix-ui/react-use-size.
