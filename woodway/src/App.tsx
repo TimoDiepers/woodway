@@ -23,6 +23,13 @@ type Jump = { lon: number; lat: number; zoom?: number };
 const WORLD = { lon: 10, lat: 25 };
 const TOOLS_W = 60;      // the phone's tool column and its margin, in px
 const DOCK_H = 90;      // until the dock has measured itself
+const WELCOME_KEY = "woodway-welcome";
+const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
+
+function firstVisit() {
+  try { return localStorage.getItem(WELCOME_KEY) !== "seen"; }
+  catch { return true; }
+}
 
 /** The height of an element, followed as it changes (the dock grows a slider, the plate loses its hint). */
 function useHeight<T extends HTMLElement>(fallback: number) {
@@ -42,6 +49,7 @@ function useHeight<T extends HTMLElement>(fallback: number) {
 export default function App() {
   const t = useT();
   const s = useAtlas();
+  const [welcomeOpen, setWelcomeOpen] = useState(firstVisit);
   const [atlas, setAtlas] = useState<Atlas | null>(null);
   const [error, setError] = useState<string | null>(null);
   const base = useRef(deferred()), names = useRef(deferred());
@@ -133,6 +141,10 @@ export default function App() {
   const recenter = () => { s.setCell(null); setFlyTo({ ...WORLD, zoom: worldZoom }); };
   const pickLayer = (id: LayerId) => s.setLayer(id);
   const closeCell = () => s.setCell(null);
+  const dismissWelcome = () => {
+    try { localStorage.setItem(WELCOME_KEY, "seen"); } catch { /* private mode: keep it for this visit only */ }
+    setWelcomeOpen(false);
+  };
 
   const map = (
     <AtlasMap atlas={atlas} ready={layerOk} imagery={layer.kind === "image"} onBase={base.current.resolve} onNames={names.current.resolve} layer={layer} year={year} plantYear={s.plantYear} labels={s.labels === "on" ? s.lang : null} cell={s.cell} onCell={select}
@@ -145,8 +157,7 @@ export default function App() {
   );
   const safeTop = { paddingTop: "max(0.75rem, env(safe-area-inset-top))" };
 
-  if (!wide) {
-    return (
+  const content = !wide ? (
       <div className="relative h-full w-full overflow-hidden">
         {map}
         <div ref={plateRef} className="pointer-events-none absolute left-0 top-0 z-10 p-3" style={{ ...safeTop, paddingLeft: "max(0.75rem, env(safe-area-inset-left))" }}>
@@ -169,10 +180,7 @@ export default function App() {
           </div>
         )}
       </div>
-    );
-  }
-
-  return (
+    ) : (
     <div className="relative h-full w-full overflow-hidden">
       {map}
       {atlas && layerOk && layer.kind !== "image" && <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />}
@@ -191,6 +199,30 @@ export default function App() {
         <Dock layer={layer} onLayer={pickLayer} row />
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {content}
+      {welcomeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+          <section className="panel w-full max-w-lg p-6 shadow-xl sm:p-8">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-inkMuted">{t("app.title")}</p>
+            <h2 id="welcome-title" className="text-3xl leading-tight">{t("welcome.title")}</h2>
+            <p className="mt-4 leading-relaxed text-inkMuted">{t("welcome.description")}</p>
+            <div className="mt-6 border-t border-[var(--paper-line)] pt-4">
+              <a href={SLIDES_URL} target="_blank" rel="noopener" className="font-semibold text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent">
+                {t("welcome.slides")}
+              </a>
+              <p className="mt-1 text-sm text-inkMuted">{t("welcome.slidesNote")}</p>
+            </div>
+            <button type="button" onClick={dismissWelcome} className="mt-7 rounded-md bg-accent px-4 py-2.5 font-semibold text-paper transition-colors hover:bg-accent/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+              {t("welcome.enter")}
+            </button>
+          </section>
+        </div>
+      )}
+    </>
   );
 }
 
