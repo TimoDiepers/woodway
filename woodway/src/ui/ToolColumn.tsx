@@ -14,7 +14,7 @@ const GlobalStrip = lazy(() => import("@/ui/GlobalStrip").then((m) => ({ default
 type PanelId = "search" | "world" | "help" | "more";
 
 /** The talk's slides: published next to woodway under slides/; in development the dev server serves the built deck. */
-const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
+export const SLIDES_URL = import.meta.env.DEV ? "/deck/index.html" : "slides/";
 /** inside the deck's own last slide, a link back to the deck would only open it a second time */
 const EMBEDDED = typeof window !== "undefined" && window.parent !== window;
 

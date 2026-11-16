@@ -54,6 +54,9 @@ interface AtlasState {
   hintSeen: boolean;
   markHintSeen: () => void;
   resetHints: () => void;
+  /** the first visit's welcome screen; never in the deck's iframe */
+  welcomeSeen: boolean;
+  markWelcomeSeen: () => void;
 }
 
 export const useAtlas = create<AtlasState>((set) => ({
@@ -80,4 +83,9 @@ export const useAtlas = create<AtlasState>((set) => ({
   hintSeen: stored("atlas-hints", ["seen", "new"] as const, "new") === "seen",
   markHintSeen: () => { save("atlas-hints", "seen"); set({ hintSeen: true }); },
   resetHints: () => { save("atlas-hints", "new"); set({ hintSeen: false }); },
+  // ?welcome shows it again, whatever was stored
+  welcomeSeen: (typeof window !== "undefined" && window.parent !== window)
+    || (!new URLSearchParams(typeof location !== "undefined" ? location.search : "").has("welcome")
+      && stored("atlas-welcome", ["seen", "new"] as const, "new") === "seen"),
+  markWelcomeSeen: () => { save("atlas-welcome", "seen"); set({ welcomeSeen: true }); },
 }));

@@ -14,6 +14,7 @@ const CellPanel = lazy(() => import("@/ui/CellPanel").then((m) => ({ default: m.
 import { TitlePlate } from "@/ui/TitlePlate";
 import { ToolColumn } from "@/ui/ToolColumn";
 import { Dock } from "@/ui/Dock";
+import { Welcome } from "@/ui/Welcome";
 import { type Place } from "@/ui/PlaceSearch";
 import { cellAt, cellCenter } from "@/map/lookup";
 import { forwardDeckKeys } from "@/lib/deckKeys";
@@ -144,11 +145,14 @@ export default function App() {
     <ToolColumn atlas={atlas} layer={layer} compact={!wide} onPlace={goTo} onRecenter={recenter} />
   );
   const safeTop = { paddingTop: "max(0.75rem, env(safe-area-inset-top))" };
+  // the first visit opens on the welcome screen over the blurred map, which loads behind it meanwhile
+  const welcome = !s.welcomeSeen && <Welcome />;
 
   if (!wide) {
     return (
       <div className="relative h-full w-full overflow-hidden">
         {map}
+        {welcome}
         <div ref={plateRef} className="pointer-events-none absolute left-0 top-0 z-10 p-3" style={{ ...safeTop, paddingLeft: "max(0.75rem, env(safe-area-inset-left))" }}>
           <TitlePlate atlas={layerOk ? atlas : null} layer={layer} compact />
         </div>
@@ -175,6 +179,7 @@ export default function App() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       {map}
+      {welcome}
       {atlas && layerOk && layer.kind !== "image" && <HoverReadout atlas={atlas} layer={layer} year={year} {...hover} />}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-4 p-4" style={safeTop}>
         <TitlePlate atlas={layerOk ? atlas : null} layer={layer} compact={false} />

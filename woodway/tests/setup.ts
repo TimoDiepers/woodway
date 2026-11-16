@@ -92,3 +92,7 @@ if (typeof globalThis.requestAnimationFrame === "undefined") {
     setTimeout(() => cb(performance.now()), 16) as unknown as number) as typeof requestAnimationFrame;
   globalThis.cancelAnimationFrame = ((id: number) => clearTimeout(id)) as typeof cancelAnimationFrame;
 }
+
+// The first visit's welcome screen sits over the whole app; the app's tests start as a returning visitor
+// (the store reads this once, when it is created). tests/Welcome.test.tsx covers the screen itself.
+try { localStorage.setItem("atlas-welcome", "seen"); } catch { /* no storage: nothing to skip */ }
